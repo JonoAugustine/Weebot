@@ -2,5 +2,15 @@
 <classpath>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="lib" path="C:/Users/sword/Programming Side Projects/Weebot/JDA-3.6.0_354-withDependencies.jar" sourcepath="C:/Users/sword/Programming Side Projects/Weebot/JDA-3.6.0_354-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/sword/Programming%20Side%20Projects/Weebot/JDA-3.6.0_354-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="lib" path="C:/Users/sword/Programming Side Projects/Weebot/jda-utilities-2.1-all.jar" sourcepath="C:/Users/sword/Programming Side Projects/Weebot/jda-utilities-2.1-sources.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:file:/C:/Users/sword/Programming%20Side%20Projects/Weebot/jda-utilities-2.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
