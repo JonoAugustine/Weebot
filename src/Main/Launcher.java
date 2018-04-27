@@ -1,13 +1,23 @@
-import javax.security.auth.login.LoginException;
+/**
+ * @author Jonathan Augustine
+ * @copyright Aquatic Mastery Productions
+ */
+
+package Main;
 
 import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 
+import javax.security.auth.login.LoginException;
+
+import Bot.Weebot;
+import Main.Listener.GuildListener;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.JDABuilder;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import net.dv8tion.jda.core.entities.*;
 
 public class Launcher {
 	
@@ -56,6 +66,9 @@ public class Launcher {
 	   
    }
 	
+   /**
+    * Update local server list from online API.
+    */
 	private static void updateServers() {
 		final List<Guild> g = Launcher.JDA.getGuilds();
 		for (final Guild guild : g) {
@@ -80,7 +93,12 @@ public class Launcher {
 		return Launcher.GUILDS;
 	}
 	
-	public static boolean checkID(long id) {
+	/**
+	 * Check if user ID matches a Developer ID.
+	 * @param id long ID to check
+	 * @return true if the user ID is a dev.
+	 */
+	public static boolean checkDevID(long id) {
 		for (int i = 0; i < DEV_IDS.length; i++) {
 			if (DEV_IDS[i] == id)
 				return true;

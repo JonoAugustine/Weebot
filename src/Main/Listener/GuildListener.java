@@ -1,7 +1,9 @@
+package Main.Listener;
 /**
  * 
  */
 
+import Main.Launcher;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;

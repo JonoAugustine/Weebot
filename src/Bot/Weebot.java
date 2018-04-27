@@ -1,9 +1,12 @@
+package Bot;
 /**
  * 
  */
 
+import java.util.ArrayList;
 import java.util.Map;
 
+import Main.Launcher;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
@@ -18,10 +21,7 @@ import net.dv8tion.jda.core.managers.GuildController;
  */
 public class Weebot {
 	
-	//General Info/Settings [
-	
-	
-	
+	//General Static Info/Settings [
 	//]
 	
 	//Sever Specific Info [
@@ -48,7 +48,6 @@ public class Weebot {
 	private boolean ALWAYSLISTEN;
 	
 	//]
-	
 	
 	
 	/**
@@ -132,16 +131,23 @@ public class Weebot {
 		
 		else if(text.equals("settings") || text.trim().equals("setting"))
 			this.listServerSettings(message.getTextChannel());
+				
+		else if(text.startsWith("callsign") || text.startsWith("prefix"))
+			this.changeCallsign(message.getTextChannel(), text);
 		
 		else if(text.startsWith("nsfw"))
 			this.nsfw(message.getTextChannel(), text);
 		
-		else if(text.startsWith("callsign") || text.startsWith("prefix"))
-			this.changeCallsign(message.getTextChannel(), text);
-			
+		else if(text.startsWith("expl") || text.startsWith("explicit"))
+			this.explicit(message.getTextChannel(), text);
+		
+		else if(text.startsWith("alwayslisten") || text.startsWith("listen"))
+			this.alwaysListen(message.getTextChannel(), text);
+		
 		//Move to Developer Reader
-		else if(Launcher.checkID(message.getAuthor().getIdLong()) &&
+		else if(Launcher.checkDevID(message.getAuthor().getIdLong()) &&
 				 text.startsWith("dev ") || text.trim().equals("dev")) {
+
 			this.devRead(message, text.trim().substring(3));
 		}
 		//Cannot Understand command
@@ -149,10 +155,76 @@ public class Weebot {
 			message.getTextChannel()
 				.sendMessage("Sorry, I don't recognize that command...").queue();
 		
+		ArrayList<String> test = new ArrayList<>();
 		
 		
 	}
 	
+	/**
+	 * Set or Get {@code EXPLICIT}.
+	 * @param channel Text channel
+	 * @param text Command
+	 */
+	private void explicit(TextChannel channel, String text) {
+		String content;
+		try {
+			content = text.trim().split(" ")[1];
+		} catch (IndexOutOfBoundsException e) {
+			channel.sendMessage("I am " + (this.EXPLICIT ? "" : "not ") + "explicit").queue();
+			return;
+		}
+		switch(content.trim()) {
+		case "true":
+			this.EXPLICIT = true;
+			break;
+		case "false":
+			this.EXPLICIT = false;
+			break;
+		case "?":
+			channel.sendMessage("I am " + (this.EXPLICIT ? "" : "not ") + "explicit").queue();
+			return;
+		default:
+			channel.sendMessage("Sorry, " + content 
+					+ " is not a command. Please use 'true' or 'false' ").queue();
+			return;
+		}
+		channel.sendMessage("I am now " + (this.EXPLICIT ? "" : "not ") + "explicit").queue();
+	}
+	
+	/**
+	 * Set or Get {@code ALWAYSLISTEN}.
+	 * @param channel Text channel
+	 * @param text Command
+	 */
+	private void alwaysListen(TextChannel channel, String text) {
+		String content;
+		try {
+			content = text.trim().split(" ")[1];
+		} catch (IndexOutOfBoundsException e) {
+			channel.sendMessage("I " + (this.ALWAYSLISTEN ? "" : "do not ") 
+							+ "always listen for a call").queue();
+			return;
+		}
+		switch(content.trim()) {
+		case "true":
+			this.ALWAYSLISTEN = true;
+			break;
+		case "false":
+			this.ALWAYSLISTEN = false;
+			break;
+		case "?":
+			channel.sendMessage("I " + (this.ALWAYSLISTEN ? "" : "do not ") 
+					+ "always listen for a call").queue();
+			return;
+		default:
+			channel.sendMessage("Sorry, " + content 
+					+ " is not a command. Please use 'true' or 'false' ").queue();
+			return;
+		}
+		channel.sendMessage("I will " + (this.ALWAYSLISTEN ? "" : "not ") 
+				+ "always listen for a call").queue();
+	}
+		
 	/**
 	 * Sets the bot's NSFW setting according to message containing true or false. <br>
 	 * Or sends whether or not the Bot is NSFW.
@@ -161,20 +233,28 @@ public class Weebot {
 	 */
 	private void nsfw(TextChannel channel, String text) {
 		//Question or Statement
-		String content = text.trim().substring(4).isEmpty() || text.trim().endsWith("?") ? 
-									"" : text.substring(4).trim();
+		String content;
+		try {
+			content = text.trim().split(" ")[1];
+		} catch (IndexOutOfBoundsException e) {
+			channel.sendMessage("I am " + (this.NSFW ? "" : "not ") + "NSFW").queue();
+			return;
+		}
 		if (content.isEmpty()) {
 			String out = "```";
 			out += "I am " + (this.NSFW ? "" : "not ") + "NSFW```";
 			channel.sendMessage(out).queue();
 		} else {
-			switch(content.toLowerCase()) {
+			switch(content.trim()) {
 			case "true":
 				this.NSFW = true;
 				break;
 			case "false":
 				this.NSFW = false;
 				break;
+			case "?":
+				channel.sendMessage("I am " + (this.NSFW ? "" : "not ") + "NSFW").queue();
+				return;
 			default:
 				channel.sendMessage("Sorry, " + content 
 						+ " is not a command. Please enter 'true' or 'false' ").queue();
@@ -191,7 +271,7 @@ public class Weebot {
 	 */
 	private void changeNickName(Message message, int command) {
 		GuildController controller = new GuildController(this.GUILD);
-		String newName = message.getContentRaw().substring(command);
+		String newName = message.getContentRaw().substring(command).trim();
 		try {
 			//Change name on server
 			controller.setNickname(this.SELF, newName).queue();
@@ -239,6 +319,22 @@ public class Weebot {
 
 	}
 	
+	/**
+	 * List all (non-dev) commands.
+	 * @param channel TextChannel to send to
+	 */
+	private void listCommands(TextChannel channel) {
+		channel.sendMessage("TODO").queue();//TODO
+		//This method makes me think that we should use
+		//a list<string> of all commands and just use that
+		//to check for all commands in read() and for listCommands
+		//This would probably make expanding a lot easier later
+	}
+	
+	/**
+	 * List current Weebot settings.
+	 * @param channel Text channel to send to
+	 */
 	private void listServerSettings(TextChannel channel) {
 		String out = "```Wanna learn about me?";
 		
@@ -254,7 +350,7 @@ public class Weebot {
 		out += "I " + (this.NSFW ? "am " : "not ") + "NSFW";
 		out += "\n";
 		out += "I " + (this.ALWAYSLISTEN ? "" : "don't ") 
-						+ "always listen for a call";
+						+ "always listen for a call \n\tRespond to empty callsign or mentions)";
 		//out += "\n";
 		//out += "\n";
 		//out += "\n";

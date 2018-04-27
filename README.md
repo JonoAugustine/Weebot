@@ -5,7 +5,9 @@
 ----
 **Roadmap**
 
- 1. Finish current basic settings implementations (changing settings, checking, etc)
+ 1. Finish current basic settings implementations
+ 	- Finish settings methods
+ 	- Add User-joined Greetings
  2. Create Database to store information about each server (plaintext works honestly)
  3. Work on *Joke/Insult Generator*(TM)
 	- Possibly using a pool of joke templates and drawing from a pool of random words and phrases
