@@ -1,22 +1,10 @@
 /**
  * 
  */
-import java.nio.channels.Channel;
-import java.util.Timer;
 
-import javax.security.auth.login.LoginException;
-
-import net.dv8tion.jda.core.AccountType;
-import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.entities.ChannelType;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
-
-import java.util.TreeMap;
 
 /**
  * Listener for Guilds. <br>
@@ -26,16 +14,24 @@ import java.util.TreeMap;
  *
  */
 public class GuildListener extends ListenerAdapter {
+		
+	public GuildListener() {}
 	
-	private TreeMap<Long, Weebot> SERVERS;
-
 	@Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		System.out.println(event.getGuild().getIdLong());
 		
-        Message message = event.getMessage();
+		//Ignore ourself
+		if (event.getAuthor().getName() == "Weebot") return;
+				
+        //Message message = event.getMessage();
         
+        //Get the proper bot
+        Launcher.getGuilds().get(event.getGuild()).read(event.getMessage());
         
-        
+	}
+	
+	@Override
+	public void onGuildJoin(GuildJoinEvent event) {
+		Launcher.updateServers(event.getGuild());		
 	}
 }
