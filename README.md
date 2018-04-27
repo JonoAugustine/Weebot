@@ -16,6 +16,7 @@
  5. Research chat-bot implementations for more natural conversations
 	 - Possibly add a *sass-scale*(TM) to determine the level of jokes/insults/casual form with specific members.
 		 - Will need to track stats and information about each individual member and define what acts increase or decrease relationship status with Weebot.
+ 6. Localize to Japanese
 ----
 **Log**
 - 27/4/18
