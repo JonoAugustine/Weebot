@@ -21,10 +21,9 @@ import net.dv8tion.jda.core.managers.GuildController;
  */
 public class Weebot {
 	
-	//General Static Info/Settings [
-	//]
+	//General Static Info/Settings 
 	
-	//Sever Specific Info [
+	//Sever Specific Info
 	
 	//The server
 	private final Guild  GUILD;
@@ -46,10 +45,7 @@ public class Weebot {
 	
 	//Should the bot always pay attention to it's callsign?
 	private boolean ALWAYSLISTEN;
-	
-	//]
-	
-	
+		
 	/**
 	 * Sets up a Weebot for the server.
 	 * Stores server <b> name </b> and <b> Unique ID long </b>
@@ -87,7 +83,7 @@ public class Weebot {
 		} catch (NullPointerException | IndexOutOfBoundsException e) {
 			System.err.println(e);
 		}
-		
+
 		return 0;
 	}
 	
@@ -154,10 +150,7 @@ public class Weebot {
 		else
 			message.getTextChannel()
 				.sendMessage("Sorry, I don't recognize that command...").queue();
-		
-		ArrayList<String> test = new ArrayList<>();
-		
-		
+				
 	}
 	
 	/**
