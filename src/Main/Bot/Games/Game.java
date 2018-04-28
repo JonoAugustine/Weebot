@@ -14,8 +14,23 @@ import java.util.ArrayList;
  */
 public abstract class Game<P extends Player> {
 
+    /** Don't let some things be modified while the game is running */
+    protected static class ModificationWhileRunningException extends Exception {
+        private static final long serialVersionUID = 1549072265432776147L;
+        /** Parameterless constructor */
+        public ModificationWhileRunningException() {}
+        /** Constructor with message */
+        public ModificationWhileRunningException(String err) { super(err); }
+    }
+
+    //Is the game still running?
+    protected boolean RUNNING;
     //Keep a list of all the Players
     protected ArrayList<P> PLAYERS;
+
+    //Some Very important but vague methods to implement in child.
+    protected abstract int startGame();
+    protected abstract int endGame();
 
     /**
      * Add {@code Player} to the {@code Game}.
@@ -34,4 +49,5 @@ public abstract class Game<P extends Player> {
         else
             return this.PLAYERS.add(player) ? 1 : -1;
     }
+
 }
