@@ -19,7 +19,7 @@
  6. Localize to Japanese
 ----
 **Log**
-- 27/4/18
+- 26/4/18
 	- Work Begins!
 	- JDA dependencies added (problem with lfs corruption on repository)
 	- Launcher.java, Weebot.java, GuildListener.java, [JDABuilder.java](https://github.com/DV8FromTheWorld/JDA/blob/master/src/main/java/net/dv8tion/jda/core/JDABuilder.java)
@@ -61,3 +61,24 @@
 				private void devHelp( TextChannel ) List all Developer commands
 			
 				public class FileWriter() {} For writing server data to the "Database"
+- 27/4/18
+	- *General*
+		- Re-structured project packages (hopefully last time)
+	- *Gradle*
+		- Converted project to a gradle project (gradle version 4.7-all) with much MUCH effort
+	- *Games*
+		- Implemented a framework for Games to be run by Weebot. As well as an initial pass at a Cards Against Humanity game.
+
+				Game
+				- Game.java
+				- Player.java
+				- CardGame
+					- CardGame.java
+					- Card.java
+					- CarsAgainstHumanity.java
+	- *Weebot*
+		- Somehow managed to not actually finish the basic Weebot methods...
+		- Considering moving Weebot server-specific settings to a seperate Settings class, possibly with a number of enums for simple settings.
+	- *Database*
+		- Began research on java [serialization](https://www.tutorialspoint.com/java/java_serialization.htm) to save the state of Weebots.
+		- I (Jono) am considering moving the ```GUILDS``` Map and refocusing it on Weebot objects (instead of Guilds) to make reading serializtions not require the list of guilds. Alternativly, we could save Guilds.
