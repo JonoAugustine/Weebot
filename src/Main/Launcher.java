@@ -11,7 +11,7 @@ import java.util.TreeMap;
 
 import javax.security.auth.login.LoginException;
 
-import Bot.Weebot;
+import Main.Bot.Weebot;
 import Main.Listener.GuildListener;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
