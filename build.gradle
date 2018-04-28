@@ -1,17 +1,22 @@
-repositories {
-    mavenCentral()
+plugins {
+  id 'java'
+  id 'application'
+  id 'com.github.johnrengelman.shadow' version '1.2.4'
 }
 
-apply plugin: "java"
+mainClassName = "com.AMPro.Weebot.main.Launcher"
+
+version '1.0'
+
+sourceCompatibility = 1.8
+
+repositories {
+  jcenter()
+}
 
 dependencies {
-    compile fileTree(dir: 'libs', include: ['*.jar'])
+  compile 'net.dv8tion:JDA:3.6.0_354'
+  compile 'com.jagrosh:jda-utilities:2.1'
 }
 
-sourceSets {
-    main.java.srcDir 'com.AMPro.Weebot.main'
-}
-
-jar {
-    manifest.attributes "Main-Class": "com.AMPro.Weebot.main.Launcher"
-}
+compileJava.options.encoding = 'UTF-8'

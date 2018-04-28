@@ -6,8 +6,8 @@ package com.AMPro.Weebot.main.Bot.Game.CardGame;
 
 import java.util.ArrayList;
 
-import Main.Bot.Games.Player;
-import Main.Bot.Games.CardGame.Card;
+import com.AMPro.Weebot.main.Bot.Game.Player;
+
 import net.dv8tion.jda.core.entities.User;
 
 /**

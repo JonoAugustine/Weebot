@@ -4,9 +4,8 @@
 
 package com.AMPro.Weebot.main.Bot.Game.CardGame;
 
-import Main.Bot.Games.Game;
-import Main.Bot.Games.Player;
-import Main.Bot.Games.CardGame.Card;
+import com.AMPro.Weebot.main.Bot.Game.Game;
+import com.AMPro.Weebot.main.Bot.Game.Player;
 
 /**
   * 

@@ -3,7 +3,7 @@
  * @copyright Aquatic Mastery Productions
  */
 
-package com.Ampro.Weebot.main;
+package com.AMPro.Weebot.main;
 
 import java.util.Comparator;
 import java.util.List;
@@ -11,11 +11,12 @@ import java.util.TreeMap;
 
 import javax.security.auth.login.LoginException;
 
-import Main.Bot.Weebot;
-import Main.Listener.GuildListener;
+import com.AMPro.Weebot.main.Bot.Weebot;
+import com.AMPro.Weebot.main.JDA.JDABuilder;
+import com.AMPro.Weebot.main.Listener.GuildListener;
+
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
-import net.dv8tion.jda.core.JDABuilder;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 

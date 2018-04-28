@@ -6,7 +6,7 @@ package com.AMPro.Weebot.main.Bot;
 
 import java.util.Map;
 
-import Main.Launcher;
+import com.AMPro.Weebot.main.Launcher;
 
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
