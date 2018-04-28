@@ -90,7 +90,7 @@ public class Weebot {
 	 * Takes in a {@code Message} and calls the appropriate private method
 	 * @param message
 	 */
-	public void read(Message message) {
+	public void read(Message message) {		
 		String text;
 		//Is this a valid call?
 		int valid = this.validateCallsign(message);
