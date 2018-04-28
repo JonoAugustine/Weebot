@@ -6,7 +6,7 @@ plugins {
 
 mainClassName = "com.AMPro.Weebot.main.Launcher"
 
-version '1.0'
+version '0.1'
 
 sourceCompatibility = 1.8
 
