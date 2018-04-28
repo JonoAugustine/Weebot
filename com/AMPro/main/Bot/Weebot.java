@@ -1,26 +1,16 @@
+package Bot;
+
 /**
  * 
  */
 
-package com.AMPro.Weebot.main.Bot;
-
-import java.util.Map;
-
-import com.AMPro.Weebot.main.Launcher;
-
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
-import net.dv8tion.jda.core.managers.GuildController;
 
 /**
  * 
  * @author sword
  *
  */
-public class Weebot {
+public class Weebot implements Comparable<Weebot> {
 	
 	//General Static Info/Settings 
 	
@@ -387,6 +377,14 @@ public class Weebot {
 	public String getNickname() {
 		return this.NICKNAME;
 	}
+
+	public long getGuildID() {
+		return this.SERVERID;
+	}
+
+	public String getGuildName() {
+		return this.SERVERNAME;
+	}
 	
 	//
 	//
@@ -435,6 +433,16 @@ public class Weebot {
 		out += "```";
 		channel.sendMessage(out).queue();
 		
+	}
+
+	/**
+	 * @return -1 if the Guild/Server ID is less than parameter's
+	 * 			0 if equal to parameter's
+	 * 			1 if greater than parameter's
+	 */
+	@Override
+	public int compareTo(Weebot w2) {
+		return (int) (this.SERVERID - w2.getGuildID());
 	}
 
 }

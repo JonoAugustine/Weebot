@@ -2,7 +2,7 @@
  * 
  */
 
-package com.AMPro.Weebot.main.Bot.Game.CardGame;
+package Bot.Game.CardGame;
 
 import com.AMPro.Weebot.main.Bot.Game.Game;
 import com.AMPro.Weebot.main.Bot.Game.Player;
