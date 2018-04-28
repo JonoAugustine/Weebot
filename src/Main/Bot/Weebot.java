@@ -1,9 +1,8 @@
-package Bot;
+package Main.Bot;
 /**
  * 
  */
 
-import java.util.ArrayList;
 import java.util.Map;
 
 import Main.Launcher;
@@ -86,7 +85,7 @@ public class Weebot {
 
 		return 0;
 	}
-	
+
 	/**
 	 * Takes in a {@code Message} and calls the appropriate private method
 	 * @param message
