@@ -2,8 +2,15 @@
 
 *A discord bot that isn't another music player*
 
+Weebot is a bot for the social chat platform [Discord](https://discordapp.com/). <br> Weebot is still under construction, but you can see a [Feature List](#FeatureList) below as well as the current [Roadmap](#Roadmap)
+
 ----
-**Roadmap**
+#Feature List <a name='FeatureList'></a>
+
+...
+
+----
+#Roadmap <a name='Roadmap'></a>
 
  1. Finish current basic settings implementations
  	- Finish settings methods
@@ -18,7 +25,7 @@
 		 - Will need to track stats and information about each individual member and define what acts increase or decrease relationship status with Weebot.
  6. Localize to Japanese
 ----
-**Log**
+#Log
 - 26/4/18
 	- Work Begins!
 	- JDA dependencies added (problem with lfs corruption on repository)
