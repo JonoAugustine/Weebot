@@ -1,7 +1,14 @@
+/*
+ * Run <gradle shadowjar> to build jar
+ */
 plugins {
   id 'java'
   id 'application'
   id 'com.github.johnrengelman.shadow' version '1.2.4'
+}
+
+sourceSets {
+    main.java.srcDirs 'com/AMPro/Weebot/main'
 }
 
 mainClassName = "com.AMPro.Weebot.main.Launcher"
