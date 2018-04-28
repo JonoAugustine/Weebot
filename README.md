@@ -5,12 +5,14 @@
 Weebot is a bot for the social chat platform [Discord](https://discordapp.com/). <br> Weebot is still under construction, but you can see a [Feature List](#FeatureList) below as well as the current [Roadmap](#Roadmap)
 
 ----
-#Feature List <a name='FeatureList'></a>
+<a name='FeatureList'></a>
+#Feature List
 
 ...
 
 ----
-#Roadmap <a name='Roadmap'></a>
+<a name='Roadmap'></a>
+#Roadmap
 
  1. Finish current basic settings implementations
  	- Finish settings methods

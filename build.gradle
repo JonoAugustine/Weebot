@@ -7,13 +7,41 @@ plugins {
   id 'com.github.johnrengelman.shadow' version '1.2.4'
 }
 
+class Version {
+    int major, minor, revision
+
+    String getMajor() {
+        "${major}"
+    }
+
+    String getMinor() {
+        "${minor}"
+    }
+
+    String getRevision() {
+        "${revision}"
+    }
+
+    String getBuild() {
+        System.getenv('BUILD_NUMBER') ? System.getenv('BUILD_NUMBER') : 'DEV'
+    }
+
+    String toString() {
+        "${getMajor()}.${getMinor()}.${getRevision()}_${getBuild()}"
+    }
+}
+def versionObj = new Version(major: 0, minor: 0, revision: 3)
+group = 'com.AMPro'
+archivesBaseName = 'Weebot'
+version = "${versionObj.toString()}"
+
 sourceSets {
     main.java.srcDirs 'com/AMPro/Weebot/main'
 }
 
 mainClassName = "com.AMPro.Weebot.main.Launcher"
 
-version '0.1'
+
 
 sourceCompatibility = 1.8
 
@@ -24,6 +52,7 @@ repositories {
 dependencies {
   compile 'net.dv8tion:JDA:3.6.0_354'
   compile 'com.jagrosh:jda-utilities:2.1'
+  compile 'com.google.code.gson:gson:2.8.1'
 }
 
 compileJava.options.encoding = 'UTF-8'
