@@ -6,6 +6,8 @@ package com.ampro.main.bot;
 
 import java.util.Map;
 import java.util.TreeMap;
+import java.util.List;
+import java.util.ArrayList;
 
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Guild;
@@ -15,9 +17,15 @@ import net.dv8tion.jda.core.managers.GuildController;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 
 import com.ampro.main.Launcher;
+import com.ampro.main.game.*;
 
 /**
+ * A Weebot.
  * 
+ * ? Should User relation to Weebot be gloabal or local 
+ * ? This would likelly invole a User wrapper class to keep track of the relationship
+ * ? Though that would probably be needed anyway if we are to implement the
+ * ? User-bot good/bad relationship meter thing (which I really wannt to)
  * @author sword
  *
  */
@@ -38,15 +46,17 @@ public class Weebot implements Comparable<Weebot> {
 	private final Member SELF;
 	private String NICKNAME;
 	private String CALLSIGN;
-	
+
 	//Can this bot say explicit things? (false default)
 	private boolean EXPLICIT;
-	
 	//Can this bot be used for NSFW? (false default)
 	private boolean NSFW;
-	
-	//Should the bot always pay attention to it's callsign?
+	//Can the bot jump into the conversation?
 	private boolean ALWAYSLISTEN;
+
+	//Weebot Games
+	private List<Class<? extends Game>> GAMES_ALLOWED;
+	private List<Game> GAMES_RUNNING;
 		
 	/**
 	 * Sets up a Weebot for the server.
@@ -63,6 +73,8 @@ public class Weebot implements Comparable<Weebot> {
 		this.EXPLICIT	= false;
 		this.NSFW		= false;
 		this.SELF		= guild.getSelfMember();
+		this.GAMES_RUNNING = new ArrayList<>();
+		this.GAMES_ALLOWED = new ArrayList<>();
 	}
 	
 	/**
@@ -105,17 +117,13 @@ public class Weebot implements Comparable<Weebot> {
 			//Cut the nickname from the next ( +1 to erase @ symbol )
 			text = message.getContentDisplay().toLowerCase().substring(this.NICKNAME.length() + 1).trim();
 
-		//Respond to empty message
-		if (text.trim().isEmpty() && this.ALWAYSLISTEN) {
-			if (valid == 2) 
-				message.getTextChannel().sendMessage("Hi there!").queue();
-			else
-				message.getTextChannel()
-					.sendMessage("Don't call me if you don't wanna talk! :(")
-					.queue();
+		//Don't respond
+		if (text.trim().isEmpty()) {
 			return;
 		}
 		
+		//TODO Redo the if-else with a string split(" ") and switch-case
+
 		//Actual responses and actions
 		
 		if(text.equals("ping"))

@@ -2,8 +2,9 @@
  * 
  */
 
-package com.ampro.main.bot.game;
+package com.ampro.main.game;
 
+import java.util.List;
 import java.util.ArrayList;
 
 /**

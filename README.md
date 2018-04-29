@@ -14,23 +14,29 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
 <a name='Roadmap'></a>
 #Roadmap
 
- 1. Finish current basic settings implementations
+ - Finish current basic settings implementations
  	- Finish settings methods
  	- Add User-joined Greetings
- 2. Create Database to store information about each server using GSON/JSON
+ - Create Database to store information about each server using GSON/JSON
 	- Perhaps a Database package with proposéd classes as:
 		- *Database.java* Keeps a list of all things to be written to file (ie. a Databse object saved with gson)
 		- *Util* Package containing helper classes that build and update the database
 			- *DatabaseWriter.java*
 			- *DatabaseReader.java*
- 3. Work on *Joke/Insult Generator*(TM)
+ - Work on *Joke/Insult Generator*(TM)
 	- Possibly using a pool of joke templates and drawing from a pool of random words and phrases
- 4.  Make *Cards against NL*
+ =  Make *Cards against NL*
 		- Send private messages to each player with their decks, send the white-card into the chat.
- 5. Research chat-bot implementations for more natural conversations
+ - Research chat-bot implementations for more natural conversations
 	 - Possibly add a *sass-scale*(TM) to determine the level of jokes/insults/casual form with specific members.
 		 - Will need to track stats and information about each individual member and define what acts increase or decrease relationship status with Weebot.
- 6. Localize to Japanese
+		 - ? Should User relation to Weebot be gloabal or local 
+		* ? This would likelly invole a User wrapper class to keep track of the relationship
+		* ? Though that would probably be needed anyway if we are to implement the
+		* ? User-bot good/bad relationship meter thing (which I really wannt to)
+	
+- Localize to Japanese
+
 ----
 #Log
 - 26/4/18

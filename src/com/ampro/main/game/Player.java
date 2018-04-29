@@ -2,7 +2,7 @@
  * 
  */
 
-package com.ampro.main.bot.game;
+package com.ampro.main.game;
 
 import net.dv8tion.jda.core.entities.User;
 

@@ -2,11 +2,12 @@
  * 
  */
 
-package com.ampro.main.bot.game.cardgame;
+package com.ampro.main.game.cardgame;
 
 import java.util.ArrayList;
 
-import com.ampro.main.bot.game.Player;
+import com.ampro.main.game.Player;
+import com.ampro.main.game.cardgame.*;
 
 import net.dv8tion.jda.core.entities.User;
 
