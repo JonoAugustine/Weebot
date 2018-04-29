@@ -2,11 +2,11 @@
  * 
  */
 
-package com.AMPro.Weebot.main.Bot.Game.CardGame;
+package com.ampro.main.bot.game.cardgame;
 
 import java.util.ArrayList;
 
-import com.AMPro.Weebot.main.Bot.Game.Player;
+import com.ampro.main.bot.game.Player;
 
 import net.dv8tion.jda.core.entities.User;
 

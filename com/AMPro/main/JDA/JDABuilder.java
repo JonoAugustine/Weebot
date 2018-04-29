@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.AMPro.Weebot.main.JDA;
+package com.ampro.main.jda;
 
 import com.neovisionaries.ws.client.WebSocketFactory;
 

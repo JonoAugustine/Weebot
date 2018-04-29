@@ -1,4 +1,4 @@
-package com.AMPro.Weebot.main.Bot.Game.CardGame;
+package com.ampro.main.bot.game.cardgame;
 
 /**
  * A card used in a {@code CardGame}.

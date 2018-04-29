@@ -2,7 +2,7 @@
  * 
  */
 
-package com.AMPro.Weebot.main.Bot.Game;
+package com.ampro.main.bot.game;
 
 import java.util.ArrayList;
 

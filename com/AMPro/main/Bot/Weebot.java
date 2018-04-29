@@ -1,9 +1,20 @@
-package Bot;
-
 /**
  * 
  */
 
+package com.ampro.main.bot;
+
+import java.util.Map;
+import java.util.TreeMap;
+
+import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.managers.GuildController;
+import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
+
+import com.ampro.main.Launcher;
 
 /**
  * 

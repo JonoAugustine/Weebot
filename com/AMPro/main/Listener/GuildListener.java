@@ -2,9 +2,9 @@
  * 
  */
 
-package com.AMPro.Weebot.main.Listener;
+package com.ampro.main.listener;
 
-import com.AMPro.Weebot.main.Launcher;
+import com.ampro.main.Launcher;
 
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;

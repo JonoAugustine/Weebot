@@ -2,10 +2,10 @@
  * 
  */
 
-package Bot.Game.CardGame;
+package com.ampro.main.bot.game.cardgame;
 
-import com.AMPro.Weebot.main.Bot.Game.Game;
-import com.AMPro.Weebot.main.Bot.Game.Player;
+import com.ampro.main.bot.game.Game;
+import com.ampro.main.bot.game.Player;
 
 /**
   * 
