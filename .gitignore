@@ -1,3 +1,5 @@
 ./.gradle/*
 /.gradle/
 *.class
+/.idea/
+Weebot.iml
