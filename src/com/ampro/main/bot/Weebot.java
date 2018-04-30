@@ -99,7 +99,7 @@ public class Weebot implements Comparable<Weebot> {
 		String call = message.getContentDisplay().split(" ")[0];
 		//Don't take commands with a space between the call sign and the command
 		//It would just make life less easy
-		if (call.length() > this.CALLSIGN.length())
+		if (call.length() > this.CALLSIGN.length() && call.startsWith(this.CALLSIGN))
 			return 1;
 		else if (call.equals("@" + this.NICKNAME))
 			return 2;
@@ -158,8 +158,11 @@ public class Weebot implements Comparable<Weebot> {
 		//Move to Developer Reader
 		else if(Launcher.checkDevID(message.getAuthor().getIdLong()) &&
 				 text.startsWith("dev ") || text.trim().equals("dev")) {
-
 			this.devRead(message, text.trim().substring(3));
+		}
+		else if(Launcher.checkDevID(message.getAuthor().getIdLong()) &&
+				text.trim().equals("kill")) {
+					Launcher.getJDA().shutdown();
 		}
 		//Cannot Understand command
 		else

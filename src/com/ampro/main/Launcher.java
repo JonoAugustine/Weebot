@@ -5,21 +5,19 @@
 
 package com.ampro.main;
 
-import java.util.Comparator;
-import java.util.List;
-import java.util.TreeMap;
-
-import javax.security.auth.login.LoginException;
-
 import com.ampro.main.bot.Weebot;
 import com.ampro.main.jda.JDABuilder;
 import com.ampro.main.listener.GuildListener;
-
 import com.ampro.main.listener.PrivateListener;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+
+import javax.security.auth.login.LoginException;
+import java.util.Comparator;
+import java.util.List;
+import java.util.TreeMap;
 
 /**
  * Runner/Main class of the Weebot network.
@@ -42,7 +40,8 @@ public class Launcher {
 
 	private static TreeMap<Guild, Weebot> GUILDS;
 
-	private static final long[] DEV_IDS = new long[]{139167730237571072L};
+	private static final long[] DEV_IDS = new long[]{139167730237571072L
+												   , 186130584693637131L};
 
 	/**
 	 * Put bot online, setup listeners, and get full list of servers (Guilds)
@@ -92,6 +91,11 @@ public class Launcher {
 	 */
 	public static void updateServers(final Guild guild) {
 		Launcher.GUILDS.put(guild, new Weebot(guild));
+	}
+
+	/** Get the JDA */
+	public static JDA getJDA() {
+		return Launcher.JDA;
 	}
 
 	/**

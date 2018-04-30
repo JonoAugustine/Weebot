@@ -23,11 +23,15 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
  */
 public class GuildListener extends ListenerAdapter {
 
+	//private boolean isSelf()
+
 	@Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 
 		//Ignore ourself
-		if (event.getAuthor().getName() == "Weebot") return;
+		if (event.getAuthor().getIdLong() == 437851896263213056L) return;
+
+		System.err.println(event.getAuthor().getIdLong());
 
         //Message message = event.getMessage();
 
