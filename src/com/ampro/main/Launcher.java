@@ -5,8 +5,8 @@
 
 package com.ampro.main;
 
-import java.util.Comparator;
 import java.util.List;
+import java.util.Comparator;
 import java.util.TreeMap;
 
 import javax.security.auth.login.LoginException;
@@ -15,37 +15,28 @@ import com.ampro.main.bot.Weebot;
 import com.ampro.main.jda.JDABuilder;
 import com.ampro.main.listener.GuildListener;
 
-import com.ampro.main.listener.PrivateListener;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
-/**
- * Runner/Main class of the Weebot network.
- * Builds single JDA connection.
- *
- * @author Jonathan Augustine
- *
- */
 public class Launcher {
-
-	/** Compares a {@code Guild} buy it's IdLong */
+	
 	private static final class GuildComparator implements Comparator<Guild> {
 		@Override
 		public int compare(Guild g1, Guild g2) {
 			return (int) (g1.getIdLong() - g2.getIdLong());
 		}
 	}
-
+	
 	private static JDA JDA;
-
+	
 	private static TreeMap<Guild, Weebot> GUILDS;
-
+	
 	private static final long[] DEV_IDS = new long[]{139167730237571072L};
-
+		
 	/**
-	 * Put bot online, setup listeners, and get full list of servers (Guilds)
+	 * Put bot online, setup listeners, and get full list of servers (guilds)
 	 * @param args
 	 * @throws LoginException
 	 * @throws RateLimitedException
@@ -56,9 +47,9 @@ public class Launcher {
     {
 	   Launcher.setUpLauncher();
        Launcher.JDA.addEventListener(new GuildListener());
-       Launcher.JDA.addEventListener(new PrivateListener());
+       //Launcherjda.addEventListener(new PrivateListener()); TODO
     }
-
+   
    /**
     * Initiates {@code Launcher} data and connects to Weebot API.
     * @throws LoginException
@@ -69,13 +60,13 @@ public class Launcher {
 	   Launcher.JDA = new JDABuilder(AccountType.BOT)
        		.setToken("NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA.Etf9Q9wuk1YCUnUox0IbIon1dUk")
        		.buildBlocking();
-
+       
 	   //Get Guild list
 	   Launcher.GUILDS = new TreeMap<Guild, Weebot>(new GuildComparator());
 	   Launcher.updateServers();
-
+	   
    }
-
+	
    /**
     * Update local server list from online API.
     */
@@ -93,7 +84,7 @@ public class Launcher {
 	public static void updateServers(final Guild guild) {
 		Launcher.GUILDS.put(guild, new Weebot(guild));
 	}
-
+	
 	/**
 	 * Update and return the Guild map.
 	 * @return Launcher guild TreeMap
@@ -102,7 +93,7 @@ public class Launcher {
 		Launcher.updateServers();
 		return Launcher.GUILDS;
 	}
-
+	
 	/**
 	 * Check if user ID matches a Developer ID.
 	 * @param id long ID to check
