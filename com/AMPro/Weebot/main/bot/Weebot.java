@@ -2,34 +2,25 @@
  * 
  */
 
-package com.ampro.main.bot;
+package bot;
 
 import java.util.Map;
-import java.util.TreeMap;
-import java.util.List;
-import java.util.ArrayList;
 
-import net.dv8tion.jda.core.entities.Member;
+import main.Launcher;
+
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.managers.GuildController;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
-
-import com.ampro.main.Launcher;
-import com.ampro.main.game.*;
+import net.dv8tion.jda.core.managers.GuildController;
 
 /**
- * A Weebot.
  * 
- * ? Should User relation to Weebot be gloabal or local 
- * ? This would likelly invole a User wrapper class to keep track of the relationship
- * ? Though that would probably be needed anyway if we are to implement the
- * ? User-bot good/bad relationship meter thing (which I really wannt to)
  * @author sword
  *
  */
-public class Weebot implements Comparable<Weebot> {
+public class Weebot {
 	
 	//General Static Info/Settings 
 	
@@ -46,17 +37,15 @@ public class Weebot implements Comparable<Weebot> {
 	private final Member SELF;
 	private String NICKNAME;
 	private String CALLSIGN;
-
+	
 	//Can this bot say explicit things? (false default)
 	private boolean EXPLICIT;
+	
 	//Can this bot be used for NSFW? (false default)
 	private boolean NSFW;
-	//Can the bot jump into the conversation?
+	
+	//Should the bot always pay attention to it's callsign?
 	private boolean ALWAYSLISTEN;
-
-	//Weebot Games
-	private List<Class<? extends Game>> GAMES_ALLOWED;
-	private List<Game> GAMES_RUNNING;
 		
 	/**
 	 * Sets up a Weebot for the server.
@@ -73,8 +62,6 @@ public class Weebot implements Comparable<Weebot> {
 		this.EXPLICIT	= false;
 		this.NSFW		= false;
 		this.SELF		= guild.getSelfMember();
-		this.GAMES_RUNNING = new ArrayList<>();
-		this.GAMES_ALLOWED = new ArrayList<>();
 	}
 	
 	/**
@@ -117,13 +104,17 @@ public class Weebot implements Comparable<Weebot> {
 			//Cut the nickname from the next ( +1 to erase @ symbol )
 			text = message.getContentDisplay().toLowerCase().substring(this.NICKNAME.length() + 1).trim();
 
-		//Don't respond
-		if (text.trim().isEmpty()) {
+		//Respond to empty message
+		if (text.trim().isEmpty() && this.ALWAYSLISTEN) {
+			if (valid == 2) 
+				message.getTextChannel().sendMessage("Hi there!").queue();
+			else
+				message.getTextChannel()
+					.sendMessage("Don't call me if you don't wanna talk! :(")
+					.queue();
 			return;
 		}
 		
-		//TODO Redo the if-else with a string split(" ") and switch-case
-
 		//Actual responses and actions
 		
 		if(text.equals("ping"))
@@ -396,14 +387,6 @@ public class Weebot implements Comparable<Weebot> {
 	public String getNickname() {
 		return this.NICKNAME;
 	}
-
-	public long getGuildID() {
-		return this.SERVERID;
-	}
-
-	public String getGuildName() {
-		return this.SERVERNAME;
-	}
 	
 	//
 	//
@@ -452,16 +435,6 @@ public class Weebot implements Comparable<Weebot> {
 		out += "```";
 		channel.sendMessage(out).queue();
 		
-	}
-
-	/**
-	 * @return -1 if the Guild/Server ID is less than parameter's
-	 * 			0 if equal to parameter's
-	 * 			1 if greater than parameter's
-	 */
-	@Override
-	public int compareTo(Weebot w2) {
-		return (int) (this.SERVERID - w2.getGuildID());
 	}
 
 }

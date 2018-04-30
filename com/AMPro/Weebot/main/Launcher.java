@@ -3,17 +3,16 @@
  * @copyright Aquatic Mastery Productions
  */
 
-package com.ampro.main;
 
-import java.util.List;
 import java.util.Comparator;
+import java.util.List;
 import java.util.TreeMap;
 
 import javax.security.auth.login.LoginException;
 
-import com.ampro.main.bot.Weebot;
-import com.ampro.main.jda.JDABuilder;
-import com.ampro.main.listener.GuildListener;
+import com.AMPro.Weebot.main.Bot.Weebot;
+import com.AMPro.Weebot.main.JDA.JDABuilder;
+import com.AMPro.Weebot.main.Listener.GuildListener;
 
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
