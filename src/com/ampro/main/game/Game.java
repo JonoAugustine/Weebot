@@ -7,7 +7,9 @@ package com.ampro.main.game;
 import com.ampro.main.comparators.Comparators;
 import net.dv8tion.jda.core.entities.User;
 
+import java.util.ArrayList;
 import java.util.TreeMap;
+import java.util.Map;
 
 /**
  * Basis of a Weebot Game.
@@ -82,6 +84,13 @@ public abstract class Game<P extends Player> {
     /** Is the game ongoing? */
     public boolean isRunning() {
         return this.RUNNING;
+    }
+
+    public ArrayList playerIterable() {
+        ArrayList<P> retu = new ArrayList<>();
+        for(Map.Entry<User, P> entry : this.PLAYERS.entrySet())
+            retu.add(entry.getValue());
+        return retu;
     }
 
 }

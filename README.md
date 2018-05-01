@@ -34,6 +34,8 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
 		* ? This would likelly invole a User wrapper class to keep track of the relationship
 		* ? Though that would probably be needed anyway if we are to implement the
 		* ? User-bot good/bad relationship meter thing (which I really wannt to)
+- Fun Features
+	- Russian Rulet Kick
 	
 - Localize to Japanese
 

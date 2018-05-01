@@ -1,0 +1,30 @@
+ *Self-destructing message*
+
+ MessageChannel channel = event.getChannel();
+    RestAction<Message> action = channel.sendMessage("This message will destroy itself in 5 seconds!");
+     action.queue((message) -> message.delete().queueAfter(5, TimeUnit.SECONDS));
+
+*private message*
+
+public void sendPrivateMessage(User user, String content)
+{
+    // openPrivateChannel provides a RestAction<PrivateChannel>
+    // which means it supplies you with the resulting channel
+    user.openPrivateChannel().queue((channel) ->
+    {
+        // value is a parameter for the `accept(T channel)` method of our callback.
+        // here we implement the body of that method, which will be called later by JDA automatically.
+        channel.sendMessage(content).queue();
+        // here we access the enclosing scope variable -content-
+        // which was provided to sendPrivateMessage(User, String) as a parameter
+    });
+}
+Since this only calls a single method in the callback you can use the short form:
+
+public void sendPrivateMessage(User user, String content)
+{
+    // notice that we are not placing a semicolon (;) in the callback this time!
+    user.openPrivateChannel().queue( (channel) -> channel.sendMessage(content).queue() );
+}
+
+

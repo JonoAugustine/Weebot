@@ -4,21 +4,16 @@
 
 package com.ampro.main.bot;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-
 import com.ampro.main.Launcher;
 import com.ampro.main.game.Game;
 import com.ampro.main.game.Player;
-import com.ampro.main.game.cardgame.CardsAgainstHumanity;
-
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.managers.GuildController;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * A Weebot.
@@ -59,7 +54,7 @@ public class Weebot implements Comparable<Weebot> {
 	/** Can this bot be used for NSFW? (false default) */
 	private boolean NSFW;
 	/** Can the bot jump into the conversation? */
-	private boolean ALWAYSLISTEN;
+	private boolean ACTIVEPARTICIPATE;
 
 	/**
 	 * Allow servers to disable some games.
@@ -80,7 +75,7 @@ public class Weebot implements Comparable<Weebot> {
 		this.SERVERID	= guild.getIdLong();
 		this.NICKNAME	= "Weebot";
 		this.CALLSIGN	= "<>";
-		this.ALWAYSLISTEN = true;
+		this.ACTIVEPARTICIPATE = true;
 		this.EXPLICIT	= false;
 		this.NSFW		= false;
 		this.SELF		= guild.getSelfMember();
@@ -111,224 +106,289 @@ public class Weebot implements Comparable<Weebot> {
 	 * @param message
 	 */
 	public void read(Message message) {
-		String text;
 		//Is this a valid call?
-		int valid = this.validateCallsign(message);
-		if (valid == 0) return;
-		else if (valid == 1)
-			//Cut the callsign from the text (makes handling it easier)
-			text = message.getContentRaw().toLowerCase().substring(this.CALLSIGN.length()).trim();
-		else
-			//Cut the nickname from the next ( +1 to erase @ symbol )
-			text = message.getContentDisplay().toLowerCase().substring(this.NICKNAME.length() + 1).trim();
+        int valid = this.validateCallsign(message);
 
-		//Don't respond
-		if (text.trim().isEmpty()) {
+        /** the validated command, stripped of its prefix*/
+        String[] command;
+        switch (this.validateCallsign(message)) {
+            case 0: return;
+            case 1:
+                //Cut the callsign from the command (makes handling it easier)
+                command = message.getContentRaw().toLowerCase()
+                        .substring(this.CALLSIGN.length()).split(" ");
+                break;
+            case 2:
+                //Cut the nickname from the next ( +1 to erase @ symbol )
+                command = message.getContentDisplay().toLowerCase()
+                        .substring(this.NICKNAME.length() + 1).split(" ");
+                break;
+            default: return;
+        }
+
+		//Don't respond to empty messages
+		if (command.length == 0) {
 			return;
 		}
 
-		//TODO Redo the if-else with a string split(" ") and switch-case
-
 		//Actual responses and actions
-
-		if(text.equals("ping"))
-			this.pong(message.getTextChannel());
-
-		else if(text.startsWith("spam ") || text.equals("spam"))
-			this.spam(message);
-
-		else if(text.startsWith("name "))
-			this.changeNickName(message, 7);
-
-		else if(text.equals("settings") || text.trim().equals("setting"))
-			this.listServerSettings(message.getTextChannel());
-
-		else if(text.startsWith("callsign") || text.startsWith("prefix"))
-			this.changeCallsign(message.getTextChannel(), text);
-
-		else if(text.startsWith("nsfw"))
-			this.nsfw(message.getTextChannel(), text);
-
-		else if(text.startsWith("expl") || text.startsWith("explicit"))
-			this.explicit(message.getTextChannel(), text);
-
-		else if(text.startsWith("alwayslisten") || text.startsWith("listen"))
-			this.alwaysListen(message.getTextChannel(), text);
-
-		//Move to Developer Reader
-		else if(Launcher.checkDevID(message.getAuthor().getIdLong()) &&
-				 text.startsWith("dev ") || text.trim().equals("dev")) {
-			this.devRead(message, text.trim().substring(3));
-		}
-		else if(Launcher.checkDevID(message.getAuthor().getIdLong()) &&
-				text.trim().equals("kill")) {
-					Launcher.getJDA().shutdown();
-		}
-		//Cannot Understand command
-		else
-			message.getTextChannel()
-				.sendMessage("Sorry, I don't recognize that command...").queue();
+        //Small note: when two cases are lined-up (like name and nickname)
+        //then both cases go to the next available code
+        // (e.g. name and nickname cases both go to this.changeNickname)
+        switch (command[0] /*The command argument*/) {
+            case "ping":
+                this.pong(message.getTextChannel());
+                return;
+            case "spam":
+                this.spam(message.getTextChannel(), command);
+                return;
+            case "name":
+            case "nickname":
+                this.changeNickName(message.getTextChannel(), command);
+                return;
+            case "callsign":
+            case "prefix":
+                this.callsign(message.getTextChannel(), command);
+                return;
+            case "participate":
+            case "activeparticipate":
+            case "interrupt":
+                this.participate(message.getTextChannel(), command);
+            case "nsfw":
+            case "naughty":
+                this.nsfw(message.getTextChannel(), command);
+                return;
+            case "explicit":
+            case "expl":
+            case "cuss":
+                this.explicit(message.getTextChannel(), command);
+                return;
+            case "set":
+            case "settings":
+            case "setting":
+                this.listServerSettings(message.getTextChannel());
+                return;
+            case "help":
+                this.help(message.getAuthor(), message.getTextChannel(), command);
+                return;
+            case "dev":
+                this.devRead(message.getTextChannel(), command);
+                return;
+            default:
+                message.getTextChannel().sendMessage(
+                                "Sorry, I don't recognize that command..."
+                ).queue();
+                return;
+        }
 
 	}
 
 	/**
 	 * Set or Get {@code EXPLICIT}.
-	 * @param channel Text channel
-	 * @param text Command
+	 * @param channel TextChannel called from
+	 * @param command command invoked
 	 */
-	private void explicit(TextChannel channel, String text) {
-		String content;
-		try {
-			content = text.trim().split(" ")[1];
-		} catch (IndexOutOfBoundsException e) {
-			channel.sendMessage("I am " + (this.EXPLICIT ? "" : "not ") + "explicit").queue();
-			return;
-		}
-		switch(content.trim()) {
-		case "true":
-			this.EXPLICIT = true;
-			break;
-		case "false":
-			this.EXPLICIT = false;
-			break;
-		case "?":
-			channel.sendMessage("I am " + (this.EXPLICIT ? "" : "not ") + "explicit").queue();
-			return;
-		default:
-			channel.sendMessage("Sorry, " + content
-					+ " is not a command. Please use 'true' or 'false' ").queue();
-			return;
-		}
-		channel.sendMessage("I am now " + (this.EXPLICIT ? "" : "not ") + "explicit").queue();
+	private void explicit(TextChannel channel, String[] command) {
+	    //Only respond to commands with the appropriate number of args
+        switch (command.length) {
+            case 1:
+                channel.sendMessage(
+                        "I am " + (this.EXPLICIT ? "" : "not ") + "NSFW"
+                ).queue();
+                return;
+            case 2:
+                switch (command[1]) {
+                    case "true":
+                        this.EXPLICIT = true;
+                        channel.sendMessage("I am now explicit" ).queue();
+                        return;
+                    case "false":
+                        this.EXPLICIT = false;
+                        channel.sendMessage("I am now clean" ).queue();
+                        return;
+                    default:
+                        channel.sendMessage("Sorry, " + command[1]
+                                + " is not an option. Please use the commands: "
+                                + "```" + this.CALLSIGN + "explicit [true/on/false/off]```"
+                                + "```" + this.CALLSIGN + "expl [true/on/false/off]```"
+                                + "```" + this.CALLSIGN + "cuss [true/on/false/off]```"
+                        ).queue();
+                        return;
+                }
+            default:
+                channel.sendMessage("Sorry, " + command[1]
+                        + " is not an option. Please use the commands: "
+                        + "```" + this.CALLSIGN + "explicit [true/on/false/off]```"
+                        + "```" + this.CALLSIGN + "expl [true/on/false/off]```"
+                        + "```" + this.CALLSIGN + "cuss [true/on/false/off]```"
+                ).queue();
+                return;
+        }
 	}
 
 	/**
-	 * Set or Get {@code ALWAYSLISTEN}.
-	 * @param channel Text channel
-	 * @param text Command
+	 * Set or Get {@code ACTIVEPARTICIPATE}.
+	 * @param channel TextChannel called from
+	 * @param command Command invoked
 	 */
-	private void alwaysListen(TextChannel channel, String text) {
-		String content;
-		try {
-			content = text.trim().split(" ")[1];
-		} catch (IndexOutOfBoundsException e) {
-			channel.sendMessage("I " + (this.ALWAYSLISTEN ? "" : "do not ")
-							+ "always listen for a call").queue();
-			return;
-		}
-		switch(content.trim()) {
-		case "true":
-			this.ALWAYSLISTEN = true;
-			break;
-		case "false":
-			this.ALWAYSLISTEN = false;
-			break;
-		case "?":
-			channel.sendMessage("I " + (this.ALWAYSLISTEN ? "" : "do not ")
-					+ "always listen for a call").queue();
-			return;
-		default:
-			channel.sendMessage("Sorry, " + content
-					+ " is not a command. Please use 'true' or 'false' ").queue();
-			return;
-		}
-		channel.sendMessage("I will " + (this.ALWAYSLISTEN ? "" : "not ")
-				+ "always listen for a call").queue();
+	private void participate(TextChannel channel, String[] command) {
+        //Only respond to commands with the appropriate number of args
+        switch (command.length) {
+            case 1:
+                channel.sendMessage(
+                    "I will " + (this.ACTIVEPARTICIPATE ? "" : "not ")
+                        + " join in on conversations."
+                ).queue();
+                return;
+            case 2:
+                switch (command[1]) {
+                    case "true":
+                        this.ACTIVEPARTICIPATE = true;
+                        channel.sendMessage(
+                                "I will join in on conversations."
+                        ).queue();
+                        return;
+                    case "false":
+                        this.ACTIVEPARTICIPATE = false;
+                        channel.sendMessage(
+                                "I won't join in on conversations anymore."
+                        ).queue();
+                        return;
+                    default:
+                        channel.sendMessage("Sorry, " + command[1]
+                                + " is not an option. Please use the commands: "
+                                + "```" + this.CALLSIGN + "participate [true/on/false/off]```"
+                                + "```" + this.CALLSIGN + "activeparticipate [true/on/false/off]```"
+                                + "```" + this.CALLSIGN + "interrupt [true/on/false/off]```"
+                        ).queue();
+                        return;
+                }
+            default:
+                channel.sendMessage("Sorry, " + command[1]
+                        + " is not an option. Please use the commands: "
+                        + "```" + this.CALLSIGN + "participate [true/on/false/off]```"
+                        + "```" + this.CALLSIGN + "activeparticipate [true/on/false/off]```"
+                        + "```" + this.CALLSIGN + "interrupt [true/on/false/off]```"
+                ).queue();
+                return;
+        }
 	}
 
 	/**
 	 * Sets the bot's NSFW setting according to message containing true or false. <br>
 	 * Or sends whether or not the Bot is NSFW.
-	 * @param channel
-	 * @param text
+	 * @param channel TextChannel called from
+	 * @param command Command used to invoke
 	 */
-	private void nsfw(TextChannel channel, String text) {
-		//Question or Statement
-		String content;
-		try {
-			content = text.trim().split(" ")[1];
-		} catch (IndexOutOfBoundsException e) {
-			channel.sendMessage("I am " + (this.NSFW ? "" : "not ") + "NSFW").queue();
-			return;
-		}
-		if (content.isEmpty()) {
-			String out = "```";
-			out += "I am " + (this.NSFW ? "" : "not ") + "NSFW```";
-			channel.sendMessage(out).queue();
-		} else {
-			switch(content.trim()) {
-			case "true":
-				this.NSFW = true;
-				break;
-			case "false":
-				this.NSFW = false;
-				break;
-			case "?":
-				channel.sendMessage("I am " + (this.NSFW ? "" : "not ") + "NSFW").queue();
-				return;
-			default:
-				channel.sendMessage("Sorry, " + content
-						+ " is not a command. Please enter 'true' or 'false' ").queue();
-				return;
-			}
-			channel.sendMessage("I am now " + (this.NSFW ? "" : "not ") + "NSFW" ).queue();
+	private void nsfw(TextChannel channel, String[] command) {
+		switch (command.length) {
+            case 1:
+                channel.sendMessage(
+                        "I am " + (this.NSFW ? "" : "not ") + "NSFW"
+                ).queue();
+                return;
+            case 2:
+                switch (command[1]) {
+                    case "true":
+                        this.NSFW = true;
+                        channel.sendMessage("I am now NSFW" ).queue();
+                        break;
+                    case "false":
+                        this.NSFW = false;
+                        channel.sendMessage("I am now SFW" ).queue();
+                        break;
+                    default:
+                        channel.sendMessage("Sorry, " + command[1]
+                                + " is not an option. Please use the command: "
+                                + "```" + this.CALLSIGN + "nsfw [true/on/false/off]```"
+                        ).queue();
+                        return;
+                }
+                break;
+            default:
+                channel.sendMessage("Sorry, " + String.join(" ", command[1])
+                        + " is not an option. Please use the command: "
+                        + "```" + this.CALLSIGN + "nsfw [true/on/false/off]```"
+                ).queue();
+                return;
 		}
 	}
 
 	/**
 	 * Change the nickname of the bot for this server.
-	 * @param message
-	 * @param command The length of the command used to call this
+	 * @param channel TextChannel called from
+	 * @param command The command used to call this method
 	 */
-	private void changeNickName(Message message, int command) {
-		GuildController controller = new GuildController(this.GUILD);
-		String newName = message.getContentRaw().substring(command).trim();
+	private void changeNickName(TextChannel channel, String[] command) {
 		try {
+            String newName = String.join(" ", command);
 			//Change name on server
-			controller.setNickname(this.SELF, newName).queue();
+            new GuildController(this.GUILD).setNickname(this.SELF, newName).queue();
 			//Change internal name
 			this.NICKNAME = newName;
 			if (newName != "Weebot")
-				message.getTextChannel()
-					.sendMessage("Hmm... " + newName
-							+ "... I like the sound of that!")
-					.queue();
+				channel.sendMessage("Hmm... " + newName
+                                    + "... I like the sound of that!").queue();
 			else
-				message.getTextChannel()
-				.sendMessage("Hmm... Weebot... I like the sound of th-- wait!")
-				.queue();
+				channel
+				    .sendMessage("Hmm... Weebot... I like the sound of th-- wait!")
+				    .queue();
 		} catch (InsufficientPermissionException e) {
-			message.getTextChannel()
-				.sendMessage("I don't have permissions do that :(").queue();
+			channel.sendMessage("I don't have permissions do that :(").queue();
 		}
 	}
 
 	/**
 	 * Change or send the callsign (limited to 3 char).
-	 * @param channel
-	 * @param text
+	 * @param channel TextChannel called from
+	 * @param command Command used to invoke
 	 */
-	private void changeCallsign(TextChannel channel, String text) {
+	private void callsign(TextChannel channel, String[] command) {
 		String newCall;
-		try {
-			newCall = text.trim().split(" ")[1];
-		} catch (IndexOutOfBoundsException e) {
-			channel.sendMessage("You can call me with " + this.CALLSIGN
-									+ " or @" + this.NICKNAME).queue();
-			return;
-		}
-		//Limit to 3 characters
-		if (newCall.length() > 3) {
-			channel.sendMessage("Please keep the callsign under 4 characters.").queue();
-			return;
-		}
-
-		this.CALLSIGN = newCall;
-
-		channel.sendMessage("You can now call me with " + this.CALLSIGN
-				+ " or @" + this.NICKNAME).queue();
+		switch (command.length) {
+            case 1:
+                //Send back the current callsign
+                channel.sendMessage("You can call me with " + this.CALLSIGN
+                        + " or @" + this.NICKNAME).queue();
+                return;
+            case 2:
+                //Set a new callsign (if under 3 char)
+                if (command[1].length() > 3) {
+                    channel.sendMessage(
+                            "Please keep the callsign under 4 characters."
+                    ).queue();
+                    return;
+                } else {
+                    this.CALLSIGN = command[1];
+                    channel.sendMessage("You can now call me with ```" + this.CALLSIGN
+                            + "``` or ```@" + this.NICKNAME + "```").queue();
+                    return;
+                }
+            default:
+                channel.sendMessage(
+                        "Sorry, I can't understand that command."
+                        + "\nYou can change my callsign with these commands:"
+                        + "```" + this.CALLSIGN + "prefix new_prefix```"
+                        + "```@" + this.NICKNAME + " prefix new_prefix```"
+                ).queue();
+        }
 
 	}
+
+
+    /**
+     * User help method. Can send list of all commands, or details
+     * about one command to User in private chat.
+     * @param inNeed
+     * @param channel
+     * @param command
+     */
+	private void help(User inNeed, TextChannel channel, String[] command) {
+	    final String help = "```Weebot\n"
+                + "SomeCommands" //TODO
+                + "```";
+        inNeed.openPrivateChannel().queue( (pChan) -> pChan.sendMessage(help).queue() );
+    }
 
 	/**
 	 * List all (non-dev) commands.
@@ -360,8 +420,8 @@ public class Weebot implements Comparable<Weebot> {
 		out += "\n";
 		out += "I " + (this.NSFW ? "am " : "not ") + "NSFW";
 		out += "\n";
-		out += "I " + (this.ALWAYSLISTEN ? "" : "don't ")
-						+ "always listen for a call \n\tRespond to empty callsign or mentions)";
+		out += "I " + (this.ACTIVEPARTICIPATE ? "" : "don't ")
+						+ "join in on some conversations :)";
 		//out += "\n";
 		//out += "\n";
 		//out += "\n";
@@ -372,31 +432,29 @@ public class Weebot implements Comparable<Weebot> {
 
 	/**
 	 * Spams "SPAM ATTACK" for the number listed after spam. Default is 5.
-	 * @param channel Text channel to spam
+	 * @param channel TextChannel to send spam to
+     * @param command Command used to invode call to this method
 	 */
-	private void spam(Message message) {
-		int loop;
-		try {
-			loop = Integer.parseInt(message.getContentRaw().substring(7));
-			if (loop > 10) {
-				message.getTextChannel().sendMessage("That's a bit much...").queue();
-				return;
-			}
-		} catch (NumberFormatException e) {
-			System.err.println("spam: Could not parse int from "
-						+ message.getContentRaw().substring(7));
-			loop = 5;
-		}
+	private void spam(TextChannel channel, String[] command) {
+	    int loop;
+	    try {
+            loop = Integer.parseInt(command[1]);
+            if (loop > 10) {
+                channel.sendMessage("That's a bit much...").queue();
+                return;
+            }
+        } catch (IndexOutOfBoundsException e) {
+	        loop = 5;
+        } catch (NumberFormatException e2) {
+	        System.err.println("Failed to parse int from: " + command[1]);
+	        loop = 5;
+        }
     	for (int i = 0; i < loop; i++) {
-    		message.getTextChannel().sendMessage("SPAM ATTACK").queue();
-    		try {
-    		    Thread.sleep(1000);
-    		} catch(InterruptedException ex) {
-    			Thread.currentThread().interrupt();
-    		}
+    		channel.sendMessage("SPAM ATTACK").queue();
     	}
     }
 
+    /** Ping-Pong */
 	private void pong(TextChannel channel) {
          channel.sendMessage("Pong!").queue();
 	}
@@ -409,6 +467,10 @@ public class Weebot implements Comparable<Weebot> {
 		return this.SERVERID;
 	}
 
+    /**
+     * The name of the bot's Guild (Unless private bot)
+     * @return Name of the Guild
+     */
 	public String getGuildName() {
 		return this.SERVERNAME;
 	}
@@ -422,19 +484,34 @@ public class Weebot implements Comparable<Weebot> {
 
 	/**
 	 * Read method for dev-only commands
-	 * @param message
-	 * @param text
+	 * @param channel
+	 * @param command
 	 */
-	private void devRead(Message message, String text) {
-		if(text.trim().equals("listguilds"))
-			listGuilds(message.getTextChannel());
-		else if(text.trim().equals("dev") || text.trim().equals("devhelp"))
-			this.devHelp(message.getTextChannel());
-
-		else
-			message.getTextChannel()
-				.sendMessage("Don't recognize: " + message.getContentRaw());
-	}
+	private void devRead(TextChannel channel, String[] command) {
+        switch (command[1]) {
+            case "listguilds":
+            case "allguilds":
+            case "listhomes":
+            case "distrobution":
+                Weebot.listGuilds(channel);
+                return;
+            case "help":
+                channel.sendMessage(
+                        "Well if ur the dev, just open the code, jesus."
+                ).queue();
+                //TODO lol
+                return;
+            case "kill":
+                channel.sendMessage("Shutting down all Weebots...").queue();
+                Launcher.getJDA().shutdown();
+                return;
+            default:
+                channel.sendMessage(
+                        "Don't recognize: " + String.join(" ", command)
+                ).queue();
+                return;
+        }
+    }
 
 	/**
 	 * Lists the dev commands

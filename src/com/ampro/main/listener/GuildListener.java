@@ -24,12 +24,11 @@ public class GuildListener extends ListenerAdapter {
 
 	@Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-		//Ignore Bots
-		if (event.getAuthor().isBot()) return;
-
-        //Get the proper bot
+		//Ignore ourself
+		if (event.getAuthor().equals(Launcher.getJDA().getSelfUser()))
+		    return;
+        //Get the proper bot and hand off the event
         Launcher.getGuilds().get(event.getGuild()).read(event.getMessage());
-
 	}
 
 	@Override

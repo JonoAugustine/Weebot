@@ -1,5 +1,5 @@
 /**
- * 
+ *
  */
 
 package com.ampro.main.game.cardgame;
@@ -13,12 +13,12 @@ import net.dv8tion.jda.core.entities.User;
 
 /**
  * A game of Cards Against Humanity.
- * 
+ *
  */
-public class CardsAgainstHumanity 
+public class CardsAgainstHumanity
         extends CardGame<CardsAgainstHumanity.CAHPlayer
                         , CardsAgainstHumanity.CAHCard> {
-    
+
     protected static class CAHPlayer extends Player {
 
         //Current held cards
@@ -43,8 +43,8 @@ public class CardsAgainstHumanity
         //What the card says
         String cardText;
 
-        /** 
-         * Make a new card. 
+        /**
+         * Make a new card.
          * @param type Black or White card type
          * @param text The text of the card
          */
@@ -58,7 +58,7 @@ public class CardsAgainstHumanity
                 throw new InvalidCardException(
                     "Winning Card cannot be of type CAHCard.CARDTYPE.BLACK"
                     );
-            else 
+            else
                 this.winningCard = winningCard;
         }
 
@@ -73,16 +73,16 @@ public class CardsAgainstHumanity
     //End after certain # of wins or rounds?
     public enum WIN_CONDITION {WINS, ROUNDS;}
     private WIN_CONDITION WIN_CONDITION;
-    private CAHPlayer WINNER;
+    private ArrayList<CAHPlayer> WINNERS;
 
     /**
      * Initialize a new CardsAgainstHumanity game.
      */
-    public CardsAgainstHumanity(User host, int handSize) {
+    public CardsAgainstHumanity(int handSize) {
         this.HAND_SIZE = handSize;
     }
 
-    
+
 
     /**
      * Adds User to the game.
@@ -126,13 +126,23 @@ public class CardsAgainstHumanity
      * End the game, decide a winner.
      */
     protected int endGame() {
-        for (Player p : this.PLAYERS) {
-            //TODO
+        ArrayList<CAHPlayer> players = this.playerIterable();
+        CAHPlayer winner = this.PLAYERS.get(this.PLAYERS.firstKey());
+        for (CAHPlayer p : players) {
+            if (winner.cardsWon.size() < p.cardsWon.size())
+                winner = p;
         }
-        return -1;
+        //Check for ties
+        if (WIN_CONDITION == WIN_CONDITION.ROUNDS) {
+            for (CAHPlayer p : players) {
+                if (winner.cardsWon.size() == p.cardsWon.size())
+                    this.WINNERS.add(p);
+            }
+        }
+        return 0;
     }
 
- 
+
     /**
      * Change the win condition.
      * @param wincondition Number of wins or Rounds completed
