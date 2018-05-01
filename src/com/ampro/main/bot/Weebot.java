@@ -121,7 +121,8 @@ public class Weebot implements Comparable<Weebot> {
             case 2:
                 //Cut the nickname from the next ( +1 to erase @ symbol )
                 command = message.getContentDisplay().toLowerCase()
-                        .substring(this.NICKNAME.length() + 1).split(" ");
+                        .substring(this.NICKNAME.length() + 1)
+                        .trim().split(" ");
                 break;
             default: return;
         }
@@ -180,7 +181,6 @@ public class Weebot implements Comparable<Weebot> {
                 ).queue();
                 return;
         }
-
 	}
 
 	/**

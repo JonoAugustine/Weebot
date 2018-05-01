@@ -25,8 +25,8 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
 			- *DatabaseReader.java*
  - Work on *Joke/Insult Generator*(TM)
 	- Possibly using a pool of joke templates and drawing from a pool of random words and phrases
- =  Make *Cards against NL*
-		- Send private messages to each player with their decks, send the white-card into the chat.
+ -  Make *Cards against NL*
+	- Send private messages to each player with their decks, send the white-card into the chat.
  - Research chat-bot implementations for more natural conversations
 	 - Possibly add a *sass-scale*(TM) to determine the level of jokes/insults/casual form with specific members.
 		 - Will need to track stats and information about each individual member and define what acts increase or decrease relationship status with Weebot.
@@ -34,7 +34,7 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
 		* ? This would likelly invole a User wrapper class to keep track of the relationship
 		* ? Though that would probably be needed anyway if we are to implement the
 		* ? User-bot good/bad relationship meter thing (which I really wannt to)
-- Fun Features
+- Fun Features (<>funhouse)
 	- Russian Roulette Kick
 	- Russian Roulette Porn DM (NSFW)
 	- <>porn @Member searches for porn of member name	
