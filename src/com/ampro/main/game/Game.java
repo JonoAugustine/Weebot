@@ -1,16 +1,18 @@
 /**
- * 
+ *
  */
 
 package com.ampro.main.game;
 
-import java.util.List;
-import java.util.ArrayList;
+import com.ampro.main.comparators.Comparators;
+import net.dv8tion.jda.core.entities.User;
+
+import java.util.TreeMap;
 
 /**
  * Basis of a Weebot Game.
  * Must be connected to a single type of Player.
- * 
+ *
  * @param <P> A class that extends {@code Player}
  */
 public abstract class Game<P extends Player> {
@@ -27,7 +29,27 @@ public abstract class Game<P extends Player> {
     //Is the game still running?
     protected boolean RUNNING;
     //Keep a list of all the Players
-    protected ArrayList<P> PLAYERS;
+    protected TreeMap<User, P> PLAYERS;
+
+    /** Create a game.
+     *  Has empty Players list.
+     *  is not running.
+     */
+    public Game() {
+        this.RUNNING = false;
+        this.PLAYERS = new TreeMap<>(new Comparators.UserIdComparator());
+    }
+
+    /**
+     * Create a game with an initial set of {@code Player}s
+     * @param p Array of {@code Players}
+     */
+    public Game(P...p) {
+        this.RUNNING = false;
+        for (int i = 0; i < p.length; i++) {
+            this.getPlayers().putIfAbsent(p[i].getUser(), p);
+        }
+    }
 
     //Some Very important but vague methods to implement in child.
     protected abstract int startGame();
@@ -45,10 +67,21 @@ public abstract class Game<P extends Player> {
     protected int joinGame(P player) {
         if (false /** What should deny joining? */)
             return -1;
-        if (this.PLAYERS.contains(player))
+        if (this.PLAYERS.containsValue(player))
             return 0;
         else
-            return this.PLAYERS.add(player) ? 1 : -1;
+            return this.PLAYERS.putIfAbsent(
+                    player.getUser(), player) == null ? 1 : -1;
+    }
+
+    /** The current players */
+    public TreeMap getPlayers() {
+        return this.PLAYERS;
+    }
+
+    /** Is the game ongoing? */
+    public boolean isRunning() {
+        return this.RUNNING;
     }
 
 }

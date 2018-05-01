@@ -5,7 +5,6 @@
 package com.ampro.main.listener;
 
 import com.ampro.main.Launcher;
-
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageEmbedEvent;
@@ -23,17 +22,10 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter;
  */
 public class GuildListener extends ListenerAdapter {
 
-	//private boolean isSelf()
-
 	@Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-
-		//Ignore ourself
-		if (event.getAuthor().getIdLong() == 437851896263213056L) return;
-
-		System.err.println(event.getAuthor().getIdLong());
-
-        //Message message = event.getMessage();
+		//Ignore Bots
+		if (event.getAuthor().isBot()) return;
 
         //Get the proper bot
         Launcher.getGuilds().get(event.getGuild()).read(event.getMessage());
@@ -42,7 +34,6 @@ public class GuildListener extends ListenerAdapter {
 
 	@Override
 	public void onGuildJoin(GuildJoinEvent event) {
-
 		Launcher.updateServers(event.getGuild());
 	}
 

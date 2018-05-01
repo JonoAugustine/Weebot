@@ -9,6 +9,8 @@ import com.ampro.main.bot.Weebot;
 import com.ampro.main.jda.JDABuilder;
 import com.ampro.main.listener.GuildListener;
 import com.ampro.main.listener.PrivateListener;
+import com.ampro.main.comparators.Comparators;
+
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
@@ -27,14 +29,6 @@ import java.util.TreeMap;
  *
  */
 public class Launcher {
-
-	/** Compares a {@code Guild} buy it's IdLong */
-	private static final class GuildComparator implements Comparator<Guild> {
-		@Override
-		public int compare(Guild g1, Guild g2) {
-			return (int) (g1.getIdLong() - g2.getIdLong());
-		}
-	}
 
 	private static JDA JDA;
 
@@ -70,7 +64,7 @@ public class Launcher {
        		.buildBlocking();
 
 	   //Get Guild list
-	   Launcher.GUILDS = new TreeMap<Guild, Weebot>(new GuildComparator());
+	   Launcher.GUILDS = new TreeMap<Guild, Weebot>(new Comparators.GuildComparator());
 	   Launcher.updateServers();
 
    }

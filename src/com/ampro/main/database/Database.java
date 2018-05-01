@@ -37,9 +37,6 @@ public class Database {
     	this.WEEBOTS = new ArrayList<>();
     }
 
-    public static void main(String[] args) throws FileNotFoundException, IOException {
-        new Database("").save();
-    }
 
     /**
      *
