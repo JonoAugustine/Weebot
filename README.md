@@ -35,8 +35,9 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
 		* ? Though that would probably be needed anyway if we are to implement the
 		* ? User-bot good/bad relationship meter thing (which I really wannt to)
 - Fun Features
-	- Russian Rulet Kick
-	
+	- Russian Roulette Kick
+	- Russian Roulette Porn DM (NSFW)
+	- <>porn @Member searches for porn of member name	
 - Localize to Japanese
 
 ----
@@ -104,3 +105,31 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
 	- *Database*
 		- Began research on java [serialization](https://www.tutorialspoint.com/java/java_serialization.htm) to save the state of Weebots.
 		- I (Jono) am considering moving the ```GUILDS``` Map and refocusing it on Weebot objects (instead of Guilds) to make reading serializtions not require the list of guilds. Alternativly, we could save Guilds.
+- 28-30/4/18
+	- *General*
+		- **Serious repackaging has finnally ended in proper building & importing!**
+		- Compiled gradle wrapper for cross-platofrm gradle-less systems.
+		- More research on object Serialization and MySQL Databases.
+		- The bot had a glitch that spammed all chats responding to itself for an hour while Jono slept (FIXED at dac944a).
+		- Added Dernst as new registered Dev.
+		- Collected some feature Ideas from friends.
+		- Carefully considering [JDA-util pack](https://github.com/JDA-Applications/JDA-Utilities), not sure if it is the best path considering current communication paths (Listener->Bot(do a thing))
+	- *Weebot*
+		- **Major refractoring of command parsing and responding**
+		- Parses commands by using ``String.split(regex, String[])``. Making looking at specific arguments a *lot* simpler.
+		- Removed ugly & clunky if-else blocks for a ***clean*** ``switch`` statement based off the parsed ``command`` array.
+		- Refractored most methods using switches and the command array
+	- *comparators.Comparators*
+		- Moved all custom comparators to a seperate package as nested classes in ``Comparators.java``
+	- *GuildListener*
+		- Uses Launcher JDA to ignore messeges sent by Weebot. (1a29acd)
+	- *Cards Against Humanity*
+		- Implemennted part of ``int endGame()`` to decide the winners of the game.
+	- *Game*
+		- Two new constructors for abstract ``Game`` class.
+		- Changed ``PLAYERS`` from ``ArrayList`` to ``TreeMap`` using the players' ``User`` as keys.
+		- Made Iterable getter for ``TreeMap Game.PLAYERS`` to make iterating easier where needed. Returns  ``ArrayList<Player>``
+		- isRunning()
+		- TreeMap getPlayers()
+	- *Player*
+		- made getUser() public (was protected)
