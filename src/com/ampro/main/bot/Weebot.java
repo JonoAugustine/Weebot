@@ -1,5 +1,17 @@
 /**
+ *  Copyright 2018 Jonathan Augustine, Daniel Ernst
  *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
  */
 
 package com.ampro.main.bot;
@@ -86,7 +98,7 @@ public class Weebot implements Comparable<Weebot> {
 
 	/**
 	 * Check if the message is valid for this bot.
-	 * @param message
+	 * @param message JDA Message to validate
 	 * @return {@code 1} if the message begins with the right {@code CALLSIGN}
 	 * 			<br> {@code 2} if the message begins with the right {@code NICKNAME} <br>
 	 * 			{@code 0} otherwise
@@ -104,13 +116,13 @@ public class Weebot implements Comparable<Weebot> {
 
 	/**
 	 * Takes in a {@code Message} and calls the appropriate private method
-	 * @param message
+	 * @param message JDA message to read
 	 */
 	public void read(Message message) {
 		//Is this a valid call?
         int valid = this.validateCallsign(message);
 
-        /** the validated command, stripped of its prefix*/
+        /** the validated command, stripped of its prefix. */
         String[] command;
         switch (this.validateCallsign(message)) {
             case 0: return;
@@ -180,7 +192,6 @@ public class Weebot implements Comparable<Weebot> {
                 message.getTextChannel().sendMessage(
                                 "Sorry, I don't recognize that command..."
                 ).queue();
-                return;
         }
 	}
 
@@ -223,7 +234,6 @@ public class Weebot implements Comparable<Weebot> {
                         + "```" + this.CALLSIGN + "expl [true/on/false/off]```"
                         + "```" + this.CALLSIGN + "cuss [true/on/false/off]```"
                 ).queue();
-                return;
         }
 	}
 
@@ -271,7 +281,6 @@ public class Weebot implements Comparable<Weebot> {
                         + "```" + this.CALLSIGN + "activeparticipate [true/on/false/off]```"
                         + "```" + this.CALLSIGN + "interrupt [true/on/false/off]```"
                 ).queue();
-                return;
         }
 	}
 
@@ -311,7 +320,6 @@ public class Weebot implements Comparable<Weebot> {
                         + " is not an option. Please use the command: "
                         + "```" + this.CALLSIGN + "nsfw [true/on/false/off]```"
                 ).queue();
-                return;
 		}
 	}
 
@@ -327,7 +335,7 @@ public class Weebot implements Comparable<Weebot> {
             new GuildController(this.GUILD).setNickname(this.SELF, newName).queue();
 			//Change internal name
 			this.NICKNAME = newName;
-			if (newName != "Weebot")
+			if (!newName.equalsIgnoreCase("weebot"))
 				channel.sendMessage("Hmm... " + newName
                                     + "... I like the sound of that!").queue();
 			else
@@ -378,9 +386,9 @@ public class Weebot implements Comparable<Weebot> {
     /**
      * User help method. Can send list of all commands, or details
      * about one command to User in private chat.
-     * @param inNeed
-     * @param channel
-     * @param command
+     * @param inNeed User asking for help
+     * @param channel TextChannel invoked from
+     * @param command command array
      */
 	private void help(User inNeed, TextChannel channel, String[] command) {
 	    final String help = "```Weebot\n"
@@ -483,8 +491,8 @@ public class Weebot implements Comparable<Weebot> {
 
 	/**
 	 * Read method for dev-only commands
-	 * @param channel
-	 * @param command
+	 * @param channel TextChannel invoked from
+	 * @param command String command array
 	 */
 	private void devRead(TextChannel channel, String[] command) {
         switch (command[1]) {

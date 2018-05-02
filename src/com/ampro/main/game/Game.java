@@ -8,8 +8,8 @@ import com.ampro.main.comparators.Comparators;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 import java.util.Map;
+import java.util.TreeMap;
 
 /**
  * Basis of a Weebot Game.
@@ -28,7 +28,10 @@ public abstract class Game<P extends Player> {
         public ModificationWhileRunningException(String err) { super(err); }
     }
 
-    //Is the game still running?
+    /** The ID of the hosting bot */
+    protected String HOST_ID;
+
+    /** Is the game currently running? */
     protected boolean RUNNING;
     //Keep a list of all the Players
     protected TreeMap<User, P> PLAYERS;
