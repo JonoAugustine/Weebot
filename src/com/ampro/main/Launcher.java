@@ -8,7 +8,7 @@ package com.ampro.main;
 import com.ampro.main.bot.Weebot;
 import com.ampro.main.comparators.Comparators;
 import com.ampro.main.jda.JDABuilder;
-import com.ampro.main.listener.GuildListener;
+import com.ampro.main.listener.EventDispatcher;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
@@ -45,7 +45,7 @@ public class Launcher {
             throws LoginException, RateLimitedException, InterruptedException
     {
 	   Launcher.setUpLauncher();
-       Launcher.JDA.addEventListener(new GuildListener());
+       Launcher.JDA.addEventListener(new EventDispatcher());
     }
 
    /**
