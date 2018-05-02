@@ -43,43 +43,57 @@ public class EventDispatcher extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
+
     }
 
+    @Override
     public void onGuildMessageUpdate(GuildMessageUpdateEvent event) {
     }
 
+    @Override
     public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
     }
 
+    @Override
     public void onGuildMessageEmbed(GuildMessageEmbedEvent event) {
     }
 
+    @Override
     public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
     }
 
+    @Override
     public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
     }
 
+    @Override
     public void onGuildMessageReactionRemoveAll(GuildMessageReactionRemoveAllEvent event) {
     }
 
 
     //Private Events
+
+    @Override
     public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
     }
 
+    @Override
     public void onPrivateMessageUpdate(PrivateMessageUpdateEvent event) {
     }
 
+    @Override
     public void onPrivateMessageDelete(PrivateMessageDeleteEvent event) {
     }
 
+    @Override
     public void onPrivateMessageEmbed(PrivateMessageEmbedEvent event) {
     }
 
+    @Override
     public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event) {
     }
 
+    @Override
     public void onPrivateMessageReactionRemove(PrivateMessageReactionRemoveEvent event) {
     }
 

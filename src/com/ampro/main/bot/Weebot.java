@@ -115,6 +115,24 @@ public class Weebot implements Comparable<Weebot> {
 	}
 
 	/**
+	 * Check if the message is valid for this bot.
+	 * @param message split Sring[] arguments parsed from message stripped content
+	 * @return {@code 1} if the message begins with the right {@code CALLSIGN}
+	 * 			<br> {@code 2} if the message begins with the right {@code NICKNAME} <br>
+	 * 			{@code 0} otherwise
+	 */
+	private int validateCallsign(String...args) {
+		String call = args[0];
+		//Don't take commands with a space between the call sign and the command
+		//It would just make life less easy
+		if (call.startsWith(this.CALLSIGN) && call.length() > this.CALLSIGN.length())
+			return 1;
+		else if (call.equals("@" + this.NICKNAME))
+			return 2;
+		return 0;
+	}
+
+	/**
 	 * Takes in a {@code Message} and calls the appropriate private method
 	 * @param message JDA message to read
 	 */

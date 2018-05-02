@@ -14,10 +14,11 @@
  * limitations under the License.
  */
 
-package com.ampro.main.listener;
+package com.ampro.main.listener.events;
 
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
@@ -30,21 +31,24 @@ import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
  *
  * @author Jonathan Augustine
  */
-public class BetterMessageEvent {
+public class BetterMessageEvent extends BetterEvent {
 
     /** The original event */
     private final GenericMessageEvent EVENT;
     /** The author (User) of the event */
     private final User AUTHOR;
+    /** Arguments of a MessageReceivedEvent */
     private final String[] ARGUMENTS;
 
 
     /**
      * Construct a {@code BetterMessageEvent} from a
      * {@code net.dv8tion.jda.core.events.message.MessageReceivedEvent}
-     * @param event
+     * @param event {@code net.dv8tion.jda.core.events.message.GenericMessageEvent}
+     *          to wrap.
      */
     public BetterMessageEvent(GenericMessageEvent event) {
+        super(event);
         this.EVENT = event;
         //Locate the message in the channel
         this.AUTHOR = event.getChannel().getMessageById(event.getMessageId())
@@ -114,6 +118,25 @@ public class BetterMessageEvent {
                 this.reply(message);
                 return;
         }
+    }
+
+    /**
+     * Get the arguments of a GenericMessageReceivedEvent.
+     * @return String array of arguments.
+     *          null if event is not MessageReceivedEvent
+     */
+    public String[] getARGUMENTS() {
+        return this.ARGUMENTS;
+    }
+
+    @Override
+    public Event getEvent() {
+        return this.EVENT;
+    }
+
+    @Override
+    public User getAuthor() {
+        return this.AUTHOR;
     }
 
 

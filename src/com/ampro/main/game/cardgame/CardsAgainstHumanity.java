@@ -4,25 +4,31 @@
 
 package com.ampro.main.game.cardgame;
 
-import java.util.ArrayList;
-
 import com.ampro.main.game.Player;
-import com.ampro.main.game.cardgame.*;
-
 import net.dv8tion.jda.core.entities.User;
+
+import java.util.ArrayList;
 
 /**
  * A game of Cards Against Humanity.
- *
+ * @author Jonathan Augustine
  */
 public class CardsAgainstHumanity
         extends CardGame<CardsAgainstHumanity.CAHPlayer
                         , CardsAgainstHumanity.CAHCard> {
 
+    /** The CardsAgainstHumanity Player. <br>
+     * Holds a Hand of cards and a list of cards won.
+     *
+     */
     protected static class CAHPlayer extends Player {
 
-        //Current held cards
-        CAHCard[] hand;
+        /**Currently held cards
+         * This is visible to the {2code Player} in their privateChannel
+         * and to the bot. Do not expose this to the guild channel, since that
+         * would show the hand to all members and that's dumb.
+         */
+        CAHCard[] HAND;
         //Card pairs from rounds won
         ArrayList<CAHCard> cardsWon;
 
