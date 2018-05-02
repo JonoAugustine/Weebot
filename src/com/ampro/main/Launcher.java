@@ -6,18 +6,15 @@
 package com.ampro.main;
 
 import com.ampro.main.bot.Weebot;
+import com.ampro.main.comparators.Comparators;
 import com.ampro.main.jda.JDABuilder;
 import com.ampro.main.listener.GuildListener;
-import com.ampro.main.listener.PrivateListener;
-import com.ampro.main.comparators.Comparators;
-
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
 import javax.security.auth.login.LoginException;
-import java.util.Comparator;
 import java.util.List;
 import java.util.TreeMap;
 
@@ -49,7 +46,6 @@ public class Launcher {
     {
 	   Launcher.setUpLauncher();
        Launcher.JDA.addEventListener(new GuildListener());
-       Launcher.JDA.addEventListener(new PrivateListener());
     }
 
    /**

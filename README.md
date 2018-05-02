@@ -30,14 +30,14 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
  - Research chat-bot implementations for more natural conversations
 	 - Possibly add a *sass-scale*(TM) to determine the level of jokes/insults/casual form with specific members.
 		 - Will need to track stats and information about each individual member and define what acts increase or decrease relationship status with Weebot.
-		 - ? Should User relation to Weebot be gloabal or local 
+		 - ? Should User relation to Weebot be gloabal or local
 		* ? This would likelly invole a User wrapper class to keep track of the relationship
 		* ? Though that would probably be needed anyway if we are to implement the
 		* ? User-bot good/bad relationship meter thing (which I really wannt to)
 - Fun Features (<>funhouse)
 	- Russian Roulette Kick
 	- Russian Roulette Porn DM (NSFW)
-	- <>porn @Member searches for porn of member name	
+	- <>porn @Member searches for porn of member name
 - Localize to Japanese
 
 ----
@@ -51,7 +51,7 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
 	- **GuildListener** listens to each bot and hands instructions to each bot according to the event's origin.
 	- **Weebot** Holds all the actions and settings of an individual bot.
 		- Added Fields:
-				
+
 				private final Guild GUILD
 				private final String SERVERNAME;
 				private final Long SERVERID;
@@ -62,27 +62,27 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
 				private boolean NSFW;
 				private boolean ALWAYSLISTEN;
 		- Completed Methods
-					
+
 				Constructor( takes in Guild )
-				private int validateCallsign( Message ) 
-				public void read( Message ) Takes in a Message and calls appropriate helper 
+				private int validateCallsign( Message )
+				public void read( Message ) Takes in a Message and calls appropriate helper
 
 				private void nsfw( TextChannel, String ) Set or Get the NSFW setting
 				private void changeNickName( Message, int )
 				private void changeCallsign( TextChannel, String ) Set or Get callsign
 				private void listServerSettings( TextChannel ) Lists all server settings
 				private void spam( Message ) Spam chat with X messages (default 5)
-				
+
 				private void devRead( Message, String ) Reads commands for Devs only
 				private static void listGuilds( TextChannel ) List all Guilds and their Weebot (Devs only)
 
 		- Known Incomplete/Unimplemented Code
-		
+
 				private void explicit( TextChannel, String ) Set or Get the EXPLICIT setting
 				private void alwaysListen( TextChannel, String ) Set or Get ALWAYSLISTEN setting
-				
+
 				private void devHelp( TextChannel ) List all Developer commands
-			
+
 				public class FileWriter() {} For writing server data to the "Database"
 - 27/4/18
 	- *General*
@@ -133,3 +133,47 @@ Weebot is a bot for the social chat platform [Discord](https://discordapp.com/).
 		- TreeMap getPlayers()
 	- *Player*
 		- made getUser() public (was protected)
+- 1/5/18
+    - *General*
+        - (JONO) After ***finally*** understanding the flow of the
+        [JDA-util pack](https://github.com/JDA-Applications/JDA-Utilities)
+        I decieded that the Weebot will not use the package in the intended
+        fashion, if at all. Seperate ``Command`` classes are still under
+        consideration, but these would be called by a Weebot object,
+        rather than as a ``Listener`` as most bots use them (from what
+        I hae gathered). <br>(See BetterMessageEvent and EventDispatcher)
+        - The idea of a seperate ``Settings`` object to be held by a
+        Weebot is growing ever more attractive
+        - [Yui bot](https://github.com/DV8FromTheWorld/Yui)
+        after much readign has proven to be a useful guid
+        on how to go about some actions like Databases and GuildSettings.
+        I used the [Command.java implementation](https://github.com/DV8FromTheWorld/Yui/blob/master/src/main/java/net/dv8tion/discord/commands/Command.java)
+        as inspiration for ``BetterMessageEvent`` methods.
+    - ***BetterMessageEvent***
+        - A wrapper class for [``GenericMessageEvent``](http://home.dv8tion.net:8080/job/JDA/javadoc/net/dv8tion/jda/core/events/message/GenericMessageEvent.html)
+        that gives an ease-of-life abstraction from an event.
+        - Provides methods for replying to events in both private and
+        Guild channels
+
+                    private final GenericMessageEvent EVENT;
+                    private final User AUTHOR;
+                    private final String[] ARGUMENTS;
+                    public BetterMessageEvent(GenericMessageEvent event)
+                    //Replies to the message event in the same channel
+                    public void reply(String message)
+                    public void reply(Message message)
+                    //Replies to the message event in a private channel
+                    public void privateReply(String message)
+                    public void privateReply(Message message)
+    - ***EventDispatcher***
+        - The "mailroom" of incoming events.
+        - Currently unimplemented (beyond a ton of empty methods)
+        - PLAN: Wrap incoming events in ``BetterMessageWrapper`` where
+        logical, then distribute the event to the appropriate Weebot.
+    - *Weebot*
+        - Changed SERVER_ID to BOT_ID consisting of the host Guild's unique ID
+        \+ "W" (e.g. 1234W).
+        - Fixed some warnings about "extraineus" code.
+        - Added some comments and Copyright.
+    - *Game*
+        - Added HOST_ID string to add to connection to hosting Guild.

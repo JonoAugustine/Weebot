@@ -43,7 +43,6 @@ public class EventDispatcher extends ListenerAdapter {
 
     @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-
     }
 
     public void onGuildMessageUpdate(GuildMessageUpdateEvent event) {
