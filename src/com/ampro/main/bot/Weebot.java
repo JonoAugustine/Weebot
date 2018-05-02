@@ -16,14 +16,15 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * A Weebot.
- * <br></br>
- * ? Should User relation to Weebot be gloabal or local
- * ? This would likelly invole a User wrapper class to keep track of the relationship
- * ? Though that would probably be needed anyway if we are to implement the
- * ? User-bot good/bad relationship meter thing (which I really wannt to)
+ * A Weebot connected to a single {@code net.dv8tion.entities.Guild}. <br>
+ * Each Weebot is assigned a {@code java.lang.String} consisting of the
+ * hosting Guild's unique ID + "W" (e.g. "1234W") <br>
+ * ? Should User relation to Weebot be gloabal or local <br>
+ * ? This would likelly invole a User wrapper class to keep track of the relationship<br>
+ * ? Though that would probably be needed anyway if we are to implement the<br>
+ * ? User-bot good/bad relationship meter thing (which I really wannt to)<br>
  *
- * @author sword
+ * @author Jonathan Augsutine
  *
  */
 public class Weebot implements Comparable<Weebot> {
@@ -39,7 +40,7 @@ public class Weebot implements Comparable<Weebot> {
 	/* Name of the server/Guild */
 	private final String SERVERNAME;
 	/** Unique ID long of the Guild */
-	private final long	 SERVERID;
+	private final String BOT_ID;
 
 	//Bot Information
 	/** The Guild member that is this */
@@ -72,7 +73,7 @@ public class Weebot implements Comparable<Weebot> {
 	public Weebot(Guild guild) {
 		this.GUILD		= guild;
 		this.SERVERNAME = guild.getName();
-		this.SERVERID	= guild.getIdLong();
+		this.BOT_ID		= guild.getIdLong() + "W";
 		this.NICKNAME	= "Weebot";
 		this.CALLSIGN	= "<>";
 		this.ACTIVEPARTICIPATE = true;
@@ -91,10 +92,10 @@ public class Weebot implements Comparable<Weebot> {
 	 * 			{@code 0} otherwise
 	 */
 	private int validateCallsign(Message message) {
-		String call = message.getContentDisplay().split(" ")[0];
+		String call = message.getContentStripped().split(" ")[0];
 		//Don't take commands with a space between the call sign and the command
 		//It would just make life less easy
-		if (call.length() > this.CALLSIGN.length() && call.startsWith(this.CALLSIGN))
+		if (call.startsWith(this.CALLSIGN) && call.length() > this.CALLSIGN.length())
 			return 1;
 		else if (call.equals("@" + this.NICKNAME))
 			return 2;
@@ -115,12 +116,12 @@ public class Weebot implements Comparable<Weebot> {
             case 0: return;
             case 1:
                 //Cut the callsign from the command (makes handling it easier)
-                command = message.getContentRaw().toLowerCase()
+                command = message.getContentStripped().toLowerCase()
                         .substring(this.CALLSIGN.length()).split(" ");
                 break;
             case 2:
                 //Cut the nickname from the next ( +1 to erase @ symbol )
-                command = message.getContentDisplay().toLowerCase()
+                command = message.getContentStripped().toLowerCase()
                         .substring(this.NICKNAME.length() + 1)
                         .trim().split(" ");
                 break;
@@ -344,7 +345,6 @@ public class Weebot implements Comparable<Weebot> {
 	 * @param command Command used to invoke
 	 */
 	private void callsign(TextChannel channel, String[] command) {
-		String newCall;
 		switch (command.length) {
             case 1:
                 //Send back the current callsign
@@ -372,7 +372,6 @@ public class Weebot implements Comparable<Weebot> {
                         + "```@" + this.NICKNAME + " prefix new_prefix```"
                 ).queue();
         }
-
 	}
 
 
@@ -464,7 +463,7 @@ public class Weebot implements Comparable<Weebot> {
 	}
 
 	public long getGuildID() {
-		return this.SERVERID;
+		return this.GUILD.getIdLong();
 	}
 
     /**
@@ -546,7 +545,7 @@ public class Weebot implements Comparable<Weebot> {
 	 */
 	@Override
 	public int compareTo(Weebot w2) {
-		return (int) (this.SERVERID - w2.getGuildID());
+		return (int) (this.getGuildID() - w2.getGuildID());
 	}
 
 }
