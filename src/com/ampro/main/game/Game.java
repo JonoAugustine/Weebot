@@ -4,6 +4,7 @@
 
 package com.ampro.main.game;
 
+import com.ampro.main.bot.Weebot;
 import com.ampro.main.comparators.Comparators;
 import net.dv8tion.jda.core.entities.User;
 
@@ -29,8 +30,7 @@ public abstract class Game<P extends Player> {
     }
 
     /** The ID of the hosting bot */
-    protected String HOST_ID;
-
+    protected final String HOST_ID;
     /** Is the game currently running? */
     protected boolean RUNNING;
     //Keep a list of all the Players
@@ -38,19 +38,24 @@ public abstract class Game<P extends Player> {
 
     /** Create a game.
      *  Has empty Players list.
-     *  is not running.
+     * Starts not Running.
+     * @param bot Weebot hosting the game
      */
-    public Game() {
+    public Game(Weebot bot) {
+        this.HOST_ID = bot.getBotId();
         this.RUNNING = false;
         this.PLAYERS = new TreeMap<>(new Comparators.UserIdComparator());
     }
 
     /**
      * Create a game with an initial set of {@code Player}s
-     * @param p Array of {@code Players}
+     * @param bot Weebot hosting game
+     * @param p {@code Players} to add to the game
      */
-    public Game(P...p) {
+    public Game(Weebot bot, P...p) {
+        this.HOST_ID = bot.getBotId();
         this.RUNNING = false;
+        this.PLAYERS = new TreeMap<>(new Comparators.UserIdComparator());
         for (int i = 0; i < p.length; i++) {
             this.getPlayers().putIfAbsent(p[i].getUser(), p);
         }
@@ -89,6 +94,7 @@ public abstract class Game<P extends Player> {
         return this.RUNNING;
     }
 
+    /** Get an Iterable Arraylist of the players */
     public ArrayList playerIterable() {
         ArrayList<P> retu = new ArrayList<>();
         for(Map.Entry<User, P> entry : this.PLAYERS.entrySet())

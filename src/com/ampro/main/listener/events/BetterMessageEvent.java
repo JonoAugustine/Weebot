@@ -16,6 +16,7 @@
 
 package com.ampro.main.listener.events;
 
+import com.ampro.main.Launcher;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.Event;
@@ -40,20 +41,23 @@ public class BetterMessageEvent extends BetterEvent {
     /** Arguments of a MessageReceivedEvent */
     private final String[] ARGUMENTS;
 
-
     /**
      * Construct a {@code BetterMessageEvent} from a
      * {@code net.dv8tion.jda.core.events.message.MessageReceivedEvent}
      * @param event {@code net.dv8tion.jda.core.events.message.GenericMessageEvent}
      *          to wrap.
      */
-    public BetterMessageEvent(GenericMessageEvent event) {
+    public BetterMessageEvent(GenericMessageEvent event)
+    throws Exception {
         super(event);
         this.EVENT = event;
         //Locate the message in the channel
         this.AUTHOR = event.getChannel().getMessageById(event.getMessageId())
                             .complete() //Use complete to get the return value
                             .getAuthor(); //Get the author (User)
+        if (this.AUTHOR == Launcher.getJDA().getSelfUser()) {
+            throw new Exception();
+        }
         if (event instanceof MessageReceivedEvent)
             this.ARGUMENTS = ((MessageReceivedEvent) event)
                     .getMessage().getContentStripped().split(" ");
@@ -118,6 +122,12 @@ public class BetterMessageEvent extends BetterEvent {
                 this.reply(message);
                 return;
         }
+    }
+
+    /** Delete the message. */
+    public void deleteMessage() {
+        this.EVENT.getChannel().getMessageById(this.EVENT.getMessageIdLong())
+                .complete().delete().queue();
     }
 
     /**

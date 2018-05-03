@@ -16,6 +16,11 @@
 
 package com.ampro.main.listener;
 
+import com.ampro.main.Launcher;
+import com.ampro.main.bot.Weebot;
+import com.ampro.main.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.core.events.message.GenericMessageEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageEmbedEvent;
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
@@ -42,16 +47,39 @@ public class EventDispatcher extends ListenerAdapter {
     //Guild Events
 
     @Override
+    public void onGenericMessage(GenericMessageEvent event) {
+        try {
+            //Get the proper bot and hand off the event
+            ((Weebot) Launcher.getDatabase().getWeebots()
+                    .get(event.getGuild().getIdLong()))
+                    .readEvent(new BetterMessageEvent(event));
+        } catch (Exception e) {
+            //Ignore ourself
+        }
+    }
+
+    @Override
+    public void onGuildJoin(GuildJoinEvent event) {
+        Launcher.getDatabase().addBot(new Weebot(event.getGuild()));
+        event.getGuild().getDefaultChannel().sendMessage(
+                "Welcome, me! \n(call me with ``<>``)"
+        ).queue();
+    }
+
+    @Override
     public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
 
     }
 
     @Override
     public void onGuildMessageUpdate(GuildMessageUpdateEvent event) {
+        //Ignore ourself
+        if (event.getAuthor().equals(Launcher.getJDA().getSelfUser()))
+            return;
     }
 
     @Override
-    public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
+    public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
     }
 
     @Override
@@ -59,7 +87,7 @@ public class EventDispatcher extends ListenerAdapter {
     }
 
     @Override
-    public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
+    public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
     }
 
     @Override
@@ -69,7 +97,6 @@ public class EventDispatcher extends ListenerAdapter {
     @Override
     public void onGuildMessageReactionRemoveAll(GuildMessageReactionRemoveAllEvent event) {
     }
-
 
     //Private Events
 

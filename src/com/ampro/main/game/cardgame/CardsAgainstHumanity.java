@@ -4,7 +4,10 @@
 
 package com.ampro.main.game.cardgame;
 
+import com.ampro.main.bot.Weebot;
 import com.ampro.main.game.Player;
+import net.dv8tion.jda.core.entities.Channel;
+import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.ArrayList;
@@ -17,13 +20,15 @@ public class CardsAgainstHumanity
         extends CardGame<CardsAgainstHumanity.CAHPlayer
                         , CardsAgainstHumanity.CAHCard> {
 
-    /** The CardsAgainstHumanity Player. <br>
+    /**
+     * The CardsAgainstHumanity Player. <br>
      * Holds a Hand of cards and a list of cards won.
      *
      */
-    protected static class CAHPlayer extends Player {
+    static class CAHPlayer extends Player {
 
-        /**Currently held cards
+        /**
+         * Currently held cards
          * This is visible to the {2code Player} in their privateChannel
          * and to the bot. Do not expose this to the guild channel, since that
          * would show the hand to all members and that's dumb.
@@ -39,14 +44,14 @@ public class CardsAgainstHumanity
 
     }
 
-    protected static class CAHCard extends Card {
+    static class CAHCard extends Card {
 
         //The winning card of the round
         CAHCard winningCard;
         //White vs Black card
         enum CARDTYPE { BLACK, WHITE; }
         CARDTYPE type;
-        //What the card says
+        /** Content of the card */
         String cardText;
 
         /**
@@ -70,6 +75,9 @@ public class CardsAgainstHumanity
 
     }
 
+    /** The hosting channel */
+    protected final Channel CHANNEL;
+
     //Cards delt to players
     private ArrayList<CAHCard> DECK_WHITE;
     //Cards pulled by the Tsar
@@ -83,12 +91,32 @@ public class CardsAgainstHumanity
 
     /**
      * Initialize a new CardsAgainstHumanity game.
+     * @param bot Weebot hosting the game
+     * @param channel TextChannel to play the game in
+     * @param handSize Number of cards each play holds
      */
-    public CardsAgainstHumanity(int handSize) {
+    public CardsAgainstHumanity(Weebot bot, TextChannel channel, int handSize) {
+        super(bot);
+        this.CHANNEL = channel;
         this.HAND_SIZE = handSize;
     }
 
-
+    /**
+     * Initialize a new CardsAgainstHumanity game.
+     * @param bot Weebot hosting the game
+     * @param channel TextChannel to play the game in
+     * @param users Users to add to the game
+     * @param handSize Number of cards each play holds
+     */
+    public CardsAgainstHumanity(Weebot bot, TextChannel channel, int handSize
+                                , User...users) {
+        super(bot);
+        for (int i = 0; i < users.length; i++) {
+            this.PLAYERS.putIfAbsent(users[i], new CAHPlayer(users[i]));
+        }
+        this.CHANNEL = channel;
+        this.HAND_SIZE = handSize;
+    }
 
     /**
      * Adds User to the game.
@@ -147,7 +175,6 @@ public class CardsAgainstHumanity
         }
         return 0;
     }
-
 
     /**
      * Change the win condition.

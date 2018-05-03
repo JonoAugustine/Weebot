@@ -19,6 +19,7 @@ package com.ampro.main.bot;
 import com.ampro.main.Launcher;
 import com.ampro.main.game.Game;
 import com.ampro.main.game.Player;
+import com.ampro.main.listener.events.BetterEvent;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.managers.GuildController;
@@ -116,7 +117,7 @@ public class Weebot implements Comparable<Weebot> {
 
 	/**
 	 * Check if the message is valid for this bot.
-	 * @param message split Sring[] arguments parsed from message stripped content
+	 * @param args split Sring[] arguments parsed from message stripped content
 	 * @return {@code 1} if the message begins with the right {@code CALLSIGN}
 	 * 			<br> {@code 2} if the message begins with the right {@code NICKNAME} <br>
 	 * 			{@code 0} otherwise
@@ -130,6 +131,15 @@ public class Weebot implements Comparable<Weebot> {
 		else if (call.equals("@" + this.NICKNAME))
 			return 2;
 		return 0;
+	}
+
+	/**
+	 * Take in a {@code com.ampro.listener.events.BetterEvent}
+	 * and calls the appropriate command.
+	 * @param event
+	 */
+	public void readEvent(BetterEvent event) {
+
 	}
 
 	/**
@@ -486,6 +496,13 @@ public class Weebot implements Comparable<Weebot> {
 
 	public String getNickname() {
 		return this.NICKNAME;
+	}
+
+	/**
+	 * @return String ID of the bot (1234W)
+	 */
+	public String getBotId() {
+		return this.BOT_ID;
 	}
 
 	public long getGuildID() {

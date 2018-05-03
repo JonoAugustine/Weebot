@@ -5,27 +5,24 @@
 package com.ampro.main.database;
 
 import com.ampro.main.bot.Weebot;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.ISnowflake;
-import net.dv8tion.jda.core.entities.User;
 
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.TreeMap;
 
 /**
- * A database object with all Weebot objects created
+ * A database for storing all the information about the Weebot program
+ * between downtimes.
  */
 public class Database {
 
 	/** Name of the Database */
 	private final String NAME;
 
-    /** All Weebots currently in circulation */
-    private List<Weebot> WEEBOTS;
+    /** All Weebots currently in circulation, mapped to their Guild's ID */
+    private TreeMap<Long, Weebot> WEEBOTS;
+
+    /** Array of registered developer Discord IDs */
+    private static ArrayList<Long> DEV_IDS;
 
     /**
      * Build a {@code Databse}.
@@ -34,45 +31,59 @@ public class Database {
      */
     public Database(String name) {
     	this.NAME = name;
-    	this.WEEBOTS = new ArrayList<>();
-    }
-
-
-    /**
-     *
-     */
-    public void save() throws FileNotFoundException, IOException {
-        ObjectOutputStream oos = new ObjectOutputStream(new FileOutputStream("\temp.ser"));
+    	this.WEEBOTS = new TreeMap<>();
+    	this.DEV_IDS = new ArrayList<>();
+    	this.DEV_IDS.add(139167730237571072L); //Jono
+        this.DEV_IDS.add(186130584693637131L); //Dernst
     }
 
     /**
-     * Saves an object to the {@code Database}.
-	     *
-     * @param o The object to save
-     */
-    public void save(Object o) {
-
-    }
-
-    /**
-     * Loads ./;l
-     * @param o
-     */
-    public void load(Object o) {
-
-    }
-
-    /**
-     * Adds a new {@code Weebot} to the {@code Database} with a link to an
-     * {@code ISnowflake} ID of either {@code Guild} or {@code User}.
+     * Adds a new {@code Weebot} to the {@code Database}.
      * Does nothing if the link already exists.
      *
-     * @param link The User or Guild to connect the bot to.
      * @param bot The bot
      */
-    public void addBot(ISnowflake link, Weebot bot) {
-        if (link instanceof User || link instanceof Guild)
-            this.WEEBOTS.add(bot);
+    public synchronized void addBot(Weebot bot) {
+        this.WEEBOTS.putIfAbsent(bot.getGuildID(), bot);
+    }
+
+    /**
+     * Remove a Weebot from the database.
+     * @param bot Weebot to remove.
+     */
+    public synchronized void removeBot(Weebot bot) {
+        this.WEEBOTS.remove(bot.getGuildID());
+    }
+
+    /**
+     * Get the database's Weebots.
+     * @return TreeMap of Weebot's mapped to their GuilID
+     */
+    public synchronized TreeMap getWeebots() {
+        return this.WEEBOTS;
+    }
+
+    /**
+     * Add a developer ID
+     * @param id long user ID
+     */
+    public synchronized void addDeveloper(long id) {
+        this.DEV_IDS.add(id);
+    }
+
+    /**
+     * Removes a developer by ID.
+     * @param id long user ID
+     */
+    public synchronized void removeDeveloper(long id) {
+        this.DEV_IDS.remove(id);
+    }
+
+    /**
+     * @return ArrayList of registered developers.
+     */
+    public synchronized ArrayList getDevelopers() {
+        return this.DEV_IDS;
     }
 
     /** Get the name of the Database. */
@@ -80,4 +91,9 @@ public class Database {
     	return this.NAME;
     }
 
+    /** */
+    @Override
+    public String toString() {
+        return this.NAME;
+    }
 }
