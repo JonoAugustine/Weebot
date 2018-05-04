@@ -50,6 +50,12 @@ public abstract class BetterEvent {
         }
     }
 
+    public class InvalidAuthorException extends InvalidEventException {
+        public InvalidAuthorException(String s) {
+            super(s);
+        }
+    }
+
     /** Get the original event */
     protected abstract Event getEvent();
     /** Get the author (User) of the event */

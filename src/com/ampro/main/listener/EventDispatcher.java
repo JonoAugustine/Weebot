@@ -20,6 +20,7 @@ import com.ampro.main.Launcher;
 import com.ampro.main.bot.Weebot;
 import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
@@ -36,18 +37,28 @@ public class EventDispatcher extends ListenerAdapter {
 
     @Override
     public void onGenericMessage(GenericMessageEvent event) {
+        System.out.println("event in");
+        BetterMessageEvent bme;
+        try {
+            bme = new BetterMessageEvent(event);
+        } catch (BetterEvent.InvalidAuthorException e) {
+            System.err.println("Is self");
+            return;
+        }
         try {
             //Get the proper bot and hand off the event
-            ((Weebot) Launcher.getDatabase().getWeebots()
-                    .get(event.getGuild().getIdLong()))
-                    //Wrap the event in a BetterMessageEvent and send to bot
-                    .readEvent(new BetterMessageEvent(event));
-        } catch (ClassCastException e) {
+            Guild g = event.getGuild();
+            if (g != null) {
+                Weebot bot = (Weebot) Launcher.getDatabase().getWeebots()
+                        .get(event.getGuild().getIdLong());
+                bot.readEvent(bme);
+            } else {
+                //If the guild is not found
+                //TODO make a single bot for private events (ie with no guild)
+                new Weebot().readEvent(bme);
+            }
+        } catch(ClassCastException e) {
             System.err.println("Failed to cast to Weebot");
-            e.printStackTrace();
-        } catch (BetterEvent.InvalidEventException e) {
-            System.err.println("Construction of BetterEvent using " +
-                    "Invalid event attempted");
             e.printStackTrace();
         }
     }

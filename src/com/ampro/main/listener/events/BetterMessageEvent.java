@@ -48,7 +48,7 @@ public class BetterMessageEvent extends BetterEvent {
      *          to wrap.
      */
     public BetterMessageEvent(GenericMessageEvent event)
-            throws InvalidEventException {
+            throws InvalidAuthorException {
         super(event);
         //Locate the message in the channel
         this.AUTHOR = event.getChannel().getMessageById(event.getMessageId())
@@ -56,7 +56,7 @@ public class BetterMessageEvent extends BetterEvent {
                             .getAuthor(); //Get the author (User)
         this.MESSAGE_EVENT = event;
         if (this.AUTHOR == Launcher.getJDA().getSelfUser()) {
-            throw new InvalidEventException("User is self.");
+            throw new InvalidAuthorException("User is self.");
         }
         if (event instanceof MessageReceivedEvent)
             this.ARGUMENTS = ((MessageReceivedEvent) event)
@@ -75,7 +75,9 @@ public class BetterMessageEvent extends BetterEvent {
                 this.MESSAGE_EVENT.getTextChannel().sendMessage(message).queue();
                 return;
             case PRIVATE:
-                this.MESSAGE_EVENT.getPrivateChannel().sendMessage(message).queue();
+                this.AUTHOR.openPrivateChannel().queue( (channel) ->
+                    channel.sendMessage(message).queue()
+                );
                 return;
             default:
                 System.err.println("Could not locate event channel.");
@@ -97,9 +99,9 @@ public class BetterMessageEvent extends BetterEvent {
     public void privateReply(String message) {
         switch (this.MESSAGE_EVENT.getChannelType()) {
             case TEXT:
-                this.AUTHOR.openPrivateChannel()
-                        .complete()
-                        .sendMessage(message);
+                this.AUTHOR.openPrivateChannel().queue((channel) ->
+                    channel.sendMessage(message).queue()
+                );
                 return;
             default:
                 this.reply(message);

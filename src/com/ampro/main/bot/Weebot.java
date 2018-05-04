@@ -95,6 +95,13 @@ public class Weebot implements Comparable<Weebot> {
 		this.GAMES_DISABLED = new ArrayList<>();
 	}
 
+	public Weebot() {
+		this.GUILD_ID = -1L;
+		this.SERVERNAME = "";
+		this.BOT_ID		= "-1W";
+		this.CALLSIGN	= "";
+	}
+
 	/**
 	 * Check if the message is valid for this bot.
 	 * @param message JDA Message to validate
@@ -142,14 +149,15 @@ public class Weebot implements Comparable<Weebot> {
 			BetterMessageEvent messageEvent = (BetterMessageEvent) event;
 			switch (this.validateCallsign(messageEvent.getARGUMENTS())) {
 				case 1:
-					this.runCommand(messageEvent.getARGUMENTS(),0);
+					this.runCommand(messageEvent,0);
 					return;
 				case 2:
-					this.runCommand(messageEvent.getARGUMENTS(),1);
+					this.runCommand(messageEvent,1);
 					return;
-				default: return;
+				default: System.err.println("Invalid Event");return;
 			}
 		}
+
 	}
 
 	/**
@@ -157,8 +165,8 @@ public class Weebot implements Comparable<Weebot> {
 	 * @param args The arguments of the command
 	 * @param startIndex The index the commands begin at
 	 */
-	private void runCommand(String[] args, int startIndex) {
-
+	private void runCommand(BetterEvent event, int startIndex) {
+		((BetterMessageEvent) event).privateReply("Well then.");
 	}
 
 	/**

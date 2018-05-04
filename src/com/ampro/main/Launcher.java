@@ -57,7 +57,7 @@ public class Launcher {
 			System.out.println(it.next());
 		}
 		System.out.println("-------------------------------DONE");
-		Launcher.startSaveTimer(0.5);
+		Launcher.startSaveTimer(1);
 		Launcher.addListeners();
 	}
 
