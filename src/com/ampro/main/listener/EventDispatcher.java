@@ -18,22 +18,10 @@ package com.ampro.main.listener;
 
 import com.ampro.main.Launcher;
 import com.ampro.main.bot.Weebot;
+import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageDeleteEvent;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageEmbedEvent;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.guild.GuildMessageUpdateEvent;
-import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent;
-import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionRemoveAllEvent;
-import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionRemoveEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageDeleteEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageEmbedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageReceivedEvent;
-import net.dv8tion.jda.core.events.message.priv.PrivateMessageUpdateEvent;
-import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionAddEvent;
-import net.dv8tion.jda.core.events.message.priv.react.PrivateMessageReactionRemoveEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 /**
@@ -52,9 +40,15 @@ public class EventDispatcher extends ListenerAdapter {
             //Get the proper bot and hand off the event
             ((Weebot) Launcher.getDatabase().getWeebots()
                     .get(event.getGuild().getIdLong()))
+                    //Wrap the event in a BetterMessageEvent and send to bot
                     .readEvent(new BetterMessageEvent(event));
-        } catch (Exception e) {
-            //Ignore ourself
+        } catch (ClassCastException e) {
+            System.err.println("Failed to cast to Weebot");
+            e.printStackTrace();
+        } catch (BetterEvent.InvalidEventException e) {
+            System.err.println("Construction of BetterEvent using " +
+                    "Invalid event attempted");
+            e.printStackTrace();
         }
     }
 
@@ -64,64 +58,6 @@ public class EventDispatcher extends ListenerAdapter {
         event.getGuild().getDefaultChannel().sendMessage(
                 "Welcome, me! \n(call me with ``<>``)"
         ).queue();
-    }
-
-    @Override
-    public void onGuildMessageReceived(GuildMessageReceivedEvent event) {
-
-    }
-
-    @Override
-    public void onGuildMessageUpdate(GuildMessageUpdateEvent event) {
-        //Ignore ourself
-        if (event.getAuthor().equals(Launcher.getJDA().getSelfUser()))
-            return;
-    }
-
-    @Override
-    public void onGuildMessageReactionAdd(GuildMessageReactionAddEvent event) {
-    }
-
-    @Override
-    public void onGuildMessageEmbed(GuildMessageEmbedEvent event) {
-    }
-
-    @Override
-    public void onGuildMessageDelete(GuildMessageDeleteEvent event) {
-    }
-
-    @Override
-    public void onGuildMessageReactionRemove(GuildMessageReactionRemoveEvent event) {
-    }
-
-    @Override
-    public void onGuildMessageReactionRemoveAll(GuildMessageReactionRemoveAllEvent event) {
-    }
-
-    //Private Events
-
-    @Override
-    public void onPrivateMessageReceived(PrivateMessageReceivedEvent event) {
-    }
-
-    @Override
-    public void onPrivateMessageUpdate(PrivateMessageUpdateEvent event) {
-    }
-
-    @Override
-    public void onPrivateMessageDelete(PrivateMessageDeleteEvent event) {
-    }
-
-    @Override
-    public void onPrivateMessageEmbed(PrivateMessageEmbedEvent event) {
-    }
-
-    @Override
-    public void onPrivateMessageReactionAdd(PrivateMessageReactionAddEvent event) {
-    }
-
-    @Override
-    public void onPrivateMessageReactionRemove(PrivateMessageReactionRemoveEvent event) {
     }
 
 }

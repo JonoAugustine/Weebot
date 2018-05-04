@@ -24,18 +24,18 @@ import net.dv8tion.jda.core.events.message.GenericMessageEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 /**
- * An wrapper class for {@code net.dv8tion.events.message.GenereicMessageEvent}
+ * An wrapper class for {@code GenereicMessageEvent} & {@code GenericPrivateMessageEvent}
  * that allows for easier
  * responding to messages in a number of ways; <br> namely, this class contains
  * methods for replying to messages regardless of the channel of origin, <br>
- * responding to events directly to a {@code net.dv8tion.entites.PrivateChannel}
+ * responding to events directly to a {@code net.dv8tion.entites.PrivateChannel}.
  *
  * @author Jonathan Augustine
  */
 public class BetterMessageEvent extends BetterEvent {
 
     /** The original event */
-    private final GenericMessageEvent EVENT;
+    private final GenericMessageEvent MESSAGE_EVENT;
     /** The author (User) of the event */
     private final User AUTHOR;
     /** Arguments of a MessageReceivedEvent */
@@ -43,20 +43,20 @@ public class BetterMessageEvent extends BetterEvent {
 
     /**
      * Construct a {@code BetterMessageEvent} from a
-     * {@code net.dv8tion.jda.core.events.message.MessageReceivedEvent}
-     * @param event {@code net.dv8tion.jda.core.events.message.GenericMessageEvent}
+     * {@code MessageReceivedEvent}
+     * @param event {@code GenericMessageEvent}
      *          to wrap.
      */
     public BetterMessageEvent(GenericMessageEvent event)
-    throws Exception {
+            throws InvalidEventException {
         super(event);
-        this.EVENT = event;
         //Locate the message in the channel
         this.AUTHOR = event.getChannel().getMessageById(event.getMessageId())
                             .complete() //Use complete to get the return value
                             .getAuthor(); //Get the author (User)
+        this.MESSAGE_EVENT = event;
         if (this.AUTHOR == Launcher.getJDA().getSelfUser()) {
-            throw new Exception();
+            throw new InvalidEventException("User is self.");
         }
         if (event instanceof MessageReceivedEvent)
             this.ARGUMENTS = ((MessageReceivedEvent) event)
@@ -70,12 +70,12 @@ public class BetterMessageEvent extends BetterEvent {
      * @param message String to send
      */
     public void reply(String message) {
-        switch (this.EVENT.getChannelType()) {
+        switch (this.MESSAGE_EVENT.getChannelType()) {
             case TEXT:
-                this.EVENT.getTextChannel().sendMessage(message).queue();
+                this.MESSAGE_EVENT.getTextChannel().sendMessage(message).queue();
                 return;
             case PRIVATE:
-                this.EVENT.getPrivateChannel().sendMessage(message).queue();
+                this.MESSAGE_EVENT.getPrivateChannel().sendMessage(message).queue();
                 return;
             default:
                 System.err.println("Could not locate event channel.");
@@ -95,7 +95,7 @@ public class BetterMessageEvent extends BetterEvent {
      * @param message String to send
      */
     public void privateReply(String message) {
-        switch (this.EVENT.getChannelType()) {
+        switch (this.MESSAGE_EVENT.getChannelType()) {
             case TEXT:
                 this.AUTHOR.openPrivateChannel()
                         .complete()
@@ -112,7 +112,7 @@ public class BetterMessageEvent extends BetterEvent {
      * @param {@code net.dv8tion.jda.core.entities.Message} to send
      */
     public void privateReply(Message message) {
-        switch (this.EVENT.getChannelType()) {
+        switch (this.MESSAGE_EVENT.getChannelType()) {
             case TEXT:
                 this.AUTHOR.openPrivateChannel()
                         .complete()
@@ -126,7 +126,7 @@ public class BetterMessageEvent extends BetterEvent {
 
     /** Delete the message. */
     public void deleteMessage() {
-        this.EVENT.getChannel().getMessageById(this.EVENT.getMessageIdLong())
+        this.MESSAGE_EVENT.getChannel().getMessageById(this.MESSAGE_EVENT.getMessageIdLong())
                 .complete().delete().queue();
     }
 
@@ -141,7 +141,7 @@ public class BetterMessageEvent extends BetterEvent {
 
     @Override
     public Event getEvent() {
-        return this.EVENT;
+        return this.MESSAGE_EVENT;
     }
 
     @Override

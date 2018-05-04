@@ -31,6 +31,25 @@ import net.dv8tion.jda.core.events.Event;
  */
 public abstract class BetterEvent {
 
+    /**
+     * Indicates the event used was not appropriate for
+     * this implementation of BetterEvent.
+     */
+    public class InvalidEventException extends Exception {
+
+        public InvalidEventException() {
+            super();
+        }
+
+        public InvalidEventException(String s) {
+            super(s);
+        }
+
+        public InvalidEventException(Throwable cause) {
+            super(cause);
+        }
+    }
+
     /** Get the original event */
     protected abstract Event getEvent();
     /** Get the author (User) of the event */

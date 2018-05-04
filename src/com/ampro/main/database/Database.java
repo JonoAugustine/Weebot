@@ -11,12 +11,9 @@ import java.util.TreeMap;
 
 /**
  * A database for storing all the information about the Weebot program
- * between downtimes.
+ * between downtime.
  */
 public class Database {
-
-	/** Name of the Database */
-	private final String NAME;
 
     /** All Weebots currently in circulation, mapped to their Guild's ID */
     private TreeMap<Long, Weebot> WEEBOTS;
@@ -25,12 +22,9 @@ public class Database {
     private static ArrayList<Long> DEV_IDS;
 
     /**
-     * Build a {@code Databse}.
-     *
-     * @param name Name of the database.
+     * Build an empty {@code Database}.
      */
-    public Database(String name) {
-    	this.NAME = name;
+    public Database() {
     	this.WEEBOTS = new TreeMap<>();
     	this.DEV_IDS = new ArrayList<>();
     	this.DEV_IDS.add(139167730237571072L); //Jono
@@ -86,14 +80,9 @@ public class Database {
         return this.DEV_IDS;
     }
 
-    /** Get the name of the Database. */
-    public String getName() {
-    	return this.NAME;
-    }
-
     /** */
     @Override
     public String toString() {
-        return this.NAME;
+        return "database";
     }
 }

@@ -40,13 +40,119 @@ Go to the [ChangeLogs](#Log) to see the most recent changes and development
 		* ? User-bot good/bad relationship meter thing (which I really wannt to)
 - Fun Features (<>funhouse)
 	- Russian Roulette Kick
-	- Russian Roulette Porn DM (NSFW)
-	- <>porn @Member searches for porn of member name
+	- Russian Roulette ~~Porn~~ DM (NSFW)
+	- <>porn @Member searches for ~~porn~~ of member name
 - Localize to Japanese
 
 ----
 <a name='Log'></a>
 **Log**
+<br>*(New files introduced in a log are marked by ***bold-italics***)*
+- 3/5/18
+    - *General*
+        - Database working using JSON/GSON.
+        - Weebot given now reader method to take BetterEvents.
+    - *Launcher*
+        - Serious restructuring.
+        - JDA login and listener adding seperated into ``jdaLogIn`` and
+        ``addListeners``.
+        - Expanded ``setUpDatabase`` to add guilds from JDA to new
+        databases.
+        - Periodic back up thread ``startSaveTimer`` saves a backup every
+        *x* minuets until the shutdown signal is received, in which case
+        it will save a backup then save the main file.
+        - Added ``getGuild`` by long ID method.
+        - The main method now flows as such:
+            <pre><code>
+            Launcher.jdaLogIn();
+            Launcher.setUpDatabase();
+            Launcher.startSaveTimer(0.5);
+            Launcher.addListeners();</code></pre>
+    - *EventDispatcher*
+        - Removed all methods other than ``onGuildJoin`` and ``onGenericMessave``.
+    - *BetterEvent*
+        - New exception ``InvalidEventException`` to warn of events
+        attempted to be used in the wrong ``BetterEvent`` implementation.
+    - *BetterMessageEvent*
+        - Added ``InvalidEventException`` thro to constructor. Thrown
+        on selfUser author.
+    - *Weebot*
+        - Replaced reference to hosting Guild with the guild long ID.
+            - This cahnge *was* initially made to aid in issues with Java's
+            Serialization, since most if not all of the JDA was not built
+            with serialization in mind (I would assume). However, now that
+            ``DatabseManager`` uses JSON/GSON to store information in files,
+            the need for this change is somewhat non-existent and may
+            very well be reverted.
+        - ``validateCallsign(String[])`` returns -1 for an array of length 0 .
+        - readEvent with initial implementation.
+            - Since it takes in any child of BetterEvent, it will (quite
+            unfortunately) need a series of if-else checking the type
+            of evemt (*optionally, a BetterEventType enum may be made later*).
+            - Old ``read`` methods are being deconstructed and refractored in
+            ``private void runCommand(String[] args, int startIndex)``
+            which will now be used to find and call the appropriate
+            command (*unimplemented*).
+        - ``ChangeNickName`` and ``listGuilds`` refractored to support
+        BetterEvent implementation.
+        - ``toString`` overrided to print: botID, Guild name, and guild
+        bot nickname.
+    - *DatabaseManager*
+        - Refractored to read and write JSON format to files of
+        ``database.wbot`` using [Gson](https://github.com/google/gson).
+        - Backup method added, saves to ``databaseBK.wbot``.
+    - *Database*
+        - Removed databse name value.
+- 2/5/18
+    - *General*
+        - Made a flowchart showing the flow of events and hand-offs between
+        the classes and discord.
+        - Major progress on Database
+        - Considering making costum seperate Command classes taking
+        inspiration from the [JDA-util pack](https://github.com/JDA-Applications/JDA-Utilities).
+    - ***DatabaseManager*** (*previously known as DatabaseIO*)
+         - Writes databse object to file with ObjectOutputStream in format
+         <b><ode>databse.wbot</code></b> .
+         - All methods are syncronized.
+    - *Launcher*
+        - Refractoring after database and betterEvent reworks (see below).
+        - Static Database reference held in Launcher.
+        - getGuilds replaced by getDatabase.
+        - updateServers replaced by setUpDatabse
+            - Loads database from file, failing that, it makes a new database.
+        - getJDA.
+    - *Database*
+        - Removed saving and loading functions, converted Database class
+        to just a databse contatining objects with syncronized access methods.
+        - The databse is now saved and loaded by the DatabseManager class
+        (see below).
+    - <a name='BetterEvent_2/5/18'></a>***BetterEvent***
+        - An abstract parent class for BetterMessageEvent and any future
+        event wrappers.
+            <pre><code>
+            protected abstract Event getEvent();
+            protected abstract User getAuthor();
+            protected abstract void reply(Message message);
+            protected abstract void privateReply(Message message);
+            public BetterEvent(Event event){} </code></pre>
+    - *BetterMessageEvent*
+        - Extended new BetterEvent class and implemented new methods
+        ([see BetterEvent](#BetterEvent_2/5/18)).
+    - *EventDispatcher*
+        - Implemented onGenericMessage event method override and
+        primitive onGuildJoin.
+    - *Weebot*
+        - Added new ``validateCallsign`` method that takes a String[ ]
+        - Added readEvent method to take in BetterEvents (*unimplemented*).
+        - getBotId()
+    - *Player*
+        - Added methods for sending player a private message.
+    - *CardGame*
+        - Two new constructors, both with a weebot and one with a player
+        array.
+    - *CardsAgainstHumanity*
+        - Implemented the two new from super contructors.
+        - Javadocs
 - 1/5/18
     - *General*
         - (JONO) After ***finally*** understanding the flow of the
@@ -65,9 +171,11 @@ Go to the [ChangeLogs](#Log) to see the most recent changes and development
         as inspiration for ``BetterMessageEvent`` methods.
     - ***BetterMessageEvent***
         - A wrapper class for [``GenericMessageEvent``](http://home.dv8tion.net:8080/job/JDA/javadoc/net/dv8tion/jda/core/events/message/GenericMessageEvent.html)
-        that gives an ease-of-life abstraction from an event.
-        - Provides methods for replying to events in both private and
-        Guild channels
+        to give a more convienient abstraction from message events coming
+         into the program.
+        - The BetterMessageEvent provides *rather convienient* methods
+                and variables that make the Weebot's job of interacting
+                with both public and private chats much simpler.
 
                     private final GenericMessageEvent EVENT;
                     private final User AUTHOR;
@@ -91,6 +199,9 @@ Go to the [ChangeLogs](#Log) to see the most recent changes and development
         - Added some comments and Copyright.
     - *Game*
         - Added HOST_ID string to add to connection to hosting Guild.
+     - *Rest In Pieces*
+        - *PrivateListener & GuildListener* was removed, since it will
+        be replaced by the EventDispatcher.
 - 28-30/4/18
 	- *General*
 		- **Serious repackaging has finnally ended in proper building & importing!**

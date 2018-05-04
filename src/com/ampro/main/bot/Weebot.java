@@ -20,6 +20,7 @@ import com.ampro.main.Launcher;
 import com.ampro.main.game.Game;
 import com.ampro.main.game.Player;
 import com.ampro.main.listener.events.BetterEvent;
+import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.managers.GuildController;
@@ -46,18 +47,16 @@ public class Weebot implements Comparable<Weebot> {
 
 	//Sever Specific Info
 	/**
-	 * The server
-	 * (If the bot lives in a Guild/Server rather than a priv chat)
+	 * The server unique ID <br>
+	 *     (we use the ID instead of reference b/c JDA guilds are not serializable)
 	 */
-	private final Guild  GUILD;
+	private final Long GUILD_ID;
 	/* Name of the server/Guild */
 	private final String SERVERNAME;
 	/** Unique ID long of the Guild */
 	private final String BOT_ID;
 
 	//Bot Information
-	/** The Guild member that is this */
-	private final Member SELF;
 	/** Guild's nickname for the bot. */
 	private String NICKNAME;
 	/** Argument prefix to call the bot<br>Default is "<>"*/
@@ -84,7 +83,7 @@ public class Weebot implements Comparable<Weebot> {
 	 * @param guild Guild (server) the bot is in.
 	 */
 	public Weebot(Guild guild) {
-		this.GUILD		= guild;
+		this.GUILD_ID = guild.getIdLong();
 		this.SERVERNAME = guild.getName();
 		this.BOT_ID		= guild.getIdLong() + "W";
 		this.NICKNAME	= "Weebot";
@@ -92,7 +91,6 @@ public class Weebot implements Comparable<Weebot> {
 		this.ACTIVEPARTICIPATE = true;
 		this.EXPLICIT	= false;
 		this.NSFW		= false;
-		this.SELF		= guild.getSelfMember();
 		this.GAMES_RUNNING = new ArrayList<>();
 		this.GAMES_DISABLED = new ArrayList<>();
 	}
@@ -123,6 +121,7 @@ public class Weebot implements Comparable<Weebot> {
 	 * 			{@code 0} otherwise
 	 */
 	private int validateCallsign(String...args) {
+		if (args.length == 0) return -1;
 		String call = args[0];
 		//Don't take commands with a space between the call sign and the command
 		//It would just make life less easy
@@ -136,9 +135,29 @@ public class Weebot implements Comparable<Weebot> {
 	/**
 	 * Take in a {@code com.ampro.listener.events.BetterEvent}
 	 * and calls the appropriate command.
-	 * @param event
+	 * @param event BetterEvent to read
 	 */
 	public void readEvent(BetterEvent event) {
+		if (event instanceof BetterMessageEvent) {
+			BetterMessageEvent messageEvent = (BetterMessageEvent) event;
+			switch (this.validateCallsign(messageEvent.getARGUMENTS())) {
+				case 1:
+					this.runCommand(messageEvent.getARGUMENTS(),0);
+					return;
+				case 2:
+					this.runCommand(messageEvent.getARGUMENTS(),1);
+					return;
+				default: return;
+			}
+		}
+	}
+
+	/**
+	 * Find and execute the command requested in a message.
+	 * @param args The arguments of the command
+	 * @param startIndex The index the commands begin at
+	 */
+	private void runCommand(String[] args, int startIndex) {
 
 	}
 
@@ -147,8 +166,6 @@ public class Weebot implements Comparable<Weebot> {
 	 * @param message JDA message to read
 	 */
 	public void read(Message message) {
-		//Is this a valid call?
-        int valid = this.validateCallsign(message);
 
         /** the validated command, stripped of its prefix. */
         String[] command;
@@ -360,7 +377,9 @@ public class Weebot implements Comparable<Weebot> {
 		try {
             String newName = String.join(" ", command);
 			//Change name on server
-            new GuildController(this.GUILD).setNickname(this.SELF, newName).queue();
+			Guild g = Launcher.getGuild(this.GUILD_ID);
+			Member self = g.getSelfMember();
+            new GuildController(g).setNickname(self, newName).queue();
 			//Change internal name
 			this.NICKNAME = newName;
 			if (!newName.equalsIgnoreCase("weebot"))
@@ -506,7 +525,7 @@ public class Weebot implements Comparable<Weebot> {
 	}
 
 	public long getGuildID() {
-		return this.GUILD.getIdLong();
+		return this.GUILD_ID;
 	}
 
     /**
@@ -571,14 +590,14 @@ public class Weebot implements Comparable<Weebot> {
 	 */
 	private static void listGuilds(TextChannel channel) {
 		String out = "```";
-		Map<Guild, Weebot> map = Launcher.getGuilds();
-		for(Map.Entry<Guild, Weebot> entry : map.entrySet()) {
+		Map<Long, Weebot> map = Launcher.getDatabase().getWeebots();
+		for(Map.Entry<Long, Weebot> entry : map.entrySet()) {
 			out += "\n";
-			out += entry.getKey().getName() + " : " + entry.getValue().getNickname();
+			out += entry.getValue().getGuildName() + " : "
+					+ entry.getValue().getNickname();
 		}
 		out += "```";
 		channel.sendMessage(out).queue();
-
 	}
 
 	/**
@@ -589,6 +608,16 @@ public class Weebot implements Comparable<Weebot> {
 	@Override
 	public int compareTo(Weebot w2) {
 		return (int) (this.getGuildID() - w2.getGuildID());
+	}
+
+	@Override
+	public String toString() {
+		String out = "";
+		out += "Weebot info\n";
+		out += this.getBotId() + "\n";
+		out += this.getGuildName() + "\n";
+		out += this.getNickname() + "\n";
+		return out;
 	}
 
 }
