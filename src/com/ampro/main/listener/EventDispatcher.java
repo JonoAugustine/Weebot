@@ -22,6 +22,7 @@ import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
+import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
@@ -37,7 +38,6 @@ public class EventDispatcher extends ListenerAdapter {
 
     @Override
     public void onGenericMessage(GenericMessageEvent event) {
-        System.out.println("event in");
         BetterMessageEvent bme;
         try {
             bme = new BetterMessageEvent(event);
@@ -49,16 +49,16 @@ public class EventDispatcher extends ListenerAdapter {
             //Get the proper bot and hand off the event
             Guild g = event.getGuild();
             if (g != null) {
-                Weebot bot = (Weebot) Launcher.getDatabase().getWeebots()
-                        .get(event.getGuild().getIdLong());
-                bot.readEvent(bme);
+                ((Weebot) Launcher.getDatabase().getWeebots()
+                        .get(event.getGuild().getIdLong()))
+                        .readEvent(bme);
             } else {
-                //If the guild is not found
-                //TODO make a single bot for private events (ie with no guild)
-                new Weebot().readEvent(bme);
+                //If the guild is not found, hand off to the private bot.
+                ((Weebot) Launcher.getDatabase().getWeebots()
+                            .get(0L)).readEvent(bme);
             }
         } catch(ClassCastException e) {
-            System.err.println("Failed to cast to Weebot");
+            System.err.println("Failed to cast to Weebot.");
             e.printStackTrace();
         }
     }
@@ -69,6 +69,11 @@ public class EventDispatcher extends ListenerAdapter {
         event.getGuild().getDefaultChannel().sendMessage(
                 "Welcome, me! \n(call me with ``<>``)"
         ).queue();
+    }
+
+    @Override
+    public void onGuildLeave(GuildLeaveEvent event) {
+        Launcher.getDatabase().removeBot(event.getGuild().getIdLong());
     }
 
 }

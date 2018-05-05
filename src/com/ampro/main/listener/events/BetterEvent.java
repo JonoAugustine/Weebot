@@ -51,9 +51,8 @@ public abstract class BetterEvent {
     }
 
     public class InvalidAuthorException extends InvalidEventException {
-        public InvalidAuthorException(String s) {
-            super(s);
-        }
+        public InvalidAuthorException(String s) { super(s); }
+        public InvalidAuthorException() { super(); }
     }
 
     /** Get the original event */
@@ -64,6 +63,8 @@ public abstract class BetterEvent {
     protected abstract void reply(Message message);
     /** Reply to the event in a private channel */
     protected abstract void privateReply(Message message);
+    /** Is the event from a Private chat? */
+    protected abstract boolean isPrivate();
 
     /**
      * Construct a {@code BetterEvent} from a

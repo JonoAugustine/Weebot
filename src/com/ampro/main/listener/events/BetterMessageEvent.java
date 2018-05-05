@@ -17,7 +17,9 @@
 package com.ampro.main.listener.events;
 
 import com.ampro.main.Launcher;
+import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
@@ -55,7 +57,7 @@ public class BetterMessageEvent extends BetterEvent {
                             .complete() //Use complete to get the return value
                             .getAuthor(); //Get the author (User)
         this.MESSAGE_EVENT = event;
-        if (this.AUTHOR == Launcher.getJDA().getSelfUser()) {
+        if (this.AUTHOR == Launcher.getJda().getSelfUser()) {
             throw new InvalidAuthorException("User is self.");
         }
         if (event instanceof MessageReceivedEvent)
@@ -151,5 +153,16 @@ public class BetterMessageEvent extends BetterEvent {
         return this.AUTHOR;
     }
 
+    @Override
+    public boolean isPrivate() {
+        return this.MESSAGE_EVENT.isFromType(ChannelType.PRIVATE);
+    }
+
+    /**
+     * @return The channel of origin.
+     */
+    public MessageChannel getChannel() {
+        return this.MESSAGE_EVENT.getChannel();
+    }
 
 }

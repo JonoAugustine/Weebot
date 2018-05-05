@@ -25,9 +25,7 @@ import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.managers.GuildController;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 /**
  * A Weebot connected to a single {@code net.dv8tion.entities.Guild}. <br>
@@ -45,29 +43,78 @@ public class Weebot implements Comparable<Weebot> {
 
 	//General Static Info/Settings
 
-	//Sever Specific Info
-	/**
-	 * The server unique ID <br>
-	 *     (we use the ID instead of reference b/c JDA guilds are not serializable)
-	 */
-	private final Long GUILD_ID;
-	/* Name of the server/Guild */
-	private final String SERVERNAME;
-	/** Unique ID long of the Guild */
-	private final String BOT_ID;
+    /**
+     * A class containing mutable settings for a Guild's Weebot.
+     * As well as the Guild information. <br>
+     * Reads <code>BetterMessageEvents</code> to change settings.
+     */
+    private class GuildSettings {
 
-	//Bot Information
-	/** Guild's nickname for the bot. */
-	private String NICKNAME;
-	/** Argument prefix to call the bot<br>Default is "<>"*/
-	private String CALLSIGN;
+        /** Hosting guild */
+        private final Guild GUILD;
+        /** Name of hosting guild */
+        private String GUILD_NAME;
+        /** Bot's nickname in hosting guild */
+        private String NICKNAME;
+        /** Guils's command string to call the bot */
+        private String CALLSIGN;
+        /** Whether the bot is able to use explicit language */
+        private boolean EXPLICIT;
+        /** Words banned on the server */
+        private List<String> BANNED_WORDS;
+        /** Commands not allowed on the server channels. */
+        private TreeMap<Channel, Class<? extends Game>> COMMANDS_DISABLED;
+        /** Whether the bot is able to be NSFW */
+        private boolean NSFW;
+        /** Whether the bot is able to respond to actions not directed to it */
+        private boolean ACTIVE_PARTICIPATE;
+        /** Games currently running. */
+        private List<Game<? extends Player>> GAMES_RUNNING;
+        /** Commands that invoke a settings change. */
+        private List<String> COMANDS;
 
-	/** Can this bot say explicit things? (false default) */
-	private boolean EXPLICIT;
-	/** Can this bot be used for NSFW? (false default) */
-	private boolean NSFW;
-	/** Can the bot jump into the conversation? */
-	private boolean ACTIVEPARTICIPATE;
+        GuildSettings() {
+            this.GUILD      = Weebot.this.GUILD;
+            if (GUILD != null) {
+                this.GUILD_NAME = this.GUILD.getName();
+                this.CALLSIGN = "<>";
+            } else {
+                this.GUILD_NAME = "PRIVATE BOT | NO GUILD";
+                this.CALLSIGN   = "";
+            }
+            this.NICKNAME   = "Weebot";
+            this.EXPLICIT   = false;
+            this.NSFW       = false;
+            this.ACTIVE_PARTICIPATE = false;
+            this.COMMANDS_DISABLED  = new TreeMap<>();
+            this.GAMES_RUNNING      = new ArrayList<>();
+            this.COMANDS    = new ArrayList<>(
+                    Arrays.asList("", "")
+            );
+        }
+
+        /**
+         * Parses a <code>BetterMessageEvent</code> and
+         * runs the appropriate method.
+         * @param event BetterMessageEvent
+         */
+        public void read(BetterMessageEvent event) {
+
+        }
+
+        boolean matchesCommand(String string) {
+            return false;
+        }
+
+    }
+
+
+    /** The host server/guild */
+    private final Guild GUILD;
+    /** The Bot's ID string ending in "W". */
+    private final String BOT_ID;
+    //Sever Specific Info
+    private GuildSettings SETTINGS;
 
 	/**
 	 * Allow servers to disable some games.
@@ -83,23 +130,20 @@ public class Weebot implements Comparable<Weebot> {
 	 * @param guild Guild (server) the bot is in.
 	 */
 	public Weebot(Guild guild) {
-		this.GUILD_ID = guild.getIdLong();
-		this.SERVERNAME = guild.getName();
-		this.BOT_ID		= guild.getIdLong() + "W";
-		this.NICKNAME	= "Weebot";
-		this.CALLSIGN	= "<>";
-		this.ACTIVEPARTICIPATE = true;
-		this.EXPLICIT	= false;
-		this.NSFW		= false;
-		this.GAMES_RUNNING = new ArrayList<>();
-		this.GAMES_DISABLED = new ArrayList<>();
+        this.GUILD      = guild;
+        this.BOT_ID     = guild.getId() + "W";
+        this.SETTINGS   = new GuildSettings();
 	}
 
+    /**
+     * Create a Weebot with no guild or call sign.
+     * <b>This is only called for the private-chat instance Weebot created
+     * when a new Database is created.</b>
+     */
 	public Weebot() {
-		this.GUILD_ID = -1L;
-		this.SERVERNAME = "";
-		this.BOT_ID		= "-1W";
-		this.CALLSIGN	= "";
+		this.GUILD = null;
+		this.BOT_ID		= "0W";
+		this.SETTINGS.NICKNAME = "Weebot";
 	}
 
 	/**
@@ -132,6 +176,10 @@ public class Weebot implements Comparable<Weebot> {
 		String call = args[0];
 		//Don't take commands with a space between the call sign and the command
 		//It would just make life less easy
+        if (call.matches("[[" + this.SETTINGS.NICKNAME + "][" + this.CALLSIGN
+                        + "]]\\w")) {
+
+        }
 		if (call.startsWith(this.CALLSIGN) && call.length() > this.CALLSIGN.length())
 			return 1;
 		else if (call.equals("@" + this.NICKNAME))
@@ -147,6 +195,7 @@ public class Weebot implements Comparable<Weebot> {
 	public void readEvent(BetterEvent event) {
 		if (event instanceof BetterMessageEvent) {
 			BetterMessageEvent messageEvent = (BetterMessageEvent) event;
+			messageEvent.getARGUMENTS();
 			switch (this.validateCallsign(messageEvent.getARGUMENTS())) {
 				case 1:
 					this.runCommand(messageEvent,0);
@@ -162,7 +211,7 @@ public class Weebot implements Comparable<Weebot> {
 
 	/**
 	 * Find and execute the command requested in a message.
-	 * @param args The arguments of the command
+	 * @param event The arguments of the command
 	 * @param startIndex The index the commands begin at
 	 */
 	private void runCommand(BetterEvent event, int startIndex) {
@@ -300,20 +349,20 @@ public class Weebot implements Comparable<Weebot> {
         switch (command.length) {
             case 1:
                 channel.sendMessage(
-                    "I will " + (this.ACTIVEPARTICIPATE ? "" : "not ")
+                    "I will " + (this.SETTINGS.ACTIVE_PARTICIPATE ? "" : "not ")
                         + " join in on conversations."
                 ).queue();
                 return;
             case 2:
                 switch (command[1]) {
                     case "true":
-                        this.ACTIVEPARTICIPATE = true;
+                        this.SETTINGS.ACTIVE_PARTICIPATE = true;
                         channel.sendMessage(
                                 "I will join in on conversations."
                         ).queue();
                         return;
                     case "false":
-                        this.ACTIVEPARTICIPATE = false;
+                        this.SETTINGS.ACTIVE_PARTICIPATE= false;
                         channel.sendMessage(
                                 "I won't join in on conversations anymore."
                         ).queue();
@@ -321,18 +370,27 @@ public class Weebot implements Comparable<Weebot> {
                     default:
                         channel.sendMessage("Sorry, " + command[1]
                                 + " is not an option. Please use the commands: "
-                                + "```" + this.CALLSIGN + "participate [true/on/false/off]```"
-                                + "```" + this.CALLSIGN + "activeparticipate [true/on/false/off]```"
-                                + "```" + this.CALLSIGN + "interrupt [true/on/false/off]```"
+                                + "```" + this.SETTINGS.CALLSIGN +
+                                "participate " +
+                                "[true/on/false/off]```"
+                                + "```" + this.SETTINGS.CALLSIGN +
+                                "activeparticipate [true/on/false/off]```"
+                                + "```" + this.SETTINGS.CALLSIGN + "interrupt" +
+                                " " +
+                                "[true/on/false/off]```"
                         ).queue();
                         return;
                 }
             default:
                 channel.sendMessage("Sorry, " + command[1]
                         + " is not an option. Please use the commands: "
-                        + "```" + this.CALLSIGN + "participate [true/on/false/off]```"
-                        + "```" + this.CALLSIGN + "activeparticipate [true/on/false/off]```"
-                        + "```" + this.CALLSIGN + "interrupt [true/on/false/off]```"
+                        + "```" + this.SETTINGS.CALLSIGN + "participate " +
+                        "[true/on/false/off]```"
+                        + "```" + this.SETTINGS.CALLSIGN + "activeparticipate" +
+                        " " +
+                        "[true/on/false/off]```"
+                        + "```" + this.SETTINGS.CALLSIGN + "interrupt " +
+                        "[true/on/false/off]```"
                 ).queue();
         }
 	}
@@ -347,23 +405,24 @@ public class Weebot implements Comparable<Weebot> {
 		switch (command.length) {
             case 1:
                 channel.sendMessage(
-                        "I am " + (this.NSFW ? "" : "not ") + "NSFW"
+                        "I am " + (this.SETTINGS.NSFW ? "" : "not ") + "NSFW"
                 ).queue();
                 return;
             case 2:
                 switch (command[1]) {
                     case "true":
-                        this.NSFW = true;
+                        this.SETTINGS.NSFW = true;
                         channel.sendMessage("I am now NSFW" ).queue();
                         break;
                     case "false":
-                        this.NSFW = false;
+                        this.SETTINGS.NSFW = false;
                         channel.sendMessage("I am now SFW" ).queue();
                         break;
                     default:
                         channel.sendMessage("Sorry, " + command[1]
                                 + " is not an option. Please use the command: "
-                                + "```" + this.CALLSIGN + "nsfw [true/on/false/off]```"
+                                + "```" + this.SETTINGS.CALLSIGN + "nsfw " +
+                                "[true/on/false/off]```"
                         ).queue();
                         return;
                 }
@@ -371,7 +430,8 @@ public class Weebot implements Comparable<Weebot> {
             default:
                 channel.sendMessage("Sorry, " + String.join(" ", command[1])
                         + " is not an option. Please use the command: "
-                        + "```" + this.CALLSIGN + "nsfw [true/on/false/off]```"
+                        + "```" + this.SETTINGS.CALLSIGN + "nsfw " +
+                        "[true/on/false/off]```"
                 ).queue();
 		}
 	}
@@ -385,11 +445,11 @@ public class Weebot implements Comparable<Weebot> {
 		try {
             String newName = String.join(" ", command);
 			//Change name on server
-			Guild g = Launcher.getGuild(this.GUILD_ID);
+			Guild g = Launcher.getGuild(this.GUILD.getIdLong());
 			Member self = g.getSelfMember();
             new GuildController(g).setNickname(self, newName).queue();
 			//Change internal name
-			this.NICKNAME = newName;
+			this.SETTINGS.NICKNAME = newName;
 			if (!newName.equalsIgnoreCase("weebot"))
 				channel.sendMessage("Hmm... " + newName
                                     + "... I like the sound of that!").queue();
@@ -411,8 +471,9 @@ public class Weebot implements Comparable<Weebot> {
 		switch (command.length) {
             case 1:
                 //Send back the current callsign
-                channel.sendMessage("You can call me with " + this.CALLSIGN
-                        + " or @" + this.NICKNAME).queue();
+                channel.sendMessage("You can call me with " + this.SETTINGS
+                        .CALLSIGN
+                        + " or @" + this.SETTINGS.NICKNAME).queue();
                 return;
             case 2:
                 //Set a new callsign (if under 3 char)
@@ -422,17 +483,21 @@ public class Weebot implements Comparable<Weebot> {
                     ).queue();
                     return;
                 } else {
-                    this.CALLSIGN = command[1];
-                    channel.sendMessage("You can now call me with ```" + this.CALLSIGN
-                            + "``` or ```@" + this.NICKNAME + "```").queue();
+                    this.SETTINGS.CALLSIGN = command[1];
+                    channel.sendMessage("You can now call me with ```" +
+                            this.SETTINGS.CALLSIGN
+                            + "``` or ```@" + this.SETTINGS.NICKNAME + "```")
+                            .queue();
                     return;
                 }
             default:
                 channel.sendMessage(
                         "Sorry, I can't understand that command."
                         + "\nYou can change my callsign with these commands:"
-                        + "```" + this.CALLSIGN + "prefix new_prefix```"
-                        + "```@" + this.NICKNAME + " prefix new_prefix```"
+                        + "```" + this.SETTINGS.CALLSIGN + "prefix " +
+                                "new_prefix```"
+                        + "```@" + this.SETTINGS.NICKNAME + " prefix " +
+                                "new_prefix```"
                 ).queue();
         }
 	}
@@ -472,18 +537,18 @@ public class Weebot implements Comparable<Weebot> {
 		String out = "```Wanna learn about me?";
 
 		out += "\n\n";
-		out += "I live here: " + this.SERVERNAME;
+		out += "I live here: " + this.SETTINGS.GUILD_NAME;
 		out += "\n";
-		out += "I now go by: " + this.NICKNAME;
+		out += "I now go by: " + this.SETTINGS.NICKNAME;
 		out += "\n";
-		out += "Call me with: " + this.CALLSIGN;
+		out += "Call me with: " + this.SETTINGS.CALLSIGN;
 		out += "\n";
-		out += "I am " + (this.EXPLICIT ? "" : "not ") + "explicit";
+		out += "I am " + (this.SETTINGS.EXPLICIT ? "" : "not ") + "explicit";
 		out += "\n";
-		out += "I " + (this.NSFW ? "am " : "not ") + "NSFW";
+		out += "I " + (this.SETTINGS.NSFW ? "am " : "not ") + "NSFW";
 		out += "\n";
-		out += "I " + (this.ACTIVEPARTICIPATE ? "" : "don't ")
-						+ "join in on some conversations :)";
+		out += "I " + (this.SETTINGS.ACTIVE_PARTICIPATE ? "" : "don't ")
+						+ "join in on some conversations where I'n not called.";
 		//out += "\n";
 		//out += "\n";
 		//out += "\n";
@@ -522,7 +587,7 @@ public class Weebot implements Comparable<Weebot> {
 	}
 
 	public String getNickname() {
-		return this.NICKNAME;
+		return this.SETTINGS.NICKNAME;
 	}
 
 	/**
@@ -532,8 +597,18 @@ public class Weebot implements Comparable<Weebot> {
 		return this.BOT_ID;
 	}
 
+    /**
+     * @return The guild the bot is linked to.
+     */
+	public Guild getGuild() {
+	    return this.GUILD;
+    }
+
+    /**
+     * @return The ID of the guild the bot is linked to.
+     */
 	public long getGuildID() {
-		return this.GUILD_ID;
+		return this.GUILD != null ? this.GUILD.getIdLong() : (0L);
 	}
 
     /**
@@ -541,7 +616,7 @@ public class Weebot implements Comparable<Weebot> {
      * @return Name of the Guild
      */
 	public String getGuildName() {
-		return this.SERVERNAME;
+		return this.SETTINGS.GUILD_NAME;
 	}
 
 	//
@@ -572,7 +647,7 @@ public class Weebot implements Comparable<Weebot> {
                 return;
             case "kill":
                 channel.sendMessage("Shutting down all Weebots...").queue();
-                Launcher.getJDA().shutdown();
+                Launcher.getJda().shutdown();
                 return;
             default:
                 channel.sendMessage(
@@ -621,9 +696,8 @@ public class Weebot implements Comparable<Weebot> {
 	@Override
 	public String toString() {
 		String out = "";
-		out += "Weebot info\n";
-		out += this.getBotId() + "\n";
-		out += this.getGuildName() + "\n";
+		out += this.getBotId() + "\n\t";
+		out += this.getGuildName() + "\n\t";
 		out += this.getNickname() + "\n";
 		return out;
 	}
