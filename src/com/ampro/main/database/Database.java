@@ -43,6 +43,15 @@ public class Database {
     }
 
     /**
+     * Retrieve a Weebot form the database by it's hosting guild's ID.
+     * @param id Hosting guild ID
+     * @return The weebot associated with the given guild ID. Null if not found.
+     */
+    public synchronized Weebot getBot(long id) {
+        return Database.WEEBOTS.get(id);
+    }
+
+    /**
      * Remove a Weebot from the database.
      * @param bot Weebot to remove.
      * @return The removed Weebot.
@@ -53,11 +62,11 @@ public class Database {
 
     /**
      * Remove a bot from the database.
-     * @param long The hosting Guild ID
+     * @param id The hosting Guild ID
      * @return The removed Weebot.
      */
-    public synchronized Weebot removeBot(long guildId) {
-        return Database.WEEBOTS.remove(guildId);
+    public synchronized Weebot removeBot(long id) {
+        return Database.WEEBOTS.remove(id);
     }
 
     /**
