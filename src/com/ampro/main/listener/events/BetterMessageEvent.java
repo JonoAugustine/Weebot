@@ -17,10 +17,7 @@
 package com.ampro.main.listener.events;
 
 import com.ampro.main.Launcher;
-import net.dv8tion.jda.core.entities.ChannelType;
-import net.dv8tion.jda.core.entities.Message;
-import net.dv8tion.jda.core.entities.MessageChannel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
 
@@ -65,6 +62,14 @@ public class BetterMessageEvent extends BetterEvent {
                 );
     }
 
+    /**
+     * Construct a {@code BetterMessageEvent} from a
+     * {@code MessageReceivedEvent}
+     * @param event {@code GenericMessageEvent}
+     *          to wrap.
+     * @param author {@link net.dv8tion.jda.core.entities.User}
+     *                 who sent the message.
+     */
     public BetterMessageEvent(GenericMessageEvent event, User author)
             throws InvalidAuthorException {
         super(event);
@@ -152,7 +157,7 @@ public class BetterMessageEvent extends BetterEvent {
      * @return String array of arguments.
      *          null if event is not MessageReceivedEvent
      */
-    public String[] getARGUMENTS() {
+    public String[] getArgs() {
         return this.ARGUMENTS.clone();
     }
 
@@ -176,6 +181,18 @@ public class BetterMessageEvent extends BetterEvent {
      */
     public MessageChannel getChannel() {
         return this.MESSAGE_EVENT.getChannel();
+    }
+
+    public Guild getGuild() {
+        return this.MESSAGE_EVENT.getGuild();
+    }
+
+    public User getSelfUser() {
+        return this.getSelfUser();
+    }
+
+    public Member getSelfMember() {
+        return this.getSelfMember();
     }
 
 }

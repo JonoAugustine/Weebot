@@ -16,7 +16,7 @@
 
 package com.ampro.main.listener.events;
 
-import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.Event;
 
@@ -60,9 +60,9 @@ public abstract class BetterEvent {
     /** Get the author (User) of the event */
     protected abstract User getAuthor();
     /** Reply to the event in the channel of origin */
-    protected abstract void reply(Message message);
+    protected abstract void reply(String message);
     /** Reply to the event in a private channel */
-    protected abstract void privateReply(Message message);
+    protected abstract void privateReply(String message);
     /** Is the event from a Private chat? */
     protected abstract boolean isPrivate();
 
@@ -72,4 +72,10 @@ public abstract class BetterEvent {
      * @param event Event to wrap
      */
     public BetterEvent(Event event){}
+
+    /** */
+    public JDA getJDA() {
+        return this.getEvent().getJDA();
+    }
+
 }
