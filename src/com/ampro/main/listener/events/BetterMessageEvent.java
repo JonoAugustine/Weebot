@@ -23,7 +23,6 @@ import net.dv8tion.jda.core.entities.MessageChannel;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
-import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 /**
  * An wrapper class for {@code GenereicMessageEvent} & {@code GenericPrivateMessageEvent}
@@ -41,7 +40,7 @@ public class BetterMessageEvent extends BetterEvent {
     /** The author (User) of the event */
     private final User AUTHOR;
     /** Arguments of a MessageReceivedEvent */
-    private final String[] ARGUMENTS;
+    private String[] ARGUMENTS;
 
     /**
      * Construct a {@code BetterMessageEvent} from a
@@ -60,11 +59,25 @@ public class BetterMessageEvent extends BetterEvent {
         if (this.AUTHOR == Launcher.getJda().getSelfUser()) {
             throw new InvalidAuthorException("User is self.");
         }
-        if (event instanceof MessageReceivedEvent)
-            this.ARGUMENTS = ((MessageReceivedEvent) event)
-                    .getMessage().getContentStripped().split(" ");
-         else
-            this.ARGUMENTS = null;
+        event.getChannel().getMessageById(event.getMessageId())
+                .queue(message ->
+                    this.ARGUMENTS = message.getContentStripped().split(" ")
+                );
+    }
+
+    public BetterMessageEvent(GenericMessageEvent event, User author)
+            throws InvalidAuthorException {
+        super(event);
+        if (author == Launcher.getJda().getSelfUser()) {
+            throw new InvalidAuthorException("User is self.");
+        } else {
+            this.AUTHOR = author;
+        }
+        this.MESSAGE_EVENT = event;
+        event.getChannel().getMessageById(event.getMessageId())
+                .queue(message ->
+                    this.ARGUMENTS = message.getContentStripped().split(" ")
+                );
     }
 
     /**
@@ -140,7 +153,7 @@ public class BetterMessageEvent extends BetterEvent {
      *          null if event is not MessageReceivedEvent
      */
     public String[] getARGUMENTS() {
-        return this.ARGUMENTS;
+        return this.ARGUMENTS.clone();
     }
 
     @Override

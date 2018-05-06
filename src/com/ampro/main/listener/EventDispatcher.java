@@ -21,6 +21,7 @@ import com.ampro.main.bot.Weebot;
 import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
@@ -38,6 +39,40 @@ public class EventDispatcher extends ListenerAdapter {
 
     @Override
     public void onGenericMessage(GenericMessageEvent event) {
+        boolean self;
+        event.getChannel().getMessageById(
+                event.getMessageId()
+        ).queue(
+            message -> {
+                User author = message.getAuthor();
+                if (author.isBot() || author == Launcher.getJda().getSelfUser())
+                {/* Do nothing*/}
+                else {
+                    BetterMessageEvent bme;
+                    try {
+                        bme = new BetterMessageEvent(event, author);
+                    } catch (BetterEvent.InvalidAuthorException e) {
+                        System.err.println("Is self");
+                        return;
+                    }
+                    try {
+                        //Get the proper bot and hand off the event
+                        Guild g = event.getGuild();
+                        if (g != null) {
+                            Launcher.getDatabase()
+                                    .getBot(event.getGuild().getIdLong())
+                                    .readEvent(bme);
+                        } else {
+                            //If the guild is not found, hand off to the private bot.
+                            Launcher.getDatabase().getBot(0L).readEvent(bme);
+                        }
+                    } catch(ClassCastException e) {
+                        System.err.println("Failed to cast to Weebot.");
+                        e.printStackTrace();
+                    }
+                }
+            }
+        );/*
         BetterMessageEvent bme;
         try {
             bme = new BetterMessageEvent(event);
@@ -49,18 +84,17 @@ public class EventDispatcher extends ListenerAdapter {
             //Get the proper bot and hand off the event
             Guild g = event.getGuild();
             if (g != null) {
-                ((Weebot) Launcher.getDatabase().getWeebots()
-                        .get(event.getGuild().getIdLong()))
+                Launcher.getDatabase()
+                        .getBot(event.getGuild().getIdLong())
                         .readEvent(bme);
             } else {
                 //If the guild is not found, hand off to the private bot.
-                ((Weebot) Launcher.getDatabase().getWeebots()
-                            .get(0L)).readEvent(bme);
+                Launcher.getDatabase().getBot(0L).readEvent(bme);
             }
         } catch(ClassCastException e) {
             System.err.println("Failed to cast to Weebot.");
             e.printStackTrace();
-        }
+        }*/
     }
 
     @Override
