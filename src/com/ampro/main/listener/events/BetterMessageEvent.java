@@ -20,13 +20,15 @@ import com.ampro.main.Launcher;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
+import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent;
 
 /**
- * An wrapper class for {@code GenereicMessageEvent} & {@code GenericPrivateMessageEvent}
+ * An wrapper class for {@link GenericMessageEvent}
+ * & {@link GenericPrivateMessageEvent}
  * that allows for easier
- * responding to messages in a number of ways; <br> namely, this class contains
+ * responding to messages in a number of ways; namely, this class contains
  * methods for replying to messages regardless of the channel of origin, <br>
- * responding to events directly to a {@code net.dv8tion.entites.PrivateChannel}.
+ * responding to events directly to a {@link PrivateChannel}.
  *
  * @author Jonathan Augustine
  */
@@ -46,7 +48,7 @@ public class BetterMessageEvent extends BetterEvent {
      *          to wrap.
      */
     public BetterMessageEvent(GenericMessageEvent event)
-            throws InvalidAuthorException {
+            throws InvalidAuthorException, InvalidEventException {
         super(event);
         //Locate the message in the channel
         this.AUTHOR = event.getChannel().getMessageById(event.getMessageId())
@@ -56,10 +58,9 @@ public class BetterMessageEvent extends BetterEvent {
         if (this.AUTHOR == Launcher.getJda().getSelfUser()) {
             throw new InvalidAuthorException("User is self.");
         }
-        event.getChannel().getMessageById(event.getMessageId())
-                .queue(message ->
-                    this.ARGUMENTS = message.getContentStripped().split(" ")
-                );
+        this.ARGUMENTS = event.getChannel().getMessageById(event.getMessageId())
+                .complete().getContentStripped().split(" ");
+
     }
 
     /**
@@ -79,10 +80,9 @@ public class BetterMessageEvent extends BetterEvent {
             this.AUTHOR = author;
         }
         this.MESSAGE_EVENT = event;
-        event.getChannel().getMessageById(event.getMessageId())
-                .queue(message ->
-                    this.ARGUMENTS = message.getContentStripped().split(" ")
-                );
+        this.ARGUMENTS = event.getChannel().getMessageById(event.getMessageId())
+                .complete().getContentStripped().split(" ");
+
     }
 
     /**
@@ -158,7 +158,7 @@ public class BetterMessageEvent extends BetterEvent {
      *          null if event is not MessageReceivedEvent
      */
     public String[] getArgs() {
-        return this.ARGUMENTS.clone();
+        return this.ARGUMENTS;
     }
 
     @Override
@@ -179,7 +179,7 @@ public class BetterMessageEvent extends BetterEvent {
     /**
      * @return The channel of origin.
      */
-    public MessageChannel getChannel() {
+    public MessageChannel getMessageChannel() {
         return this.MESSAGE_EVENT.getChannel();
     }
 
@@ -193,6 +193,15 @@ public class BetterMessageEvent extends BetterEvent {
 
     public Member getSelfMember() {
         return this.getSelfMember();
+    }
+
+    /**
+     * @return
+     *          The TextChannel the Message was received in
+     *          or null if not from a TextChannel
+     */
+    public TextChannel getTextChannel() {
+        return this.MESSAGE_EVENT.getTextChannel();
     }
 
 }
