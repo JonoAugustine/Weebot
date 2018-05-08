@@ -26,7 +26,12 @@ import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.managers.GuildController;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.TreeMap;
+
+//import org.joda.time.LocalDateTime;
 
 /**
  * A representation of a Weebot entity linked to a Guild.<br>
@@ -35,11 +40,18 @@ import java.util.*;
  *     Each Weebot is assigned an ID String consisting of the
  *     hosting Guild's unique ID + "W" (e.g. "1234W") <br><br>
  *
- *  Dev Questions TODO: <br>
- * ? Should User relation to Weebot be gloabal or local? <br>
- * ? This would likelly invole a User wrapper class to keep track of the relationship<br>
- * ? Though that would probably be needed anyway if we are to implement the<br>
- * ? User-bot good/bad relationship meter thing (which I really want to)<br>
+ * Development plans TODO: <br>
+ *      Add a {@code Refresh} method to call on startup that updates and settings
+ *      (like {@link Weebot#NICKNAME}) that were changed during downtime.
+ *
+ * <br><br>
+ * Development Questions TODO: <br>
+ * ? Should User relation to Weebot be gloabal or local? This would likelly
+ * invole a User wrapper class to keep track of the relationship Though that
+ * would probably be needed anyway if we are to implement the User-bot good/bad
+ * relationship meter thing (which I really want to)
+ * <br>
+ *
  *
  * @author Jonathan Augsutine
  *
@@ -47,9 +59,12 @@ import java.util.*;
 public class Weebot implements Comparable<Weebot> {
 
     /** Hosting guild */
-    private final Guild GUILD;
+    private final long GUILD_ID;
     /** The Bot's ID string ending in "W". */
     private final String BOT_ID;
+    /** The date the bot was added to the Database */
+    //TODO private LocalDateTime BIRTHDAY;
+
     /** Bot's nickname in hosting guild */
     private String NICKNAME;
     /** Guils's command string to call the bot */
@@ -63,11 +78,9 @@ public class Weebot implements Comparable<Weebot> {
     /** Whether the bot is able to respond to actions not directed to it */
     private boolean ACTIVE_PARTICIPATE;
 
-    /** Commands that invoke a settings change. */
-    private List<String> COMMANDS;
-
-    /** Commands not allowed on the server channels. */
-    private TreeMap<Channel, Class<? extends Command>> COMMANDS_DISABLED;
+    /** Commands not allowed on the server channels.*/
+    private TreeMap<TextChannel, ArrayList<Class<? extends Command>>>
+            COMMANDS_DISABLED;
 	/** List of {@code Game}s currently Running */
 	private List<Game<? extends Player>> GAMES_RUNNING;
 
@@ -77,7 +90,7 @@ public class Weebot implements Comparable<Weebot> {
 	 * @param guild Guild (server) the bot is in.
 	 */
 	public Weebot(Guild guild) {
-        this.GUILD      = guild;
+        this.GUILD_ID   = guild.getIdLong();
         this.BOT_ID     = guild.getId() + "W";
         this.NICKNAME   = "Weebot";
         this.CALLSIGN   = "<>";
@@ -85,11 +98,9 @@ public class Weebot implements Comparable<Weebot> {
         this.NSFW       = false;
         this.BANNED_WORDS = new ArrayList<>();
         this.ACTIVE_PARTICIPATE = false;
-        this.COMMANDS = new ArrayList<>(
-                Arrays.asList()
-        );
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING  = new ArrayList<>();
+        //TODO this.BIRTHDAY   = new LocalDateTime();
     }
 
     /**
@@ -98,7 +109,7 @@ public class Weebot implements Comparable<Weebot> {
      * when a new Database is created.</b>
      */
 	public Weebot() {
-        this.GUILD      = null;
+        this.GUILD_ID   = 0L;
         this.BOT_ID     = "0W";
         this.NICKNAME   = "Weebot";
         this.CALLSIGN   = "";
@@ -108,10 +119,7 @@ public class Weebot implements Comparable<Weebot> {
                 Arrays.asList()
         );
         this.ACTIVE_PARTICIPATE = false;
-        this.COMMANDS = new ArrayList<>();
-        this.COMMANDS_DISABLED = new TreeMap<>(
-
-        );
+        this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING  = null;
 	}
 
@@ -145,10 +153,6 @@ public class Weebot implements Comparable<Weebot> {
 		String call = args[0];
 		//Don't take commands with a space between the call sign and the command
 		//It would just make life less easy
-        if (call.matches("[[" + this.NICKNAME + "][" + this.CALLSIGN
-                        + "]]\\w")) {
-
-        }
 		if (call.startsWith(this.CALLSIGN) && call.length() > this.CALLSIGN.length())
 			return 1;
 		else if (call.equals("@" + this.NICKNAME))
@@ -172,10 +176,9 @@ public class Weebot implements Comparable<Weebot> {
 				case 2:
 					this.runCommand(messageEvent,1);
 					return;
-				default: System.err.println("Invalid Event");return;
+				default: break; //To allow for active participate later
 			}
 		}
-
 	}
 
 	/**
@@ -183,9 +186,54 @@ public class Weebot implements Comparable<Weebot> {
 	 * @param event The arguments of the command
 	 * @param startIndex The index the commands begin at
 	 */
-	private void runCommand(BetterEvent event, int startIndex) {
-		((BetterMessageEvent) event).privateReply("Well then.");
+	private void runCommand(BetterMessageEvent event, int startIndex) {
+        //get the arg string without the callsign
+        String command;
+        if (startIndex == 0)
+            command = event.getArgs()[0].substring(this.CALLSIGN.length());
+        else
+            command = event.getArgs()[1];
+
+        for (Command c : Launcher.getCommands()) {
+            if (c.isCommandFor(command)) {
+                if (this.commandIsAllowed(c, event)) {
+                    c.run(this, event);
+                } else {
+                    event.reply("This command is not allowed in this channel.");
+                }
+                return;
+            }
+        }
+
+        //Command help = Launcher.getCommand(HelpCommand.class);
+        //if (help != null) help.run(this, event);
+        event.reply("Sorry, I don't recognize that command.");
+
 	}
+
+    /**
+     * Checks if a command has been banned from a channel.
+     * @param c The {@link Command} to check
+     * @param e The {@link BetterMessageEvent} that called it.
+     * @return
+     */
+	private boolean commandIsAllowed(Command c, BetterMessageEvent e) {
+        try {
+            //Get the channel the message was sent in
+            ArrayList<Class<? extends Command>> commands =
+                    this.COMMANDS_DISABLED.get(e.getTextChannel());
+
+            for (Class com : commands) {
+                if(c.getClass().equals(com)) {
+                    return false;
+                }
+            }
+        } catch (NullPointerException exc) {
+            //If no list of banned commands was found
+            return true;
+        }
+        return true;
+    }
 
 	/**
 	 * Takes in a {@code Message} and calls the appropriate private method
@@ -414,7 +462,7 @@ public class Weebot implements Comparable<Weebot> {
 		try {
             String newName = String.join(" ", command);
 			//Change name on server
-			Guild g = Launcher.getGuild(this.GUILD.getIdLong());
+			Guild g = Launcher.getGuild(this.GUILD_ID);
 			Member self = g.getSelfMember();
             new GuildController(g).setNickname(self, newName).queue();
 			//Change internal name
@@ -470,7 +518,6 @@ public class Weebot implements Comparable<Weebot> {
         }
 	}
 
-
     /**
      * User help method. Can send list of all commands, or details
      * about one command to User in private chat.
@@ -505,7 +552,7 @@ public class Weebot implements Comparable<Weebot> {
 		String out = "```Wanna learn about me?";
 
 		out += "\n\n";
-		out += "I live here: " + this.GUILD.getName();
+		out += "I live here: " + Launcher.getGuild(this.GUILD_ID).getName();
 		out += "\n";
 		out += "I now go by: " + this.NICKNAME;
 		out += "\n";
@@ -558,6 +605,8 @@ public class Weebot implements Comparable<Weebot> {
 		return this.NICKNAME;
 	}
 
+	public String getCallsign() { return this.CALLSIGN; }
+
 	/**
 	 * @return String ID of the bot (1234W)
 	 */
@@ -566,17 +615,10 @@ public class Weebot implements Comparable<Weebot> {
 	}
 
     /**
-     * @return The guild the bot is linked to.
-     */
-	public Guild getGuild() {
-	    return this.GUILD;
-    }
-
-    /**
      * @return The ID of the guild the bot is linked to.
      */
 	public long getGuildID() {
-		return this.GUILD != null ? this.GUILD.getIdLong() : (0L);
+		return this.GUILD_ID;
 	}
 
     /**
@@ -584,7 +626,9 @@ public class Weebot implements Comparable<Weebot> {
      * @return Name of the Guild
      */
 	public String getGuildName() {
-		return this.GUILD.getName();
+		return this.GUILD_ID != 0L ?
+                Launcher.getGuild(this.GUILD_ID).getName()
+                : "PRIVATE BOT";
 	}
 
 	//
@@ -605,7 +649,7 @@ public class Weebot implements Comparable<Weebot> {
             case "allguilds":
             case "listhomes":
             case "distrobution":
-                Weebot.listGuilds(channel);
+                //Weebot.listGuilds(channel);
                 return;
             case "help":
                 channel.sendMessage(
@@ -624,32 +668,6 @@ public class Weebot implements Comparable<Weebot> {
                 return;
         }
     }
-
-	/**
-	 * Lists the dev commands
-	 * @param channel
-	 */
-	private void devHelp(TextChannel channel) {
-		//TODO
-		channel.sendMessage("Still need to do this...").queue();
-	}
-
-	/**
-	 * Send a list of each guild Weebot is a member of
-	 * and that guild's Weebot
-	 * @param channel {@code TextChannel} to send to
-	 */
-	private static void listGuilds(TextChannel channel) {
-		String out = "```";
-		Map<Long, Weebot> map = Launcher.getDatabase().getWeebots();
-		for(Map.Entry<Long, Weebot> entry : map.entrySet()) {
-			out += "\n";
-			out += entry.getValue().getGuildName() + " : "
-					+ entry.getValue().getNickname();
-		}
-		out += "```";
-		channel.sendMessage(out).queue();
-	}
 
 	/**
 	 * @return -1 if the Guild/Server ID is less than parameter's

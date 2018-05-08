@@ -15,17 +15,22 @@
  */
 package com.ampro.main.bot.commands;
 
+import com.ampro.main.Launcher;
+import com.ampro.main.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.TextChannel;
 
-import java.util.Arrays;
 import java.util.List;
 
 /**
- *
+ * <h2>Weebot Commands</h2>
+ * <p>The execution of commands issued to a Weebot instance.</p>
+ * <p>Commands are stored by Weebots</p>
+ * @author Jonathan Augustine
  */
 public abstract class Command {
+
     /** Name of the command, to be called the format: {@code [prefix]<name>}. */
     protected final String name;
 
@@ -106,6 +111,17 @@ public abstract class Command {
     private final static String USER_PERM
             = "%s You must have the %s permission in this %s to use that!";
 
+    public Command() {
+        this.name       = null;
+        this.aliases    = null;
+        this.help       = null;
+        this.argFormat  = null;
+        this.guildOnly  = false;
+        this.ownerOnly  = false;
+        this.cooldown   = 0;
+        this.hidden     = false;
+    }
+
 
     public Command(String name, List<String> aliases, String help
             , String argFormat, boolean guildOnly, boolean ownerOnly
@@ -122,12 +138,25 @@ public abstract class Command {
 
     }
 
+    /**
+     * Performs a check then runs the command.
+     * @param bot The {@link Weebot} that called the command.
+     * @param event The {@link BetterMessageEvent} that called the command.
+     */
+    public abstract void run(Weebot bot, BetterMessageEvent event);
 
     /**
-     *
-     * @param event Better Message Event
+     * Performs the action of the command.
+     * @param event The {@link BetterMessageEvent} that called the command.
      */
     protected abstract void execute(BetterMessageEvent event);
+
+    /**
+     * Performs the action of the command.
+     * @param bot The {@link Weebot} which called this command.
+     * @param event The {@link BetterMessageEvent} that called the command.
+     */
+    protected abstract void execute(Weebot bot, BetterMessageEvent event);
 
     /**
      * Checks for the Command with the given
@@ -138,16 +167,27 @@ public abstract class Command {
      * @param  event
      *         The BetterMessageEvent passed to the command.
      */
-    public final void run(BetterMessageEvent event) {
+    protected boolean check(BetterMessageEvent event) {
         //Check Channel
 
         // child check
-        if(event.getArgs().length != 0) {
-            String[] parts = Arrays.copyOf(event.getArgs(), 2);
-            for(Command cmd: children) {
-                if(cmd.isCommandFor(parts[0])) {
+        //if(event.getArgs().length != 0) {
+        //    String[] parts = Arrays.copyOf(event.getArgs(), 2);
+        //   for(Command cmd: children) {
+        //        if(cmd.isCommandFor(parts[0])) {
+        //        }
+        //    }
+        //}
 
-                }
+        //user permission check
+
+        //If the command is for developer's only, check if the event Author's
+        //ID is registered as a developer.
+        if (this.ownerOnly) {
+            if (!Launcher.getDatabase().getDevelopers()
+                    .contains(event.getAuthor().getIdLong()))
+            {
+                return false;
             }
         }
 
@@ -155,13 +195,10 @@ public abstract class Command {
 
         //required role check
 
-        //user permission check
 
         //cooldown check
 
-        // run
-        execute(event);
-
+        return true;
     }
 
     /**
@@ -173,9 +210,9 @@ public abstract class Command {
      * @return {@code true} if the input is the name or an alias of the Command
      */
     public boolean isCommandFor(String input) {
-        if(name.equalsIgnoreCase(input))
+        if(this.name.equalsIgnoreCase(input))
             return true;
-        for(String alias: aliases)
+        for(String alias: this.aliases)
             if(alias.equalsIgnoreCase(input))
                 return true;
         return false;
@@ -341,11 +378,11 @@ public abstract class Command {
         {
             case USER:         return cooldownScope.genKey(name,event.getAuthor().getIdLong());
             case USER_GUILD:   return event.getGuild()!=null ? cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getGuild().getIdLong()) :
-                    CooldownScope.USER_CHANNEL.genKey(name,event.getAuthor().getIdLong(), event.getChannel().getIdLong());
-            case USER_CHANNEL: return cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getChannel().getIdLong());
+                    CooldownScope.USER_CHANNEL.genKey(name,event.getAuthor().getIdLong(), event.getMessageChannel().getIdLong());
+            case USER_CHANNEL: return cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getMessageChannel().getIdLong());
             case GUILD:        return event.getGuild()!=null ? cooldownScope.genKey(name,event.getGuild().getIdLong()) :
-                    CooldownScope.CHANNEL.genKey(name,event.getChannel().getIdLong());
-            case CHANNEL:      return cooldownScope.genKey(name,event.getChannel().getIdLong());
+                    CooldownScope.CHANNEL.genKey(name,event.getMessageChannel().getIdLong());
+            case CHANNEL:      return cooldownScope.genKey(name,event.getMessageChannel().getIdLong());
             case SHARD:        return event.getJDA().getShardInfo()!=null ? cooldownScope.genKey(name, event.getJDA().getShardInfo().getShardId()) :
                     CooldownScope.GLOBAL.genKey(name, 0);
             case USER_SHARD:   return event.getJDA().getShardInfo()!=null ? cooldownScope.genKey(name,event.getAuthor().getIdLong(),event.getJDA().getShardInfo().getShardId()) :
@@ -381,6 +418,30 @@ public abstract class Command {
             return front+" "+cooldownScope.errorSpecification+"!";
     }
 
+    public boolean isOwnerOnly() {
+        return ownerOnly;
+    }
+
+    public void setRequiredRole(String requiredRole) {
+        this.requiredRole = requiredRole;
+    }
+
+    public void setUserPermissions(Permission[] userPermissions) {
+        this.userPermissions = userPermissions;
+    }
+
+    public void setBotPermissions(Permission[] botPermissions) {
+        this.botPermissions = botPermissions;
+    }
+
+    public boolean isUsesTopicTags() {
+        return usesTopicTags;
+    }
+
+    public void setUsesTopicTags(boolean usesTopicTags) {
+        this.usesTopicTags = usesTopicTags;
+    }
+
     /**
      * A series of {@link java.lang.Enum Enum}s used for defining the scope size for a
      * {@link com.jagrosh.jdautilities.command.Command Command}'s cooldown.
@@ -389,7 +450,7 @@ public abstract class Command {
      * for cooldown scopes, allowing a command to remain on cooldown for more than just the user
      * calling it, with no unnecessary abstraction or developer input.
      *
-     * Cooldown keys are generated via {@link com.ampro.main.bot.commands.Command#getCooldownKey(CommandEvent)
+     * Cooldown keys are generated via {@code com.ampro.main.bot.commands.Command#getCooldownKey(CommandEvent)
      * Command#getCooldownKey(CommandEvent)} using 1-2 Snowflake ID's corresponding to the name
      * (IE: {@code USER_CHANNEL} uses the ID's of the User and the Channel from the CommandEvent).
      *

@@ -72,29 +72,8 @@ public class EventDispatcher extends ListenerAdapter {
                     }
                 }
             }
-        );/*
-        BetterMessageEvent bme;
-        try {
-            bme = new BetterMessageEvent(event);
-        } catch (BetterEvent.InvalidAuthorException e) {
-            System.err.println("Is self");
-            return;
-        }
-        try {
-            //Get the proper bot and hand off the event
-            Guild g = event.getGuild();
-            if (g != null) {
-                Launcher.getDatabase()
-                        .getBot(event.getGuild().getIdLong())
-                        .readEvent(bme);
-            } else {
-                //If the guild is not found, hand off to the private bot.
-                Launcher.getDatabase().getBot(0L).readEvent(bme);
-            }
-        } catch(ClassCastException e) {
-            System.err.println("Failed to cast to Weebot.");
-            e.printStackTrace();
-        }*/
+        );
+
     }
 
     @Override

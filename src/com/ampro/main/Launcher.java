@@ -6,6 +6,10 @@
 package com.ampro.main;
 
 import com.ampro.main.bot.Weebot;
+import com.ampro.main.bot.commands.Command;
+import com.ampro.main.bot.commands.HelpCommand;
+import com.ampro.main.bot.commands.ListGuildsCommand;
+import com.ampro.main.bot.commands.ShutdownCommand;
 import com.ampro.main.database.Database;
 import com.ampro.main.database.DatabaseManager;
 import com.ampro.main.jda.JDABuilder;
@@ -17,9 +21,7 @@ import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 
 import javax.security.auth.login.LoginException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Runner/Main class of the Weebot network.
@@ -31,6 +33,13 @@ import java.util.List;
 public class Launcher {
 
 	private static JDA JDA_CLIENT;
+	private static Thread saveTimer;
+
+	private static final ArrayList<Command> COMMANDS =
+			new ArrayList<>(Arrays.asList(
+					new HelpCommand(), new ShutdownCommand(),
+					new ListGuildsCommand()
+			));
 
 	/** The database */
 	private static Database DATABASE;
@@ -45,6 +54,7 @@ public class Launcher {
    public static void main(final String[] args) {
 		Launcher.jdaLogIn();
 		Launcher.setUpDatabase();
+
 		Collection c = DATABASE.getWeebots().values();
 		Iterator it = c.iterator();
 		System.out.println("Printing bots from database---------");
@@ -52,8 +62,8 @@ public class Launcher {
 			System.out.println(it.next());
 		}
 		System.out.println("-------------------------------DONE");
+
 		Launcher.startSaveTimer(1);
-		//while (Launcher.JDA_.getStatus() == null)
 		Launcher.addListeners();
 	}
 
@@ -96,15 +106,30 @@ public class Launcher {
 		Launcher.DATABASE = db == null ? new Database() : db;
 		if (db == null) {
 			System.err.println("Database not found, creating new database.");
-			System.err.println("Loading known Guilds");
+			System.err.println("\nLoading known Guilds");
 			List<Guild> guilds = Launcher.JDA_CLIENT.getGuilds();
 			for (Guild g : guilds) {
 				Launcher.DATABASE.addBot(new Weebot(g));
 			}
 			DatabaseManager.save(Launcher.DATABASE);
 			return;
+		} else {
+			System.out.println("Database located.\n\tUpdating registered Guilds.");
+			Launcher.updateGuilds();
 		}
+		System.out.println("\n\tBacking up database.");
 		DatabaseManager.backUp(Launcher.DATABASE);
+	}
+
+	/**
+	 * Update the Weebots in the database after downtime.
+	 * <b>This is only called once on startup</b>
+	 */
+	public static void updateGuilds() {
+		List<Guild> guilds = Launcher.JDA_CLIENT.getGuilds();
+		for (Guild g : guilds) {
+			Launcher.DATABASE.addBot(new Weebot(g));
+		}
 	}
 
 	/**
@@ -113,16 +138,9 @@ public class Launcher {
 	 * @param min The delay in minuets between saves.
 	 */
 	private static synchronized void startSaveTimer(double min) {
-	   Thread saveTimer = new Thread( () -> {
+	   Launcher.saveTimer = new Thread( () -> {
 			   try {
 				   while(true) {
-				   	   if (Launcher.JDA_CLIENT.getStatus().equals(Status.SHUTTING_DOWN)) {
-					        //On a proper shutdown
-					        System.err.println("Sutdown signal received. Saving database.");
-				   			DatabaseManager.backUp(Launcher.DATABASE);
-				   			DatabaseManager.save(Launcher.DATABASE);
-				   			break;
-				       }
 					   System.out.println("Backing up database.");
 					   DatabaseManager.backUp(Launcher.DATABASE);
 					   Thread.sleep(Math.round((1000 * 60) * min));
@@ -132,8 +150,30 @@ public class Launcher {
 			   }
 		   }
 	   );
-	   saveTimer.start();
+	   Launcher.saveTimer.start();
    }
+
+	/**
+	 * Begin the shutdown sequence. Backup and save database.
+	 */
+	public static void shutdown() {
+		Launcher.JDA_CLIENT.shutdown();
+
+		Launcher.saveTimer.interrupt();
+		System.err.println("Shutdown signal received. Saving database.");
+		DatabaseManager.backUp(Launcher.DATABASE);
+		DatabaseManager.save(Launcher.DATABASE);
+		System.out.println("Successfully shutdown.");
+
+		Collection c = DATABASE.getWeebots().values();
+		Iterator it = c.iterator();
+		System.out.println("Printing bots from database---------");
+		while(it.hasNext()) {
+			System.out.println(it.next());
+		}
+		System.out.println("-------------------------------DONE");
+
+	}
 
 	/**
 	 * @return The database.
@@ -164,6 +204,25 @@ public class Launcher {
 			Guild curr = it.next();
 			if (curr.getIdLong() == id) {
 				return curr;
+			}
+		}
+		return null;
+	}
+
+	public static ArrayList<Command> getCommands() {
+		return Launcher.COMMANDS;
+	}
+
+	/**
+	 * Get a {@link Command} from the available list.
+	 * @param cl The class of the {@link Command}.
+	 * @return  The {@link Command} that was requested.
+	 *          null if not found.
+	 */
+	public static Command getCommand(Class<? extends Command> cl) {
+		for (Command c : Launcher.COMMANDS) {
+			if (c.getClass().equals(cl)) {
+				return c;
 			}
 		}
 		return null;
