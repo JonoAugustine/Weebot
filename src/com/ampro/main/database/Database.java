@@ -5,9 +5,9 @@
 package com.ampro.main.database;
 
 import com.ampro.main.bot.Weebot;
-import com.google.gson.GsonBuilder;
 
 import java.util.ArrayList;
+import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -17,18 +17,18 @@ import java.util.TreeMap;
 public class Database {
 
     /** All Weebots currently in circulation, mapped to their Guild's ID */
-    private static TreeMap<Long, Weebot> WEEBOTS;
+    private TreeMap<Long, Weebot> WEEBOTS; //TODO Circular reference here
 
     /** Array of registered developer Discord IDs */
-    private static ArrayList<Long> DEV_IDS;
+    private ArrayList<Long> DEV_IDS;
 
     /** Build an empty {@code Database}.*/
     public Database() {
-        Database.WEEBOTS = new TreeMap<>();
-        Database.WEEBOTS.putIfAbsent(0L, new Weebot());
-    	Database.DEV_IDS = new ArrayList<>();
-    	Database.DEV_IDS.add(139167730237571072L); //Jono
-        Database.DEV_IDS.add(186130584693637131L); //Dernst
+        WEEBOTS = new TreeMap<>();
+        WEEBOTS.putIfAbsent(0L, new Weebot());
+    	DEV_IDS = new ArrayList<>();
+    	DEV_IDS.add(139167730237571072L); //Jono
+        DEV_IDS.add(186130584693637131L); //Dernst
     }
 
     /**
@@ -38,8 +38,8 @@ public class Database {
      * @param bot The bot
      */
     public synchronized void addBot(Weebot bot) {
-        if (!Database.WEEBOTS.containsValue(bot))
-            Database.WEEBOTS.putIfAbsent(bot.getGuildID(), bot);
+        if (!this.WEEBOTS.containsValue(bot))
+            this.WEEBOTS.putIfAbsent(bot.getGuildID(), bot);
     }
 
     /**
@@ -48,7 +48,7 @@ public class Database {
      * @return The weebot associated with the given guild ID. Null if not found.
      */
     public synchronized Weebot getBot(long id) {
-        return Database.WEEBOTS.get(id);
+        return this.WEEBOTS.get(id);
     }
 
     /**
@@ -57,7 +57,7 @@ public class Database {
      * @return The removed Weebot.
      */
     public synchronized Weebot removeBot(Weebot bot) {
-        return Database.WEEBOTS.remove(bot.getGuildID());
+        return this.WEEBOTS.remove(bot.getGuildID());
     }
 
     /**
@@ -66,7 +66,7 @@ public class Database {
      * @return The removed Weebot.
      */
     public synchronized Weebot removeBot(long id) {
-        return Database.WEEBOTS.remove(id);
+        return this.WEEBOTS.remove(id);
     }
 
     /**
@@ -74,7 +74,7 @@ public class Database {
      * @return TreeMap of Weebot's mapped to their Guild ID
      */
     public synchronized TreeMap getWeebots() {
-        return Database.WEEBOTS;
+        return this.WEEBOTS;
     }
 
     /**
@@ -82,7 +82,7 @@ public class Database {
      * @param id long user ID
      */
     public synchronized void addDeveloper(long id) {
-        Database.DEV_IDS.add(id);
+        this.DEV_IDS.add(id);
     }
 
     /**
@@ -91,19 +91,36 @@ public class Database {
      * @return The removed id
      */
     public synchronized long removeDeveloper(long id) {
-        return Database.DEV_IDS.remove(DEV_IDS.indexOf(id));
+        return this.DEV_IDS.remove(DEV_IDS.indexOf(id));
     }
 
     /**
      * @return ArrayList of registered developers.
      */
-    public synchronized ArrayList getDevelopers() {
-        return Database.DEV_IDS;
+    public synchronized ArrayList<Long> getDevelopers() {
+        return this.DEV_IDS;
     }
 
-    /** */
     @Override
     public String toString() {
-       	return new GsonBuilder().setPrettyPrinting().create().toJson(this);
+        String out = "";
+        out += "[";
+
+
+
+        for(Map.Entry<Long, Weebot> entry : this.WEEBOTS.entrySet()) {
+            long key = entry.getKey();
+            Weebot bot = entry.getValue();
+
+            out += "[";
+            out += key + ",";
+            out += bot.getNickname();
+            out += "]";
+        }
+
+        out += "]";
+
+        return out;
     }
+
 }

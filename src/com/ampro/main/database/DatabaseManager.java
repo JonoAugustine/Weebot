@@ -12,7 +12,6 @@ import java.io.*;
  */
 public class DatabaseManager {
 
-
     /**
      * Save the Database to file in the format:
      * <code>database.wbot</code>
@@ -30,8 +29,10 @@ public class DatabaseManager {
                 return -1;
             }
             try (Writer writer = new FileWriter("database.wbot")) {
-                Gson gson = new GsonBuilder().create();
-                gson.toJson(database, writer);
+                Gson gson = new GsonBuilder().enableComplexMapKeySerialization()
+                        .setExclusionStrategies().setPrettyPrinting().create();
+                gson.toJson(database, writer); //TODO
+                System.out.println("Database saved.");
                 return 1;
             } catch (FileNotFoundException e) {
                 System.err.println("File not found while writing gson to file.");
@@ -56,8 +57,10 @@ public class DatabaseManager {
                 return -1;
             }
             try (Writer writer = new FileWriter("databaseBK.wbot")) {
-                Gson gson = new GsonBuilder().create();
+                Gson gson = new GsonBuilder().enableComplexMapKeySerialization()
+                        .setExclusionStrategies().setPrettyPrinting().create();
                 gson.toJson(database, writer);
+                System.out.println("Database backed up.");
                 return 1;
             } catch (FileNotFoundException e) {
                 System.err.println("File not found while writing gson backup to file.");
@@ -88,9 +91,9 @@ public class DatabaseManager {
             try (Reader bKreader = new FileReader("databaseBK.wbot")) {
                 return gson.fromJson(bKreader, Database.class);
             } catch (FileNotFoundException e2) {
-                System.err.println("Unable to locate databseBK.wbot.");
-                e.printStackTrace();
-                e2.printStackTrace();
+                System.err.println("\tUnable to locate databseBK.wbot.");
+                //e.printStackTrace();
+                //e2.printStackTrace();
             } catch (IOException e2) {
                 System.err.println("IOException while reading gson from file.");
                 e.printStackTrace();
