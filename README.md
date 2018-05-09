@@ -6,11 +6,12 @@ Weebot is a bot for the social chat platform
 [Discord](https://discordapp.com/). <br> Weebot is still under
 construction, but you can see a [Feature List](#FeatureList) below as
 well as the current [Roadmap](#Roadmap). <br>
-Go to the [ChangeLogs](#Log) to see the most recent changes and development
+Go to the [ChangeLogs](#Log) to see the most recent changes in
+development progress.
 
 ----
 <a name='FeatureList'></a>
-#Feature List
+**Feature List**
 
 ...
 
@@ -52,16 +53,73 @@ Go to the [ChangeLogs](#Log) to see the most recent changes and development
     - *General* A very late update for very many changes
         - Implemented use of ``Command`` classes being called from
         ``Weebot`` instances.
-            - (JONO) I need to make a flowchart of events.
+            - (JONO) I need to make a new flowchart of events.
+            - <a name='CARR'></a>A ``static final List`` of ``Commands``
+            is kept in ``Launcher`` to avoid Gson errors with rebuilding
+            from abstract constructors. (Since the ``Launcher`` is not
+            serialized)
+            - A safe-shutdown method added to ``Launcher`` to disconnect
+            all bots and save without interruption
+            (see [ShutdownCommand](#SDC1)).
+        - Made use of Java multithreadding in the new commands, since
+        most of the commands should not hold up the main thread.
+    - *Weebot*
+        - Implemented ``runCommand(BetterMessageEvent, int)``
+            1. Get the command calling argument from the front of the
+            ``BetterMessageEvent``'s  args.
+            2. Check if the command string applies to any ``Command``
+            in the Launcher's list of ``Command``s.
+            3. Check if the command is allowed in that ``Channel``.
+            4. Run the command.
+        - Made ``boolean commandIsAllowed(Command, BetterMessageEvent)``
+        to check if the passed ``Command`` matches the a class in the
+        diabled command map.
+        - Changed reference to hosting guild to the guild's ID to avoid
+        a circular reference breaking Gson (even though I have no idea
+        where the circular reference is...)
+        - Removed the ``COMMANDS`` list ([see this](#CARR))
+        - Made banned-commands ``TreeMap`` value a ``List`` of
+        ``Command`` classes, so multiple commands can be banned in a
+        ``TextChannel``
+        - Removed ``devHelp(TextChannel)`` method (to be replaced with
+        [``HelpCommand``](#HPC)).
     - *Command*
-        -
+        - Added 2 abstract methods
+        ``void run(Weebot bot, BetterMessageEvent event)`` and
+        ``void execute(Weebot bot, BetterMessageEvent event)`` that
+        allow for the command to better interact with the bot (e.g. for
+        settings changes and games).
+        - Changed jagrosh's ``void run`` method to
+        ``boolean check(BetterMessageEvent)`` that checks if the command
+        call meets the permission requirenemts. (Currently only checks
+        against ``ownerOnly`` ``Command`` setting).
+        - Added empty constructor that sets everything to ``null``,
+        ``false``, or ``0``.
+        - A LOT of g/setters.
     - ***ListGuildsCommand***
-    - ***ShutdownCommand***
-    - ***HelpCommand***
+        - Sends a list of guild names and bot names to non-developers.
+        - Private messages developers a more detailed list.
+        - Runs a new ``Thread``.
+    - <a name='SDC1'>***ShutdownCommand***</a>
+        - Begins the shutdown sequence in ``Launcher``:
+        <pre><code>
+        Launcher.JDA_CLIENT.shutdown();
+        Launcher.saveTimer.interrupt();
+        DatabaseManager.backUp(Launcher.DATABASE);
+        DatabaseManager.save(Launcher.DATABASE);</code></pre>
+    - <a name='HPC'>***HelpCommand***</a>
+        - Doesn't really do anything but is set up to be implemented.
+        - Runs a new ``Thread``.
     - *BetterMessageEvent*
         - Removed queue lambda expression and reverted back complete to
         get arguments.
         - getTextChannel
+    - *Database*
+        - Made stataic variables...not static. (*unstaticized?*).
+        Makes more since this way, since a database is ***a*** Database
+        and can differe from another save file (in theory).
+    - *DatabaseManager*
+        - Set Gson to pretty printing cuz why not.
 - 3/6/18
     - *General*
         - Moving closer to a modified attempt at seperate ``Command``
