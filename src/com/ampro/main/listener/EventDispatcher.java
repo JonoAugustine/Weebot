@@ -39,7 +39,6 @@ public class EventDispatcher extends ListenerAdapter {
 
     @Override
     public void onGenericMessage(GenericMessageEvent event) {
-        boolean self;
         event.getChannel().getMessageById(
                 event.getMessageId()
         ).queue(

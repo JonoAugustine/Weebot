@@ -48,6 +48,45 @@ Go to the [ChangeLogs](#Log) to see the most recent changes and development
 <a name='Log'></a>
 **Log**
 <br>*(New files introduced in a log are marked by ***bold-italics***)*
+- 3/7/18
+    - *General* A very late update for very many changes
+        - Implemented use of ``Command`` classes being called from
+        ``Weebot`` instances.
+            - (JONO) I need to make a flowchart of events.
+    - *Command*
+        -
+    - ***ListGuildsCommand***
+    - ***ShutdownCommand***
+    - ***HelpCommand***
+    - *BetterMessageEvent*
+        - Removed queue lambda expression and reverted back complete to
+        get arguments.
+        - getTextChannel
+- 3/6/18
+    - *General*
+        - Moving closer to a modified attempt at seperate ``Command``
+        classes to excecute actions, while using the Weebots as a
+        database for settings and games to draw from.
+    - ***Command***
+        - Implemented a modified ad rather stripped down jagrosh
+        [JDA-util pack's](https://github.com/JDA-Applications/JDA-Utilities)
+        Command abstract class.
+    - *Weebot*
+        - Removed ``GuildSettings`` class and moved all variables back
+        to Weebot proper.
+            - Weebot empty constructor sets up a private bot.
+            with a null ``Guild`` and an ID of 0W.
+            - Made disabled commands a map with commands mapped to
+            channels for more specific banning of commands.
+        - Added methods ``read(BetterMessageEvent)`` and
+        ``matchesCommand(String)`` for taking in ``BetterEvents`` that
+        call commands.
+    - *BetterMessageEvent*
+        - ```getGuild, getSelfUser,```getSelfMmeber
+    - *BetterEvent*
+        - Changed abstract reply methods to String parameters instead of
+        ``Message``.
+        - getJDA
 - 3/5/18
     - *General*
         - Database working using JSON/GSON.
