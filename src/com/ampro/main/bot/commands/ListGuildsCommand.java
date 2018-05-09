@@ -21,7 +21,7 @@ public class ListGuildsCommand extends Command {
         super("ListGuilds"
                 , new ArrayList<>(Arrays.asList(
                         "showguilds", "showhosts", "listhosts", "allguilds"
-                        , "allhosts"
+                        , "allhosts", "listhomes", "distrobution"
                 ))
                 , "List all the guilds hosting a Weebot."
                 ,""

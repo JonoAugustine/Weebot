@@ -31,7 +31,7 @@ public class DatabaseManager {
             try (Writer writer = new FileWriter("database.wbot")) {
                 Gson gson = new GsonBuilder().enableComplexMapKeySerialization()
                         .setExclusionStrategies().setPrettyPrinting().create();
-                gson.toJson(database, writer); //TODO
+                gson.toJson(database, writer);
                 System.out.println("Database saved.");
                 return 1;
             } catch (FileNotFoundException e) {

@@ -9,7 +9,9 @@ import java.util.List;
 import java.util.Random;
 
 /**
+ * A {@link Command} to send information and help to the use requesting it.
  *
+ * @author Jonathan Augustine
  */
 public class HelpCommand extends Command {
 
@@ -52,7 +54,8 @@ public class HelpCommand extends Command {
     }
 
     /**
-     * Performs the action of the command.
+     * Reads the command and arguments given and responds with the requested
+     * information or help.
      *
      * @param bot
      *         The {@link Weebot} which called this command.
@@ -61,14 +64,29 @@ public class HelpCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
-        switch (new Random().nextInt() % 2) {
-            case 0:
-                event.reply("Check your DMs hot stuff :stuck_out_tongue_winking_eye:");
-                event.privateReply("Think of me :smirk: https://bit.ly/1LnkxHw");
-                break;
-            default:
-                event.reply("No amount of help will ever be enough to fix the" +
-                        " pathetic life you've made for yourself.");
+        /** Message arguments cleansed of the callsign or bot mention */
+        String[] args = this.cleanArgs(bot, event);
+
+        //If the only argument is the command invoke
+        if (args.length == 1) {
+            this.genericHelp(bot, event);
+        } else {
+            switch (args[1]) {
+                case "commands":
+                    this.commandsHelp(bot, event);
+                    return;
+                default:
+                    switch (new Random().nextInt() % 2) {
+                        case 0:
+                            event.reply("Check your DMs hot stuff :stuck_out_tongue_winking_eye:");
+                            event.privateReply("Think of me :smirk: https://bit.ly/1LnkxHw");
+                            break;
+                        default:
+                            event.reply("No amount of help will ever be enough to fix the" + " pathetic life you've made for yourself.");
+
+                    }
+                    return;
+            }
         }
     }
 
@@ -80,5 +98,32 @@ public class HelpCommand extends Command {
      */
     @Override
     protected void execute(BetterMessageEvent event) {}
+
+    /**
+     * Send the generic help information about Weebot.
+     * @param bot The bot who called.
+     * @param event The event that invoked this.
+     */
+    private void genericHelp(Weebot bot, BetterMessageEvent event) {
+        //TODO genericHelp response
+        String out = "```" + bot.getNickname() + " Help:\n";
+        out += "Sorry, this command is still under construction.\n";
+        out += "```";
+        event.reply(out);
+    }
+
+    /**
+     * Send a list of all the {@link Command}s Weebots can perform
+     * and how to use them.
+     * @param bot The bot who called
+     * @param event The event that invoked
+     */
+    private void commandsHelp(Weebot bot, BetterMessageEvent event) {
+        //TODO commandsHelp
+        String out = "```" + bot.getNickname() + " Commands:\n";
+        out += "Sorry, this command is still under construction.\n";
+        out += "```";
+        event.reply(out);
+    }
 
 }

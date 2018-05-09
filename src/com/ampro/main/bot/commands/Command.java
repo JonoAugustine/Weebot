@@ -21,6 +21,8 @@ import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.TextChannel;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -216,6 +218,46 @@ public abstract class Command {
             if(alias.equalsIgnoreCase(input))
                 return true;
         return false;
+    }
+
+    /**
+     * Removes the callsigns (@Weebot, or bot's {@link Weebot#CALLSIGN}) from
+     * the args.
+     * @param args String array to clean.
+     * @return new string array with the command call at index {@code [0]}.
+     */
+    protected String[] cleanArgs(Weebot bot, String[] args) {
+        //Make it an ArrayList b/c easy to work with
+        ArrayList<String> temp = new ArrayList<>(Arrays.asList(args));
+        if (args[0].startsWith(bot.getCallsign())) {
+            //^Check if the command was called with the callsign
+
+            //Split the first index by spaces. This allows for commands to be
+            //called w/ or w/o a space between the callsign and the command
+            //string (making it so there is only one case to deal with -> fewer
+            // if-else statements).
+            temp.get(0).split(" ");
+            //Then delete the callsign from the first argument
+            temp.set(0, temp.get(0).substring(bot.getCallsign().length()));
+
+        } else if (args[0].equals("@" + bot.getNickname())) {
+            //^Check if the command was called by mentioning the bot
+            //Remove the first argument and replace it with the second
+            //(which would be the command arg; e.g. [@Weebot, help])
+            temp.remove(0);
+            temp.trimToSize();
+        }
+        return temp.toArray(new String[temp.size()]);
+    }
+
+    /**
+     * Removes the callsigns (@Weebot, or bot's {@link Weebot#CALLSIGN}) from
+     * the args.
+     * @param event {@link BetterMessageEvent} to clean the arguments of.
+     * @return new string array with the command call at index {@code [0]}.
+     */
+    protected String[] cleanArgs(Weebot bot, BetterMessageEvent event) {
+        return this.cleanArgs(bot, event.getArgs());
     }
 
     /**

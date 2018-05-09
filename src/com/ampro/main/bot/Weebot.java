@@ -304,9 +304,7 @@ public class Weebot implements Comparable<Weebot> {
             case "help":
                 this.help(message.getAuthor(), message.getTextChannel(), command);
                 return;
-            case "dev":
-                this.devRead(message.getTextChannel(), command);
-                return;
+
             default:
                 message.getTextChannel().sendMessage(
                                 "Sorry, I don't recognize that command..."
@@ -533,18 +531,6 @@ public class Weebot implements Comparable<Weebot> {
     }
 
 	/**
-	 * List all (non-dev) commands.
-	 * @param channel TextChannel to send to
-	 */
-	private void listCommands(TextChannel channel) {
-		channel.sendMessage("TODO").queue();//TODO
-		//This method makes me think that we should use
-		//a list<string> of all commands and just use that
-		//to check for all commands in read() and for listCommands
-		//This would probably make expanding a lot easier later
-	}
-
-	/**
 	 * List current Weebot settings.
 	 * @param channel Text channel to send to
 	 */
@@ -631,44 +617,6 @@ public class Weebot implements Comparable<Weebot> {
                 : "PRIVATE BOT";
 	}
 
-	//
-	//
-	//Dev-only Methods
-	//
-	//
-	//
-
-	/**
-	 * Read method for dev-only commands
-	 * @param channel TextChannel invoked from
-	 * @param command String command array
-	 */
-	private void devRead(TextChannel channel, String[] command) {
-        switch (command[1]) {
-            case "listguilds":
-            case "allguilds":
-            case "listhomes":
-            case "distrobution":
-                //Weebot.listGuilds(channel);
-                return;
-            case "help":
-                channel.sendMessage(
-                        "Well if ur the dev, just open the code, jesus."
-                ).queue();
-                //TODO lol
-                return;
-            case "kill":
-                channel.sendMessage("Shutting down all Weebots...").queue();
-                Launcher.getJda().shutdown();
-                return;
-            default:
-                channel.sendMessage(
-                        "Don't recognize: " + String.join(" ", command)
-                ).queue();
-                return;
-        }
-    }
-
 	/**
 	 * @return -1 if the Guild/Server ID is less than parameter's
 	 * 			0 if equal to parameter's
@@ -688,4 +636,59 @@ public class Weebot implements Comparable<Weebot> {
 		return out;
 	}
 
+    public String getNICKNAME() {
+        return NICKNAME;
+    }
+
+    public void setNICKNAME(String NICKNAME) {
+        this.NICKNAME = NICKNAME;
+    }
+
+    public String getCALLSIGN() {
+        return CALLSIGN;
+    }
+
+    public void setCALLSIGN(String CALLSIGN) {
+        this.CALLSIGN = CALLSIGN;
+    }
+
+    public boolean isEXPLICIT() {
+        return EXPLICIT;
+    }
+
+    public void setEXPLICIT(boolean EXPLICIT) {
+        this.EXPLICIT = EXPLICIT;
+    }
+
+    public List<String> getBANNED_WORDS() {
+        return BANNED_WORDS;
+    }
+
+    public void setBANNED_WORDS(List<String> BANNED_WORDS) {
+        this.BANNED_WORDS = BANNED_WORDS;
+    }
+
+    public boolean isNSFW() {
+        return NSFW;
+    }
+
+    public void setNSFW(boolean NSFW) {
+        this.NSFW = NSFW;
+    }
+
+    public boolean isACTIVE_PARTICIPATE() {
+        return ACTIVE_PARTICIPATE;
+    }
+
+    public void setACTIVE_PARTICIPATE(boolean ACTIVE_PARTICIPATE) {
+        this.ACTIVE_PARTICIPATE = ACTIVE_PARTICIPATE;
+    }
+
+    public List<Game<? extends Player>> getGAMES_RUNNING() {
+        return GAMES_RUNNING;
+    }
+
+    public void setGAMES_RUNNING(List<Game<? extends Player>> GAMES_RUNNING) {
+        this.GAMES_RUNNING = GAMES_RUNNING;
+    }
 }
