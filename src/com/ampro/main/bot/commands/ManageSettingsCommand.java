@@ -5,13 +5,12 @@ import com.ampro.main.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
-import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.managers.GuildController;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 /**
  * A {@link Command} that manages the settings for the {@link Weebot}.
@@ -27,8 +26,8 @@ public class ManageSettingsCommand extends Command {
                 , new ArrayList<>(Arrays.asList(
                         "managesettings", "changesettings", "setting",
                         "nickname", "setname", "changename",
-                        "callsign", "callwith", "callw/", "prefix",
-                        "explicit", "expl", "cancuss", "vulgar", "pottymouth",
+                        "callsign", "callwith", "callw", "prefix",
+                        "explicit", "expl", "vulgar", "pottymouth",
                         "participate", "activeparticipate", "interrupt",
                         "livebot", "chatbot",
                         "naughty", "nsfw"
@@ -59,244 +58,297 @@ public class ManageSettingsCommand extends Command {
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
         String[] args = this.cleanArgs(bot, event);
-/*
-        switch (args[0] /*The command argument*) {
+        //Small note: when two cases are lined-up (like name and nickname)
+        //then both cases go to the next available code
+        // (e.g. name and nickname cases both go to this.changeNickname)
+        switch (args[0].toLowerCase()) {
             case "set":
             case "settings":
             case "setting":
                 this.listServerSettings(bot, event);
                 return;
-            case "name":
+            case "setname":
+            case "changename":
             case "nickname":
                 this.changeNickName(bot, event);
                 return;
             case "callsign":
             case "prefix":
+            case "callwith":
+            case "callw":
                 this.callsign(bot, event);
                 return;
             case "participate":
-            case "activeparticipate":
             case "interrupt":
                 this.participate(bot, event);
+            case "explicit":
+            case "expl":
+            case "vulgar":
+            case "pottymouth":
+                this.explicit(bot, event);
+                return;
             case "nsfw":
             case "naughty":
                 this.nsfw(bot, event);
                 return;
-            case "explicit":
-            case "expl":
-            case "cuss":
-                this.explicit(bot, event);
-                return;
             default:
                 return;
         }
-*/
+
     }
-/*
+
     /**
-     * Set or Get {@code EXPLICIT}.
-     * @param channel TextChannel called from
-     * @param command command invoked
-     *
+     * Send a list of the Bot's settings.
+     * @param bot The {@link Weebot} who called.
+     * @param event The {@link BetterMessageEvent} that invoked
+     */
+    private void listServerSettings(Weebot bot, BetterMessageEvent event) {
+        String out = "Wanna learn about me?";
+
+        out += "\n\n```";
+        out += "I live here: " + Launcher.getGuild(bot.getGuildID()).getName();
+        out += "\n";
+        out += "I now go by: " + bot.getNickname();
+        out += "\n";
+        out += "Call me with: " + bot.getCallsign()+ " or @" +bot.getNickname();
+        out += "\n";
+        out += "I am " + (bot.isExplicit() ? "" : "not ") + "explicit";
+        out += "\n";
+        out += "I " + (bot.isNSFW() ? "am " : "not ") + "NSFW";
+        out += "\n";
+        out += "I " + (bot.canParticipate() ? "" : "don't ")
+                + "join in on some conversations where I'n not called.";
+        out += "```\n";
+        out += "You can change any setting like this:" +
+                "```<setting_name> [new_value]``` where ``[new_value]`` " +
+                "can be either ``[true/on/false/off]`` or ``[abc...]``";
+        //out += "\n";
+        //out += "\n";
+        out += "```";
+
+        event.reply(out);
+    }
+
+    /**
+     * View or set the {@link Weebot#explicit} setting.
+     * @param bot The {@link Weebot} to view or modify.
+     * @param event The {@link BetterMessageEvent} that invoked this command.
+     */
     private void explicit(Weebot bot, BetterMessageEvent event) {
+        String[] args = this.cleanArgs(bot, event);
         //Only respond to commands with the appropriate number of args
-        switch (command.length) {
+        switch (args.length) {
             case 1:
-                channel.sendMessage(
-                        "I am " + (this.EXPLICIT ? "" : "not ") + "NSFW"
-                ).queue();
+                //If the command was just the name of the setting
+                event.reply("I am " + (bot.isExplicit() ? "" : "not ")
+                        + "explicit."
+                );
                 return;
             case 2:
-                switch (command[1]) {
+                switch (args[1].toLowerCase()) {
                     case "true":
-                        this.EXPLICIT = true;
-                        channel.sendMessage("I am now explicit" ).queue();
+                    case "on":
+                    case "yes":
+                        if (bot.setExplicit(true))
+                            event.reply("I am already explicit :smiling_imp:");
+                        else
+                            event.reply("I am now explicit :smiling_imp:");
                         return;
                     case "false":
-                        this.EXPLICIT = false;
-                        channel.sendMessage("I am now clean" ).queue();
+                    case "off":
+                    case "of":
+                        if (bot.setExplicit(false))
+                            event.reply("I am now clean :innocent:");
+                        else
+                            event.reply("I am already clean :innocent:");
                         return;
                     default:
-                        channel.sendMessage("Sorry, " + command[1]
+                        event.reply("Sorry, " + args[1]
                                 + " is not an option. Please use the commands: "
-                                + "```" + this.CALLSIGN + "explicit [true/on/false/off]```"
-                                + "```" + this.CALLSIGN + "expl [true/on/false/off]```"
-                                + "```" + this.CALLSIGN + "cuss [true/on/false/off]```"
-                        ).queue();
+                                + "```" + bot.getCallsign()
+                                + "<explicit/expl/vulgar/pottymouth> "
+                                + "[true/on/false/off]```"
+                        );
                         return;
                 }
             default:
-                channel.sendMessage("Sorry, " + command[1]
+                event.reply("Sorry, " + String.join(" ", args)
+                                            .substring(args[0].length())
                         + " is not an option. Please use the commands: "
-                        + "```" + this.CALLSIGN + "explicit [true/on/false/off]```"
-                        + "```" + this.CALLSIGN + "expl [true/on/false/off]```"
-                        + "```" + this.CALLSIGN + "cuss [true/on/false/off]```"
-                ).queue();
+                        + "```" + bot.getCallsign()
+                        + "<explicit/expl/vulgar/pottymouth> "
+                        + "[true/on/false/off]```"
+                );
+                return;
         }
     }
 
     /**
-     * Set or Get {@code ACTIVEPARTICIPATE}.
-     * @param channel TextChannel called from
-     * @param command Command invoked
-     *
+     * View or set the {@link Weebot#ACTIVE_PARTICIPATE} setting.
+     * @param bot The {@link Weebot} to view or modify.
+     * @param event The {@link BetterMessageEvent} that invoked this command.
+     */
     private void participate(Weebot bot, BetterMessageEvent event) {
+        String[] args = this.cleanArgs(bot, event);
         //Only respond to commands with the appropriate number of args
-        switch (command.length) {
+        switch (args.length) {
             case 1:
-                channel.sendMessage(
-                        "I will " + (this.ACTIVE_PARTICIPATE ? "" : "not ")
+                event.reply(
+                        "I will " + (bot.canParticipate() ? "" : "not ")
                                 + " join in on conversations."
-                ).queue();
+                );
                 return;
             case 2:
-                switch (command[1]) {
+                switch (args[1]) {
                     case "true":
-                        this.ACTIVE_PARTICIPATE = true;
-                        channel.sendMessage(
-                                "I will join in on conversations."
-                        ).queue();
+                    case "on":
+                        if (bot.setACTIVE_PARTICIPATE(true))
+                            event.reply("I can already join conversations");
+                        else
+                            event.reply("I will join conversations :grin:");
                         return;
                     case "false":
-                        this.ACTIVE_PARTICIPATE= false;
-                        channel.sendMessage(
-                                "I won't join in on conversations anymore."
-                        ).queue();
+                    case "off":
+                    case "of":
+                        bot.setACTIVE_PARTICIPATE(false);
+                        event.reply("I won't join conversations anymore.");
                         return;
                     default:
-                        channel.sendMessage("Sorry, " + command[1]
-                                + " is not an option. Please use the commands: "
-                                + "```" + this.CALLSIGN +
-                                "participate " +
-                                "[true/on/false/off]```"
-                                + "```" + this.CALLSIGN +
-                                "activeparticipate [true/on/false/off]```"
-                                + "```" + this.CALLSIGN + "interrupt" +
-                                " " +
-                                "[true/on/false/off]```"
-                        ).queue();
+                        event.reply("Sorry, " + args[1] + " is not an option."
+                                + " Please use the commands: "
+                                + "```" + bot.getCallsign() +
+                                "<participate/interrupt> [true/on/false/off]```"
+                        );
                         return;
                 }
             default:
-                channel.sendMessage("Sorry, " + command[1]
+                event.reply("Sorry, " + String.join(" ", args)
+                                             .substring(args[0].length())
                         + " is not an option. Please use the commands: "
-                        + "```" + this.CALLSIGN + "participate " +
-                        "[true/on/false/off]```"
-                        + "```" + this.CALLSIGN + "activeparticipate" +
-                        " " +
-                        "[true/on/false/off]```"
-                        + "```" + this.CALLSIGN + "interrupt " +
-                        "[true/on/false/off]```"
-                ).queue();
+                        + "```" + bot.getCallsign() +
+                        "<participate/interrupt> [true/on/false/off]```"
+                );
+                return;
         }
     }
 
     /**
-     * Sets the bot's NSFW setting according to message containing true or false. <br>
-     * Or sends whether or not the Bot is NSFW.
-     * @param channel TextChannel called from
-     * @param command Command used to invoke
-     *
+     * View or set the {@link Weebot#NSFW} setting.
+     * @param bot The {@link Weebot} to view or modify.
+     * @param event The {@link BetterMessageEvent} that invoked this command.
+     */
     private void nsfw(Weebot bot, BetterMessageEvent event) {
-        switch (command.length) {
+        String[] args = this.cleanArgs(bot, event);
+        switch (args.length) {
             case 1:
-                channel.sendMessage(
-                        "I am " + (this.NSFW ? "" : "not ") + "NSFW"
-                ).queue();
+                event.reply(
+                        "I am " + (bot.isNSFW() ? "" : "not ") + "NSFW"
+                );
                 return;
             case 2:
-                switch (command[1]) {
+                switch (args[1]) {
                     case "true":
-                        this.NSFW = true;
-                        channel.sendMessage("I am now NSFW" ).queue();
+                    case "on":
+                        if (bot.setNSFW(true))
+                            event.reply("I am already NSFW :wink:");
+                        else
+                            event.reply("I am now NSFW :wink:");
                         break;
                     case "false":
-                        this.NSFW = false;
-                        channel.sendMessage("I am now SFW" ).queue();
+                    case "off":
+                    case "of":
+                        if (bot.setNSFW(false))
+                            event.reply("I am already SFW :innocent:");
+                        else
+                            event.reply("I am now SFW :innocent:");
                         break;
                     default:
-                        channel.sendMessage("Sorry, " + command[1]
-                                + " is not an option. Please use the command: "
-                                + "```" + this.CALLSIGN + "nsfw " +
+                        event.reply("Sorry, " + args[1] + " is not an option."
+                                + " Please use the command: " + "```"
+                                + bot.getCallsign() + "<nsfw/naughty>" +
                                 "[true/on/false/off]```"
-                        ).queue();
+                        );
                         return;
                 }
                 break;
             default:
-                channel.sendMessage("Sorry, " + String.join(" ", command[1])
-                        + " is not an option. Please use the command: "
-                        + "```" + this.CALLSIGN + "nsfw " +
+                event.reply("Sorry, " + String.join(" ", args)
+                                                .substring(args[0].length())
+                        + " is not an option. Please use the command:```"
+                        + bot.getCallsign() + "<nsfw/naughty>" +
                         "[true/on/false/off]```"
-                ).queue();
+                );
+                return;
         }
     }
 
     /**
-     * Change the nickname of the bot for this server.
-     * @param channel TextChannel called from
-     * @param command The command used to call this method
-     *
-    private void changeNickName(Weebot bot, BetterMessageEvent event) {
-        try {
-            String newName = String.join(" ", command);
-            //Change name on server
-            Guild g = Launcher.getGuild(this.GUILD_ID);
-            Member self = g.getSelfMember();
-            new GuildController(g).setNickname(self, newName).queue();
-            //Change internal name
-            this.NICKNAME = newName;
-            if (!newName.equalsIgnoreCase("weebot"))
-                channel.sendMessage("Hmm... " + newName
-                        + "... I like the sound of that!").queue();
-            else
-                channel
-                        .sendMessage("Hmm... Weebot... I like the sound of th-- wait!")
-                        .queue();
-        } catch (InsufficientPermissionException e) {
-            channel.sendMessage("I don't have permissions do that :(").queue();
-        }
-    }
-
-    /**
-     * Change or send the callsign (limited to 3 char).
-     * @param channel TextChannel called from
-     * @param command Command used to invoke
-     *
+     * View or set the {@link Weebot#callsign} setting.
+     * @param bot The {@link Weebot} to view or modify.
+     * @param event The {@link BetterMessageEvent} that invoked this command.
+     */
     private void callsign(Weebot bot, BetterMessageEvent event) {
-        switch (command.length) {
+        String[] args = this.cleanArgs(bot, event);
+        switch (args.length) {
             case 1:
                 //Send back the current callsign
-                channel.sendMessage("You can call me with " + this.CALLSIGN
-                        + " or @" + this.NICKNAME).queue();
+                event.reply(
+                        "You can call me with " + bot.getCallsign()
+                        + " or @" + bot.getNickname()
+                );
                 return;
             case 2:
                 //Set a new callsign (if under 3 char)
-                if (command[1].length() > 3) {
-                    channel.sendMessage(
+                if (args[1].length() > 3) {
+                    event.reply(
                             "Please keep the callsign under 4 characters."
-                    ).queue();
+                    );
                     return;
                 } else {
-                    this.CALLSIGN = command[1];
-                    channel.sendMessage("You can now call me with ```" +
-                            this.CALLSIGN
-                            + "``` or ```@" + this.NICKNAME + "```")
-                            .queue();
+                    bot.setCallsign(args[1]);
+                    event.reply(
+                            "You can now call me with ```" + args[1]
+                            + "<command> ```or```@" + bot.getNickname() + "```"
+                    );
                     return;
                 }
             default:
-                channel.sendMessage(
-                        "Sorry, I can't understand that command."
-                                + "\nYou can change my callsign with these commands:"
-                                + "```" + this.CALLSIGN + "prefix " +
-                                "new_prefix```"
-                                + "```@" + this.NICKNAME + " prefix " +
-                                "new_prefix```"
-                ).queue();
+                event.reply("Sorry, " + String.join(" ", args)
+                        .substring(args[0].length())
+                        + " is not an option. Please use the command:```"
+                        + bot.getCallsign() +
+                        "<callsign/prefix/callwith/callw> [new_prefix]```"
+                );
+                return;
         }
     }
-*/
+
+    /**
+     * View or set the {@link Weebot#nickname} setting.
+     * @param bot The {@link Weebot} to view or modify.
+     * @param event The {@link BetterMessageEvent} that invoked this command.
+     */
+    private void changeNickName(Weebot bot, BetterMessageEvent event) {
+        String[] args = this.cleanArgs(bot, event);
+        try {
+            String newName = String.join(" ", args)
+                    .substring(args[0].length());
+            //Change name on server
+            Guild g = Launcher.getGuild(bot.getGuildID());
+            Member self = g.getSelfMember();
+            new GuildController(g).setNickname(self, newName).queue();
+            //Change internal name
+            bot.setNickname(newName);
+            if (!newName.equalsIgnoreCase("weebot"))
+                event.reply("Hmm... " + newName
+                        + "... I like the sound of that!"
+                );
+            else
+                event.reply("Hmm... Weebot... I like the sound of th-- wait!");
+        } catch (InsufficientPermissionException e) {
+            event.reply("I don't have permissions do that :(");
+        }
+    }
 
     @Override
     protected void execute(BetterMessageEvent event) {}

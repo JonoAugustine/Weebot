@@ -221,8 +221,8 @@ public abstract class Command {
     }
 
     /**
-     * Removes the callsigns (@Weebot, or bot's {@link Weebot#CALLSIGN}) from
-     * the args.
+     * Removes the callsigns (@Weebot, or bot's {@link Weebot#callsign}) from
+     * the args and sets all strings to lowercase.
      * @param args String array to clean.
      * @return new string array with the command call at index {@code [0]}.
      */
@@ -247,11 +247,14 @@ public abstract class Command {
             temp.remove(0);
             temp.trimToSize();
         }
+        for (int i = 0; i < temp.size(); i++) {
+            temp.set(i, temp.get(i).toLowerCase());
+        }
         return temp.toArray(new String[temp.size()]);
     }
 
     /**
-     * Removes the callsigns (@Weebot, or bot's {@link Weebot#CALLSIGN}) from
+     * Removes the callsigns (@Weebot, or bot's {@link Weebot#callsign}) from
      * the args.
      * @param event {@link BetterMessageEvent} to clean the arguments of.
      * @return new string array with the command call at index {@code [0]}.

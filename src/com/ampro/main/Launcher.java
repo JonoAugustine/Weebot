@@ -6,10 +6,7 @@
 package com.ampro.main;
 
 import com.ampro.main.bot.Weebot;
-import com.ampro.main.bot.commands.Command;
-import com.ampro.main.bot.commands.HelpCommand;
-import com.ampro.main.bot.commands.ListGuildsCommand;
-import com.ampro.main.bot.commands.ShutdownCommand;
+import com.ampro.main.bot.commands.*;
 import com.ampro.main.database.Database;
 import com.ampro.main.database.DatabaseManager;
 import com.ampro.main.jda.JDABuilder;
@@ -38,7 +35,7 @@ public class Launcher {
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
 					new HelpCommand(), new ShutdownCommand(),
-					new ListGuildsCommand()
+					new ManageSettingsCommand(), new ListGuildsCommand()
 			));
 
 	/** The database */
