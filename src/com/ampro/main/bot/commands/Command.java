@@ -197,7 +197,6 @@ public abstract class Command {
 
         //required role check
 
-
         //cooldown check
 
         return true;
@@ -222,7 +221,7 @@ public abstract class Command {
 
     /**
      * Removes the callsigns (@Weebot, or bot's {@link Weebot#callsign}) from
-     * the args and sets all strings to lowercase.
+     * the args.
      * @param args String array to clean.
      * @return new string array with the command call at index {@code [0]}.
      */
@@ -247,10 +246,21 @@ public abstract class Command {
             temp.remove(0);
             temp.trimToSize();
         }
-        for (int i = 0; i < temp.size(); i++) {
-            temp.set(i, temp.get(i).toLowerCase());
-        }
         return temp.toArray(new String[temp.size()]);
+    }
+
+    /**
+     * Removes the callsigns (@Weebot, or bot's {@link Weebot#callsign}) from
+     * the args and sets all strings to lowercase.
+     * @param args String array to clean.
+     * @return new string array with the command call at index {@code [0]}.
+     */
+    protected final String[] cleanArgsLowerCase(Weebot bot, String[] args) {
+        args = this.cleanArgs(bot, args);
+        for (int i = 0; i < args.length; i++) {
+            args[i] = args[i].toLowerCase();
+        }
+        return args;
     }
 
     /**
@@ -261,6 +271,16 @@ public abstract class Command {
      */
     protected String[] cleanArgs(Weebot bot, BetterMessageEvent event) {
         return this.cleanArgs(bot, event.getArgs());
+    }
+
+    /**
+     * Removes the callsigns (@Weebot, or bot's {@link Weebot#callsign}) from
+     * the args and sets all arguments to lowercase.
+     * @param event {@link BetterMessageEvent} to clean the arguments of.
+     * @return new string array with the command call at index {@code [0]}.
+     */
+    protected final String[] cleanArgsLowerCase(Weebot bot, BetterMessageEvent event) {
+        return this.cleanArgsLowerCase(bot, event.getArgs());
     }
 
     /**

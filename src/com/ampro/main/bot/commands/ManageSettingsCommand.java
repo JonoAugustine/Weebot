@@ -2,13 +2,13 @@ package com.ampro.main.bot.commands;
 
 import com.ampro.main.Launcher;
 import com.ampro.main.bot.Weebot;
+import com.ampro.main.database.DatabaseManager;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.managers.GuildController;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -44,6 +44,7 @@ public class ManageSettingsCommand extends Command {
     @Override
     public void run(Weebot bot, BetterMessageEvent event) {
         if(this.check(event)) {
+            System.out.println("[AMPRO] Starting settings command thread.");
             Thread thread = new Thread(() -> this.execute(bot, event));
             thread.setName(bot.getBotId() + " : SettingsCommand");
             thread.start();
@@ -57,44 +58,50 @@ public class ManageSettingsCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = this.cleanArgsLowerCase(bot, event);
         //Small note: when two cases are lined-up (like name and nickname)
         //then both cases go to the next available code
         // (e.g. name and nickname cases both go to this.changeNickname)
-        switch (args[0].toLowerCase()) {
-            case "set":
+        switch (args[0]) {
+            case "managesettings":
             case "settings":
             case "setting":
-                this.listServerSettings(bot, event);
-                return;
+                System.out.println("[AMPRO]Listing Settings.");
+                this.listGuildSettings(bot, event);
+                break;
             case "setname":
             case "changename":
             case "nickname":
                 this.changeNickName(bot, event);
-                return;
+                break;
             case "callsign":
             case "prefix":
             case "callwith":
             case "callw":
                 this.callsign(bot, event);
-                return;
+                break;
             case "participate":
             case "interrupt":
                 this.participate(bot, event);
+                break;
             case "explicit":
             case "expl":
             case "vulgar":
             case "pottymouth":
                 this.explicit(bot, event);
-                return;
+                break;
             case "nsfw":
             case "naughty":
                 this.nsfw(bot, event);
-                return;
+                break;
             default:
+                System.out.println("[AMPRO] No Setting command found in: "
+                + args[0]);
                 return;
         }
-
+        synchronized (Launcher.getDatabase()) {
+            DatabaseManager.backUp(Launcher.getDatabase());
+        }
     }
 
     /**
@@ -102,7 +109,8 @@ public class ManageSettingsCommand extends Command {
      * @param bot The {@link Weebot} who called.
      * @param event The {@link BetterMessageEvent} that invoked
      */
-    private void listServerSettings(Weebot bot, BetterMessageEvent event) {
+    private void listGuildSettings(Weebot bot, BetterMessageEvent event) {
+        System.out.println("[AMPRO] Building Guild Settings List.");
         String out = "Wanna learn about me?";
 
         out += "\n\n```";
@@ -116,15 +124,14 @@ public class ManageSettingsCommand extends Command {
         out += "\n";
         out += "I " + (bot.isNSFW() ? "am " : "not ") + "NSFW";
         out += "\n";
-        out += "I " + (bot.canParticipate() ? "" : "don't ")
-                + "join in on some conversations where I'n not called.";
+        out += "I " + (bot.canParticipate() ? "" : "won't ")
+                + "join conversations if I'm not called.";
         out += "```\n";
         out += "You can change any setting like this:" +
                 "```<setting_name> [new_value]``` where ``[new_value]`` " +
                 "can be either ``[true/on/false/off]`` or ``[abc...]``";
         //out += "\n";
         //out += "\n";
-        out += "```";
 
         event.reply(out);
     }
@@ -135,7 +142,7 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked this command.
      */
     private void explicit(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = this.cleanArgsLowerCase(bot, event);
         //Only respond to commands with the appropriate number of args
         switch (args.length) {
             case 1:
@@ -189,7 +196,7 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked this command.
      */
     private void participate(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = this.cleanArgsLowerCase(bot, event);
         //Only respond to commands with the appropriate number of args
         switch (args.length) {
             case 1:
@@ -238,7 +245,7 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked this command.
      */
     private void nsfw(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = this.cleanArgsLowerCase(bot, event);
         switch (args.length) {
             case 1:
                 event.reply(
@@ -288,7 +295,7 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked this command.
      */
     private void callsign(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = this.cleanArgsLowerCase(bot, event);
         switch (args.length) {
             case 1:
                 //Send back the current callsign
