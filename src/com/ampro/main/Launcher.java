@@ -22,10 +22,10 @@ import java.util.*;
 
 /**
  * Runner/Main class of the Weebot network.
- * Builds single JDA connection.
+ * Builds single JDA connection, instances of all {@link Command Commands}, and
+ * {@link Database}.
  *
  * @author Jonathan Augustine
- *
  */
 public class Launcher {
 
@@ -99,22 +99,25 @@ public class Launcher {
 	 * Is called only once during setup.
 	 */
 	private static void setUpDatabase() {
+		System.err.println("[Launcher-setUpDatabase]\n\tSetting up Database.");
 		Database db = DatabaseManager.load();
 		Launcher.DATABASE = db == null ? new Database() : db;
 		if (db == null) {
-			System.err.println("Database not found, creating new database.");
-			System.err.println("\nLoading known Guilds");
+			System.err.println("\tDatabase not found, creating new database.");
+			System.err.println("\tLoading known Guilds");
 			List<Guild> guilds = Launcher.JDA_CLIENT.getGuilds();
 			for (Guild g : guilds) {
 				Launcher.DATABASE.addBot(new Weebot(g));
 			}
 			DatabaseManager.save(Launcher.DATABASE);
+			System.err.println("\tDatabase created and saved to file.");
 			return;
 		} else {
-			System.out.println("Database located.\n\tUpdating registered Guilds.");
+			System.err.println("\tDatabase located.");
+			System.err.println("\tUpdating registered Guilds.");
 			Launcher.updateGuilds();
 		}
-		System.out.println("\n\tBacking up database.");
+		System.err.println("\tBacking up database.");
 		DatabaseManager.backUp(Launcher.DATABASE);
 	}
 
@@ -147,6 +150,7 @@ public class Launcher {
 			   }
 		   }
 	   );
+	   saveTimer.setName("Save Timer");
 	   Launcher.saveTimer.start();
    }
 

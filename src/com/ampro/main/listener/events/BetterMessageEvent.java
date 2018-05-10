@@ -22,6 +22,8 @@ import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
 import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent;
 
+import java.time.OffsetDateTime;
+
 /**
  * An wrapper class for {@link GenericMessageEvent}
  * & {@link GenericPrivateMessageEvent}
@@ -39,7 +41,8 @@ public class BetterMessageEvent extends BetterEvent {
     /** The author (User) of the event */
     private final User AUTHOR;
     /** Arguments of a MessageReceivedEvent */
-    private String[] ARGUMENTS;
+    private final String[] ARGUMENTS;
+    private OffsetDateTime CREATION_TIME;
 
     /**
      * Construct a {@code BetterMessageEvent} from a
@@ -59,7 +62,11 @@ public class BetterMessageEvent extends BetterEvent {
             throw new InvalidAuthorException("User is self.");
         }
         this.ARGUMENTS = event.getChannel().getMessageById(event.getMessageId())
-                .complete().getContentStripped().split(" ");
+                .complete().getContentStripped().trim().split(" ");
+
+        this.CREATION_TIME = event.getChannel()
+                .getMessageById(event.getMessageId())
+                .complete().getCreationTime();
 
     }
 
@@ -81,7 +88,11 @@ public class BetterMessageEvent extends BetterEvent {
         }
         this.MESSAGE_EVENT = event;
         this.ARGUMENTS = event.getChannel().getMessageById(event.getMessageId())
-                .complete().getContentStripped().split(" ");
+                .complete().getContentStripped().trim().split(" ");
+
+        this.CREATION_TIME = event.getChannel()
+                .getMessageById(event.getMessageId())
+                .complete().getCreationTime();
 
     }
 
@@ -149,7 +160,7 @@ public class BetterMessageEvent extends BetterEvent {
     /** Delete the message. */
     public void deleteMessage() {
         this.MESSAGE_EVENT.getChannel().getMessageById(this.MESSAGE_EVENT.getMessageIdLong())
-                .complete().delete().queue();
+                .queue(m -> m.delete().queue());
     }
 
     /**
@@ -202,6 +213,13 @@ public class BetterMessageEvent extends BetterEvent {
      */
     public TextChannel getTextChannel() {
         return this.MESSAGE_EVENT.getTextChannel();
+    }
+
+    /**
+     * @return {@link OffsetDateTime} of the message.
+     */
+    public final OffsetDateTime getCreationTime() {
+        return this.CREATION_TIME;
     }
 
 }

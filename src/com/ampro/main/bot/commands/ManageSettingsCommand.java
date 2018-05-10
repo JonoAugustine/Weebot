@@ -44,7 +44,6 @@ public class ManageSettingsCommand extends Command {
     @Override
     public void run(Weebot bot, BetterMessageEvent event) {
         if(this.check(event)) {
-            System.out.println("[AMPRO] Starting settings command thread.");
             Thread thread = new Thread(() -> this.execute(bot, event));
             thread.setName(bot.getBotId() + " : SettingsCommand");
             thread.start();
@@ -66,7 +65,6 @@ public class ManageSettingsCommand extends Command {
             case "managesettings":
             case "settings":
             case "setting":
-                System.out.println("[AMPRO]Listing Settings.");
                 this.listGuildSettings(bot, event);
                 break;
             case "setname":
@@ -95,8 +93,6 @@ public class ManageSettingsCommand extends Command {
                 this.nsfw(bot, event);
                 break;
             default:
-                System.out.println("[AMPRO] No Setting command found in: "
-                + args[0]);
                 return;
         }
         synchronized (Launcher.getDatabase()) {
@@ -110,10 +106,8 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked
      */
     private void listGuildSettings(Weebot bot, BetterMessageEvent event) {
-        System.out.println("[AMPRO] Building Guild Settings List.");
         String out = "Wanna learn about me?";
-
-        out += "\n\n```";
+        out += "\n```";
         out += "I live here: " + Launcher.getGuild(bot.getGuildID()).getName();
         out += "\n";
         out += "I now go by: " + bot.getNickname();
@@ -128,7 +122,7 @@ public class ManageSettingsCommand extends Command {
                 + "join conversations if I'm not called.";
         out += "```\n";
         out += "You can change any setting like this:" +
-                "```<setting_name> [new_value]``` where ``[new_value]`` " +
+                "```<setting_name> [new_value]```\nwhere ``[new_value]`` " +
                 "can be either ``[true/on/false/off]`` or ``[abc...]``";
         //out += "\n";
         //out += "\n";
@@ -264,7 +258,7 @@ public class ManageSettingsCommand extends Command {
                     case "false":
                     case "off":
                     case "of":
-                        if (bot.setNSFW(false))
+                        if (!bot.setNSFW(false))
                             event.reply("I am already SFW :innocent:");
                         else
                             event.reply("I am now SFW :innocent:");
@@ -337,9 +331,17 @@ public class ManageSettingsCommand extends Command {
      */
     private void changeNickName(Weebot bot, BetterMessageEvent event) {
         String[] args = this.cleanArgs(bot, event);
+        if (args.length < 2) {
+            event.reply(
+                    "Please provide a new name.```"
+                    + bot.getCallsign() + "<" + args[0] + "> <new name>```"
+            );
+            return;
+        }
         try {
             String newName = String.join(" ", args)
-                    .substring(args[0].length());
+                    .substring(args[0].length()).trim();
+            System.out.println(newName);
             //Change name on server
             Guild g = Launcher.getGuild(bot.getGuildID());
             Member self = g.getSelfMember();
@@ -353,7 +355,7 @@ public class ManageSettingsCommand extends Command {
             else
                 event.reply("Hmm... Weebot... I like the sound of th-- wait!");
         } catch (InsufficientPermissionException e) {
-            event.reply("I don't have permissions do that :(");
+            event.reply("I don't have permissions do that :pensive:");
         }
     }
 
