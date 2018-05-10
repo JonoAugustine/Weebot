@@ -13,21 +13,23 @@ development progress.
 <a name='FeatureList'></a>
 **Feature List**
 
-...
+...welp....
 
 ----
 <a name='Roadmap'></a>
 **Roadmap**
 
- - Finish current basic settings implementations
- 	- Finish settings methods
- 	- Add User-joined Greetings
- - Create Database to store information about each server using GSON/JSON
-	- Perhaps a Database package with proposéd classes as:
-		- *Database.java* Keeps a list of all things to be written to file (ie. a Databse object saved with gson)
-		- *Util* Package containing helper classes that build and update the database
-			- *DatabaseWriter.java*
-			- *DatabaseReader.java*
+ - ~~Finish current basic settings implementations~~
+ 	- ~~Finish settings methods~~
+ 	- ~~Add User-joined Greetings~~
+ - ~~Create Database to store information about each server using GSON/JSON~~
+	- ~~Perhaps a Database package with proposéd classes as:~~
+		- ~~*Database.java* Keeps a list of all things to be written to
+		file (ie. a Databse object saved with gson)~~
+		- ~~*Util* Package containing helper classes that build and
+		update the database~~
+			- ~~*DatabaseWriter.java*~~
+			- ~~*DatabaseReader.java*~~
  - Work on *Joke/Insult Generator*(TM)
 	- Possibly using a pool of joke templates and drawing from a pool of random words and phrases
  -  Make *Cards against NL*
@@ -49,7 +51,29 @@ development progress.
 <a name='Log'></a>
 **Log**
 <br>*(New files introduced in a log are marked by ***bold-italics***)*
-- 3/7/18
+- 3/9-10/18
+    - *General*
+        - [``ManagaeSettingsCommand``](#MSC1)
+        - Lots of minor code cleaning and optimizations using IntelliJ
+        analitics
+    - *Command*
+        - Made ``String[] cleanArgs(Weebot,String[])`` and variations
+        to clean message arguments of the callsign/bot-mention to make
+        parsing simpler in ``Commands``.
+    - <a name='MSC1'>***ManageSettingsCommand***</a>
+        - Moved all settings management commands to a new ``Command``
+        class and fixed bugs.
+    - *HelpCommand*
+        - Added placeholder responses.
+    - *Weebot*
+        - Several s/getters
+        - Removed methods now housed in
+        [``ManagaeSettingsCommand``](#MSC1)
+    - *BetterMessageEvent*
+        - ``private final OffsetDateTime CREATION_TIME``
+    - *Launcher*
+        - More consol logging prints.
+- 3/7-8/18
     - *General* A very late update for very many changes
         - Implemented use of ``Command`` classes being called from
         ``Weebot`` instances.
