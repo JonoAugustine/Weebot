@@ -18,7 +18,7 @@ public abstract class CardGame<P extends Player, C extends Card>
      * Create a new CardGame.
      * @param bot Weebot hosting the game
      */
-    protected CardGame(Weebot bot) {
+    CardGame(Weebot bot) {
         super(bot);
     }
 

@@ -19,9 +19,9 @@ import com.ampro.main.game.Game;
 import com.ampro.main.game.Player;
 import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
-import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
-import net.dv8tion.jda.core.managers.GuildController;
+import com.sun.istack.internal.NotNull;
+import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.util.*;
 
@@ -66,16 +66,16 @@ public class Weebot implements Comparable<Weebot> {
     /** Whether the bot is able to use explicit language */
     private boolean explicit;
     /** Words banned on the server */
-    private List<String> BANNED_WORDS;
+    private final List<String> BANNED_WORDS;
     /** Whether the bot is able to be NSFW */
     private boolean NSFW;
     /** Whether the bot is able to respond to actions not directed to it */
     private boolean ACTIVE_PARTICIPATE;
 
     /** Commands not allowed on the server channels.*/
-    private TreeMap<TextChannel, ArrayList<Class<? extends Command>>> COMMANDS_DISABLED;
+    private final TreeMap<TextChannel, ArrayList<Class<? extends Command>>> COMMANDS_DISABLED;
     /** List of {@code Game}s currently Running */
-    private List<Game<? extends Player>> GAMES_RUNNING;
+    private final List<Game<? extends Player>> GAMES_RUNNING;
 
     /**
      * Sets up a Weebot for the server.
@@ -108,7 +108,7 @@ public class Weebot implements Comparable<Weebot> {
         this.callsign = "";
         this.explicit = false;
         this.NSFW = false;
-        this.BANNED_WORDS = new ArrayList<>(Arrays.asList());
+        this.BANNED_WORDS = new ArrayList<>();
         this.ACTIVE_PARTICIPATE = false;
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING = null;
@@ -192,7 +192,7 @@ public class Weebot implements Comparable<Weebot> {
      * Checks if a command has been banned from a channel.
      * @param c The {@link Command} to check
      * @param e The {@link BetterMessageEvent} that called it.
-     * @return
+     * @return {@code true} if the command is not banned in the event's chat.
      */
     private boolean commandIsAllowed(Command c, BetterMessageEvent e) {
         try {
@@ -241,12 +241,13 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     /**
+     * @param w2 Weebot to compare to.
      * @return -1 if the Guild/Server ID is less than parameter's
      * 			0 if equal to parameter's
      * 			1 if greater than parameter's
      */
     @Override
-    public int compareTo(Weebot w2) {
+    public int compareTo(@NotNull Weebot w2) {
         return (int) (this.getGuildID() - w2.getGuildID());
     }
 
@@ -349,7 +350,7 @@ public class Weebot implements Comparable<Weebot> {
 
     /**
      * Set whether the bot is allowed to be not-safe-for-work.
-     * @param NSFW
+     * @param NSFW {@code true} if the bot can be NSFW
      * @return The previous value of {@link Weebot#NSFW}.
      */
     public final boolean setNSFW(boolean NSFW) {
@@ -368,7 +369,7 @@ public class Weebot implements Comparable<Weebot> {
 
     /**
      *
-     * @param ACTIVE_PARTICIPATE
+     * @param ACTIVE_PARTICIPATE {@code true} if the bot can join conversations.
      * @return The previous value of {@link Weebot#ACTIVE_PARTICIPATE}
      */
     public final boolean setACTIVE_PARTICIPATE(boolean ACTIVE_PARTICIPATE) {
@@ -389,7 +390,7 @@ public class Weebot implements Comparable<Weebot> {
      * Add a running {@link Game} to the bot.
      * @param game The {@link Game} to add.
      */
-    public final void addRunningGame(Game game) {
+    public final void addRunningGame(Game<? extends Player> game) {
         this.GAMES_RUNNING.add(game);
     }
 

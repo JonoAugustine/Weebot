@@ -5,7 +5,7 @@ package com.ampro.main.game.cardgame;
  * Currenty holds no information in abstract,
  * Just here for future expansion and Generics
  */
-public abstract class Card {
+abstract class Card {
 
     /** Just a little backup case in case something goes REALLY wrong. */
     protected static class InvalidCardException extends Exception {

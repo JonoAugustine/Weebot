@@ -44,9 +44,8 @@ public class EventDispatcher extends ListenerAdapter {
         ).queue(
             message -> {
                 User author = message.getAuthor();
-                if (author.isBot() || author == Launcher.getJda().getSelfUser())
-                {/* Do nothing*/}
-                else {
+                if (!author.isBot() && author != Launcher.getJda().getSelfUser())
+                {
                     BetterMessageEvent bme;
                     try {
                         bme = new BetterMessageEvent(event, author);

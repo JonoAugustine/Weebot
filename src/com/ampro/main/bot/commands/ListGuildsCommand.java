@@ -55,49 +55,46 @@ public class ListGuildsCommand extends Command {
      * a list of all Guilds hosting a Weebot and their Weebot's name, as well
      * as a private message containing more details about the Guild and their
      * bot.
-     * @param event {@link com.ampro.main.listener.events.BetterMessageEvent}
+     * @param event {@link BetterMessageEvent}
      */
+    @SuppressWarnings("unchecked")
     @Override
     protected void execute(BetterMessageEvent event) {
 
-        Iterator<Weebot> botIterator = Launcher.getDatabase().getWeebots()
-                .values().iterator();
+        Iterable<Weebot> botIterable = Launcher.getDatabase().getWeebots()
+                .values();
         String out;
 
-        if (!Launcher.getDatabase().getDevelopers()
-                .contains(event.getAuthor().getIdLong())
+        if (!Launcher.checkDevID(event.getAuthor().getIdLong())
                 || event.getMessageChannel().getType() == ChannelType.TEXT) {
 
             out = "``` Weeebotful Guilds:\n\n";
 
-            while (botIterator.hasNext()) {
-                Weebot curr = (Weebot) botIterator.next();
-                out += curr.getGuildName() + "\n\t";
-                out += curr.getNickname() + "\n";
-                //TODO out += curr.getBirthday();
-            }
+            for (Weebot w : botIterable)
+                out.concat(
+                        w.getGuildName() + "\n\t"
+                        + w.getNickname() + "\n"
+                );
+            //TODO out += curr.getBirthday();
             out += "```";
             event.reply(out);
         }
-       if (Launcher.getDatabase().getDevelopers()
-               .contains(event.getAuthor().getIdLong())) {
 
-           botIterator = Launcher.getDatabase().getWeebots()
-                   .values().iterator();
-
+       if (Launcher.checkDevID(event.getAuthor().getIdLong())) {
            out = "```Weeebotful Guilds (Dev):\n\n";
-           while (botIterator.hasNext()) {
-               Weebot curr = botIterator.next();
-               out += curr.getGuildName() + "\n\t";
-               out += curr.getGuildID() + "\n\t";
-               out += curr.getBotId()   + "\n\t";
-               out += curr.getNickname()   + "\n\t";
-               out += curr.getCallsign()    + "\n";
+           for (Weebot w : botIterable)
+               out.concat(
+                    w.getGuildName() + "\n\t"
+                    + w.getGuildID() + "\n\t"
+                    + w.getBotId()   + "\n\t"
+                    + w.getNickname()   + "\n\t"
+                    + w.getCallsign()    + "\n"
+               );
                //TODO out += curr.getBirthday();
-           }
            out += "```";
            event.privateReply(out);
        }
+
     }
 
     /**

@@ -78,12 +78,10 @@ public class Launcher {
 				   .setToken("NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA.Etf9Q9wuk1YCUnUox0IbIon1dUk");
 		   Launcher.JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
 	   } catch (LoginException e) {
-			e.printStackTrace();
-	   } catch (IllegalArgumentException e) {
-		   e.printStackTrace();
-	   } catch (InterruptedException e) {
-			e.printStackTrace();
-	   }
+           e.printStackTrace();
+       } catch (InterruptedException e) {
+	       e.printStackTrace();
+       }
    }
 
 	/**
@@ -125,7 +123,7 @@ public class Launcher {
 	 * Update the Weebots in the database after downtime.
 	 * <b>This is only called once on startup</b>
 	 */
-	public static void updateGuilds() {
+	private static void updateGuilds() {
 		List<Guild> guilds = Launcher.JDA_CLIENT.getGuilds();
 		for (Guild g : guilds) {
 			Launcher.DATABASE.addBot(new Weebot(g));
@@ -141,6 +139,8 @@ public class Launcher {
 	   Launcher.saveTimer = new Thread( () -> {
 			   try {
 				   while(true) {
+				       if (Launcher.getJda().getStatus() != Status.CONNECTED)
+				           continue;
 					   System.out.println("Backing up database.");
 					   DatabaseManager.backUp(Launcher.DATABASE);
 					   Thread.sleep(Math.round((1000 * 60) * min));
@@ -200,13 +200,11 @@ public class Launcher {
 	 * @return requested Guild <br> null if not found.
 	 */
 	public static Guild getGuild(long id) {
-		Iterator<Guild> it = Launcher.JDA_CLIENT.getGuilds().iterator();
-		while (it.hasNext()) {
-			Guild curr = it.next();
-			if (curr.getIdLong() == id) {
-				return curr;
-			}
-		}
+		Iterable<Guild> it = Launcher.JDA_CLIENT.getGuilds();
+		for (Guild g : it)
+			if (g.getIdLong() == id)
+				return g;
+
 		return null;
 	}
 

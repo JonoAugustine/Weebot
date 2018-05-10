@@ -53,29 +53,29 @@ import java.util.concurrent.ConcurrentMap;
  */
 public class JDABuilder
 {
-    protected final List<Object> listeners;
+    private final List<Object> listeners;
 
-    protected ConcurrentMap<String, String> contextMap = null;
-    protected boolean enableContext = true;
-    protected SessionController controller = null;
-    protected OkHttpClient.Builder httpClientBuilder = null;
-    protected WebSocketFactory wsFactory = null;
-    protected AccountType accountType;
-    protected String token = null;
-    protected IEventManager eventManager = null;
-    protected IAudioSendFactory audioSendFactory = null;
-    protected JDA.ShardInfo shardInfo = null;
-    protected Game game = null;
-    protected OnlineStatus status = OnlineStatus.ONLINE;
-    protected int maxReconnectDelay = 900;
-    protected int corePoolSize = 2;
-    protected boolean enableVoice = true;
-    protected boolean enableShutdownHook = true;
-    protected boolean enableBulkDeleteSplitting = true;
-    protected boolean autoReconnect = true;
-    protected boolean idle = false;
-    protected boolean requestTimeoutRetry = true;
-    protected boolean enableCompression = true;
+    private ConcurrentMap<String, String> contextMap = null;
+    private boolean enableContext = true;
+    private SessionController controller = null;
+    private OkHttpClient.Builder httpClientBuilder = null;
+    private WebSocketFactory wsFactory = null;
+    private final AccountType accountType;
+    private String token = null;
+    private IEventManager eventManager = null;
+    private IAudioSendFactory audioSendFactory = null;
+    private JDA.ShardInfo shardInfo = null;
+    private Game game = null;
+    private OnlineStatus status = OnlineStatus.ONLINE;
+    private int maxReconnectDelay = 900;
+    private int corePoolSize = 2;
+    private boolean enableVoice = true;
+    private boolean enableShutdownHook = true;
+    private boolean enableBulkDeleteSplitting = true;
+    private boolean autoReconnect = true;
+    private boolean idle = false;
+    private boolean requestTimeoutRetry = true;
+    private boolean enableCompression = true;
 
     /**
      * Creates a completely empty JDABuilder.
@@ -216,7 +216,7 @@ public class JDABuilder
 
     /**
      * Sets the {@link okhttp3.OkHttpClient.Builder Builder} that will be used by JDA's requester.
-     * This can be used to set things such as connection timeout and proxy. 
+     * This can be used to set things such as connection timeout and proxy.
      *
      * @param  builder
      *         The new {@link okhttp3.OkHttpClient.Builder Builder} to use.
@@ -583,14 +583,14 @@ public class JDABuilder
      * @return A {@link net.dv8tion.jda.core.JDA} instance that has started the login process. It is unknown as
      *         to whether or not loading has finished when this returns.
      */
-    public JDA buildAsync() throws LoginException
+    private JDA buildAsync() throws LoginException
     {
         OkHttpClient.Builder httpClientBuilder = this.httpClientBuilder == null ? new OkHttpClient.Builder() : this.httpClientBuilder;
         WebSocketFactory wsFactory = this.wsFactory == null ? new WebSocketFactory() : this.wsFactory;
 
         if (controller == null && shardInfo != null)
             controller = new SessionControllerAdapter();
-        
+
         JDAImpl jda = new JDAImpl(accountType, token, controller, httpClientBuilder, wsFactory, autoReconnect, enableVoice, enableShutdownHook,
                 enableBulkDeleteSplitting, requestTimeoutRetry, enableContext, corePoolSize, maxReconnectDelay, contextMap);
 

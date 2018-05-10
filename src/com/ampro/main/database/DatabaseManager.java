@@ -19,59 +19,58 @@ public class DatabaseManager {
      *          -1 if the en error occurred.
      */
     public static synchronized int save(Database database) {
-        synchronized (database) {
-            File file = new File("database.wbot");
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                System.err.println("IOException while creating Database file.");
-                e.printStackTrace();
-                return -1;
-            }
-            try (Writer writer = new FileWriter("database.wbot")) {
-                Gson gson = new GsonBuilder().enableComplexMapKeySerialization()
-                        .setExclusionStrategies().setPrettyPrinting().create();
-                gson.toJson(database, writer);
-                System.out.println("Database saved.");
-                return 1;
-            } catch (FileNotFoundException e) {
-                System.err.println("File not found while writing gson to file.");
-                e.printStackTrace();
-                return -1;
-            } catch (IOException e) {
-                System.err.println("IOException while writing gson to file.");
-                e.printStackTrace();
-                return -1;
-            }
+        File file = new File("database.wbot");
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            System.err.println("IOException while creating Database file.");
+            e.printStackTrace();
+            return -1;
+        }
+        try (Writer writer = new FileWriter("database.wbot")) {
+            Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setExclusionStrategies().setPrettyPrinting().create();
+
+            gson.toJson(database, writer);
+            System.out.println("Database saved.");
+            return 1;
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found while writing gson to file.");
+            e.printStackTrace();
+            return -1;
+        } catch (IOException e) {
+            System.err.println("IOException while writing gson to file.");
+            e.printStackTrace();
+            return -1;
         }
     }
 
+
     public static synchronized int backUp(Database database) {
-        synchronized (database) {
-            File file = new File("databaseBK.wbot");
-            try {
-                file.createNewFile();
-            } catch (IOException e) {
-                System.err.println("IOException while creating Database backup file.");
-                e.printStackTrace();
-                return -1;
-            }
-            try (Writer writer = new FileWriter("databaseBK.wbot")) {
-                Gson gson = new GsonBuilder().enableComplexMapKeySerialization()
-                        .setExclusionStrategies().setPrettyPrinting().create();
-                gson.toJson(database, writer);
-                System.out.println("Database backed up.");
-                return 1;
-            } catch (FileNotFoundException e) {
-                System.err.println("File not found while writing gson backup to file.");
-                e.printStackTrace();
-                return -1;
-            } catch (IOException e) {
-                System.err.println("IOException while writing gson backup to file.");
-                e.printStackTrace();
-                return -1;
-            }
+
+        File file = new File("databaseBK.wbot");
+        try {
+            file.createNewFile();
+        } catch (IOException e) {
+            System.err.println("IOException while creating Database backup file.");
+            e.printStackTrace();
+            return -1;
         }
+        try (Writer writer = new FileWriter("databaseBK.wbot")) {
+            Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setExclusionStrategies().setPrettyPrinting().create();
+
+            gson.toJson(database, writer);
+            System.out.println("Database backed up.");
+            return 1;
+        } catch (FileNotFoundException e) {
+            System.err.println("File not found while writing gson backup to file.");
+            e.printStackTrace();
+            return -1;
+        } catch (IOException e) {
+            System.err.println("IOException while writing gson backup to file.");
+            e.printStackTrace();
+            return -1;
+        }
+
     }
 
     /**

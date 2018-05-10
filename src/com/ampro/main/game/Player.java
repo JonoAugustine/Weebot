@@ -19,7 +19,7 @@ public abstract class Player {
      * Make a new player wrapper for a User.
      * @param user {@code net.dv8tion.jda.core.entities.User}
      */
-    public Player(User user) {
+    protected Player(User user) {
         this.user = user;
     }
 
@@ -35,7 +35,7 @@ public abstract class Player {
      * Send a private message to the {@code Player}.
      * @param message String to send
      */
-    public void privateMessage(String message) {
+    private void privateMessage(String message) {
         this.user.openPrivateChannel().complete()
                 .sendMessage(message).queue();
     }

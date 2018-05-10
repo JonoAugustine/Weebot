@@ -17,10 +17,10 @@ import java.util.TreeMap;
 public class Database {
 
     /** All Weebots currently in circulation, mapped to their Guild's ID */
-    private TreeMap<Long, Weebot> WEEBOTS;
+    private final TreeMap<Long, Weebot> WEEBOTS;
 
     /** Array of registered developer Discord IDs */
-    private ArrayList<Long> DEV_IDS;
+    private final ArrayList<Long> DEV_IDS;
 
     /** Build an empty {@code Database}.*/
     public Database() {
@@ -106,16 +106,11 @@ public class Database {
         String out = "";
         out += "[";
 
-
-
         for(Map.Entry<Long, Weebot> entry : this.WEEBOTS.entrySet()) {
             long key = entry.getKey();
             Weebot bot = entry.getValue();
 
-            out += "[";
-            out += key + ",";
-            out += bot.getNickname();
-            out += "]";
+            out.concat("[" + key + "," + bot.getNickname() + "]");
         }
 
         out += "]";

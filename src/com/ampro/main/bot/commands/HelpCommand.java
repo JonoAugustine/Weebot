@@ -18,7 +18,7 @@ public class HelpCommand extends Command {
     public HelpCommand() {
         super(
                 "Help"
-                , new ArrayList<String>(
+                , new ArrayList<>(
                         Arrays.asList("helpme", "showhelp")
                 )
                 , "Show how to interact with me."
@@ -85,7 +85,7 @@ public class HelpCommand extends Command {
                             event.reply("No amount of help will ever be enough to fix the" + " pathetic life you've made for yourself.");
 
                     }
-                    return;
+                    break;
             }
         }
     }

@@ -14,7 +14,7 @@ import java.util.Arrays;
 
 /**
  * A {@link Command} that manages the settings for the {@link Weebot}.
- * <p>Contains all commands relating to any {@ling Weebot} settings, as such,
+ * <p>Contains all commands relating to any {@link Weebot} settings, as such,
  * takes commands leading with the name of any setting.</p>
  *
  * @author Jonathan Augustine
@@ -180,7 +180,7 @@ public class ManageSettingsCommand extends Command {
                         + "<explicit/expl/vulgar/pottymouth> "
                         + "[true/on/false/off]```"
                 );
-                return;
+                break;
         }
     }
 
@@ -229,7 +229,7 @@ public class ManageSettingsCommand extends Command {
                         + "```" + bot.getCallsign() +
                         "<participate/interrupt> [true/on/false/off]```"
                 );
-                return;
+                break;
         }
     }
 
@@ -279,7 +279,7 @@ public class ManageSettingsCommand extends Command {
                         + bot.getCallsign() + "<nsfw/naughty>" +
                         "[true/on/false/off]```"
                 );
-                return;
+                break;
         }
     }
 
@@ -320,7 +320,7 @@ public class ManageSettingsCommand extends Command {
                         + bot.getCallsign() +
                         "<callsign/prefix/callwith/callw> [new_prefix]```"
                 );
-                return;
+                break;
         }
     }
 

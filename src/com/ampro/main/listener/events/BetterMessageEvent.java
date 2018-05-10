@@ -51,7 +51,7 @@ public class BetterMessageEvent extends BetterEvent {
      *          to wrap.
      */
     public BetterMessageEvent(GenericMessageEvent event)
-            throws InvalidAuthorException, InvalidEventException {
+            throws InvalidEventException {
         super(event);
         //Locate the message in the channel
         this.AUTHOR = event.getChannel().getMessageById(event.getMessageId())
@@ -119,7 +119,7 @@ public class BetterMessageEvent extends BetterEvent {
      * Send a message to the channel the event came from.
      * @param message {@code net.dv8tion.jda.core.entities.Message} to send
      */
-    public void reply(Message message) {
+    private void reply(Message message) {
         this.reply(message.getContentRaw());
     }
 
@@ -136,13 +136,13 @@ public class BetterMessageEvent extends BetterEvent {
                 return;
             default:
                 this.reply(message);
-                return;
+                break;
         }
     }
 
     /**
      * Send a private message to the author of the event.
-     * @param {@code net.dv8tion.jda.core.entities.Message} to send
+     * @param message {@link Message} to send
      */
     public void privateReply(Message message) {
         switch (this.MESSAGE_EVENT.getChannelType()) {
@@ -153,7 +153,7 @@ public class BetterMessageEvent extends BetterEvent {
                 return;
             default:
                 this.reply(message);
-                return;
+                break;
         }
     }
 
@@ -196,14 +196,6 @@ public class BetterMessageEvent extends BetterEvent {
 
     public Guild getGuild() {
         return this.MESSAGE_EVENT.getGuild();
-    }
-
-    public User getSelfUser() {
-        return this.getSelfUser();
-    }
-
-    public Member getSelfMember() {
-        return this.getSelfMember();
     }
 
     /**

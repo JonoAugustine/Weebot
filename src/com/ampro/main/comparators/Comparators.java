@@ -8,7 +8,7 @@ import java.util.Comparator;
 
 public class Comparators {
     /** Compares a {@code Guild} buy it's IdLong */
-    public static final class GuildComparator implements Comparator<Guild> {
+    private static final class GuildComparator implements Comparator<Guild> {
         @Override
         public int compare(Guild g1, Guild g2) {
             return (int) (g1.getIdLong() - g2.getIdLong());
@@ -24,7 +24,7 @@ public class Comparators {
     }
 
     /** Compare Users by their name */
-    public static final class UserNameComparator implements Comparator<User> {
+    private static final class UserNameComparator implements Comparator<User> {
         @Override
         public int compare(User u1, User u2) {
             return u1.getName().compareTo(u2.getName());
@@ -32,7 +32,7 @@ public class Comparators {
     }
 
     /** Compares Members by their Unique IdLong */
-    public static final class MemberIdComparator implements Comparator<Member> {
+    private static final class MemberIdComparator implements Comparator<Member> {
         @Override
         public int compare(Member m1, Member m2) {
             return (int) (m1.getUser().getIdLong() - m2.getUser().getIdLong());
@@ -40,7 +40,7 @@ public class Comparators {
     }
 
     /** Compare Members by their {@code net.dv8tion.core.entities.Member.getEffectiveName()} */
-    public static final class MemberNameComparator implements Comparator<Member> {
+    private static final class MemberNameComparator implements Comparator<Member> {
         @Override
         public int compare(Member m1, Member m2) {
             return m1.getEffectiveName().compareTo(m2.getEffectiveName());

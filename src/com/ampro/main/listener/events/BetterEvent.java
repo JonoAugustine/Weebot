@@ -35,13 +35,13 @@ public abstract class BetterEvent {
      * Indicates the event used was not appropriate for
      * this implementation of BetterEvent.
      */
-    public class InvalidEventException extends Exception {
+    class InvalidEventException extends Exception {
 
-        public InvalidEventException() {
+        InvalidEventException() {
             super();
         }
 
-        public InvalidEventException(String s) {
+        InvalidEventException(String s) {
             super(s);
         }
 
@@ -51,7 +51,7 @@ public abstract class BetterEvent {
     }
 
     public class InvalidAuthorException extends InvalidEventException {
-        public InvalidAuthorException(String s) { super(s); }
+        InvalidAuthorException(String s) { super(s); }
         public InvalidAuthorException() { super(); }
     }
 
@@ -71,7 +71,7 @@ public abstract class BetterEvent {
      * {@code net.dv8tion.jda.core.entities.Event}
      * @param event Event to wrap
      */
-    public BetterEvent(Event event){}
+    BetterEvent(Event event){}
 
     /** */
     public JDA getJDA() {

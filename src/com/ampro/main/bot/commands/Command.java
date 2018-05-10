@@ -34,55 +34,55 @@ import java.util.List;
 public abstract class Command {
 
     /** Name of the command, to be called the format: {@code [prefix]<name>}. */
-    protected final String name;
+    private final String name;
 
     /**
      * The aliases of the command, when calling a command these function identically to calling the
      * {@link com.jagrosh.jdautilities.command.Command#name Command.name}.
      */
-    protected final List<String> aliases;
+    private final List<String> aliases;
 
     /** A small help String that summarizes the function of the command. */
-    protected final String help;
+    private final String help;
 
     /** An arguments format String for the command. */
-    protected final String argFormat;
+    private final String argFormat;
 
     /**
      * {@code true} if the command may only be used in a {@link net.dv8tion.jda.core.entities.Guild Guild},
      * {@code false} if it may be used in both a Guild and a DM.
      * <br>Default {@code true}.
      */
-    protected final boolean guildOnly;
+    private final boolean guildOnly;
 
     /**
      * {@code true} if the command may only be used by a User with an ID matching the
      * Owners or any of the CoOwners.
      * <br>Default {@code false}.
      */
-    protected final boolean ownerOnly;
+    private final boolean ownerOnly;
 
     /**
      * A String name of a role required to use this command.
      */
-    protected String requiredRole = null;
+    private String requiredRole = null;
 
     /**
      * An {@code int} number of seconds users must wait before using this command again.
      */
-    protected final int cooldown;
+    private final int cooldown;
 
     /**
      * Any {@link net.dv8tion.jda.core.Permission Permission}s a Member must have to use this command.
      * <br>These are only checked in a {@link net.dv8tion.jda.core.entities.Guild Guild} environment.
      */
-    protected Permission[] userPermissions = new Permission[0];
+    private Permission[] userPermissions = new Permission[0];
 
     /**
      * Any {@link net.dv8tion.jda.core.Permission Permission}s the bot must have to use a command.
      * <br>These are only checked in a {@link net.dv8tion.jda.core.entities.Guild Guild} environment.
      */
-    protected Permission[] botPermissions = new Permission[0];
+    private Permission[] botPermissions = new Permission[0];
 
     /**
      * {@code true} if this command checks a channel topic for topic-tags.
@@ -90,30 +90,30 @@ public abstract class Command {
      * will cause this command to terminate.
      * <br>Default {@code true}.
      */
-    protected boolean usesTopicTags;
+    private boolean usesTopicTags;
 
     /**
      * The child commands of the command. These are used in the format {@code [prefix]<parent name>
      * <child name>}.
      */
-    protected Command[] children;
+    private Command[] children;
 
     /** {@code true} if this command should be hidden from the help. */
-    protected final boolean hidden;
+    private final boolean hidden;
 
     /**
      * The {@link com.jagrosh.jdautilities.command.Command.CooldownScope CooldownScope}
      * of the command. This defines how far of a scope cooldowns have.
      * <br>Default {@link com.jagrosh.jdautilities.command.Command.CooldownScope#USER CooldownScope.USER}.
      */
-    protected CooldownScope cooldownScope = CooldownScope.USER;
+    private final CooldownScope cooldownScope = CooldownScope.USER;
 
     private final static String BOT_PERM
             = "%s I need the %s permission in this %s!";
     private final static String USER_PERM
             = "%s You must have the %s permission in this %s to use that!";
 
-    public Command() {
+    Command() {
         this.name       = null;
         this.aliases    = null;
         this.help       = null;
@@ -125,9 +125,8 @@ public abstract class Command {
     }
 
 
-    public Command(String name, List<String> aliases, String help
-            , String argFormat, boolean guildOnly, boolean ownerOnly
-            , int cooldown, boolean hidden) {
+    Command(String name, List<String> aliases, String help, String argFormat, boolean guildOnly, boolean ownerOnly,
+            int cooldown, boolean hidden) {
 
         this.name       = name;
         this.aliases    = aliases;
@@ -169,7 +168,7 @@ public abstract class Command {
      * @param  event
      *         The BetterMessageEvent passed to the command.
      */
-    protected boolean check(BetterMessageEvent event) {
+    boolean check(BetterMessageEvent event) {
         //Check Channel
 
         // child check
@@ -185,12 +184,8 @@ public abstract class Command {
 
         //If the command is for developer's only, check if the event Author's
         //ID is registered as a developer.
-        if (this.ownerOnly) {
-            if (!Launcher.getDatabase().getDevelopers()
-                    .contains(event.getAuthor().getIdLong()))
-            {
-                return false;
-            }
+        if (this.ownerOnly && !Launcher.checkDevID(event.getAuthor().getIdLong())) {
+            return false;
         }
 
         //Bot permissions
@@ -225,7 +220,7 @@ public abstract class Command {
      * @param args String array to clean.
      * @return new string array with the command call at index {@code [0]}.
      */
-    protected String[] cleanArgs(Weebot bot, String[] args) {
+    private String[] cleanArgs(Weebot bot, String[] args) {
         //Make it an ArrayList b/c easy to work with
         ArrayList<String> temp = new ArrayList<>(Arrays.asList(args));
         if (args[0].startsWith(bot.getCallsign())) {
@@ -235,7 +230,7 @@ public abstract class Command {
             //called w/ or w/o a space between the callsign and the command
             //string (making it so there is only one case to deal with -> fewer
             // if-else statements).
-            temp.get(0).split(" ");
+            temp.set(0, String.join("",temp.get(0).split(" ")));
             //Then delete the callsign from the first argument
             temp.set(0, temp.get(0).substring(bot.getCallsign().length()));
 
@@ -255,7 +250,7 @@ public abstract class Command {
      * @param args String array to clean.
      * @return new string array with the command call at index {@code [0]}.
      */
-    protected final String[] cleanArgsLowerCase(Weebot bot, String[] args) {
+    private String[] cleanArgsLowerCase(Weebot bot, String[] args) {
         args = this.cleanArgs(bot, args);
         for (int i = 0; i < args.length; i++) {
             args[i] = args[i].toLowerCase();
@@ -269,7 +264,7 @@ public abstract class Command {
      * @param event {@link BetterMessageEvent} to clean the arguments of.
      * @return new string array with the command call at index {@code [0]}.
      */
-    protected String[] cleanArgs(Weebot bot, BetterMessageEvent event) {
+    String[] cleanArgs(Weebot bot, BetterMessageEvent event) {
         return this.cleanArgs(bot, event.getArgs());
     }
 
@@ -279,7 +274,7 @@ public abstract class Command {
      * @param event {@link BetterMessageEvent} to clean the arguments of.
      * @return new string array with the command call at index {@code [0]}.
      */
-    protected final String[] cleanArgsLowerCase(Weebot bot, BetterMessageEvent event) {
+    final String[] cleanArgsLowerCase(Weebot bot, BetterMessageEvent event) {
         return this.cleanArgsLowerCase(bot, event.getArgs());
     }
 

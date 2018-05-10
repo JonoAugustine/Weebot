@@ -49,10 +49,11 @@ public class CardsAgainstHumanity
         //The winning card of the round
         CAHCard winningCard;
         //White vs Black card
-        enum CARDTYPE { BLACK, WHITE; }
-        CARDTYPE type;
+        enum CARDTYPE { BLACK, WHITE
+        }
+        final CARDTYPE type;
         /** Content of the card */
-        String cardText;
+        final String cardText;
 
         /**
          * Make a new card.
@@ -76,7 +77,7 @@ public class CardsAgainstHumanity
     }
 
     /** The hosting channel */
-    protected final Channel CHANNEL;
+    private final Channel CHANNEL;
 
     //Cards delt to players
     private ArrayList<CAHCard> DECK_WHITE;
@@ -85,7 +86,8 @@ public class CardsAgainstHumanity
     //How many cards per hand?
     private final int HAND_SIZE;
     //End after certain # of wins or rounds?
-    public enum WIN_CONDITION {WINS, ROUNDS;}
+    public enum WIN_CONDITION {WINS, ROUNDS
+    }
     private WIN_CONDITION WIN_CONDITION;
     private ArrayList<CAHPlayer> WINNERS;
 
@@ -111,8 +113,8 @@ public class CardsAgainstHumanity
     public CardsAgainstHumanity(Weebot bot, TextChannel channel, int handSize
                                 , User...users) {
         super(bot);
-        for (int i = 0; i < users.length; i++) {
-            this.PLAYERS.putIfAbsent(users[i], new CAHPlayer(users[i]));
+        for (User u : users) {
+            this.PLAYERS.putIfAbsent(u, new CAHPlayer(u));
         }
         this.CHANNEL = channel;
         this.HAND_SIZE = handSize;
@@ -182,7 +184,7 @@ public class CardsAgainstHumanity
      * @return Previous win condition
      * @throws ModificationWhileRunningException if game is running
      */
-    public WIN_CONDITION setWinCondition(WIN_CONDITION wincondition)
+    protected WIN_CONDITION setWinCondition(WIN_CONDITION wincondition)
         throws ModificationWhileRunningException {
 
         WIN_CONDITION prev = this.WIN_CONDITION;
