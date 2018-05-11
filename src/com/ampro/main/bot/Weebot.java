@@ -260,6 +260,10 @@ public class Weebot implements Comparable<Weebot> {
         return this.nickname;
     }
 
+    public final OffsetDateTime getBirthday() {
+        return this.BIRTHDAY;
+    }
+
     /**
      * Set the bot's internal copy of its effective name in its Guild.
      * @param newName The new {@link Weebot#nickname} for the bot.

@@ -68,27 +68,26 @@ public class ListGuildsCommand extends Command {
 
             out = "``` Weeebotful Guilds:\n\n";
 
-            for (Weebot w : botIterable)
-                out.concat(
-                        w.getGuildName() + "\n\t"
-                        + w.getNickname() + "\n"
-                );
-            //TODO out += curr.getBirthday();
+            for (Weebot w : botIterable) {
+                out = out.concat(w.getGuildName() + "\n\t" + w.getNickname() + "\n\t"
+                        + w.getBirthday().toString() + "\n\n");
+            }
             out += "```";
             event.reply(out);
         }
 
        if (Launcher.checkDevID(event.getAuthor().getIdLong())) {
            out = "```Weeebotful Guilds (Dev):\n\n";
-           for (Weebot w : botIterable)
-               out.concat(
-                    w.getGuildName() + "\n\t"
-                    + w.getGuildID() + "\n\t"
-                    + w.getBotId()   + "\n\t"
-                    + w.getNickname()   + "\n\t"
-                    + w.getCallsign()    + "\n"
+           for (Weebot w : botIterable) {
+               out = out.concat(
+                       w.getGuildName() + "\n\t"
+                       + w.getGuildID() + "\n\t"
+                       + w.getBotId() + "\n\t"
+                       + w.getNickname() + "\n\t"
+                       + w.getCallsign() + "\n\t"
+                       + w.getBirthday().toString() + "\n\n"
                );
-               //TODO out += curr.getBirthday();
+           }
            out += "```";
            event.privateReply(out);
        }
