@@ -15,7 +15,7 @@ package com.ampro.main.bot;
 
 import com.ampro.main.Launcher;
 import com.ampro.main.bot.commands.Command;
-import com.ampro.main.bot.commands.NotePadCommand;
+import com.ampro.main.bot.commands.NotePadCommand.NotePad;
 import com.ampro.main.game.Game;
 import com.ampro.main.game.Player;
 import com.ampro.main.listener.events.BetterEvent;
@@ -79,7 +79,7 @@ public class Weebot implements Comparable<Weebot> {
     private final List<Game<? extends Player>> GAMES_RUNNING;
 
     /** Map of "NotePads" */
-    private final TreeMap<String, ArrayList<NotePadCommand.NotePad>> NOTES;
+    private final TreeMap<String, NotePad> NOTES;
 
     /** How much the bot can spam. */
     private int spamLimit;
@@ -102,6 +102,7 @@ public class Weebot implements Comparable<Weebot> {
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING = new ArrayList<>();
         this.NOTES  = new TreeMap<>();
+        this.NOTES.putIfAbsent("default", new NotePad(guild));
         this.spamLimit = 5;
     }
 
@@ -123,6 +124,7 @@ public class Weebot implements Comparable<Weebot> {
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING = null;
         this.NOTES  = new TreeMap<>();
+        this.NOTES.putIfAbsent("default", new NotePad(this));
         this.spamLimit = 5;
     }
 
@@ -373,7 +375,8 @@ public class Weebot implements Comparable<Weebot> {
         this.GAMES_RUNNING.add(game);
     }
 
-    public TreeMap<String, ArrayList<NotePadCommand.NotePad>> getNotePads() {
+    /** @return {@link TreeMap TreeMap<String,NotePad>} */
+    public TreeMap<String, NotePad> getNotePads() {
         return NOTES;
     }
 
