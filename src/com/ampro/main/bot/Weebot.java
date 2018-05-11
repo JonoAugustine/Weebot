@@ -19,7 +19,6 @@ import com.ampro.main.game.Game;
 import com.ampro.main.game.Player;
 import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
-import com.sun.istack.internal.NotNull;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 
@@ -243,7 +242,7 @@ public class Weebot implements Comparable<Weebot> {
      * 			1 if greater than parameter's
      */
     @Override
-    public int compareTo(@NotNull Weebot w2) {
+    public int compareTo(Weebot w2) {
         return (int) (this.getGuildID() - w2.getGuildID());
     }
 
