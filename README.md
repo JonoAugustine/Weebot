@@ -12,8 +12,20 @@ development progress.
 ----
 <a name='FeatureList'></a>
 **Feature List**
-
-...welp....
+- Settings
+    - Set bot nickname.
+    - Change the call-sign (or prefix) used to call the bot directly.
+    - Allow or disallow the bot to use explicit language.
+    - Allow or disallow the bot to use NSFW commands.
+    - Server-wide word bans. (Under construction)
+    - Allow or disallow the bot to respond to actions not directed to it.
+- Commands
+    - Discord Games (Played on Discord chats)
+        - Cards Against Humanity (Under construction).
+        - "Secrete Message" (Under construction).
+    - Novelty/misc
+        - Self-destruct messages.
+        - List all guilds hosting a Weebot.
 
 ----
 <a name='Roadmap'></a>
@@ -30,7 +42,7 @@ development progress.
 		update the database~~
 			- ~~*DatabaseWriter.java*~~
 			- ~~*DatabaseReader.java*~~
- - Work on *Joke/Insult Generator*(TM)
+ - Make *Joke/Insult Generator*(TM)
 	- Possibly using a pool of joke templates and drawing from a pool of random words and phrases
  -  Make *Cards against NL*
 	- Send private messages to each player with their decks, send the white-card into the chat.
@@ -44,8 +56,6 @@ development progress.
 - Fun Features (<>funhouse)
 	- Russian Roulette Kick
 	- Russian Roulette ~~Porn~~ DM (NSFW)
-	- <>porn @Member searches for ~~porn~~ of member name
-- Localize to Japanese
 
 ----
 <a name='Log'></a>
@@ -63,6 +73,11 @@ development progress.
     - <a name='MSC1'>***ManageSettingsCommand***</a>
         - Moved all settings management commands to a new ``Command``
         class and fixed bugs.
+    - <a name='SDMC1'> ***SelfDestructMessageCommand*** </a>
+        - Command to set a message to "self destruct" after the given
+        time. Used as
+        ``<callsign><selfdestruct/deleteme> [time] [message]`` where
+        the time is default 30 seconds.
     - *HelpCommand*
         - Added placeholder responses.
     - *Weebot*

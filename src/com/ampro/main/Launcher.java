@@ -35,7 +35,8 @@ public class Launcher {
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
 					new HelpCommand(), new ShutdownCommand(),
-					new ManageSettingsCommand(), new ListGuildsCommand()
+					new ManageSettingsCommand(), new ListGuildsCommand(),
+                    new SelfDestructMessageCommand()
 			));
 
 	/** The database */

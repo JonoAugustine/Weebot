@@ -57,7 +57,10 @@ public class ManageSettingsCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgsLowerCase(bot, event);
+        String[] args;
+        synchronized (bot) {
+            args = this.cleanArgsLowerCase(bot, event);
+        }
         //Small note: when two cases are lined-up (like name and nickname)
         //then both cases go to the next available code
         // (e.g. name and nickname cases both go to this.changeNickname)
@@ -106,28 +109,29 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked
      */
     private void listGuildSettings(Weebot bot, BetterMessageEvent event) {
-        String out = "Wanna learn about me?";
-        out += "\n```";
-        out += "I live here: " + Launcher.getGuild(bot.getGuildID()).getName();
-        out += "\n";
-        out += "I now go by: " + bot.getNickname();
-        out += "\n";
-        out += "Call me with: " + bot.getCallsign()+ " or @" +bot.getNickname();
-        out += "\n";
-        out += "I am " + (bot.isExplicit() ? "" : "not ") + "explicit";
-        out += "\n";
-        out += "I " + (bot.isNSFW() ? "am " : "not ") + "NSFW";
-        out += "\n";
-        out += "I " + (bot.canParticipate() ? "" : "won't ")
-                + "join conversations if I'm not called.";
-        out += "```\n";
-        out += "You can change any setting like this:" +
-                "```<setting_name> [new_value]```\nwhere ``[new_value]`` " +
-                "can be either ``[true/on/false/off]`` or ``[abc...]``";
-        //out += "\n";
-        //out += "\n";
+        synchronized (bot) {
+            String out = "Wanna learn about me?";
+            out += "\n```";
+            out += "I live here: " + Launcher.getGuild(bot.getGuildID()).getName();
+            out += "\n";
+            out += "I now go by: " + bot.getNickname();
+            out += "\n";
+            out += "Call me with: " + bot.getCallsign() + " or @" + bot.getNickname();
+            out += "\n";
+            out += "I am " + (bot.isExplicit() ? "" : "not ") + "explicit";
+            out += "\n";
+            out += "I " + (bot.isNSFW() ? "am " : "not ") + "NSFW";
+            out += "\n";
+            out += "I " + (bot.canParticipate() ? "" : "won't ") + "join conversations if I'm not called.";
+            out += "```\n";
+            out += "You can change any setting like this:" + "```<setting_name> [new_value]```\nwhere ``[new_value]`` "
+                    + "can be either ``[true/on/false/off]`` or ``[abc...]``";
 
-        event.reply(out);
+            //out += "\n";
+            //out += "\n";
+
+            event.reply(out);
+        }
     }
 
     /**
@@ -136,51 +140,49 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked this command.
      */
     private void explicit(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgsLowerCase(bot, event);
-        //Only respond to commands with the appropriate number of args
-        switch (args.length) {
-            case 1:
-                //If the command was just the name of the setting
-                event.reply("I am " + (bot.isExplicit() ? "" : "not ")
-                        + "explicit."
-                );
-                return;
-            case 2:
-                switch (args[1].toLowerCase()) {
-                    case "true":
-                    case "on":
-                    case "yes":
-                        if (bot.setExplicit(true))
-                            event.reply("I am already explicit :smiling_imp:");
-                        else
-                            event.reply("I am now explicit :smiling_imp:");
-                        return;
-                    case "false":
-                    case "off":
-                    case "of":
-                        if (bot.setExplicit(false))
-                            event.reply("I am now clean :innocent:");
-                        else
-                            event.reply("I am already clean :innocent:");
-                        return;
-                    default:
-                        event.reply("Sorry, " + args[1]
-                                + " is not an option. Please use the commands: "
-                                + "```" + bot.getCallsign()
-                                + "<explicit/expl/vulgar/pottymouth> "
-                                + "[true/on/false/off]```"
-                        );
-                        return;
-                }
-            default:
-                event.reply("Sorry, " + String.join(" ", args)
-                                            .substring(args[0].length())
-                        + " is not an option. Please use the commands: "
-                        + "```" + bot.getCallsign()
-                        + "<explicit/expl/vulgar/pottymouth> "
-                        + "[true/on/false/off]```"
-                );
-                break;
+        synchronized (bot) {
+            String[] args = this.cleanArgsLowerCase(bot, event);
+            //Only respond to commands with the appropriate number of args
+            switch (args.length) {
+                case 1:
+                    //If the command was just the name of the setting
+                    event.reply("I am " + (bot.isExplicit() ? "" : "not ") + "explicit.");
+                    return;
+                case 2:
+                    switch (args[1].toLowerCase()) {
+                        case "true":
+                        case "on":
+                        case "yes":
+                            if(bot.setExplicit(true))
+                                event.reply("I am already explicit :smiling_imp:");
+                            else
+                                event.reply("I am now explicit :smiling_imp:");
+                            return;
+                        case "false":
+                        case "off":
+                        case "of":
+                            if(bot.setExplicit(false))
+                                event.reply("I am now clean :innocent:");
+                            else
+                                event.reply("I am already clean :innocent:");
+                            return;
+                        default:
+                            event.reply("Sorry, " + args[1]
+                                    + " is not an option. Please use the commands: "
+                                    + "```" + bot.getCallsign()
+                                    + "<explicit/expl/vulgar/pottymouth> "
+                                    + "[true/on/false/off]```");
+
+                            return;
+                    }
+                default:
+                    event.reply("Sorry, " + String.join(" ", args).substring(args[0].length())
+                            + " is not an option. Please use the commands: "
+                            + "```" + bot.getCallsign()
+                            + "<explicit/expl/vulgar/pottymouth> "
+                            + "[true/on/false/off]```");
+                    break;
+            }
         }
     }
 
@@ -190,46 +192,46 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked this command.
      */
     private void participate(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgsLowerCase(bot, event);
-        //Only respond to commands with the appropriate number of args
-        switch (args.length) {
-            case 1:
-                event.reply(
-                        "I will " + (bot.canParticipate() ? "" : "not ")
-                                + " join in on conversations."
-                );
-                return;
-            case 2:
-                switch (args[1]) {
-                    case "true":
-                    case "on":
-                        if (bot.setACTIVE_PARTICIPATE(true))
-                            event.reply("I can already join conversations");
-                        else
-                            event.reply("I will join conversations :grin:");
-                        return;
-                    case "false":
-                    case "off":
-                    case "of":
-                        bot.setACTIVE_PARTICIPATE(false);
-                        event.reply("I won't join conversations anymore.");
-                        return;
-                    default:
-                        event.reply("Sorry, " + args[1] + " is not an option."
-                                + " Please use the commands: "
-                                + "```" + bot.getCallsign() +
-                                "<participate/interrupt> [true/on/false/off]```"
-                        );
-                        return;
-                }
-            default:
-                event.reply("Sorry, " + String.join(" ", args)
-                                             .substring(args[0].length())
-                        + " is not an option. Please use the commands: "
-                        + "```" + bot.getCallsign() +
-                        "<participate/interrupt> [true/on/false/off]```"
-                );
-                break;
+        synchronized (bot) {
+            String[] args = this.cleanArgsLowerCase(bot, event);
+            //Only respond to commands with the appropriate number of args
+            switch (args.length) {
+                case 1:
+                    event.reply("I will " + (bot.canParticipate() ? "" : "not ") + " join in on conversations.");
+                    return;
+                case 2:
+                    switch (args[1]) {
+                        case "true":
+                        case "on":
+                            if(bot.setACTIVE_PARTICIPATE(true))
+                                event.reply("I can already join conversations");
+                            else
+                                event.reply("I will join conversations :grin:");
+                            return;
+                        case "false":
+                        case "off":
+                        case "of":
+                            bot.setACTIVE_PARTICIPATE(false);
+                            event.reply("I won't join conversations anymore.");
+                            return;
+                        default:
+                            event.reply("Sorry, " + args[1]
+                                    + " is not an option."
+                                    + " Please use the commands: " + "```"
+                                    + bot.getCallsign()
+                                    + "<participate/interrupt> [true/on/false/off]```"
+                            );
+                            return;
+                    }
+                default:
+                    event.reply("Sorry, " + String.join(" ", args)
+                            .substring(args[0].length())
+                            + " is not an option. Please use the commands: "
+                            + "```" + bot.getCallsign()
+                            + "<participate/interrupt> [true/on/false/off]```"
+                    );
+                    break;
+            }
         }
     }
 
@@ -239,47 +241,40 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked this command.
      */
     private void nsfw(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgsLowerCase(bot, event);
-        switch (args.length) {
-            case 1:
-                event.reply(
-                        "I am " + (bot.isNSFW() ? "" : "not ") + "NSFW"
-                );
-                return;
-            case 2:
-                switch (args[1]) {
-                    case "true":
-                    case "on":
-                        if (bot.setNSFW(true))
-                            event.reply("I am already NSFW :wink:");
-                        else
-                            event.reply("I am now NSFW :wink:");
-                        break;
-                    case "false":
-                    case "off":
-                    case "of":
-                        if (!bot.setNSFW(false))
-                            event.reply("I am already SFW :innocent:");
-                        else
-                            event.reply("I am now SFW :innocent:");
-                        break;
-                    default:
-                        event.reply("Sorry, " + args[1] + " is not an option."
-                                + " Please use the command: " + "```"
-                                + bot.getCallsign() + "<nsfw/naughty>" +
-                                "[true/on/false/off]```"
-                        );
-                        return;
-                }
-                break;
-            default:
-                event.reply("Sorry, " + String.join(" ", args)
-                                                .substring(args[0].length())
-                        + " is not an option. Please use the command:```"
-                        + bot.getCallsign() + "<nsfw/naughty>" +
-                        "[true/on/false/off]```"
-                );
-                break;
+        synchronized (bot) {
+            String[] args = this.cleanArgsLowerCase(bot, event);
+
+            switch (args.length) {
+                case 1:
+                    event.reply("I am " + (bot.isNSFW() ? "" : "not ") + "NSFW");
+                    return;
+                case 2:
+                    switch (args[1]) {
+                        case "true":
+                        case "on":
+                            if(bot.setNSFW(true))
+                                event.reply("I am already NSFW :wink:");
+                            else
+                                event.reply("I am now NSFW :wink:");
+                            break;
+                        case "false":
+                        case "off":
+                        case "of":
+                            if(!bot.setNSFW(false))
+                                event.reply("I am already SFW :innocent:");
+                            else
+                                event.reply("I am now SFW :innocent:");
+                            break;
+                        default:
+                            event.reply("Sorry, " + args[1] + " is not an option." + " Please use the command: " + "```" + bot.getCallsign() + "<nsfw/naughty>" + "[true/on/false/off]```");
+
+                            return;
+                    }
+                    break;
+                default:
+                    event.reply("Sorry, " + String.join(" ", args).substring(args[0].length()) + " is not an option. Please use the command:```" + bot.getCallsign() + "<nsfw/naughty>" + "[true/on/false/off]```");
+                    break;
+            }
         }
     }
 
@@ -289,38 +284,28 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked this command.
      */
     private void callsign(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgsLowerCase(bot, event);
-        switch (args.length) {
-            case 1:
-                //Send back the current callsign
-                event.reply(
-                        "You can call me with " + bot.getCallsign()
-                        + " or @" + bot.getNickname()
-                );
-                return;
-            case 2:
-                //Set a new callsign (if under 3 char)
-                if (args[1].length() > 3) {
-                    event.reply(
-                            "Please keep the callsign under 4 characters."
-                    );
+        synchronized (bot) {
+            String[] args = this.cleanArgsLowerCase(bot, event);
+            switch (args.length) {
+                case 1:
+                    //Send back the current callsign
+                    event.reply("You can call me with " + bot.getCallsign() + " or @" + bot.getNickname());
                     return;
-                } else {
-                    bot.setCallsign(args[1]);
-                    event.reply(
-                            "You can now call me with ```" + args[1]
-                            + "<command> ```or```@" + bot.getNickname() + "```"
-                    );
-                    return;
-                }
-            default:
-                event.reply("Sorry, " + String.join(" ", args)
-                        .substring(args[0].length())
-                        + " is not an option. Please use the command:```"
-                        + bot.getCallsign() +
-                        "<callsign/prefix/callwith/callw> [new_prefix]```"
-                );
-                break;
+                case 2:
+                    //Set a new callsign (if under 3 char)
+                    if(args[1].length() > 3) {
+                        event.reply("Please keep the callsign under 4 characters.");
+                        return;
+                    } else {
+                        bot.setCallsign(args[1]);
+                        event.reply("You can now call me with ```" + args[1] + "<command> ```or```@" + bot.getNickname() + "```");
+
+                        return;
+                    }
+                default:
+                    event.reply("Sorry, " + String.join(" ", args).substring(args[0].length()) + " is not an option. Please use the command:```" + bot.getCallsign() + "<callsign/prefix/callwith/callw> [new_prefix]```");
+                    break;
+            }
         }
     }
 
@@ -330,32 +315,28 @@ public class ManageSettingsCommand extends Command {
      * @param event The {@link BetterMessageEvent} that invoked this command.
      */
     private void changeNickName(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgs(bot, event);
-        if (args.length < 2) {
-            event.reply(
-                    "Please provide a new name.```"
-                    + bot.getCallsign() + "<" + args[0] + "> <new name>```"
-            );
-            return;
-        }
-        try {
-            String newName = String.join(" ", args)
-                    .substring(args[0].length()).trim();
-            System.out.println(newName);
-            //Change name on server
-            Guild g = Launcher.getGuild(bot.getGuildID());
-            Member self = g.getSelfMember();
-            new GuildController(g).setNickname(self, newName).queue();
-            //Change internal name
-            bot.setNickname(newName);
-            if (!newName.equalsIgnoreCase("weebot"))
-                event.reply("Hmm... " + newName
-                        + "... I like the sound of that!"
-                );
-            else
-                event.reply("Hmm... Weebot... I like the sound of th-- wait!");
-        } catch (InsufficientPermissionException e) {
-            event.reply("I don't have permissions do that :pensive:");
+        synchronized (bot) {
+            String[] args = this.cleanArgs(bot, event);
+            if(args.length < 2) {
+                event.reply("Please provide a new name.```" + bot.getCallsign() + "<" + args[0] + "> <new name>```");
+                return;
+            }
+            try {
+                String newName = String.join(" ", args).substring(args[0].length()).trim();
+                System.out.println(newName);
+                //Change name on server
+                Guild g = Launcher.getGuild(bot.getGuildID());
+                Member self = g.getSelfMember();
+                new GuildController(g).setNickname(self, newName).queue();
+                //Change internal name
+                bot.setNickname(newName);
+                if(!newName.equalsIgnoreCase("weebot"))
+                    event.reply("Hmm... " + newName + "... I like the sound of that!");
+                else
+                    event.reply("Hmm... Weebot... I like the sound of th-- wait!");
+            } catch (InsufficientPermissionException e) {
+                event.reply("I don't have permissions do that :pensive:");
+            }
         }
     }
 
