@@ -7,6 +7,9 @@ package com.ampro.main;
 
 import com.ampro.main.bot.Weebot;
 import com.ampro.main.bot.commands.*;
+import com.ampro.main.bot.commands.MiscCommands.PingCommand;
+import com.ampro.main.bot.commands.MiscCommands.SelfDestructMessageCommand;
+import com.ampro.main.bot.commands.MiscCommands.SpamCommand;
 import com.ampro.main.database.Database;
 import com.ampro.main.database.DatabaseManager;
 import com.ampro.main.jda.JDABuilder;
@@ -33,9 +36,10 @@ public class Launcher {
 	private static Thread saveTimer;
 
 	private static final ArrayList<Command> COMMANDS =
-			new ArrayList<>(Arrays.asList(
+			new ArrayList<Command>(Arrays.asList(
 					new HelpCommand(), new ShutdownCommand(),
 					new ManageSettingsCommand(), new ListGuildsCommand(),
+                    new PingCommand(), new SpamCommand(), new NotePadCommand(),
                     new SelfDestructMessageCommand()
 			));
 
@@ -51,6 +55,7 @@ public class Launcher {
 	 */
    public static void main(final String[] args) {
 		Launcher.jdaLogIn();
+		//Launcher.jdaDevLogIn();
 		Launcher.setUpDatabase();
 
 		Collection c = DATABASE.getWeebots().values();
@@ -84,6 +89,26 @@ public class Launcher {
 	       e.printStackTrace();
        }
    }
+
+	/**
+	 * Initiates {@code Launcher} data and connects to Weebot TestBuild API.
+	 * Builds Asynchronously in a separate thread to let main thread work on
+	 * other setup processes.
+	 * @throws LoginException
+	 * @throws InterruptedException
+	 */
+	private static void jdaDevLogIn() {
+		try {
+			//Connect to API
+			JDABuilder builder = new JDABuilder(AccountType.BOT)
+					.setToken("NDQ0MzIzNzMyMDEwMzAzNDg4.DdaQyQ.ztloAQmeuUffaC-DC9zE-LFwPq4");
+			Launcher.JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
+		} catch (LoginException e) {
+			e.printStackTrace();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+	}
 
 	/**
 	 * Adds event listeners to the JDA.

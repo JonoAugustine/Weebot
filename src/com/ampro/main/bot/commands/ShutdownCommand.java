@@ -47,9 +47,4 @@ public class ShutdownCommand extends Command {
         Launcher.shutdown();
     }
 
-    @Override
-    protected void execute(BetterMessageEvent event) {
-        Launcher.shutdown();
-    }
-
 }

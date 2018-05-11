@@ -91,15 +91,6 @@ public class HelpCommand extends Command {
     }
 
     /**
-     * Performs the action of the command.
-     *
-     * @param event
-     *         The {@link BetterMessageEvent} that called the command.
-     */
-    @Override
-    protected void execute(BetterMessageEvent event) {}
-
-    /**
      * Send the generic help information about Weebot.
      * @param bot The bot who called.
      * @param event The event that invoked this.

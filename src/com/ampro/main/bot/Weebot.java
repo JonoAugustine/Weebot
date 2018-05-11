@@ -15,6 +15,7 @@ package com.ampro.main.bot;
 
 import com.ampro.main.Launcher;
 import com.ampro.main.bot.commands.Command;
+import com.ampro.main.bot.commands.NotePadCommand;
 import com.ampro.main.game.Game;
 import com.ampro.main.game.Player;
 import com.ampro.main.listener.events.BetterEvent;
@@ -22,6 +23,7 @@ import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
 
+import java.time.OffsetDateTime;
 import java.util.*;
 
 //import org.joda.time.LocalDateTime;
@@ -56,7 +58,7 @@ public class Weebot implements Comparable<Weebot> {
     /** The Bot's ID string ending in "W". */
     private final String BOT_ID;
     /** The date the bot was added to the Database */
-    //TODO private LocalDateTime BIRTHDAY;
+    private final OffsetDateTime BIRTHDAY;
 
     /** Bot's nickname in hosting guild */
     private String nickname;
@@ -76,6 +78,12 @@ public class Weebot implements Comparable<Weebot> {
     /** List of {@code Game}s currently Running */
     private final List<Game<? extends Player>> GAMES_RUNNING;
 
+    /** Map of "NotePads" */
+    private final TreeMap<String, ArrayList<NotePadCommand.NotePad>> NOTES;
+
+    /** How much the bot can spam. */
+    private int spamLimit;
+
     /**
      * Sets up a Weebot for the server.
      * Stores server <b> name </b> and <b> Unique ID long </b>
@@ -85,6 +93,7 @@ public class Weebot implements Comparable<Weebot> {
         this.GUILD_ID = guild.getIdLong();
         this.BOT_ID = guild.getId() + "W";
         this.nickname = "Weebot";
+        this.BIRTHDAY   = OffsetDateTime.now();
         this.callsign = "<>";
         this.explicit = false;
         this.NSFW = false;
@@ -92,7 +101,8 @@ public class Weebot implements Comparable<Weebot> {
         this.ACTIVE_PARTICIPATE = false;
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING = new ArrayList<>();
-        //TODO this.BIRTHDAY   = new LocalDateTime();
+        this.NOTES  = new TreeMap<>();
+        this.spamLimit = 5;
     }
 
     /**
@@ -103,6 +113,7 @@ public class Weebot implements Comparable<Weebot> {
     public Weebot() {
         this.GUILD_ID = 0L;
         this.BOT_ID = "0W";
+        this.BIRTHDAY   = OffsetDateTime.now();
         this.nickname = "Weebot";
         this.callsign = "";
         this.explicit = false;
@@ -111,6 +122,8 @@ public class Weebot implements Comparable<Weebot> {
         this.ACTIVE_PARTICIPATE = false;
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING = null;
+        this.NOTES  = new TreeMap<>();
+        this.spamLimit = 5;
     }
 
     /**
@@ -204,35 +217,6 @@ public class Weebot implements Comparable<Weebot> {
             return true;
         }
         return true;
-    }
-
-    /**
-     * Spams "SPAM ATTACK" for the number listed after spam. Default is 5.
-     * @param channel TextChannel to send spam to
-     * @param command Command used to invode call to this method
-     */
-    private void spam(TextChannel channel, String[] command) {
-        int loop;
-        try {
-            loop = Integer.parseInt(command[1]);
-            if(loop > 10) {
-                channel.sendMessage("That's a bit much...").queue();
-                return;
-            }
-        } catch (IndexOutOfBoundsException e) {
-            loop = 5;
-        } catch (NumberFormatException e2) {
-            System.err.println("Failed to parse int from: " + command[1]);
-            loop = 5;
-        }
-        for (int i = 0; i < loop; i++) {
-            channel.sendMessage("SPAM ATTACK").queue();
-        }
-    }
-
-    /** Ping-Pong */
-    private void pong(TextChannel channel) {
-        channel.sendMessage("Pong!").queue();
     }
 
     /**
@@ -387,6 +371,24 @@ public class Weebot implements Comparable<Weebot> {
      */
     public final void addRunningGame(Game<? extends Player> game) {
         this.GAMES_RUNNING.add(game);
+    }
+
+    public TreeMap<String, ArrayList<NotePadCommand.NotePad>> getNotePads() {
+        return NOTES;
+    }
+
+    /** @return The number of messages the bot can spam at once. */
+    public int getSpamLimit() { return this.spamLimit; }
+
+    /**
+     * Set the number of time the bot can spam at once.
+     * @param limit The new limit
+     * @return The old limit.
+     */
+    public int setSpamLimit(int limit) {
+        int old = this.spamLimit;
+        this.spamLimit = limit;
+        return old;
     }
 
 }

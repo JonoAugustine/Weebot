@@ -7,7 +7,6 @@ import net.dv8tion.jda.core.entities.ChannelType;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 
 /**
  * A {@link Runnable} {@link Command} implementation that sends a list of all
@@ -58,7 +57,6 @@ public class ListGuildsCommand extends Command {
      * @param event {@link BetterMessageEvent}
      */
     @SuppressWarnings("unchecked")
-    @Override
     protected void execute(BetterMessageEvent event) {
 
         Iterable<Weebot> botIterable = Launcher.getDatabase().getWeebots()

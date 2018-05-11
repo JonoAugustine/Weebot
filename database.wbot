@@ -3,17 +3,55 @@
     "0": {
       "GUILD_ID": 0,
       "BOT_ID": "0W",
+      "BIRTHDAY": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 5,
+            "day": 11
+          },
+          "time": {
+            "hour": 0,
+            "minute": 18,
+            "second": 14,
+            "nano": 801000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -14400
+        }
+      },
       "nickname": "Weebot",
       "callsign": "",
       "explicit": false,
       "BANNED_WORDS": [],
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
-      "COMMANDS_DISABLED": {}
+      "COMMANDS_DISABLED": {},
+      "NOTES": {},
+      "spamLimit": 5
     },
     "139168039634468865": {
       "GUILD_ID": 139168039634468865,
       "BOT_ID": "139168039634468865W",
+      "BIRTHDAY": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 5,
+            "day": 11
+          },
+          "time": {
+            "hour": 0,
+            "minute": 18,
+            "second": 14,
+            "nano": 802000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -14400
+        }
+      },
       "nickname": "Weebot",
       "callsign": "\u003c\u003e",
       "explicit": true,
@@ -21,11 +59,31 @@
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
-      "GAMES_RUNNING": []
+      "GAMES_RUNNING": [],
+      "NOTES": {},
+      "spamLimit": 10
     },
     "218979588716494848": {
       "GUILD_ID": 218979588716494848,
       "BOT_ID": "218979588716494848W",
+      "BIRTHDAY": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 5,
+            "day": 11
+          },
+          "time": {
+            "hour": 0,
+            "minute": 18,
+            "second": 14,
+            "nano": 802000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -14400
+        }
+      },
       "nickname": "Weebot",
       "callsign": "\u003c\u003e",
       "explicit": false,
@@ -33,7 +91,9 @@
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
-      "GAMES_RUNNING": []
+      "GAMES_RUNNING": [],
+      "NOTES": {},
+      "spamLimit": 5
     }
   },
   "DEV_IDS": [

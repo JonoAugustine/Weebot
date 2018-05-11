@@ -23,6 +23,7 @@ import net.dv8tion.jda.core.events.message.GenericMessageEvent;
 import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent;
 
 import java.time.OffsetDateTime;
+import java.util.function.Consumer;
 
 /**
  * An wrapper class for {@link GenericMessageEvent}
@@ -104,14 +105,39 @@ public class BetterMessageEvent extends BetterEvent {
         switch (this.MESSAGE_EVENT.getChannelType()) {
             case TEXT:
                 this.MESSAGE_EVENT.getTextChannel().sendMessage(message).queue();
-                return;
+                break;
             case PRIVATE:
                 this.AUTHOR.openPrivateChannel().queue( (channel) ->
-                    channel.sendMessage(message).queue()
+                        channel.sendMessage(message).queue()
                 );
-                return;
+                break;
             default:
                 System.err.println("Could not locate event channel.");
+                break;
+        }
+    }
+
+    /**
+     * Send a message to the channel the event came from.
+     * @param message String to send
+     * @param consumer
+     */
+    public void reply(String message, Consumer<Message> consumer) {
+        switch (this.MESSAGE_EVENT.getChannelType()) {
+            case TEXT:
+                this.MESSAGE_EVENT.getTextChannel().sendMessage(message)
+                        .queue(m -> consumer.accept(m));
+                break;
+            case PRIVATE:
+                this.AUTHOR.openPrivateChannel().queue( (channel) ->
+                    channel.sendMessage(message).queue( m ->
+                            consumer.accept(m)
+                    )
+                );
+                break;
+            default:
+                System.err.println("Could not locate event channel.");
+                break;
         }
     }
 

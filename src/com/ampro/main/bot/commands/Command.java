@@ -113,7 +113,10 @@ public abstract class Command {
     private final static String USER_PERM
             = "%s You must have the %s permission in this %s to use that!";
 
-    Command() {
+    /**
+     * Build a new Command with empty, null, or false variables.
+     */
+    protected Command() {
         this.name       = null;
         this.aliases    = null;
         this.help       = null;
@@ -125,8 +128,21 @@ public abstract class Command {
     }
 
 
-    Command(String name, List<String> aliases, String help, String argFormat, boolean guildOnly, boolean ownerOnly,
-            int cooldown, boolean hidden) {
+    /**
+     * Build a Command with each variable assigned.
+     * @param name Name of the command
+     * @param aliases Alternative names for the command
+     * @param help A small help string.
+     * @param argFormat Format of arguments.
+     * @param guildOnly Can this only be used in Guild servers?
+     * @param ownerOnly Can this only be used by Weebot developers?
+     * @param cooldown Cooldown time
+     * @param hidden Should this be hidden from general help calls from
+     *                  {@link HelpCommand}?
+     */
+    protected Command(String name, List<String> aliases, String help,
+                      String argFormat, boolean guildOnly, boolean ownerOnly,
+                        int cooldown, boolean hidden) {
 
         this.name       = name;
         this.aliases    = aliases;
@@ -145,12 +161,6 @@ public abstract class Command {
      * @param event The {@link BetterMessageEvent} that called the command.
      */
     public abstract void run(Weebot bot, BetterMessageEvent event);
-
-    /**
-     * Performs the action of the command.
-     * @param event The {@link BetterMessageEvent} that called the command.
-     */
-    protected abstract void execute(BetterMessageEvent event);
 
     /**
      * Performs the action of the command.

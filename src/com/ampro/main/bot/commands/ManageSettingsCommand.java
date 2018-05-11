@@ -30,7 +30,8 @@ public class ManageSettingsCommand extends Command {
                         "explicit", "expl", "vulgar", "pottymouth",
                         "participate", "activeparticipate", "interrupt",
                         "livebot", "chatbot",
-                        "naughty", "nsfw"
+                        "naughty", "nsfw",
+                        "spamlimit"
                 ))
                 , "See and change my settings."
                 ,"[true/false/on/off]"
@@ -95,6 +96,9 @@ public class ManageSettingsCommand extends Command {
             case "naughty":
                 this.nsfw(bot, event);
                 break;
+            case "spamlimit":
+                this.spamLimit(bot, event);
+                break;
             default:
                 return;
         }
@@ -123,9 +127,11 @@ public class ManageSettingsCommand extends Command {
             out += "I " + (bot.isNSFW() ? "am " : "not ") + "NSFW";
             out += "\n";
             out += "I " + (bot.canParticipate() ? "" : "won't ") + "join conversations if I'm not called.";
+            out += "\n";
+            out += "I can spam up to " + bot.getSpamLimit() + " times";
             out += "```\n";
             out += "You can change any setting like this:" + "```<setting_name> [new_value]```\nwhere ``[new_value]`` "
-                    + "can be either ``[true/on/false/off]`` or ``[abc...]``";
+                    + "can be either ``[true/on/false/off]`` or ``[abc123...]``";
 
             //out += "\n";
             //out += "\n";
@@ -289,7 +295,8 @@ public class ManageSettingsCommand extends Command {
             switch (args.length) {
                 case 1:
                     //Send back the current callsign
-                    event.reply("You can call me with " + bot.getCallsign() + " or @" + bot.getNickname());
+                    event.reply("You can call me with " + bot.getCallsign()
+                            + " or @" + bot.getNickname());
                     return;
                 case 2:
                     //Set a new callsign (if under 3 char)
@@ -298,12 +305,17 @@ public class ManageSettingsCommand extends Command {
                         return;
                     } else {
                         bot.setCallsign(args[1]);
-                        event.reply("You can now call me with ```" + args[1] + "<command> ```or```@" + bot.getNickname() + "```");
+                        event.reply("You can now call me with ```" + args[1]
+                                + "<command> ```or```@" + bot.getNickname() + "```");
 
                         return;
                     }
                 default:
-                    event.reply("Sorry, " + String.join(" ", args).substring(args[0].length()) + " is not an option. Please use the command:```" + bot.getCallsign() + "<callsign/prefix/callwith/callw> [new_prefix]```");
+                    event.reply("Sorry, " + String.join(" ", args)
+                            .substring(args[0].length())
+                            + " is not an option. Please use the command:```"
+                            + bot.getCallsign()
+                            + "<callsign/prefix/callwith/callw> [new_prefix]```");
                     break;
             }
         }
@@ -340,6 +352,43 @@ public class ManageSettingsCommand extends Command {
         }
     }
 
-    @Override
-    protected void execute(BetterMessageEvent event) {}
+    /**
+     * Set or get the limit on bot spam.
+     * @param bot The {@link Weebot} to view or modify.
+     * @param event The {@link BetterMessageEvent} that invoked this command.
+     */
+    private void spamLimit(Weebot bot, BetterMessageEvent event) {
+        synchronized (bot) {
+            String[] args = this.cleanArgsLowerCase(bot, event);
+            switch (args.length) {
+                case 1:
+                    event.reply(
+                            "The spam limit is currently set to "
+                            + bot.getSpamLimit()
+                    );
+                    return;
+                case 2:
+                    try {
+                        int limit = Math.abs(Integer.parseInt(args[1]));
+                        bot.setSpamLimit(limit);
+                        event.reply("The spam limit is now " + limit);
+                    } catch (NumberFormatException e) {
+                        event.reply("Sorry, I couldn't read that number." +
+                                " Try using a smaller number and make sure " +
+                                "there are no letters, symbols, or decimals."
+                        );
+                    }
+                    return;
+                default:
+                    event.reply("Sorry, " + String.join(" ", args)
+                            .substring(args[0].length())
+                            + " is not an option. Please use the command:```"
+                            + bot.getCallsign() + "<spamlimit> <new_limit>```"
+                            + "\n Where <new_limit> is an integer."
+                    );
+                    break;
+            }
+        }
+    }
+
 }
