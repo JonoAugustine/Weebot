@@ -79,7 +79,7 @@ public class Weebot implements Comparable<Weebot> {
     private final List<Game<? extends Player>> GAMES_RUNNING;
 
     /** Map of "NotePads" */
-    private final TreeMap<String, NotePad> NOTES;
+    private final ArrayList<NotePad> NOTES;
 
     /** How much the bot can spam. */
     private int spamLimit;
@@ -101,9 +101,11 @@ public class Weebot implements Comparable<Weebot> {
         this.ACTIVE_PARTICIPATE = false;
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING = new ArrayList<>();
-        this.NOTES  = new TreeMap<>();
-        this.NOTES.putIfAbsent("default", new NotePad(guild));
+        this.NOTES  = new ArrayList<>();
+        this.NOTES.add(0, new NotePad(guild));
         this.spamLimit = 5;
+
+
     }
 
     /**
@@ -123,8 +125,8 @@ public class Weebot implements Comparable<Weebot> {
         this.ACTIVE_PARTICIPATE = false;
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING = null;
-        this.NOTES  = new TreeMap<>();
-        this.NOTES.putIfAbsent("default", new NotePad(this));
+        this.NOTES  = new ArrayList<>();
+        this.NOTES.add(0, new NotePad(this));
         this.spamLimit = 5;
     }
 
@@ -380,7 +382,7 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     /** @return {@link TreeMap TreeMap<String,NotePad>} */
-    public TreeMap<String, NotePad> getNotePads() {
+    public ArrayList<NotePad> getNotePads() {
         return NOTES;
     }
 
