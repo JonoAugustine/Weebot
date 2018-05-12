@@ -42,6 +42,7 @@ development progress.
 		update the database~~
 			- ~~*DatabaseWriter.java*~~
 			- ~~*DatabaseReader.java*~~
+- ~~Make a NotePat/StickyNote functionality.~~
  - Make *Joke/Insult Generator*(TM)
 	- Possibly using a pool of joke templates and drawing from a pool of random words and phrases
  -  Make *Cards against NL*

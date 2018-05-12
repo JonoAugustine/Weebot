@@ -465,12 +465,20 @@ public class NotePadCommand extends Command {
             case WRITE:
                 String nNote =
                         String.join(" ",Arrays.copyOfRange(args,3,args.length)).trim();
+                if (nNote.isEmpty()) {
+                    event.reply("The note's message cannot be blank.");
+                    return;
+                }
                 pad.addNotes(event.getAuthor(), nNote);
                 event.reply("``" + nNote + "`` was added to " + pad.name + ".");
                 return;
             case INSERT:
                 nNote =
                     String.join(" ", Arrays.copyOfRange(args, 4,args.length)).trim();
+                if (nNote.isEmpty()) {
+                    event.reply("The note's message cannot be blank.");
+                    return;
+                }
                 try {
                     pad.insertNotes(event.getAuthor(), Integer.parseInt(args[4]), nNote);
                     event.reply("``" + nNote + "`` was added to " + pad.name + ".");
@@ -484,6 +492,10 @@ public class NotePadCommand extends Command {
                 try {
                     nNote = String.join(" ", Arrays.copyOfRange(args,4, args.length))
                                   .trim();
+                    if (nNote.isEmpty()) {
+                        event.reply("The note's message cannot be blank.");
+                        return;
+                    }
                     //Index read starting at 1
                     String old = pad.editNote(Integer.parseInt(args[3]) - 1, nNote,
                                               event.getAuthor());
