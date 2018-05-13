@@ -117,6 +117,9 @@ development progress.
                 }
                 ```
         - *BetterMessageEvent*
+            - Saves the ``Message`` of the wrapped event, so we don't lose the
+            methods of JDA ``Message`` and only make 1 (one) ``.complete()``
+            call to speed the thread up.
             - Added reply with file and reply with file + file consumer
             ```
             public void reply(File file, String filename)

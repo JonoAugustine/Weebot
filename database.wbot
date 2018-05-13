@@ -212,9 +212,31 @@
               "totalSeconds": -14400
             }
           }
+        },
+        {
+          "name": "Weebot_Feature_Requests",
+          "notes": [],
+          "creationTime": {
+            "dateTime": {
+              "date": {
+                "year": 2018,
+                "month": 5,
+                "day": 13
+              },
+              "time": {
+                "hour": 3,
+                "minute": 48,
+                "second": 31,
+                "nano": 961000000
+              }
+            },
+            "offset": {
+              "totalSeconds": -14400
+            }
+          }
         }
       ],
-      "spamLimit": 5
+      "spamLimit": 0
     },
     "218979588716494848": {
       "GUILD_ID": 218979588716494848,
@@ -275,5 +297,50 @@
   "DEV_IDS": [
     139167730237571072,
     186130584693637131
+  ],
+  "SUGGESTIONS": [
+    [
+      {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 5,
+            "day": 13
+          },
+          "time": {
+            "hour": 4,
+            "minute": 56,
+            "second": 28,
+            "nano": 193000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -14400
+        }
+      },
+      {
+        "suggestion": "Cards Against Humanity",
+        "authorID": 139167730237571072,
+        "guildID": 139168039634468865,
+        "submitTime": {
+          "dateTime": {
+            "date": {
+              "year": 2018,
+              "month": 5,
+              "day": 13
+            },
+            "time": {
+              "hour": 4,
+              "minute": 56,
+              "second": 28,
+              "nano": 193000000
+            }
+          },
+          "offset": {
+            "totalSeconds": -14400
+          }
+        }
+      }
+    ]
   ]
 }

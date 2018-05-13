@@ -4,8 +4,12 @@
 
 package com.ampro.main.database;
 
+import com.ampro.main.Launcher;
 import com.ampro.main.bot.Weebot;
+import com.ampro.main.bot.commands.MiscCommands.WeebotSuggestionCommand.Suggestion;
+import net.dv8tion.jda.core.entities.User;
 
+import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.TreeMap;
@@ -22,6 +26,8 @@ public class Database {
     /** Array of registered developer Discord IDs */
     private final ArrayList<Long> DEV_IDS;
 
+    private final TreeMap<OffsetDateTime, Suggestion> SUGGESTIONS;
+
     /** Build an empty {@code Database}.*/
     public Database() {
         WEEBOTS = new TreeMap<>();
@@ -29,6 +35,7 @@ public class Database {
     	DEV_IDS = new ArrayList<>();
     	DEV_IDS.add(139167730237571072L); //Jono
         DEV_IDS.add(186130584693637131L); //Dernst
+        SUGGESTIONS = new TreeMap<>();
     }
 
     /**
@@ -94,6 +101,29 @@ public class Database {
         return this.DEV_IDS.remove(DEV_IDS.indexOf(id));
     }
 
+    public synchronized void addSuggestion(Suggestion suggestion) {
+        SUGGESTIONS.putIfAbsent(suggestion.getSubmitTime(), suggestion);
+    }
+
+    public TreeMap<OffsetDateTime, Suggestion> getSuggestions() {
+        return SUGGESTIONS;
+    }
+
+    public synchronized Suggestion removeSuggestion(Suggestion suggestion) {
+        return SUGGESTIONS.remove(suggestion.getSubmitTime());
+    }
+
+    public synchronized ArrayList<Suggestion> clearUserSuggestions(User user) {
+        ArrayList<Suggestion> out = new ArrayList<>();
+        for (Suggestion s : SUGGESTIONS.values()) {
+            if (Launcher.getJda().getUserById(s.getAuthorID()).getIdLong()
+                    == user.getIdLong()) {
+                out.add(SUGGESTIONS.remove(s.getSubmitTime()));
+            }
+        }
+        return out;
+    }
+
     /**
      * @return ArrayList of registered developers.
      */
@@ -117,5 +147,4 @@ public class Database {
 
         return out;
     }
-
 }

@@ -10,6 +10,7 @@ import com.ampro.main.bot.commands.*;
 import com.ampro.main.bot.commands.MiscCommands.PingCommand;
 import com.ampro.main.bot.commands.MiscCommands.SelfDestructMessageCommand;
 import com.ampro.main.bot.commands.MiscCommands.SpamCommand;
+import com.ampro.main.bot.commands.MiscCommands.WeebotSuggestionCommand;
 import com.ampro.main.database.Database;
 import com.ampro.main.database.DatabaseManager;
 import com.ampro.main.jda.JDABuilder;
@@ -43,7 +44,8 @@ public class Launcher {
 					new HelpCommand(), new ShutdownCommand(),
 					new ManageSettingsCommand(), new ListGuildsCommand(),
                     new PingCommand(), new SpamCommand(), new NotePadCommand(),
-                    new SelfDestructMessageCommand()
+                    new SelfDestructMessageCommand(),
+                    new WeebotSuggestionCommand()
 			));
 
 	/** The database */
