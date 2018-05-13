@@ -8,6 +8,10 @@ import net.dv8tion.jda.core.entities.User;
 
 import javax.naming.InvalidNameException;
 import javax.naming.NamingException;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -15,7 +19,6 @@ import java.util.*;
 /**
  * View and modify {@link NotePad Note Pads}.
  * TODO: add NotePad permissions/roles allowed to modify
- * TODO: Get more details about a single {@link NotePad.Note note}, e.g. creation time
  * @author Jonathan Augustine
  */
 public class NotePadCommand extends Command {
@@ -67,7 +70,13 @@ public class NotePadCommand extends Command {
                 this.lastEditTime = OffsetDateTime.now();
                 this.edits++;
                 if (!this.editorIDs.contains(editor.getIdLong()))
-                    this.editorIDs.add(editor.getIdLong());
+                    this.editorIDs.add(0, editor.getIdLong());
+            }
+
+            long lastEditor() {
+                if (this.editorIDs.isEmpty())
+                    return this.authorID;
+                return this.editorIDs.get(0);
             }
 
             @Override
@@ -304,7 +313,8 @@ public class NotePadCommand extends Command {
 
     }
 
-    private enum ACTION {MAKE, WRITE, INSERT, EDIT, GET, DELETE, CLEAR, TRASH}
+    private enum ACTION {MAKE, WRITE, INSERT, EDIT, GET, DELETE, CLEAR, TRASH,
+                         FILE}
 
     public NotePadCommand() {
         super(
@@ -359,7 +369,6 @@ public class NotePadCommand extends Command {
      */
     @Override
     protected synchronized void execute(Weebot bot, BetterMessageEvent event) {
-        //TODO
         String[] args = this.cleanArgs(bot, event);
         ArrayList<NotePad> notes = bot.getNotePads();
         NotePad pad;
@@ -385,6 +394,7 @@ public class NotePadCommand extends Command {
                             "write or edit a specific notepad."
             ));
             //TODO Show help
+            new Thread(() -> event.deleteMessage()).start();
             return;
         }
 
@@ -417,6 +427,7 @@ public class NotePadCommand extends Command {
             event.reply(nPad.name + " has been created. It's number "
                                 + (notes.indexOf(nPad) + 1) + "."
             );
+            new Thread(() -> event.deleteMessage()).start();
             return;
         }
 
@@ -429,22 +440,22 @@ public class NotePadCommand extends Command {
 
         //Should be 'notes #' , so display NotePad
         if (args.length == 2) {
-            out = "```" + pad.name + "\n\n";
-            i = 1;
             if (pad.notes.isEmpty()) {
                 event.reply(pad.name + " is empty.");
                 return;
             }
+            out = "```(" + (notes.indexOf(pad) + 1) + ") " + pad.name + "\n\n";
+            i = 1;
             for (NotePad.Note n : pad) {
-                out = out.concat(i++ + ".) " + n + "\t|"
-                                    + n.lastEditTime.format(
-                                        DateTimeFormatter.ofPattern(
-                                                "d-M-y hh:mm:ss"))
-                                    + "\n"
+                out = out.concat(n.lastEditTime.format(
+                                DateTimeFormatter.ofPattern(
+                                        "d-M-y hh:mm:ss"))
+                                + "\n" + i++ + ".) " + n + "\n\n"
                 );
             }
             out += "```";
             event.reply(out);
+            new Thread(() -> event.deleteMessage()).start();
             return;
         }
 
@@ -471,6 +482,7 @@ public class NotePadCommand extends Command {
                 }
                 pad.addNotes(event.getAuthor(), nNote);
                 event.reply("``" + nNote + "`` was added to " + pad.name + ".");
+                new Thread(() -> event.deleteMessage()).start();
                 return;
             case INSERT:
                 nNote =
@@ -482,6 +494,7 @@ public class NotePadCommand extends Command {
                 try {
                     pad.insertNotes(event.getAuthor(), Integer.parseInt(args[4]), nNote);
                     event.reply("``" + nNote + "`` was added to " + pad.name + ".");
+                    new Thread(() -> event.deleteMessage()).start();
                 } catch (NumberFormatException e) {
                     event.reply("Sorry, I couldn't understand '" +
                                     args[3] + "'. Please use an integer " +
@@ -501,6 +514,7 @@ public class NotePadCommand extends Command {
                                               event.getAuthor());
                     event.reply("``" + old + "`` was replaced with ``" + nNote + "`` in" +
                                         " ``" + pad.name + "``.");
+                    new Thread(() -> event.deleteMessage()).start();
                 } catch (NumberFormatException e) {
                     event.reply("Sorry, I couldn't understand '" +
                                         args[3] + "'. Please use an integer " +
@@ -526,6 +540,7 @@ public class NotePadCommand extends Command {
                                                       .getName()
                            : ".");
                     event.reply(out);
+                    new Thread(() -> event.deleteMessage()).start();
                 } catch (NumberFormatException e) {
                     event.reply("Sorry, I couldn't understand '" +
                                         args[3] + "'. Please use an integer " +
@@ -536,7 +551,9 @@ public class NotePadCommand extends Command {
                 return;
             case DELETE:
                 try {
-                    pad.deleteNote(Integer.parseInt(args[3]));
+                    NotePad.Note oNote = pad.deleteNote(Integer.parseInt(args[3]) - 1);
+                    event.reply("``" + oNote + "`` was removed from " + pad.name + ".");
+                    new Thread(() -> event.deleteMessage()).start();
                 } catch (NumberFormatException e) {
                     event.reply("Sorry, I couldn't understand '" +
                                        args[3] + "'. Please use an integer " +
@@ -548,16 +565,46 @@ public class NotePadCommand extends Command {
             case CLEAR:
                 pad.clear();
                 event.reply(pad.name + " NotePad was cleared.");
+                new Thread(() -> event.deleteMessage()).start();
                 return;
             case TRASH:
                 notes.remove(pad);
-                event.reply(pad.name + " NotePad was deleted.");
+                event.reply(pad.name + " NotePad was deleted by " + event.getAuthor()
+                        .getName() + ".");
+                new Thread(() -> event.deleteMessage()).start();
+                return;
+            case FILE:
+                event.reply(makeNotePadFile(pad), pad.name + " NotePad.txt",
+                            file -> file.deleteOnExit());
                 return;
             default:
                 return;
         }
 
+    }
 
+    private static File makeNotePadFile(NotePad pad) {
+        String name = "/temp/out/" + pad.name + " NotePad.txt";
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(name))) {
+            String out = pad.name + "\n\n";
+            int i = 1;
+            for (NotePad.Note n : pad) {
+                out = out.concat(n.lastEditTime.format(
+                        DateTimeFormatter.ofPattern("d-M-y hh:mm:ss"))
+                    + "| Author: " + Launcher.getJda().getUserById(n.authorID).getName()
+                    + (n.lastEditTime == n.creationTime ?  "" : " | Last Editor: " +
+                        Launcher.getJda().getUserById(n.lastEditor()).getName())
+                    + "\n" + i++ + ".) " + n + "\n\n"
+                );
+            }
+
+            bw.write(out);
+            return new File(name);
+        } catch (IOException e) {
+
+            e.printStackTrace();
+            return null;
+        }
     }
 
     /**
@@ -589,6 +636,8 @@ public class NotePadCommand extends Command {
                 case "trash":
                 case "bin":
                     return ACTION.TRASH;
+                case "file":
+                    return ACTION.FILE;
             }
         }
         return null;

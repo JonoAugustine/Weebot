@@ -196,7 +196,7 @@ public class Weebot implements Comparable<Weebot> {
 
         //Command help = Launcher.getCommand(HelpCommand.class);
         //if (help != null) help.run(this, event);
-        event.reply("Sorry, I don't recognize that command.");
+        //event.reply("Sorry, I don't recognize that command.");
 
     }
 

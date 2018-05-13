@@ -62,11 +62,116 @@ development progress.
 <a name='Log'></a>
 **Log**
 <br>*(New files introduced in a log are marked by ***bold-italics***)*
+
+- 3/12/18
+    - *General*
+        - ``Launcher#saveTimer`` shortened from 1 min to 30 sec.
+        - Solid Implementation of ``NotePadCommand``, though still needs some
+        features ([see below](#NPC2))
+    - <a name='NPC2'>*NotePadCommand*</a>
+        - Several improvments and functionality!
+            - Standardized the format of arguments to make parsing consistant and
+            not a f**king mess.
+            ```
+            notes
+            notes #
+            notes # clear
+            notes # toss/trash/bin
+            notes # delete/remove #
+            notes make [the name]
+            notes # write/add <the message>
+            notes # insert # <the message>
+            notes # edit # <new message>
+            ```
+            - Ditched the "ALL SWITCHES EVERYWHERE" approach in place of mixed,
+            sequential ifs and a final switch statement. since the argument format
+            is consistant and somewhat linear in form progression/length, the
+            process of parsing can be approched in a less hyper-modular fashion.
+            - Added several more actions to interact with a NotePad and Note.
+                - MAKE, WRITE, INSERT, EDIT, GET, DELETE, CLEAR, TRASH, FILE
+                    - *GET* replies with details about the the requested note.
+                    - *FILE* creates a file out of the requested NotePad, sends
+                    the file as a reply, then deletes the local file.
+            - Private methods for parsing ``NotePads``, ``Actions``, and sending
+            generic err messages.
+            - Disallow empty Note entries.
+            - Delete the invoking message for some actions, to reduce clutter in
+            the chat.
+        - *NotePad*
+            - Added author/editor parameters to writing and editing mehods.
+            - Clear all notes method ``public Note[] clear()``
+            - More keywords for new ``Actions``
+            - *Note*
+                - Added more information to keep:
+                ```
+                private OffsetDateTime lastEditTime;
+                private long edits;
+                private final long authorID;
+                private final ArrayList<Long> editorIDs;
+                void edit(String note, User editor) {
+                    this.note = note;
+                    this.lastEditTime = OffsetDateTime.now();
+                    this.edits++;
+                    if (!this.editorIDs.contains(editor.getIdLong()))
+                        this.editorIDs.add(editor.getIdLong());
+                }
+                ```
+        - *BetterMessageEvent*
+            - Added reply with file and reply with file + file consumer
+            ```
+            public void reply(File file, String filename)
+            public void reply(File file, String name, Consumer<File> consumer)
+            ```
+        - *DatabaseManager*
+            - Checks if the main ``database.wbot`` matches the last backup. If
+            they do not match, then load the backup (assuming there was an
+            improper shutdown last time and the database).
+- 3/11/18
+    - *General*
+        - Created a new bot ***[Weebot (TestBuild)](https://discordapp.com/developers/applications/me/444323732010303488)***
+        for testings new implementations on. Allowing Weebot to have longer
+        uptimes between updates. The login sequence was added and commented out
+        in ``Launcher``.
+        - Created a [``NotePadCommand``](#NPC1).
+        Still needs features finished/implemented.
+        - Implemented the creation time variable for ``BetterMessageEvent`` and
+        ``Weebot`` using ``OffsetDateTime``
+    - <a name='NPC1'>***NotePadCommand & NotePad***</a>
+        - A Command and Object for guilds to write persistant notepads/stickynotes
+        that can be accessed on the guild channels, removing the need for Google
+        Drive for small notes that need to be shared with guild memebers.
+        - ``NotePadCommand`` holds a nested class ``NotePad`` that holds a list
+        of notes that can be written, edited or deleted.
+        - A ``ArrayList`` of ``NotePads`` is kept by a Weebot.
+            - ***NotePad***
+                - Several overloaded constructors and methods implemented for ``NotePad``.
+                - ``NotePad`` has an array of key words that cannot be used as names
+                - ***Note***
+                    - A ``Note`` is essentially a "BetterString" that keeps track
+                    of some extra information beyond the note's content like its
+                    creation date & time.
+                    - It can be edited and have it's creation time
+        - **In its current implmenetation, all aspects of ``NotePadCommand`` need
+        to be refractored (and finished...).**
+    - ***MiscCommands*** (& *ManageSettingsCommand)*
+        - Moved [SelfDestruct](#SDMC1), Spam, and Ping commands to a "container"
+         class ``MiscCommands``, since they can't really warrant their own classes.
+        - Added variable ``int spamLimit`` to ``Weebot`` and ``ManageSettignsCommand``
+        to set a Guild-wide limit on bot spam attacks.
+    - *Command*
+        - Removed single-arg ``execute(BetterMessageEvent)`` abstract method.
+    - *BetterMessageEvent*
+        - ``reply(Sring, Consumer<Message>)`` added. Should add more of these.
+            - Beginning to feel like it's getting closer and closer to just being
+            the jagrosh util CommandEvent....
+
+
 - 3/9-10/18
     - *General*
         - [``ManagaeSettingsCommand``](#MSC1)
         - Lots of minor code cleaning and optimizations using IntelliJ
         analitics
+        - Updated Event flowchart
     - *Command*
         - Made ``String[] cleanArgs(Weebot,String[])`` and variations
         to clean message arguments of the callsign/bot-mention to make
@@ -74,6 +179,7 @@ development progress.
     - <a name='MSC1'>***ManageSettingsCommand***</a>
         - Moved all settings management commands to a new ``Command``
         class and fixed bugs.
+        - Syncronized Methods
     - <a name='SDMC1'> ***SelfDestructMessageCommand*** </a>
         - Command to set a message to "self destruct" after the given
         time. Used as

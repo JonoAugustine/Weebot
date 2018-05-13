@@ -8,6 +8,7 @@ import java.io.*;
 /**
  * Holds a database and reads & writes {@code Database} it from/to file
  * using GSON (JSON).
+ * //TODO Add another redundancy to the databases
  * @author Jonathan Augustine
  */
 public class DatabaseManager {
@@ -59,7 +60,6 @@ public class DatabaseManager {
             Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setExclusionStrategies().setPrettyPrinting().create();
 
             gson.toJson(database, writer);
-            System.out.println("Database backed up.");
             return 1;
         } catch (FileNotFoundException e) {
             System.err.println("File not found while writing gson backup to file.");
@@ -74,36 +74,41 @@ public class DatabaseManager {
     }
 
     /**
-     * Loads database.
+     * Loads database. If main database does not match the backup, return the backup.
      * @return Database in format database.wbot
      *             null if database not found.
      */
     public static synchronized Database load() {
         Gson gson = new GsonBuilder().create();
+        Database out = null;
+        Database bk = null;
         try (Reader reader = new FileReader("database.wbot")) {
-            return gson.fromJson(reader, Database.class);
+            out = gson.fromJson(reader, Database.class);
         } catch (FileNotFoundException e) {
             System.err.println(
                     "Unable to locate database.wbot."
                     + "\n\tAttempting to load backup file..."
             );
-            try (Reader bKreader = new FileReader("databaseBK.wbot")) {
-                return gson.fromJson(bKreader, Database.class);
-            } catch (FileNotFoundException e2) {
-                System.err.println("\tUnable to locate databseBK.wbot.");
-                //e.printStackTrace();
-                //e2.printStackTrace();
-            } catch (IOException e2) {
-                System.err.println("IOException while reading gson from file.");
-                e.printStackTrace();
-                e2.printStackTrace();
-            }
-            return null;
         } catch (IOException e) {
             System.err.println("IOException while reading gson from file.");
             e.printStackTrace();
             return null;
         }
+        try (Reader bKreader = new FileReader("databaseBK.wbot")) {
+             bk = gson.fromJson(bKreader, Database.class);
+        } catch (FileNotFoundException e) {
+            System.err.println("\tUnable to locate databseBK.wbot.");
+            //e.printStackTrace();
+            //e2.printStackTrace();
+            return null;
+        } catch (IOException e) {
+            System.err.println("IOException while reading gson from backup file.");
+            e.printStackTrace();
+            e.printStackTrace();
+            return null;
+        }
+        out = out != null ? out : bk;
+        return out == bk ? out : bk;
     }
 
 }

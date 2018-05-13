@@ -19,8 +19,11 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDA.Status;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import org.apache.commons.io.FileUtils;
 
 import javax.security.auth.login.LoginException;
+import java.io.File;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -57,6 +60,7 @@ public class Launcher {
 		Launcher.jdaLogIn();
 		//Launcher.jdaDevLogIn();
 		Launcher.setUpDatabase();
+		Launcher.setUpDirStructure();
 
 		Collection c = DATABASE.getWeebots().values();
 		Iterator it = c.iterator();
@@ -145,6 +149,22 @@ public class Launcher {
 		DatabaseManager.backUp(Launcher.DATABASE);
 	}
 
+	private static void setUpDirStructure() {
+        new File("/temp/out").mkdirs();
+        new File("/temp/in").mkdirs();
+    }
+
+    /**
+     * Clears the temp folders.
+     */
+    private static void clearTempDirs() {
+        try {
+            FileUtils.cleanDirectory(new File("/temp"));
+        } catch (IOException e) {
+            System.err.println("Failed clear temp dir.");
+        }
+    }
+
 	/**
 	 * Update the Weebots in the database after downtime.
 	 * <b>This is only called once on startup</b>
@@ -167,7 +187,6 @@ public class Launcher {
 				   while(true) {
 				       if (Launcher.getJda().getStatus() != Status.CONNECTED)
 				           continue;
-					   System.out.println("Backing up database.");
 					   DatabaseManager.backUp(Launcher.DATABASE);
 					   Thread.sleep(Math.round((1000 * 60) * min));
 				   }
@@ -190,6 +209,10 @@ public class Launcher {
 		System.err.println("Shutdown signal received. Saving database.");
 		DatabaseManager.backUp(Launcher.DATABASE);
 		DatabaseManager.save(Launcher.DATABASE);
+
+		System.err.println("Clearing temp directories.");
+		Launcher.clearTempDirs();
+
 		System.out.println("Successfully shutdown.");
 
 		Collection c = DATABASE.getWeebots().values();

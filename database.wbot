@@ -86,52 +86,7 @@
       "NOTES": [
         {
           "name": "Numberless Liquidators",
-          "notes": [
-            {
-              "note": "I like this better",
-              "creationTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 5,
-                    "day": 12
-                  },
-                  "time": {
-                    "hour": 7,
-                    "minute": 43,
-                    "second": 51,
-                    "nano": 321000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": -14400
-                }
-              },
-              "lastEditTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 5,
-                    "day": 12
-                  },
-                  "time": {
-                    "hour": 7,
-                    "minute": 44,
-                    "second": 41,
-                    "nano": 601000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": -14400
-                }
-              },
-              "edits": 1,
-              "authorID": 139167730237571072,
-              "editorIDs": [
-                139167730237571072
-              ]
-            }
-          ],
+          "notes": [],
           "creationTime": {
             "dateTime": {
               "date": {
@@ -197,7 +152,7 @@
               "editorIDs": []
             },
             {
-              "note": "Add functionality to write NotePad to text file and send to chat (maybe lock behind permission?)",
+              "note": "Determine if auto deleting messages is good",
               "creationTime": {
                 "dateTime": {
                   "date": {
@@ -206,10 +161,10 @@
                     "day": 12
                   },
                   "time": {
-                    "hour": 9,
-                    "minute": 21,
-                    "second": 37,
-                    "nano": 410000000
+                    "hour": 19,
+                    "minute": 48,
+                    "second": 30,
+                    "nano": 773000000
                   }
                 },
                 "offset": {
@@ -224,21 +179,19 @@
                     "day": 12
                   },
                   "time": {
-                    "hour": 9,
-                    "minute": 24,
-                    "second": 19,
-                    "nano": 216000000
+                    "hour": 19,
+                    "minute": 48,
+                    "second": 30,
+                    "nano": 773000000
                   }
                 },
                 "offset": {
                   "totalSeconds": -14400
                 }
               },
-              "edits": 1,
+              "edits": 0,
               "authorID": 139167730237571072,
-              "editorIDs": [
-                139167730237571072
-              ]
+              "editorIDs": []
             }
           ],
           "creationTime": {

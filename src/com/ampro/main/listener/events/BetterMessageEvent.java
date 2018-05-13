@@ -22,6 +22,7 @@ import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
 import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent;
 
+import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.function.Consumer;
 
@@ -139,7 +140,9 @@ public class BetterMessageEvent extends BetterEvent {
                 System.err.println("Could not locate event channel.");
                 break;
         }
+
     }
+
 
     /**
      * Send a message to the channel the event came from.
@@ -147,6 +150,44 @@ public class BetterMessageEvent extends BetterEvent {
      */
     private void reply(Message message) {
         this.reply(message.getContentRaw());
+    }
+
+    /**
+     * Reply with a file and message.
+     * @param file
+     * @param filename
+     */
+    public void reply(File file, String filename) {
+        switch (this.MESSAGE_EVENT.getChannelType()) {
+            case TEXT:
+                this.MESSAGE_EVENT.getTextChannel().sendFile(file, filename).queue();
+                break;
+            case PRIVATE:
+                this.AUTHOR.openPrivateChannel().queue(
+                        c -> c.sendFile(file, filename).queue()
+                );
+                break;
+            default:
+                System.err.println("Could not locate event channel.");
+                break;
+        }
+    }
+
+    public void reply(File file, String name, Consumer<File> consumer) {
+        switch (this.MESSAGE_EVENT.getChannelType()) {
+            case TEXT:
+                this.MESSAGE_EVENT.getTextChannel().sendFile(file, name).queue();
+                break;
+            case PRIVATE:
+                this.AUTHOR.openPrivateChannel().queue(
+                        c -> c.sendFile(file, name).queue()
+                );
+                break;
+            default:
+                System.err.println("Could not locate event channel.");
+                return;
+        }
+        synchronized (file) { consumer.accept(file); }
     }
 
     /**

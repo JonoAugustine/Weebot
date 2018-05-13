@@ -86,52 +86,7 @@
       "NOTES": [
         {
           "name": "Numberless Liquidators",
-          "notes": [
-            {
-              "note": "I like this better",
-              "creationTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 5,
-                    "day": 12
-                  },
-                  "time": {
-                    "hour": 7,
-                    "minute": 43,
-                    "second": 51,
-                    "nano": 321000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": -14400
-                }
-              },
-              "lastEditTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 5,
-                    "day": 12
-                  },
-                  "time": {
-                    "hour": 7,
-                    "minute": 44,
-                    "second": 41,
-                    "nano": 601000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": -14400
-                }
-              },
-              "edits": 1,
-              "authorID": 139167730237571072,
-              "editorIDs": [
-                139167730237571072
-              ]
-            }
-          ],
+          "notes": [],
           "creationTime": {
             "dateTime": {
               "date": {
@@ -152,8 +107,93 @@
           }
         },
         {
-          "name": "Another_NotePad",
-          "notes": [],
+          "name": "Weebot_Development_Notes",
+          "notes": [
+            {
+              "note": "Add locking functionality to Notes and NotePads to allow the author to restrict who can edit their message by role, user, or permission",
+              "creationTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 5,
+                    "day": 12
+                  },
+                  "time": {
+                    "hour": 9,
+                    "minute": 18,
+                    "second": 46,
+                    "nano": 11000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": -14400
+                }
+              },
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 5,
+                    "day": 12
+                  },
+                  "time": {
+                    "hour": 9,
+                    "minute": 18,
+                    "second": 46,
+                    "nano": 11000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": -14400
+                }
+              },
+              "edits": 0,
+              "authorID": 139167730237571072,
+              "editorIDs": []
+            },
+            {
+              "note": "Determine if auto deleting messages is good",
+              "creationTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 5,
+                    "day": 12
+                  },
+                  "time": {
+                    "hour": 19,
+                    "minute": 48,
+                    "second": 30,
+                    "nano": 773000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": -14400
+                }
+              },
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 5,
+                    "day": 12
+                  },
+                  "time": {
+                    "hour": 19,
+                    "minute": 48,
+                    "second": 30,
+                    "nano": 773000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": -14400
+                }
+              },
+              "edits": 0,
+              "authorID": 139167730237571072,
+              "editorIDs": []
+            }
+          ],
           "creationTime": {
             "dateTime": {
               "date": {
@@ -162,10 +202,10 @@
                 "day": 12
               },
               "time": {
-                "hour": 7,
-                "minute": 45,
-                "second": 34,
-                "nano": 177000000
+                "hour": 9,
+                "minute": 15,
+                "second": 35,
+                "nano": 806000000
               }
             },
             "offset": {
