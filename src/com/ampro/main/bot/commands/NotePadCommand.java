@@ -574,7 +574,10 @@ public class NotePadCommand extends Command {
                 new Thread(() -> event.deleteMessage()).start();
                 return;
             case FILE:
-                event.reply(makeNotePadFile(pad), pad.name + " NotePad.txt",
+                if (pad.notes.isEmpty())
+                    event.reply(pad.name + " NotePad is empty.");
+                else
+                   event.reply(makeNotePadFile(pad), pad.name + " NotePad.txt",
                             file -> file.deleteOnExit());
                 return;
             default:
@@ -697,7 +700,7 @@ public class NotePadCommand extends Command {
         if (Integer.parseInt(arg) > notes.size()) {
             int k = notes.size();
             event.reply("There " + (k != 1 ? "are" : "is") + " only " + notes.size()
-                                 + "Note Pad" + (k != 1 ? "s" : "") + "."
+                                 + " Note Pad" + (k != 1 ? "s" : "") + "."
                                  + "\nUse ``" + this.getArgFormat() + "`` to " +
                                 "write or edit a specific notepad.\"");
             return;

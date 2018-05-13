@@ -40,6 +40,7 @@ public class BetterMessageEvent extends BetterEvent {
 
     /** The original event */
     private final GenericMessageEvent MESSAGE_EVENT;
+    private final Message MESSAGE;
     /** The author (User) of the event */
     private final User AUTHOR;
     /** Arguments of a MessageReceivedEvent */
@@ -55,20 +56,18 @@ public class BetterMessageEvent extends BetterEvent {
     public BetterMessageEvent(GenericMessageEvent event)
             throws InvalidEventException {
         super(event);
-        //Locate the message in the channel
-        this.AUTHOR = event.getChannel().getMessageById(event.getMessageId())
-                            .complete() //Use complete to get the return value
-                            .getAuthor(); //Get the author (User)
+
+        this.MESSAGE = event.getChannel().getMessageById(event.getMessageId())
+                            .complete();
+        //Locate the MESSAGE in the channel
+        this.AUTHOR = this.MESSAGE.getAuthor();
         this.MESSAGE_EVENT = event;
         if (this.AUTHOR == Launcher.getJda().getSelfUser()) {
             throw new InvalidAuthorException("User is self.");
         }
-        this.ARGUMENTS = event.getChannel().getMessageById(event.getMessageId())
-                .complete().getContentStripped().trim().split(" ");
 
-        this.CREATION_TIME = event.getChannel()
-                .getMessageById(event.getMessageId())
-                .complete().getCreationTime();
+        this.ARGUMENTS = MESSAGE.getContentStripped().trim().split(" ");
+        this.CREATION_TIME = MESSAGE.getCreationTime();
 
     }
 
@@ -78,28 +77,30 @@ public class BetterMessageEvent extends BetterEvent {
      * @param event {@code GenericMessageEvent}
      *          to wrap.
      * @param author {@link net.dv8tion.jda.core.entities.User}
-     *                 who sent the message.
+     *                 who sent the MESSAGE.
      */
     public BetterMessageEvent(GenericMessageEvent event, User author)
             throws InvalidAuthorException {
         super(event);
+        this.MESSAGE = event.getChannel().getMessageById(event.getMessageId())
+                            .complete();
+
         if (author == Launcher.getJda().getSelfUser()) {
             throw new InvalidAuthorException("User is self.");
         } else {
             this.AUTHOR = author;
         }
-        this.MESSAGE_EVENT = event;
-        this.ARGUMENTS = event.getChannel().getMessageById(event.getMessageId())
-                .complete().getContentStripped().trim().split(" ");
 
-        this.CREATION_TIME = event.getChannel()
-                .getMessageById(event.getMessageId())
-                .complete().getCreationTime();
+        this.MESSAGE_EVENT = event;
+
+        this.ARGUMENTS = MESSAGE.getContentStripped().trim().split(" ");
+        this.CREATION_TIME = MESSAGE.getCreationTime();
+
 
     }
 
     /**
-     * Send a message to the channel the event came from.
+     * Send a MESSAGE to the channel the event came from.
      * @param message String to send
      */
     public void reply(String message) {
@@ -119,7 +120,7 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
-     * Send a message to the channel the event came from.
+     * Send a MESSAGE to the channel the event came from.
      * @param message String to send
      * @param consumer
      */
@@ -145,7 +146,7 @@ public class BetterMessageEvent extends BetterEvent {
 
 
     /**
-     * Send a message to the channel the event came from.
+     * Send a MESSAGE to the channel the event came from.
      * @param message {@code net.dv8tion.jda.core.entities.Message} to send
      */
     private void reply(Message message) {
@@ -153,7 +154,7 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
-     * Reply with a file and message.
+     * Reply with a file and MESSAGE.
      * @param file
      * @param filename
      */
@@ -191,7 +192,7 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
-     * Send a private message to the author of the event.
+     * Send a private MESSAGE to the author of the event.
      * @param message String to send
      */
     public void privateReply(String message) {
@@ -208,7 +209,7 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
-     * Send a private message to the author of the event.
+     * Send a private MESSAGE to the author of the event.
      * @param message {@link Message} to send
      */
     public void privateReply(Message message) {
@@ -224,7 +225,7 @@ public class BetterMessageEvent extends BetterEvent {
         }
     }
 
-    /** Delete the message. */
+    /** Delete the MESSAGE. */
     public void deleteMessage() {
         this.MESSAGE_EVENT.getChannel().getMessageById(this.MESSAGE_EVENT.getMessageIdLong())
                 .queue(m -> m.delete().queue());
@@ -275,10 +276,15 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
-     * @return {@link OffsetDateTime} of the message.
+     * @return {@link OffsetDateTime} of the MESSAGE.
      */
     public final OffsetDateTime getCreationTime() {
         return this.CREATION_TIME;
+    }
+
+    /** @return The {@link Message} wrapped. */
+    public final Message getMessage() {
+        return MESSAGE;
     }
 
 }
