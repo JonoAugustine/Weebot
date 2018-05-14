@@ -41,8 +41,10 @@ public class BetterMessageEvent extends BetterEvent {
     /** The original event */
     private final GenericMessageEvent MESSAGE_EVENT;
     private final Message MESSAGE;
-    /** The author (User) of the event */
+    /** The author of the event */
     private final User AUTHOR;
+    /** The Author as a Memeber */
+    private final Member M_AUTHOR;
     /** Arguments of a MessageReceivedEvent */
     private final String[] ARGUMENTS;
     private OffsetDateTime CREATION_TIME;
@@ -61,6 +63,7 @@ public class BetterMessageEvent extends BetterEvent {
                             .complete();
         //Locate the MESSAGE in the channel
         this.AUTHOR = this.MESSAGE.getAuthor();
+        this.M_AUTHOR = MESSAGE.getMember();
         this.MESSAGE_EVENT = event;
         if (this.AUTHOR == Launcher.getJda().getSelfUser()) {
             throw new InvalidAuthorException("User is self.");
@@ -68,7 +71,6 @@ public class BetterMessageEvent extends BetterEvent {
 
         this.ARGUMENTS = MESSAGE.getContentStripped().trim().split(" ");
         this.CREATION_TIME = MESSAGE.getCreationTime();
-
     }
 
     /**
@@ -89,6 +91,7 @@ public class BetterMessageEvent extends BetterEvent {
             throw new InvalidAuthorException("User is self.");
         } else {
             this.AUTHOR = author;
+            this.M_AUTHOR = MESSAGE.getMember();
         }
 
         this.MESSAGE_EVENT = event;
@@ -285,6 +288,13 @@ public class BetterMessageEvent extends BetterEvent {
     /** @return The {@link Message} wrapped. */
     public final Message getMessage() {
         return MESSAGE;
+    }
+
+    /** @return The Author as a {@link net.dv8tion.jda.core.entities.Member}.
+     *          Null if not from a guild.
+     */
+    public final Member getMember() {
+        return M_AUTHOR;
     }
 
 }

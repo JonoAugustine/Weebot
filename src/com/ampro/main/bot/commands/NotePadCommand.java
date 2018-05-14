@@ -3,8 +3,7 @@ package com.ampro.main.bot.commands;
 import com.ampro.main.Launcher;
 import com.ampro.main.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
-import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.*;
 
 import javax.naming.InvalidNameException;
 import javax.naming.NamingException;
@@ -18,7 +17,7 @@ import java.util.*;
 
 /**
  * View and modify {@link NotePad Note Pads}.
- * TODO: add NotePad permissions/roles allowed to modify
+ * TODO: Add separate view and edit permissions.
  * @author Jonathan Augustine
  */
 public class NotePadCommand extends Command {
@@ -88,13 +87,31 @@ public class NotePadCommand extends Command {
         final String name;
         final ArrayList<Note> notes;
         final OffsetDateTime creationTime;
+        //TODO separate lists for each entity.
+        /**
+         * {@link Long} IDs of {@link Channel Channels},
+         * {@link User Users}, and {@link Role Roles} that
+         * are allowed to edit this NotePad. <em>If this and {@link NotePad#blockedIDs}
+         * are empty, then the NotePad can be edited by anyone on any channel.</em>
+         */
+        final ArrayList<Long> allowedIDs;
+        /**
+         * {@link Long} IDs of {@link Channel Channels},
+         * {@link User Users}, and {@link Role Roles} that
+         * are not allowed to edit this NotePad. <em>If this and
+         * {@link NotePad#allowedIDs} are empty, then the NotePad can be edited by
+         * anyone on any channel.</em>
+         */
+        final ArrayList<Long> blockedIDs;
+
         /**
          * List of words that cannot be used as names,
          * to avoid parsing err.
          */
-        final static String[] keyWords = new String[]
-                {"make", "write", "add", "insert", "edit", "delete", "remove",
-                 "clear", "toss", "trash", "bin"};
+        final static String[] keyWords = new String[] {"make", "write", "add", "insert",
+                                                       "edit", "delete", "remove",
+                                                       "lockto", "lockout", "clear",
+                                                       "toss", "trash", "bin"};
 
         /**
          * Check if a string is a reserved {@link NotePad#keyWords}.
@@ -109,6 +126,38 @@ public class NotePadCommand extends Command {
         }
 
         /**
+         * Check if the event can edit the NotePad. TODO separate lists for each entity.
+         * @param event
+         * @return False if the channel is not allowed. <br>
+         *         False if the Member is not allowed. <br>
+         *         False if the Role is not allowed.
+         */
+        public boolean allowedEdit(BetterMessageEvent event) {
+            //If no locks, all is allowed
+            if (this.allowedIDs.isEmpty() && this.blockedIDs.isEmpty())
+                return true;
+            long id;
+            //Check channel
+            id = event.getTextChannel().getIdLong();
+            if ((!this.allowedIDs.isEmpty() && !this.allowedIDs.contains(id))
+                || (!this.blockedIDs.isEmpty() && this.blockedIDs.contains(id)))
+                return false;
+            //Check role (we know channel is allowed)
+            for (Role r : event.getMember().getRoles()) {
+                id = r.getIdLong();
+                if (!this.allowedIDs.isEmpty() && this.allowedIDs.contains(id))
+                    return true;
+                else if (!this.blockedIDs.isEmpty() && this.blockedIDs.contains(id))
+                    return false;
+            }
+            //If all else fails, check the Member
+            id = event.getAuthor().getIdLong();
+            return (!this.allowedIDs.isEmpty() && this.allowedIDs.contains(id))
+                    || (this.blockedIDs.isEmpty() && !this.blockedIDs.contains(id));
+
+        }
+
+        /**
          * Make a new empty NotePad, using {@link OffsetDateTime#now()} as the name.
          */
         public NotePad() {
@@ -116,6 +165,8 @@ public class NotePadCommand extends Command {
             this.name = this.creationTime
                       .format(DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss"));
             this.notes = new ArrayList<>();
+            allowedIDs = new ArrayList<>();
+            blockedIDs = new ArrayList<>();
         }
 
         /**
@@ -133,6 +184,8 @@ public class NotePadCommand extends Command {
                       .format(DateTimeFormatter.ofPattern("m-d-y HH:mm:ss"));
             }
             this.notes = new ArrayList<>();
+            allowedIDs = new ArrayList<>();
+            blockedIDs = new ArrayList<>();
         }
 
         /**
@@ -148,6 +201,8 @@ public class NotePadCommand extends Command {
                       .format(DateTimeFormatter.ofPattern("dd-MM-yy HH:mm:ss"));
             }
             this.notes = new ArrayList<>();
+            allowedIDs = new ArrayList<>();
+            blockedIDs = new ArrayList<>();
         }
 
         /**
@@ -161,6 +216,8 @@ public class NotePadCommand extends Command {
             if (!isOk(this.name)) throw new InvalidNameException();
             this.notes = new ArrayList<>();
             this.creationTime = OffsetDateTime.now();
+            allowedIDs = new ArrayList<>();
+            blockedIDs = new ArrayList<>();
         }
 
         /**
@@ -178,6 +235,8 @@ public class NotePadCommand extends Command {
             this.notes = new ArrayList<>();
             this.addNotes(author, notes);
             this.creationTime = OffsetDateTime.now();
+            allowedIDs = new ArrayList<>();
+            blockedIDs = new ArrayList<>();
         }
 
         /**
@@ -195,6 +254,8 @@ public class NotePadCommand extends Command {
             this.notes = new ArrayList<>();
             this.addNotes(author, notes);
             this.creationTime = OffsetDateTime.now();
+            allowedIDs = new ArrayList<>();
+            blockedIDs = new ArrayList<>();
         }
 
         /**
@@ -313,8 +374,8 @@ public class NotePadCommand extends Command {
 
     }
 
-    private enum ACTION {MAKE, WRITE, INSERT, EDIT, GET, DELETE, CLEAR, TRASH,
-                         FILE}
+    private enum ACTION {MAKE, WRITE, INSERT, EDIT, GET, LOCKTO, LOCKOUT, DELETE, CLEAR,
+                            TRASH, FILE}
 
     public NotePadCommand() {
         super(
@@ -323,8 +384,18 @@ public class NotePadCommand extends Command {
                         "notepads", "notes", "jotter", "todo"
                 )),
                 "Write a note for me to keep track of for you",
-                "<notepad/notes/jotter/todo> <notepad_number> " +
-                        "[<action> [note_number] [message]]",
+                "notes\n"   +
+                "notes #\n" +
+                "notes # file\n"    +
+                "notes # clear\n"   +
+                "notes # toss/trash/bin\n"  +
+                "notes # delete/remove #\n" +
+                "notes make [the name]\n"   +
+                "notes # write/add <new message>\n"    +
+                "notes # insert # <new message>\n"    +
+                "notes # edit # <new message>\n"   +
+                "notes # lockto [roles, members, or channels]\n"    +
+                "notes # lockout [roles, members,, or channels]\n",
                 true,
                 false,
                 0,
@@ -354,6 +425,7 @@ public class NotePadCommand extends Command {
      * Possible Command Argument Formats <br>
      * notes <br>
      * notes # <br>
+     * notes # file <br>
      * notes # clear <br>
      * notes # toss/trash/bin <br>
      * notes # delete/remove # <br>
@@ -361,6 +433,8 @@ public class NotePadCommand extends Command {
      * notes # write/add <\the message> <br>
      * notes # insert # <\here the message> <br>
      * notes # edit # <\new message> <br>
+     * notes # lockto [some roles, memebers, or channels] TODO
+     * notes # lockout [some roles, memebers, or channels] TODO
      * </code>
      * @param bot
      *         The {@link Weebot} which called this command.
@@ -380,20 +454,22 @@ public class NotePadCommand extends Command {
             if (notes.size() == 0) {
                 event.reply("There are no NotePads. " +
                         "Use this command to make a new NotePad:```" +
-                        "<notepad/notes/jotter/todo> <make> [The Name]```");
+                        "notes make [The Name]``` or ``help");
                 return;
             }
             out = "Here are the available NotePads:```";
             i = 1;
             for (NotePad n : notes) {
                 //TODO add permission check here
-                out = out.concat(i++ + ".) " + n.name + "\n");
+                if (n.allowedEdit(event)) {
+                    out = out.concat(i + ".) " + n.name + "\n");
+                }
+                i++;
             }
-            event.reply(out.concat( //TODO more detailed help
-                    "```\nUse ``" + this.getArgFormat() + "`` to " +
-                            "write or edit a specific notepad."
+            event.reply(out.concat(
+                    "```Use ``notes <notepad_number>`` to see the content of a NotePad"
+                    + "or ``help notes`` for more help."
             ));
-            //TODO Show help
             new Thread(() -> event.deleteMessage()).start();
             return;
         }
@@ -419,7 +495,7 @@ public class NotePadCommand extends Command {
                                         " these ``\"make\", \"write\", \"add\"," +
                                         " \"insert\", \"edit\", \"delete\", " +
                                         "\"remove\", \"clear\", \"toss\", " +
-                                        "\"trash\", \"bin\"``"
+                                        "\"trash\", \"bin\", \"lockto\", \"lockout\"``"
                     );
                     return;
                 }
@@ -433,10 +509,16 @@ public class NotePadCommand extends Command {
 
         //Any other command should start as 'notes #' , so get the notepad.
         pad = this.parseNotePad(notes, args[1], event);
-        //If the parser had an err, exit the command.
+
         if (pad == null) {
             return;
+        } else if (!pad.allowedEdit(event)) {
+            event.reply(
+                    "Sorry, you do not have permission to view or edit this NotePad."
+                    + " Use ``notes`` to view all NotePads you have access to.");
+            return;
         }
+        //If the parser had an err, exit the command.
 
         //Should be 'notes #' , so display NotePad
         if (args.length == 2) {
@@ -463,9 +545,8 @@ public class NotePadCommand extends Command {
         ACTION action = this.parseAction(args[2]);
         if (action == null) {
             event.reply("Sorry, I couldn't understand '" +
-                                String.join(" ", args) + "'. Please use " +
-                                "'write', 'add', 'insert', 'delete', " +
-                                "'remove', or 'edit' to modify the NotePad."
+                                String.join(" ", args) + "'. Please ``help notes`` for " +
+                                "available commands."
             );
             return;
         }
@@ -562,6 +643,56 @@ public class NotePadCommand extends Command {
                     noteIndexOutOfBoundsMessage(args[3], event);
                 }
                 return;
+            case LOCKTO:
+                StringBuilder sb = new StringBuilder(
+                                            pad.name + " NotePad has been locked to ");
+                Message m = event.getMessage();
+                for (TextChannel c : m.getMentionedChannels()) {
+                    pad.allowedIDs.add(c.getIdLong());
+                    pad.blockedIDs.remove(c.getIdLong());
+                    sb.append("#" + c.getName() + ", ");
+                }
+                for (Member u : m.getMentionedMembers()) {
+                    pad.allowedIDs.add(u.getUser().getIdLong());
+                    pad.blockedIDs.remove(u.getUser().getIdLong());
+                    sb.append("@" + u.getEffectiveName() + ", ");
+                }
+                for (Role r : m.getMentionedRoles()) {
+                    pad.allowedIDs.add(r.getIdLong());
+                    pad.blockedIDs.remove(r.getIdLong());
+                    sb.append("@" + r.getName() + ", ");
+                }
+                sb.setLength(sb.length() - 2);
+                sb.append(".");
+                event.reply(sb.toString());
+                return;
+            case LOCKOUT:
+                sb = new StringBuilder();
+                m = event.getMessage();
+                for (TextChannel c : m.getMentionedChannels()) {
+                    pad.blockedIDs.add(c.getIdLong());
+                    pad.allowedIDs.remove(c.getIdLong());
+                    sb.append("#" + c.getName() + ", ");
+                }
+                for (Member u : m.getMentionedMembers()) {
+                    pad.blockedIDs.add(u.getUser().getIdLong());
+                    pad.allowedIDs.remove(u.getUser().getIdLong());
+                    sb.append("@" + u.getEffectiveName() + ", ");
+                }
+                for (Role r : m.getMentionedRoles()) {
+                    pad.blockedIDs.add(r.getIdLong());
+                    pad.allowedIDs.remove(r.getIdLong());
+                    sb.append("@" + r.getName() + ", ");
+                }
+                if (sb.length() == 0) {
+                    event.reply("A TextChannel, Member, or Role must be mentioned using" +
+                                        "``#channel, @member, or @role``.");
+                } else {
+                    sb.setLength(sb.length() - 2);
+                    sb.append("have been blocked from viewing or editing "+pad.name+ ".");
+                    event.reply(sb.toString());
+                }
+                return;
             case CLEAR:
                 pad.clear();
                 event.reply(pad.name + " NotePad was cleared.");
@@ -578,7 +709,7 @@ public class NotePadCommand extends Command {
                     event.reply(pad.name + " NotePad is empty.");
                 else
                    event.reply(makeNotePadFile(pad), pad.name + " NotePad.txt",
-                            file -> file.deleteOnExit());
+                                 file -> file.deleteOnExit());
                 return;
             default:
                 return;
@@ -641,6 +772,10 @@ public class NotePadCommand extends Command {
                     return ACTION.TRASH;
                 case "file":
                     return ACTION.FILE;
+                case "lockto":
+                    return ACTION.LOCKTO;
+                case "lockout":
+                    return ACTION.LOCKOUT;
             }
         }
         return null;
@@ -732,6 +867,24 @@ public class NotePadCommand extends Command {
             (String arg, BetterMessageEvent event) {
         event.reply("I couldn't find a note " + arg + ". Please use a number" +
                             " listed in the NotePad.");
+    }
+
+    @Override
+    public String getHelp() {
+        String out = "";
+
+        out += "```";
+
+        out += "NotePadCommand Help:\n\n"
+            +  "<required> , [optional]";
+
+        out += this.argFormat
+            +  "\nNote: any instance of 'notes' can be replaced with any of the following"
+            + this.aliases.toString() + ".\n"
+            + "Note: X # Y # = X <notepad_number> Y <note_number>.";
+        out += "```";
+
+        return out;
     }
 
 }

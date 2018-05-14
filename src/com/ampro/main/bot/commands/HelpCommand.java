@@ -1,5 +1,6 @@
 package com.ampro.main.bot.commands;
 
+import com.ampro.main.Launcher;
 import com.ampro.main.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
 
@@ -22,7 +23,7 @@ public class HelpCommand extends Command {
                         Arrays.asList("helpme", "showhelp")
                 )
                 , "Show how to interact with me."
-                , "[command]"
+                , "<help> [command]"
                 , false
                 , false
                 , 0
@@ -67,25 +68,27 @@ public class HelpCommand extends Command {
         /** Message arguments cleansed of the callsign or bot mention */
         String[] args = this.cleanArgs(bot, event);
 
+
         //If the only argument is the command invoke
         if (args.length == 1) {
             this.genericHelp(bot, event);
         } else {
-            switch (args[1]) {
-                case "commands":
-                    this.commandsHelp(bot, event);
-                    return;
-                default:
-                    switch (new Random().nextInt() % 2) {
-                        case 0:
-                            event.reply("Check your DMs hot stuff :stuck_out_tongue_winking_eye:");
-                            event.privateReply("Think of me :smirk: https://bit.ly/1LnkxHw");
-                            break;
-                        default:
-                            event.reply("No amount of help will ever be enough to fix the" + " pathetic life you've made for yourself.");
+            for (Command c : Launcher.getCommands()) {
+                if (c.isCommandFor(args[1])) {
+                    event.reply(c.getHelp());
+                }
+            }
+            switch (new Random().nextInt() % 2) {
+                case 0:
+                    if (event.getGuild().getName() == "Numberless Liquidators") {
+                        event.reply(
+                                "Check your DMs hot stuff :stuck_out_tongue_winking_eye:");
 
+                        event.privateReply("Think of me :smirk: https://bit.ly/1LnkxHw");
+                        break;
                     }
-                    break;
+                default:
+                    event.reply("Help isn't on the way just yet...(under construction)");
             }
         }
     }
