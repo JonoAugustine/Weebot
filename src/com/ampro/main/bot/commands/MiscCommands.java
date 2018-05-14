@@ -16,11 +16,13 @@ import java.util.Collection;
 
 /**
  * A container class containing commands for smaller commands that could not
- * justify their own classes.
- * <P>
- *     Spam Command
- *     Ping-Pong command
- * </P>
+ * justify their own classes:
+ * <P><i>
+ *     Self Destruct Message Command    <br>
+ *     Weebot Suggestions Command       <br>
+ *     Spam Command                     <br>
+ *     Ping-Pong command                <br>
+ * </P></i>
  *
  * @author Jonathan Augustine
  */
@@ -29,15 +31,19 @@ public class MiscCommands {
     /**
      * Automatically deletes a message from a
      * {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}
-     * after a given time or 30 seconds by default.
+     * after a given time or 30 seconds by default. <br><i>
      * Formatted: < callsign>< deleteme> [time] [message]
-     *
-     * @author Jonathan Augustine
      */
     public static final class SelfDestructMessageCommand extends Command {
 
         public SelfDestructMessageCommand() {
-            super("SelfDestruct", new ArrayList<>(Arrays.asList("deleteme", "cleanthis", "deletethis", "covertracks")), "Deletes the marked message after the given amount of time (30 sec by default)", "<callsign><deleteme> [time] [message]", true, false, 0, false);
+            super(
+                    "SelfDestruct",
+                    new ArrayList<>(Arrays.asList("deleteme", "cleanthis",
+                            "deletethis", "covertracks")),
+                    "Deletes the marked message after the given amount of time (30 sec by default)",
+                    "<callsign><deleteme> <time or X> [message]",
+                    true, false, 0, false);
         }
 
         /**
