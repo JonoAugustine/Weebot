@@ -116,6 +116,8 @@ development progress.
                         this.editorIDs.add(editor.getIdLong());
                 }
                 ```
+        - ***WeebotSuggestionCommand***
+            - A new ``MiscCommand`` to accept suggestions about Weebot development in a list readable to devs only.
         - *BetterMessageEvent*
             - Saves the ``Message`` of the wrapped event, so we don't lose the
             methods of JDA ``Message`` and only make 1 (one) ``.complete()``

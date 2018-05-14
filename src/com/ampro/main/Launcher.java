@@ -40,7 +40,7 @@ public class Launcher {
 	private static Thread saveTimer;
 
 	private static final ArrayList<Command> COMMANDS =
-			new ArrayList<Command>(Arrays.asList(
+			new ArrayList<>(Arrays.asList(
 					new HelpCommand(), new ShutdownCommand(),
 					new ManageSettingsCommand(), new ListGuildsCommand(),
                     new PingCommand(), new SpamCommand(), new NotePadCommand(),

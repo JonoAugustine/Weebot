@@ -19,6 +19,7 @@ import com.ampro.main.Launcher;
 import com.ampro.main.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.ChannelType;
 import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.util.ArrayList;
@@ -34,55 +35,57 @@ import java.util.List;
 public abstract class Command {
 
     /** Name of the command, to be called the format: {@code [prefix]<name>}. */
-    private final String name;
+    protected final String name;
 
     /**
      * The aliases of the command, when calling a command these function identically to calling the
      * {@link com.jagrosh.jdautilities.command.Command#name Command.name}.
      */
-    private final List<String> aliases;
+    protected final List<String> aliases;
 
     /** A small help String that summarizes the function of the command. */
-    private final String help;
+    protected final String help;
+
+    //private final String helpLong;
 
     /** An arguments format String for the command. */
-    private final String argFormat;
+    protected final String argFormat;
 
     /**
      * {@code true} if the command may only be used in a {@link net.dv8tion.jda.core.entities.Guild Guild},
      * {@code false} if it may be used in both a Guild and a DM.
      * <br>Default {@code true}.
      */
-    private final boolean guildOnly;
+    protected final boolean guildOnly;
 
     /**
      * {@code true} if the command may only be used by a User with an ID matching the
      * Owners or any of the CoOwners.
      * <br>Default {@code false}.
      */
-    private final boolean ownerOnly;
+    protected final boolean ownerOnly;
 
     /**
      * A String name of a role required to use this command.
      */
-    private String requiredRole = null;
+    protected String requiredRole = null;
 
     /**
      * An {@code int} number of seconds users must wait before using this command again.
      */
-    private final int cooldown;
+    protected final int cooldown;
 
     /**
      * Any {@link net.dv8tion.jda.core.Permission Permission}s a Member must have to use this command.
      * <br>These are only checked in a {@link net.dv8tion.jda.core.entities.Guild Guild} environment.
      */
-    private Permission[] userPermissions = new Permission[0];
+    protected Permission[] userPermissions = new Permission[0];
 
     /**
      * Any {@link net.dv8tion.jda.core.Permission Permission}s the bot must have to use a command.
      * <br>These are only checked in a {@link net.dv8tion.jda.core.entities.Guild Guild} environment.
      */
-    private Permission[] botPermissions = new Permission[0];
+    protected Permission[] botPermissions = new Permission[0];
 
     /**
      * {@code true} if this command checks a channel topic for topic-tags.
@@ -90,27 +93,27 @@ public abstract class Command {
      * will cause this command to terminate.
      * <br>Default {@code true}.
      */
-    private boolean usesTopicTags;
+    protected boolean usesTopicTags;
 
     /**
      * The child commands of the command. These are used in the format {@code [prefix]<parent name>
      * <child name>}.
      */
-    private Command[] children;
+    protected Command[] children;
 
     /** {@code true} if this command should be hidden from the help. */
-    private final boolean hidden;
+    protected final boolean hidden;
 
     /**
      * The {@link com.jagrosh.jdautilities.command.Command.CooldownScope CooldownScope}
      * of the command. This defines how far of a scope cooldowns have.
      * <br>Default {@link com.jagrosh.jdautilities.command.Command.CooldownScope#USER CooldownScope.USER}.
      */
-    private final CooldownScope cooldownScope = CooldownScope.USER;
+    protected final CooldownScope cooldownScope = CooldownScope.USER;
 
-    private final static String BOT_PERM
+    protected final static String BOT_PERM
             = "%s I need the %s permission in this %s!";
-    private final static String USER_PERM
+    protected final static String USER_PERM
             = "%s You must have the %s permission in this %s to use that!";
 
     /**
@@ -119,7 +122,8 @@ public abstract class Command {
     protected Command() {
         this.name       = null;
         this.aliases    = null;
-        this.help       = null;
+        this.help = null;
+        //this.helpLong   = null;
         this.argFormat  = null;
         this.guildOnly  = false;
         this.ownerOnly  = false;
@@ -141,12 +145,13 @@ public abstract class Command {
      *                  {@link HelpCommand}?
      */
     protected Command(String name, List<String> aliases, String help,
-                      String argFormat, boolean guildOnly, boolean ownerOnly,
-                        int cooldown, boolean hidden) {
+                      /*String helpLong,*/ String argFormat, boolean guildOnly,
+                      boolean ownerOnly, int cooldown, boolean hidden) {
 
         this.name       = name;
         this.aliases    = aliases;
-        this.help       = help;
+        this.help = help;
+        //this.helpLong   = helpLong;
         this.argFormat  = argFormat;
         this.guildOnly  = guildOnly;
         this.ownerOnly  = ownerOnly;
@@ -195,6 +200,10 @@ public abstract class Command {
         //If the command is for developer's only, check if the event Author's
         //ID is registered as a developer.
         if (this.ownerOnly && !Launcher.checkDevID(event.getAuthor().getIdLong())) {
+            return false;
+        }
+
+        if (this.guildOnly && event.getMessageChannel().getType() != ChannelType.TEXT) {
             return false;
         }
 
@@ -511,6 +520,10 @@ public abstract class Command {
     public void setUsesTopicTags(boolean usesTopicTags) {
         this.usesTopicTags = usesTopicTags;
     }
+
+    //public String getHelpLong() {
+    //    return helpLong;
+    //}
 
     /**
      * A series of {@link java.lang.Enum Enum}s used for defining the scope size for a
