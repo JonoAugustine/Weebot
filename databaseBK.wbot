@@ -234,6 +234,71 @@
               "totalSeconds": -14400
             }
           }
+        },
+        {
+          "name": "SSB_Dolphin",
+          "notes": [
+            {
+              "note": "Information and download link [https://www.reddit.com/r/smashbros/comments/8j1ojb/atlonglastlegacyxp20fullisreleasedxpost/?ref\u003dshare\u0026refsource\u003dlink]",
+              "creationTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 5,
+                    "day": 13
+                  },
+                  "time": {
+                    "hour": 17,
+                    "minute": 9,
+                    "second": 59,
+                    "nano": 613000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": -14400
+                }
+              },
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 5,
+                    "day": 13
+                  },
+                  "time": {
+                    "hour": 17,
+                    "minute": 9,
+                    "second": 59,
+                    "nano": 613000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": -14400
+                }
+              },
+              "edits": 0,
+              "authorID": 139167730237571072,
+              "editorIDs": []
+            }
+          ],
+          "creationTime": {
+            "dateTime": {
+              "date": {
+                "year": 2018,
+                "month": 5,
+                "day": 13
+              },
+              "time": {
+                "hour": 17,
+                "minute": 9,
+                "second": 30,
+                "nano": 438000000
+              }
+            },
+            "offset": {
+              "totalSeconds": -14400
+            }
+          }
         }
       ],
       "spamLimit": 0
