@@ -17,7 +17,7 @@
 package com.ampro.main.listener;
 
 import com.ampro.main.Launcher;
-import com.ampro.main.bot.Weebot;
+import com.ampro.main.entities.bot.Weebot;
 import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;

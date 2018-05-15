@@ -5,8 +5,8 @@
 package com.ampro.main.database;
 
 import com.ampro.main.Launcher;
-import com.ampro.main.bot.Weebot;
-import com.ampro.main.bot.commands.MiscCommands.WeebotSuggestionCommand.Suggestion;
+import com.ampro.main.commands.MiscCommands.WeebotSuggestionCommand.Suggestion;
+import com.ampro.main.entities.bot.Weebot;
 import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;

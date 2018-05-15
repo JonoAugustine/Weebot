@@ -218,9 +218,9 @@ public class BetterMessageEvent extends BetterEvent {
     public void privateReply(Message message) {
         switch (this.MESSAGE_EVENT.getChannelType()) {
             case TEXT:
-                this.AUTHOR.openPrivateChannel()
-                        .complete()
-                        .sendMessage(message);
+                this.AUTHOR.openPrivateChannel().queue( c ->
+                    c.sendMessage(message).queue()
+                );
                 return;
             default:
                 this.reply(message);

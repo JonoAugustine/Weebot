@@ -2,9 +2,9 @@
  *
  */
 
-package com.ampro.main.game;
+package com.ampro.main.entities.games;
 
-import com.ampro.main.bot.Weebot;
+import com.ampro.main.entities.bot.Weebot;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.ArrayList;

@@ -13,10 +13,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.ampro.main.bot.commands;
+package com.ampro.main.commands;
 
 import com.ampro.main.Launcher;
-import com.ampro.main.bot.Weebot;
+import com.ampro.main.entities.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.ChannelType;
@@ -177,7 +177,7 @@ public abstract class Command {
     /**
      * Checks for the Command with the given
      * {@link com.ampro.main.listener.events.BetterMessageEvent} and
-     * {@link com.ampro.main.bot.Weebot Weebot} that called it.
+     * {@link com.ampro.main.entities.bot.Weebot Weebot} that called it.
      * <br>Will terminate and possibly respond with a failure message if any checks fail.
      *
      * @param  event
@@ -533,7 +533,7 @@ public abstract class Command {
      * for cooldown scopes, allowing a command to remain on cooldown for more than just the user
      * calling it, with no unnecessary abstraction or developer input.
      *
-     * Cooldown keys are generated via {@code com.ampro.main.bot.commands.Command#getCooldownKey(CommandEvent)
+     * Cooldown keys are generated via {@code com.ampro.main.commands.Command#getCooldownKey(CommandEvent)
      * Command#getCooldownKey(CommandEvent)} using 1-2 Snowflake ID's corresponding to the name
      * (IE: {@code USER_CHANNEL} uses the ID's of the User and the Channel from the CommandEvent).
      *

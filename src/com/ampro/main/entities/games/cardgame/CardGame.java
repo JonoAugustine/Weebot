@@ -2,11 +2,11 @@
  *
  */
 
-package com.ampro.main.game.cardgame;
+package com.ampro.main.entities.games.cardgame;
 
-import com.ampro.main.bot.Weebot;
-import com.ampro.main.game.Game;
-import com.ampro.main.game.Player;
+import com.ampro.main.entities.bot.Weebot;
+import com.ampro.main.entities.games.Game;
+import com.ampro.main.entities.games.Player;
 import net.dv8tion.jda.core.entities.User;
 
 /**
@@ -17,7 +17,7 @@ public abstract class CardGame<P extends Player, C extends Card>
 
     /**
      * Create a new CardGame.
-     * @param bot Weebot hosting the game
+     * @param bot Weebot hosting the games
      */
     CardGame(Weebot bot, User author) {
         super(bot, author);
@@ -25,15 +25,15 @@ public abstract class CardGame<P extends Player, C extends Card>
 
     /**
      * Create a new CardGame and add with players.
-     * @param bot Weebot hosting the game
-     * @param p Players to add to the game
+     * @param bot Weebot hosting the games
+     * @param p Players to add to the games
      */
     protected CardGame(Weebot bot, User author, P...p) {
         super(bot, author, p);
     }
 
     /**
-     * Adds {@code player} to game and deals them {@code Card}s.
+     * Adds {@code player} to games and deals them {@code Card}s.
      *
      * @param player Player to add
      * @return -1 if player could not be added

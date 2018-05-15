@@ -1,8 +1,8 @@
-package com.ampro.main.bot.commands;
+package com.ampro.main.commands;
 
 import com.ampro.main.Launcher;
-import com.ampro.main.bot.Weebot;
 import com.ampro.main.database.DatabaseManager;
+import com.ampro.main.entities.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;

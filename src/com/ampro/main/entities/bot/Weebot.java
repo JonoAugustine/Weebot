@@ -11,13 +11,14 @@
  * specific language governing permissions and limitations under the License.
  */
 
-package com.ampro.main.bot;
+package com.ampro.main.entities.bot;
 
 import com.ampro.main.Launcher;
-import com.ampro.main.bot.commands.Command;
-import com.ampro.main.bot.commands.NotePadCommand.NotePad;
-import com.ampro.main.game.Game;
-import com.ampro.main.game.Player;
+import com.ampro.main.commands.Command;
+import com.ampro.main.commands.NotePadCommand.NotePad;
+import com.ampro.main.entities.Passive;
+import com.ampro.main.entities.games.Game;
+import com.ampro.main.entities.games.Player;
 import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
@@ -78,6 +79,8 @@ public class Weebot implements Comparable<Weebot> {
     /** List of {@code Game}s currently Running */
     private final List<Game<? extends Player>> GAMES_RUNNING;
 
+    private final List<Passive> PASSIVES;
+
     /** Map of "NotePads" */
     private final ArrayList<NotePad> NOTES;
 
@@ -103,7 +106,7 @@ public class Weebot implements Comparable<Weebot> {
         this.GAMES_RUNNING = new ArrayList<>();
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
-
+        PASSIVES = new ArrayList<>();
     }
 
     /**
@@ -125,6 +128,7 @@ public class Weebot implements Comparable<Weebot> {
         this.GAMES_RUNNING = null;
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
+        PASSIVES = new ArrayList<>();
     }
 
     /**
@@ -152,24 +156,20 @@ public class Weebot implements Comparable<Weebot> {
      * @param event BetterEvent to read
      */
     public void readEvent(BetterEvent event) {
-        Thread readThread = new Thread(() -> {
-            if(event instanceof BetterMessageEvent) {
-                BetterMessageEvent messageEvent = (BetterMessageEvent) event;
-                switch (this.validateCallsign(messageEvent.getArgs())) {
-                    case 1:
-                        this.runCommand(messageEvent, 0);
-                        return;
-                    case 2:
-                        this.runCommand(messageEvent, 1);
-                        return;
-                    default:
-                        break; //To allow for active participate later
-                }
+        if(event instanceof BetterMessageEvent) {
+            BetterMessageEvent messageEvent = (BetterMessageEvent) event;
+            switch (this.validateCallsign(messageEvent.getArgs())) {
+                case 1:
+                    this.runCommand(messageEvent, 0);
+                    return;
+                case 2:
+                    this.runCommand(messageEvent, 1);
+                    return;
+                default:
+                    this.submitToPassives(messageEvent);
+                    break; //To allow for active participate later
             }
-        });
-        readThread.setName(this.BOT_ID + " : ReadThread");
-        readThread.start();
-
+        }
     }
 
     /**
@@ -221,6 +221,10 @@ public class Weebot implements Comparable<Weebot> {
             return true;
         }
         return true;
+    }
+
+    private void submitToPassives(BetterMessageEvent event) {
+
     }
 
     /**
@@ -366,7 +370,7 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     /**
-     * @return A list of {@link com.ampro.main.game.Game} instances currently
+     * @return A list of {@link Game} instances currently
      *              being run by the bot.
      */
     public List<Game<? extends Player>> getGAMES_RUNNING() {

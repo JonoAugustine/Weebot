@@ -5,19 +5,20 @@
 
 package com.ampro.main;
 
-import com.ampro.main.bot.Weebot;
-import com.ampro.main.bot.commands.*;
-import com.ampro.main.bot.commands.MiscCommands.PingCommand;
-import com.ampro.main.bot.commands.MiscCommands.SelfDestructMessageCommand;
-import com.ampro.main.bot.commands.MiscCommands.SpamCommand;
-import com.ampro.main.bot.commands.MiscCommands.WeebotSuggestionCommand;
+import com.ampro.main.commands.*;
+import com.ampro.main.commands.MiscCommands.PingCommand;
+import com.ampro.main.commands.MiscCommands.SelfDestructMessageCommand;
+import com.ampro.main.commands.MiscCommands.SpamCommand;
+import com.ampro.main.commands.MiscCommands.WeebotSuggestionCommand;
 import com.ampro.main.database.Database;
 import com.ampro.main.database.DatabaseManager;
+import com.ampro.main.entities.bot.Weebot;
 import com.ampro.main.jda.JDABuilder;
 import com.ampro.main.listener.EventDispatcher;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDA.Status;
+import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import org.apache.commons.io.FileUtils;
@@ -87,8 +88,10 @@ public class Launcher {
 	   try {
 		   //Connect to API
 		   JDABuilder builder = new JDABuilder(AccountType.BOT)
-				   .setToken("NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA.Etf9Q9wuk1YCUnUox0IbIon1dUk");
-		   Launcher.JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
+				   .setToken("NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA" +
+						             ".Etf9Q9wuk1YCUnUox0IbIon1dUk")
+				   .setGame(Game.playing("@Weebot help"));
+		   JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
 	   } catch (LoginException e) {
            e.printStackTrace();
        } catch (InterruptedException e) {
