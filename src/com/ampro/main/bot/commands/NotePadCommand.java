@@ -117,8 +117,7 @@ public class NotePadCommand extends Command {
         final ArrayList<Long> blockedChannelIDs;
 
         /**
-         * List of words that cannot be used as names,
-         * to avoid parsing err.
+         * List of words that cannot be used as names, to avoid parsing err.
          */
         final static String[] keyWords = new String[] {"make", "write", "add", "insert",
                                                        "edit", "delete", "remove",

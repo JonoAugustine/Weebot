@@ -5,11 +5,9 @@
 package com.ampro.main.game;
 
 import com.ampro.main.bot.Weebot;
-import com.ampro.main.comparators.Comparators;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.TreeMap;
 
 /**
@@ -31,20 +29,23 @@ public abstract class Game<P extends Player> {
 
     /** The ID of the hosting bot */
     private final String HOST_ID;
+    /** User ID of the User who started the game.*/
+    private final long AUTHOR_ID;
+    //Keep a list of all the Players
+    protected final TreeMap<Long, P> PLAYERS;
     /** Is the game currently running? */
     protected boolean RUNNING;
-    //Keep a list of all the Players
-    protected final TreeMap<User, P> PLAYERS;
 
     /** Create a game.
      *  Has empty Players list.
      * Starts not Running.
      * @param bot Weebot hosting the game
      */
-    protected Game(Weebot bot) {
+    protected Game(Weebot bot, User author) {
         this.HOST_ID = bot.getBotId();
         this.RUNNING = false;
-        this.PLAYERS = new TreeMap<>(new Comparators.UserIdComparator());
+        this.PLAYERS = new TreeMap<>();
+        this.AUTHOR_ID = author.getIdLong();
     }
 
     /**
@@ -52,13 +53,14 @@ public abstract class Game<P extends Player> {
      * @param bot Weebot hosting game
      * @param players {@code Players} to add to the game
      */
-    protected Game(Weebot bot, P... players) {
+    protected Game(Weebot bot, User author, P... players) {
         this.HOST_ID = bot.getBotId();
         this.RUNNING = false;
-        this.PLAYERS = new TreeMap<>(new Comparators.UserIdComparator());
+        this.PLAYERS = new TreeMap<>();
         for (P p : players) {
-            this.PLAYERS.putIfAbsent(p.getUser(), p);
+            this.PLAYERS.putIfAbsent(p.getUser().getIdLong(), p);
         }
+        this.AUTHOR_ID = author.getIdLong();
     }
 
     //Some Very important but vague methods to implement in child.
@@ -80,13 +82,8 @@ public abstract class Game<P extends Player> {
         if (this.PLAYERS.containsValue(player))
             return 0;
         else
-            return this.PLAYERS.putIfAbsent(
-                    player.getUser(), player) == null ? 1 : -1;
-    }
-
-    /** The current players */
-    public TreeMap<User, P> getPlayers() {
-        return this.PLAYERS;
+            return this.PLAYERS.putIfAbsent(player.getUser().getIdLong(), player) == null
+                   ? 1 : -1;
     }
 
     /** Is the game ongoing? */
@@ -96,10 +93,15 @@ public abstract class Game<P extends Player> {
 
     /** Get an Iterable Arraylist of the players */
     public ArrayList<P> playerIterable() {
-        ArrayList<P> retu = new ArrayList<>();
-        for(Map.Entry<User, P> entry : this.PLAYERS.entrySet())
-            retu.add(entry.getValue());
-        return retu;
+        return new ArrayList<>(this.PLAYERS.values());
+    }
+
+    public String getHOST_ID() {
+        return HOST_ID;
+    }
+
+    public long getAUTHOR_ID() {
+        return AUTHOR_ID;
     }
 
 }

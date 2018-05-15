@@ -7,6 +7,8 @@ package com.ampro.main.game;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;
 
+import java.util.function.Consumer;
+
 /**
  * Base Wrapper Class for Members currently involved in a Webot {@code Game}
  */
@@ -46,6 +48,14 @@ public abstract class Player {
      */
     public void privateMessage(Message message) {
         this.privateMessage(message.getContentRaw());
+    }
+
+    public void privateMessage(String message, Consumer<Message> consumer) {
+        this.user.openPrivateChannel().queue( privateChannel -> {
+           privateChannel.sendMessage(message).queue( m -> {
+               consumer.accept(m);
+           });
+        });
     }
 
 }

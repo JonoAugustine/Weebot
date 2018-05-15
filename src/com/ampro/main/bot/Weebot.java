@@ -148,25 +148,28 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     /**
-     * Take in a {@code com.ampro.listener.events.BetterEvent}
-     * and calls the appropriate command.
+     * Take in a {@link BetterEvent} and calls the appropriate command.
      * @param event BetterEvent to read
      */
     public void readEvent(BetterEvent event) {
-        if(event instanceof BetterMessageEvent) {
-            BetterMessageEvent messageEvent = (BetterMessageEvent) event;
-            messageEvent.getArgs();
-            switch (this.validateCallsign(messageEvent.getArgs())) {
-                case 1:
-                    this.runCommand(messageEvent, 0);
-                    return;
-                case 2:
-                    this.runCommand(messageEvent, 1);
-                    return;
-                default:
-                    break; //To allow for active participate later
+        Thread readThread = new Thread(() -> {
+            if(event instanceof BetterMessageEvent) {
+                BetterMessageEvent messageEvent = (BetterMessageEvent) event;
+                switch (this.validateCallsign(messageEvent.getArgs())) {
+                    case 1:
+                        this.runCommand(messageEvent, 0);
+                        return;
+                    case 2:
+                        this.runCommand(messageEvent, 1);
+                        return;
+                    default:
+                        break; //To allow for active participate later
+                }
             }
-        }
+        });
+        readThread.setName(this.BOT_ID + " : ReadThread");
+        readThread.start();
+
     }
 
     /**

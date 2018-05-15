@@ -76,9 +76,10 @@ public class CardsAgainstHumanity
 
     }
 
+    private static final int MIN_PLAYERS = 3;
+
     /** The hosting channel */
     private final Channel CHANNEL;
-
     //Cards delt to players
     private ArrayList<CAHCard> DECK_WHITE;
     //Cards pulled by the Tsar
@@ -97,8 +98,9 @@ public class CardsAgainstHumanity
      * @param channel TextChannel to play the game in
      * @param handSize Number of cards each play holds
      */
-    public CardsAgainstHumanity(Weebot bot, TextChannel channel, int handSize) {
-        super(bot);
+    public CardsAgainstHumanity(Weebot bot, TextChannel channel, User author,
+                                int handSize) {
+        super(bot, author);
         this.CHANNEL = channel;
         this.HAND_SIZE = handSize;
     }
@@ -110,11 +112,11 @@ public class CardsAgainstHumanity
      * @param users Users to add to the game
      * @param handSize Number of cards each play holds
      */
-    public CardsAgainstHumanity(Weebot bot, TextChannel channel, int handSize
+    public CardsAgainstHumanity(Weebot bot, TextChannel channel, User author, int handSize
                                 , User...users) {
-        super(bot);
+        super(bot, author);
         for (User u : users) {
-            this.PLAYERS.putIfAbsent(u, new CAHPlayer(u));
+            this.PLAYERS.putIfAbsent(u.getIdLong(), new CAHPlayer(u));
         }
         this.CHANNEL = channel;
         this.HAND_SIZE = handSize;
