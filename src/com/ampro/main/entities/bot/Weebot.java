@@ -16,7 +16,7 @@ package com.ampro.main.entities.bot;
 import com.ampro.main.Launcher;
 import com.ampro.main.commands.Command;
 import com.ampro.main.commands.NotePadCommand.NotePad;
-import com.ampro.main.entities.Passive;
+import com.ampro.main.entities.IPassive;
 import com.ampro.main.entities.games.Game;
 import com.ampro.main.entities.games.Player;
 import com.ampro.main.listener.events.BetterEvent;
@@ -79,7 +79,7 @@ public class Weebot implements Comparable<Weebot> {
     /** List of {@code Game}s currently Running */
     private final List<Game<? extends Player>> GAMES_RUNNING;
 
-    private final List<Passive> PASSIVES;
+    private final List<IPassive> PASSIVES;
 
     /** Map of "NotePads" */
     private final ArrayList<NotePad> NOTES;
@@ -383,6 +383,14 @@ public class Weebot implements Comparable<Weebot> {
      */
     public final void addRunningGame(Game<? extends Player> game) {
         this.GAMES_RUNNING.add(game);
+    }
+
+    public final boolean addPassive(IPassive passive) {
+        return this.PASSIVES.add(passive);
+    }
+
+    public final List<IPassive> getPassives() {
+        return this.PASSIVES;
     }
 
     /** @return {@link TreeMap TreeMap<String,NotePad>} */

@@ -184,7 +184,6 @@ public abstract class Command {
      *         The BetterMessageEvent passed to the command.
      */
     boolean check(BetterMessageEvent event) {
-        //Check Channel
 
         // child check
         //if(event.getArgs().length != 0) {
@@ -203,6 +202,8 @@ public abstract class Command {
             return false;
         }
 
+        //Check Channel
+        //Guild only
         if (this.guildOnly && event.getMessageChannel().getType() != ChannelType.TEXT) {
             return false;
         }
@@ -239,7 +240,7 @@ public abstract class Command {
      * @param args String array to clean.
      * @return new string array with the command call at index {@code [0]}.
      */
-    private String[] cleanArgs(Weebot bot, String[] args) {
+    protected String[] cleanArgs(Weebot bot, String[] args) {
         //Make it an ArrayList b/c easy to work with
         ArrayList<String> temp = new ArrayList<>(Arrays.asList(args));
         if (args[0].startsWith(bot.getCallsign())) {
@@ -269,7 +270,7 @@ public abstract class Command {
      * @param args String array to clean.
      * @return new string array with the command call at index {@code [0]}.
      */
-    private String[] cleanArgsLowerCase(Weebot bot, String[] args) {
+    protected String[] cleanArgsLowerCase(Weebot bot, String[] args) {
         args = this.cleanArgs(bot, args);
         for (int i = 0; i < args.length; i++) {
             args[i] = args[i].toLowerCase();
@@ -283,7 +284,7 @@ public abstract class Command {
      * @param event {@link BetterMessageEvent} to clean the arguments of.
      * @return new string array with the command call at index {@code [0]}.
      */
-    String[] cleanArgs(Weebot bot, BetterMessageEvent event) {
+    protected String[] cleanArgs(Weebot bot, BetterMessageEvent event) {
         return this.cleanArgs(bot, event.getArgs());
     }
 
@@ -293,7 +294,7 @@ public abstract class Command {
      * @param event {@link BetterMessageEvent} to clean the arguments of.
      * @return new string array with the command call at index {@code [0]}.
      */
-    final String[] cleanArgsLowerCase(Weebot bot, BetterMessageEvent event) {
+    protected final String[] cleanArgsLowerCase(Weebot bot, BetterMessageEvent event) {
         return this.cleanArgsLowerCase(bot, event.getArgs());
     }
 

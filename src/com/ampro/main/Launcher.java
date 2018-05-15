@@ -13,6 +13,7 @@ import com.ampro.main.commands.MiscCommands.WeebotSuggestionCommand;
 import com.ampro.main.database.Database;
 import com.ampro.main.database.DatabaseManager;
 import com.ampro.main.entities.bot.Weebot;
+import com.ampro.main.entities.games.SecretePhraseCommand;
 import com.ampro.main.jda.JDABuilder;
 import com.ampro.main.listener.EventDispatcher;
 import net.dv8tion.jda.core.AccountType;
@@ -45,7 +46,7 @@ public class Launcher {
 					new HelpCommand(), new ShutdownCommand(),
 					new ManageSettingsCommand(), new ListGuildsCommand(),
                     new PingCommand(), new SpamCommand(), new NotePadCommand(),
-                    new SelfDestructMessageCommand(),
+                    new SelfDestructMessageCommand(), new SecretePhraseCommand(),
                     new WeebotSuggestionCommand()
 			));
 

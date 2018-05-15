@@ -8,13 +8,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 14
+            "day": 15
           },
           "time": {
-            "hour": 19,
-            "minute": 53,
-            "second": 44,
-            "nano": 369000000
+            "hour": 17,
+            "minute": 33,
+            "second": 23,
+            "nano": 496000000
           }
         },
         "offset": {
@@ -28,6 +28,7 @@
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
+      "PASSIVES": [],
       "NOTES": [],
       "spamLimit": 5
     },
@@ -39,13 +40,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 14
+            "day": 15
           },
           "time": {
-            "hour": 19,
-            "minute": 53,
-            "second": 44,
-            "nano": 372000000
+            "hour": 17,
+            "minute": 33,
+            "second": 23,
+            "nano": 496000000
           }
         },
         "offset": {
@@ -60,40 +61,15 @@
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
       "GAMES_RUNNING": [],
-      "NOTES": [
+      "PASSIVES": [
         {
-          "name": "Test_Pad",
-          "notes": [],
-          "creationTime": {
-            "dateTime": {
-              "date": {
-                "year": 2018,
-                "month": 5,
-                "day": 14
-              },
-              "time": {
-                "hour": 19,
-                "minute": 53,
-                "second": 47,
-                "nano": 721000000
-              }
-            },
-            "offset": {
-              "totalSeconds": -14400
-            }
-          },
-          "authorID": 139167730237571072,
-          "allowedUserIDs": [
-            139167730237571072
-          ],
-          "allowedChannelIDs": [
-            439522471369244683
-          ],
-          "allowedRoleIDs": [],
-          "blockedUserIDs": [],
-          "blockedChannelIDs": []
+          "HOST_ID": "139168039634468865W",
+          "AUTHOR_ID": 139167730237571072,
+          "PLAYERS": {},
+          "RUNNING": false
         }
       ],
+      "NOTES": [],
       "spamLimit": 5
     },
     "218979588716494848": {
@@ -104,13 +80,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 14
+            "day": 15
           },
           "time": {
-            "hour": 19,
-            "minute": 53,
-            "second": 44,
-            "nano": 372000000
+            "hour": 17,
+            "minute": 33,
+            "second": 23,
+            "nano": 497000000
           }
         },
         "offset": {
@@ -125,6 +101,7 @@
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
       "GAMES_RUNNING": [],
+      "PASSIVES": [],
       "NOTES": [],
       "spamLimit": 5
     }

@@ -3,10 +3,10 @@ package com.ampro.main.entities;
 import com.ampro.main.listener.events.BetterMessageEvent;
 
 /**
- * An interface defining a Passive entity, which accepts events without direct
+ * An interface defining a IPassive entity, which accepts events without direct
  * invocation.
  */
-public interface Passive {
+public interface IPassive {
 
     /**
      * Take in a {@link BetterMessageEvent} to interact with.
