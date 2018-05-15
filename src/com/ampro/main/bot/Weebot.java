@@ -102,9 +102,7 @@ public class Weebot implements Comparable<Weebot> {
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING = new ArrayList<>();
         this.NOTES  = new ArrayList<>();
-        this.NOTES.add(0, new NotePad(guild));
         this.spamLimit = 5;
-
 
     }
 
@@ -126,7 +124,6 @@ public class Weebot implements Comparable<Weebot> {
         this.COMMANDS_DISABLED = new TreeMap<>();
         this.GAMES_RUNNING = null;
         this.NOTES  = new ArrayList<>();
-        this.NOTES.add(0, new NotePad(this));
         this.spamLimit = 5;
     }
 
