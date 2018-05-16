@@ -16,9 +16,9 @@ package com.ampro.main.entities.bot;
 import com.ampro.main.Launcher;
 import com.ampro.main.commands.Command;
 import com.ampro.main.commands.NotePadCommand.NotePad;
+import com.ampro.main.commands.games.Game;
+import com.ampro.main.commands.games.Player;
 import com.ampro.main.entities.IPassive;
-import com.ampro.main.entities.games.Game;
-import com.ampro.main.entities.games.Player;
 import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
@@ -77,9 +77,9 @@ public class Weebot implements Comparable<Weebot> {
     /** Commands not allowed on the server channels.*/
     private final TreeMap<TextChannel, ArrayList<Class<? extends Command>>> COMMANDS_DISABLED;
     /** List of {@code Game}s currently Running */
-    private final List<Game<? extends Player>> GAMES_RUNNING;
+    private final transient List<Game<? extends Player>> GAMES_RUNNING;
 
-    private final List<IPassive> PASSIVES;
+    private final transient List<IPassive> PASSIVES;
 
     /** Map of "NotePads" */
     private final ArrayList<NotePad> NOTES;

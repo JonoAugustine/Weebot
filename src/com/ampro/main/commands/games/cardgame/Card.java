@@ -1,4 +1,4 @@
-package com.ampro.main.entities.games.cardgame;
+package com.ampro.main.commands.games.cardgame;
 
 /**
  * A card used in a {@code CardGame}.

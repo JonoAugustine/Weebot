@@ -2,11 +2,11 @@
  *
  */
 
-package com.ampro.main.entities.games.cardgame;
+package com.ampro.main.commands.games.cardgame;
 
+import com.ampro.main.commands.games.Game;
+import com.ampro.main.commands.games.Player;
 import com.ampro.main.entities.bot.Weebot;
-import com.ampro.main.entities.games.Game;
-import com.ampro.main.entities.games.Player;
 import net.dv8tion.jda.core.entities.User;
 
 /**

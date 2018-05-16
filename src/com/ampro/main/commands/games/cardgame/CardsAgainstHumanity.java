@@ -2,10 +2,10 @@
  *
  */
 
-package com.ampro.main.entities.games.cardgame;
+package com.ampro.main.commands.games.cardgame;
 
+import com.ampro.main.commands.games.Player;
 import com.ampro.main.entities.bot.Weebot;
-import com.ampro.main.entities.games.Player;
 import net.dv8tion.jda.core.entities.Channel;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;

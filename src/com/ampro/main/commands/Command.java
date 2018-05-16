@@ -183,7 +183,7 @@ public abstract class Command {
      * @param  event
      *         The BetterMessageEvent passed to the command.
      */
-    boolean check(BetterMessageEvent event) {
+    protected boolean check(BetterMessageEvent event) {
 
         // child check
         //if(event.getArgs().length != 0) {

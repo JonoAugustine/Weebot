@@ -2,7 +2,7 @@
  *
  */
 
-package com.ampro.main.entities.games;
+package com.ampro.main.commands.games;
 
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.User;

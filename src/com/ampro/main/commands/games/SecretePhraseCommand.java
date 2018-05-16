@@ -1,22 +1,30 @@
-package com.ampro.main.entities.games;
+package com.ampro.main.commands.games;
 
 
 import com.ampro.main.commands.Command;
 import com.ampro.main.entities.IPassive;
 import com.ampro.main.entities.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.PermissionOverride;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public class SecretePhraseCommand extends Command {
 
     /**
-     * Players must slip phrases into sentences without being found out. TODO: How to accept messages (event listener?
-     * vs from bot?) TODO: Should SecretePhrase and SecretePhraseCommand be in one file?
+     * Players must slip phrases into sentences without being found out.
+     * <br>
+     *     Played on @everyone {@link TextChannel TextChannels}.
+     * <br>
+     * Messages are un-callable after {@link SecretePhrase#callMessageLimit}
+     * number of player messages.
      *
      * @author Jonathan Augustine, Daniel Ernst
      */
@@ -55,27 +63,20 @@ public class SecretePhraseCommand extends Command {
 
         }
 
-        /**
-         * TextChannel to play the game in. Game is global (any channel) if this is null.
-         */
-        private final TextChannel channel;
+        private final long callMessageLimit;
 
-        public SecretePhrase(Weebot bot, User author) {
+        public SecretePhrase(Weebot bot, User author, long callMessageLimit) {
             super(bot, author);
-            this.channel = null;
+            this.callMessageLimit = callMessageLimit;
         }
 
-        public SecretePhrase(Weebot bot, User author, TextChannel channel) {
+        public SecretePhrase(Weebot bot, User author, long callMessageLimit,
+                             User...players) {
             super(bot, author);
-            this.channel = channel;
-        }
-
-        public SecretePhrase(Weebot bot, User author, User... players) {
-            super(bot, author);
+            this.callMessageLimit = callMessageLimit;
             for (User u : players) {
                 this.PLAYERS.putIfAbsent(u.getIdLong(), new SPPlayer(u));
             }
-            this.channel = null;
         }
 
         @Override
@@ -177,9 +178,11 @@ public class SecretePhraseCommand extends Command {
      */
     @Override
     public void run(Weebot bot, BetterMessageEvent event) {
-        Thread thread = new Thread(() -> this.execute(bot,event));
-        thread.setName(bot.getBotId() + ":SecretePhraseCommand");
-        thread.start();
+        if (this.check(event)) {
+            Thread thread = new Thread(() -> this.execute(bot, event));
+            thread.setName(bot.getBotId() + ":SecretePhraseCommand");
+            thread.start();
+        }
     }
 
     /**
@@ -194,30 +197,26 @@ public class SecretePhraseCommand extends Command {
     protected void execute(Weebot bot, BetterMessageEvent event) {
         //Save the args
         String[] args = this.cleanArgs(bot, event.getArgs());
-        //Get the game being acted upon to
-        SecretePhrase game = null;
-        for (IPassive p : bot.getPassives())
-            if (p instanceof SecretePhrase) {
-                if (((SecretePhrase) p).channel != null) {
-                    if (((SecretePhrase) p).channel == event.getTextChannel()){
-                        game = (SecretePhrase) p;
-                        break;
-                    }
-                } else {
-                    game = (SecretePhrase) p;
-                }
-            }
 
         //Get the action
         ACTION action = parseAction(args[1]);
         if (action == null) {
             //TODO Send err?
-            System.err.println("No Game Found");
+            System.err.println("No Action Found");
             return;
         }
+
+        //Get the game being acted upon to
+        SecretePhrase game = null;
+        for (IPassive p : bot.getPassives()) {
+            if (p instanceof SecretePhrase) {
+                game = (SecretePhrase) p;
+            }
+        }
+
         switch (action) {
             case START:
-                bot.addPassive(new SecretePhrase(bot, event.getAuthor()));
+                bot.addPassive(new SecretePhrase(bot, event.getAuthor(), 10));
                 System.out.println("START");
                 break;
             case STOP:
@@ -241,6 +240,35 @@ public class SecretePhraseCommand extends Command {
                     System.out.println("CALL");
                 }
                 break;
+        }
+    }
+
+    @Override
+    protected final boolean check(BetterMessageEvent event) {
+        //If it passes basic checks
+        //Check if channel is @everyone
+        if (super.check(event)) {
+            //Get @everyone role (called publicRole by API)
+            Role everyoneRole = event.getGuild().getPublicRole();
+            //Get the channel of the message
+            TextChannel channel = event.getTextChannel();
+            //Get the permission overrides
+            PermissionOverride override = channel.getPermissionOverride(everyoneRole);
+            //Get the permissions
+            if (override != null) {
+                List<Permission> perms = override.getAllowed();
+                if (perms.contains(Permission.MESSAGE_READ)
+                        && perms.contains(Permission.MESSAGE_WRITE))
+                {
+                    return true;
+                } else {
+                    return false;
+                }
+            } else {
+                return true;
+            }
+        } else {
+            return false;
         }
     }
 
