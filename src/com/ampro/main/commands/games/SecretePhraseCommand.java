@@ -274,6 +274,7 @@ public class SecretePhraseCommand extends Command {
                     return;
                 } else {
                     game.endGame();
+                    //TODO Show scores
                     bot.getPassives().remove(game);
                 }
                 break;
