@@ -68,29 +68,28 @@ public class HelpCommand extends Command {
         /** Message arguments cleansed of the callsign or bot mention */
         String[] args = this.cleanArgs(bot, event);
 
-
         //If the only argument is the command invoke
         if (args.length == 1) {
             this.genericHelp(bot, event);
         } else {
             for (Command c : Launcher.getCommands()) {
-                if (c.isCommandFor(args[1])) {
+                if(c.isCommandFor(args[1])) {
                     event.reply(c.getHelp());
+                    return;
                 }
             }
-            switch (new Random().nextInt() % 2) {
-                case 0:
-                    if (event.getGuild().getName() == "Numberless Liquidators") {
-                        event.reply(
-                                "Check your DMs hot stuff :stuck_out_tongue_winking_eye:");
-
+            if(event.getGuild().getName() == "Numberless Liquidators") {
+                switch (new Random().nextInt() % 2) {
+                    case 0:
+                        event.reply("Check your DMs hot stuff :stuck_out_tongue_winking_eye:");
+                    default:
                         event.privateReply("Think of me :smirk: https://bit.ly/1LnkxHw");
-                        break;
-                    }
-                default:
-                    event.reply("Help isn't on the way just yet...(under construction)");
+                }
+            } else {
+                event.reply("Help isn't on the way just yet...(under construction)");
             }
         }
+
     }
 
     /**

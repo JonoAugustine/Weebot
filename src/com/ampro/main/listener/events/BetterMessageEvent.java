@@ -20,6 +20,9 @@ import com.ampro.main.Launcher;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.GenericMessageEvent;
+import net.dv8tion.jda.core.events.message.MessageDeleteEvent;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
+import net.dv8tion.jda.core.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent;
 
 import java.io.File;
@@ -38,16 +41,19 @@ import java.util.function.Consumer;
  */
 public class BetterMessageEvent extends BetterEvent {
 
+    public enum TYPE {RECIVED, EDITED, DELETED}
+
+
     /** The original event */
-    private final GenericMessageEvent MESSAGE_EVENT;
-    private final Message MESSAGE;
+    private final GenericMessageEvent messageEvent;
+    private final Message message;
+    private final TYPE type;
     /** The author of the event */
-    private final User AUTHOR;
+    private final User author;
     /** The Author as a Memeber */
-    private final Member M_AUTHOR;
+    private final Member memberAuthor;
     /** Arguments of a MessageReceivedEvent */
-    private final String[] ARGUMENTS;
-    private OffsetDateTime CREATION_TIME;
+    private final String[] arguments;
 
     /**
      * Construct a {@code BetterMessageEvent} from a
@@ -59,18 +65,27 @@ public class BetterMessageEvent extends BetterEvent {
             throws InvalidEventException {
         super(event);
 
-        this.MESSAGE = event.getChannel().getMessageById(event.getMessageId())
+        this.message = event.getChannel().getMessageById(event.getMessageId())
                             .complete();
-        //Locate the MESSAGE in the channel
-        this.AUTHOR = this.MESSAGE.getAuthor();
-        this.M_AUTHOR = MESSAGE.getMember();
-        this.MESSAGE_EVENT = event;
-        if (this.AUTHOR == Launcher.getJda().getSelfUser()) {
+        //Locate the message in the channel
+        this.author = this.message.getAuthor();
+        this.memberAuthor = message.getMember();
+        this.messageEvent = event;
+        if (this.author == Launcher.getJda().getSelfUser()) {
             throw new InvalidAuthorException("User is self.");
         }
 
-        this.ARGUMENTS = MESSAGE.getContentStripped().trim().split(" ");
-        this.CREATION_TIME = MESSAGE.getCreationTime();
+        this.arguments = message.getContentStripped().trim().split(" ");
+
+        if (event instanceof MessageDeleteEvent) {
+            this.type = TYPE.DELETED;
+        } else if (event instanceof MessageReceivedEvent) {
+            this.type = TYPE.RECIVED;
+        } else if (event instanceof MessageUpdateEvent) {
+            this.type = TYPE.EDITED;
+        } else {
+            throw new InvalidEventException("Must be Update, Received, or Delete event");
+        }
     }
 
     /**
@@ -79,40 +94,48 @@ public class BetterMessageEvent extends BetterEvent {
      * @param event {@code GenericMessageEvent}
      *          to wrap.
      * @param author {@link net.dv8tion.jda.core.entities.User}
-     *                 who sent the MESSAGE.
+     *                 who sent the message.
      */
     public BetterMessageEvent(GenericMessageEvent event, User author)
-            throws InvalidAuthorException {
+            throws InvalidAuthorException, InvalidEventException {
         super(event);
-        this.MESSAGE = event.getChannel().getMessageById(event.getMessageId())
+        this.message = event.getChannel().getMessageById(event.getMessageId())
                             .complete();
 
         if (author == Launcher.getJda().getSelfUser()) {
             throw new InvalidAuthorException("User is self.");
         } else {
-            this.AUTHOR = author;
-            this.M_AUTHOR = MESSAGE.getMember();
+            this.author = author;
+            this.memberAuthor = message.getMember();
         }
 
-        this.MESSAGE_EVENT = event;
+        this.messageEvent = event;
 
-        this.ARGUMENTS = MESSAGE.getContentStripped().trim().split(" ");
-        this.CREATION_TIME = MESSAGE.getCreationTime();
+        this.arguments = message.getContentStripped().trim().split(" ");
 
+        if (event instanceof MessageDeleteEvent) {
+            this.type = TYPE.DELETED;
+        } else if (event instanceof MessageReceivedEvent) {
+            this.type = TYPE.RECIVED;
+        } else if (event instanceof MessageUpdateEvent) {
+            this.type = TYPE.EDITED;
+        } else {
+            throw new InvalidEventException("Must be Update, Received, or Delete event");
+        }
 
     }
 
     /**
-     * Send a MESSAGE to the channel the event came from.
+     * Send a message to the channel the event came from.
      * @param message String to send
      */
     public void reply(String message) {
-        switch (this.MESSAGE_EVENT.getChannelType()) {
+        switch (this.messageEvent.getChannelType()) {
             case TEXT:
-                this.MESSAGE_EVENT.getTextChannel().sendMessage(message).queue();
+                this.messageEvent.getTextChannel().sendMessage(message).queue();
                 break;
             case PRIVATE:
-                this.AUTHOR.openPrivateChannel().queue( (channel) ->
+                this.author.openPrivateChannel().queue( (channel) ->
                         channel.sendMessage(message).queue()
                 );
                 break;
@@ -123,18 +146,18 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
-     * Send a MESSAGE to the channel the event came from.
+     * Send a message to the channel the event came from.
      * @param message String to send
      * @param consumer
      */
     public void reply(String message, Consumer<Message> consumer) {
-        switch (this.MESSAGE_EVENT.getChannelType()) {
+        switch (this.messageEvent.getChannelType()) {
             case TEXT:
-                this.MESSAGE_EVENT.getTextChannel().sendMessage(message)
+                this.messageEvent.getTextChannel().sendMessage(message)
                         .queue(m -> consumer.accept(m));
                 break;
             case PRIVATE:
-                this.AUTHOR.openPrivateChannel().queue( (channel) ->
+                this.author.openPrivateChannel().queue( (channel) ->
                     channel.sendMessage(message).queue( m ->
                             consumer.accept(m)
                     )
@@ -149,7 +172,7 @@ public class BetterMessageEvent extends BetterEvent {
 
 
     /**
-     * Send a MESSAGE to the channel the event came from.
+     * Send a message to the channel the event came from.
      * @param message {@code net.dv8tion.jda.core.entities.Message} to send
      */
     private void reply(Message message) {
@@ -157,17 +180,17 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
-     * Reply with a file and MESSAGE.
+     * Reply with a file and message.
      * @param file
      * @param filename
      */
     public void reply(File file, String filename) {
-        switch (this.MESSAGE_EVENT.getChannelType()) {
+        switch (this.messageEvent.getChannelType()) {
             case TEXT:
-                this.MESSAGE_EVENT.getTextChannel().sendFile(file, filename).queue();
+                this.messageEvent.getTextChannel().sendFile(file, filename).queue();
                 break;
             case PRIVATE:
-                this.AUTHOR.openPrivateChannel().queue(
+                this.author.openPrivateChannel().queue(
                         c -> c.sendFile(file, filename).queue()
                 );
                 break;
@@ -178,12 +201,12 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     public void reply(File file, String name, Consumer<File> consumer) {
-        switch (this.MESSAGE_EVENT.getChannelType()) {
+        switch (this.messageEvent.getChannelType()) {
             case TEXT:
-                this.MESSAGE_EVENT.getTextChannel().sendFile(file, name).queue();
+                this.messageEvent.getTextChannel().sendFile(file, name).queue();
                 break;
             case PRIVATE:
-                this.AUTHOR.openPrivateChannel().queue(
+                this.author.openPrivateChannel().queue(
                         c -> c.sendFile(file, name).queue()
                 );
                 break;
@@ -195,13 +218,13 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
-     * Send a private MESSAGE to the author of the event.
+     * Send a private message to the author of the event.
      * @param message String to send
      */
     public void privateReply(String message) {
-        switch (this.MESSAGE_EVENT.getChannelType()) {
+        switch (this.messageEvent.getChannelType()) {
             case TEXT:
-                this.AUTHOR.openPrivateChannel().queue((channel) ->
+                this.author.openPrivateChannel().queue((channel) ->
                     channel.sendMessage(message).queue()
                 );
                 return;
@@ -212,13 +235,13 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
-     * Send a private MESSAGE to the author of the event.
+     * Send a private message to the author of the event.
      * @param message {@link Message} to send
      */
     public void privateReply(Message message) {
-        switch (this.MESSAGE_EVENT.getChannelType()) {
+        switch (this.messageEvent.getChannelType()) {
             case TEXT:
-                this.AUTHOR.openPrivateChannel().queue( c ->
+                this.author.openPrivateChannel().queue(c ->
                     c.sendMessage(message).queue()
                 );
                 return;
@@ -228,9 +251,9 @@ public class BetterMessageEvent extends BetterEvent {
         }
     }
 
-    /** Delete the MESSAGE. */
+    /** Delete the message. */
     public void deleteMessage() {
-        this.MESSAGE_EVENT.getChannel().getMessageById(this.MESSAGE_EVENT.getMessageIdLong())
+        this.messageEvent.getChannel().getMessageById(this.messageEvent.getMessageIdLong())
                 .queue(m -> m.delete().queue());
     }
 
@@ -240,33 +263,33 @@ public class BetterMessageEvent extends BetterEvent {
      *          null if event is not MessageReceivedEvent
      */
     public String[] getArgs() {
-        return this.ARGUMENTS;
+        return this.arguments;
     }
 
     @Override
     public Event getEvent() {
-        return this.MESSAGE_EVENT;
+        return this.messageEvent;
     }
 
     @Override
     public User getAuthor() {
-        return this.AUTHOR;
+        return this.author;
     }
 
     @Override
     public boolean isPrivate() {
-        return this.MESSAGE_EVENT.isFromType(ChannelType.PRIVATE);
+        return this.messageEvent.isFromType(ChannelType.PRIVATE);
     }
 
     /**
      * @return The channel of origin.
      */
     public MessageChannel getMessageChannel() {
-        return this.MESSAGE_EVENT.getChannel();
+        return this.messageEvent.getChannel();
     }
 
     public Guild getGuild() {
-        return this.MESSAGE_EVENT.getGuild();
+        return this.messageEvent.getGuild();
     }
 
     /**
@@ -275,26 +298,26 @@ public class BetterMessageEvent extends BetterEvent {
      *          or null if not from a TextChannel
      */
     public TextChannel getTextChannel() {
-        return this.MESSAGE_EVENT.getTextChannel();
+        return this.messageEvent.getTextChannel();
     }
 
     /**
-     * @return {@link OffsetDateTime} of the MESSAGE.
+     * @return {@link OffsetDateTime} of the message.
      */
     public final OffsetDateTime getCreationTime() {
-        return this.CREATION_TIME;
+        return this.message.getCreationTime();
     }
 
     /** @return The {@link Message} wrapped. */
     public final Message getMessage() {
-        return MESSAGE;
+        return message;
     }
 
     /** @return The Author as a {@link net.dv8tion.jda.core.entities.Member}.
      *          Null if not from a guild.
      */
     public final Member getMember() {
-        return M_AUTHOR;
+        return memberAuthor;
     }
 
 }

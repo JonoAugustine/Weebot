@@ -35,7 +35,7 @@ public abstract class BetterEvent {
      * Indicates the event used was not appropriate for
      * this implementation of BetterEvent.
      */
-    class InvalidEventException extends Exception {
+    public class InvalidEventException extends Exception {
 
         InvalidEventException() {
             super();

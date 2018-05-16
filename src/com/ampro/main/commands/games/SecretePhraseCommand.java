@@ -6,10 +6,7 @@ import com.ampro.main.entities.IPassive;
 import com.ampro.main.entities.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
-import net.dv8tion.jda.core.entities.PermissionOverride;
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.entities.*;
 
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
@@ -84,14 +81,7 @@ public class SecretePhraseCommand extends Command {
             User member = event.getAuthor();
             SPPlayer memberPlayer = this.PLAYERS.get(member.getIdLong());
             if(memberPlayer == null) return;
-            String message = event.getMessage().getContentStripped();
-            for (Phrase p : memberPlayer.unusedPhrases) {
-                if(message.contains(p.phrase)) {
-                    memberPlayer.unusedPhrases.remove(p);
-                    memberPlayer.usedPhrases.add(p);
-                    return;
-                }
-            }
+            this.usePhrase(memberPlayer, event.getMessage());
         }
 
         /**
@@ -115,11 +105,31 @@ public class SecretePhraseCommand extends Command {
             }
         }
 
+        /**
+         * Checks if a player used their phrase
+         * @param player The player
+         * @param message The message sent by the user
+         */
+        protected final void usePhrase(SPPlayer player, Message message) {
+            String string = message.getContentStripped();
+            for (Phrase p : player.unusedPhrases) {
+                if(string.contains(p.phrase)) {
+                    player.unusedPhrases.remove(p);
+                    player.usedPhrases.add(p);
+                    return;
+                }
+            }
+        }
+
         @Override
         protected int startGame() {
             return 0;
         }
 
+        /**
+         * End the game and decide a winner.
+         * @return an int for some reason TODO
+         */
         @Override
         protected int endGame() {
             return 0;
@@ -155,7 +165,7 @@ public class SecretePhraseCommand extends Command {
     public SecretePhraseCommand() {
         super(
                 "SecretePhrase",
-                new ArrayList<>(Arrays.asList()),
+                new ArrayList<>(Arrays.asList("sphrase")),
                 "A game designed by Dernst",
                 "", //TODO
                 true,
@@ -182,6 +192,9 @@ public class SecretePhraseCommand extends Command {
             Thread thread = new Thread(() -> this.execute(bot, event));
             thread.setName(bot.getBotId() + ":SecretePhraseCommand");
             thread.start();
+        } else {
+            event.reply("This game can only be played in open text channels " +
+                    "(``@everyone`` has read & write permissions).");
         }
     }
 
@@ -202,7 +215,11 @@ public class SecretePhraseCommand extends Command {
         ACTION action = parseAction(args[1]);
         if (action == null) {
             //TODO Send err?
-            System.err.println("No Action Found");
+            event.reply("Sorry, '" +
+                    String.join(" ", Arrays.copyOfRange(args, 1, args.length))
+                    + "' is not a command for the Secrete Phrase game. Please " +
+                    "use:```\nstart, join, callout, or stop```"
+            );
             return;
         }
 
@@ -230,21 +247,30 @@ public class SecretePhraseCommand extends Command {
                 }
             case STOP:
                 if (game == null) {
-                    System.err.println("No Game Found");
+                    event.reply("There is no game of Secrete Phrase running.");
+                    return;
                 } else {
-                    System.out.println("STOP");
+                    game.endGame();
                 }
                 break;
             case JOIN:
                 if (game == null) {
-                    System.err.println("No Game Found");
+                    event.reply("There is no Secrete Phrase game running. You can use```"
+                            + "sphrase start``` to start a new game and ```sphrase " +
+                            "join``` to join said game."
+                    );
+                    return;
                 } else {
                     System.out.println("JOIN");
                 }
                 break;
             case CALL:
                 if (game == null) {
-                    System.err.println("No Game Found");
+                    event.reply("There is no Secrete Phrase game running. You can use```"
+                            + "sphrase start``` to start a new game and ```sphrase " +
+                            "join``` to join said game."
+                    );
+                    return;
                 } else {
                     System.out.println("CALL");
                 }
@@ -295,8 +321,10 @@ public class SecretePhraseCommand extends Command {
             case "join":
                 return ACTION.JOIN;
             case "call":
+            case "callout":
                 return ACTION.CALL;
             case "stop":
+            case "end":
                 return ACTION.STOP;
             default:
                 return null;

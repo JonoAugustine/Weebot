@@ -447,7 +447,7 @@ public class NotePadCommand extends Command {
         super(
                 "NotePad",
                 new ArrayList<>(Arrays.asList(
-                        "notepads", "notes", "jotter", "todo"
+                        "notepads", "notes", "jotter", "todo", "note"
                 )),
                 "Write a note for me to keep track of for you",
                 "notes\n"   +
