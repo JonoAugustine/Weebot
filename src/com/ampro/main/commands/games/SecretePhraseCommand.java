@@ -216,9 +216,18 @@ public class SecretePhraseCommand extends Command {
 
         switch (action) {
             case START:
-                bot.addPassive(new SecretePhrase(bot, event.getAuthor(), 10));
-                System.out.println("START");
-                break;
+                if (game != null) {
+                    //Don't allow more than one game to run.
+                    event.reply("There is already a game of SecretePhrase running in " +
+                            "this server. End that game first before starting a new one" +
+                            ".");
+                    return;
+                } else {
+                    //If no game is running, start one.
+                    bot.addPassive(new SecretePhrase(bot, event.getAuthor(), 10));
+                    System.out.println("START");
+                    break;
+                }
             case STOP:
                 if (game == null) {
                     System.err.println("No Game Found");
@@ -256,13 +265,14 @@ public class SecretePhraseCommand extends Command {
             PermissionOverride override = channel.getPermissionOverride(everyoneRole);
             //Get the permissions
             if (override != null) {
-                List<Permission> perms = override.getAllowed();
-                if (perms.contains(Permission.MESSAGE_READ)
-                        && perms.contains(Permission.MESSAGE_WRITE))
-                {
+                List<Permission> denied = override.getDenied();
+                if (denied.isEmpty()) {
                     return true;
-                } else {
+                } else if (denied.contains(Permission.MESSAGE_READ)
+                            && denied.contains(Permission.MESSAGE_WRITE)) {
                     return false;
+                } else {
+                    return true;
                 }
             } else {
                 return true;

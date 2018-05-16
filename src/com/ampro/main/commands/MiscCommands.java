@@ -21,6 +21,7 @@ import java.util.Collection;
  *     Self Destruct Message Command    <br>
  *     Weebot Suggestions Command       <br>
  *     Spam Command                     <br>
+ *     Shutdown Command                 <br>
  *     Ping-Pong command                <br>
  * </P></i>
  *
@@ -245,6 +246,48 @@ public class MiscCommands {
         private boolean isDev(User user) {
             return Launcher.checkDevID(user.getIdLong());
         }
+    }
+
+    /**
+     * Safely shuts down all the bots, initiating proper database saving in
+     * {@link com.ampro.main.Launcher}.
+     *
+     * @author Jonathan Augustine
+     */
+    public static final class ShutdownCommand extends Command {
+
+        public ShutdownCommand() {
+            super(
+                    "ShutDown"
+                    , new ArrayList<>(Arrays.asList(
+                            "killbots", "devkill", "tite"
+                    ))
+                    , "Safely shutdown the Weebots."
+                    , ""
+                    , false
+                    , true
+                    , 0
+                    , true
+            );
+        }
+
+        /**
+         * Begins global shutdown process.
+         * @param bot The bot that called this event.
+         * @param event {@link BetterMessageEvent}
+         */
+        @Override
+        public void run(Weebot bot, BetterMessageEvent event) {
+            if (this.check(event))
+                this.execute(bot, event);
+        }
+
+        @Override
+        protected void execute(Weebot bot, BetterMessageEvent event) {
+            event.reply("Shutting down all Weebots...");
+            Launcher.shutdown();
+        }
+
     }
 
     /**

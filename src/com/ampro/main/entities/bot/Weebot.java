@@ -224,7 +224,9 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     private void submitToPassives(BetterMessageEvent event) {
-
+        for (IPassive p : this.PASSIVES) {
+            p.accept(event);
+        }
     }
 
     /**

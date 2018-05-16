@@ -6,10 +6,7 @@
 package com.ampro.main;
 
 import com.ampro.main.commands.*;
-import com.ampro.main.commands.MiscCommands.PingCommand;
-import com.ampro.main.commands.MiscCommands.SelfDestructMessageCommand;
-import com.ampro.main.commands.MiscCommands.SpamCommand;
-import com.ampro.main.commands.MiscCommands.WeebotSuggestionCommand;
+import com.ampro.main.commands.MiscCommands.*;
 import com.ampro.main.commands.games.SecretePhraseCommand;
 import com.ampro.main.database.Database;
 import com.ampro.main.database.DatabaseManager;
