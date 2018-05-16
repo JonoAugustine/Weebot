@@ -38,6 +38,9 @@ public class SecretePhraseCommand extends Command {
                 this.phrase = phrase;
                 this.creationTime = OffsetDateTime.now();
             }
+
+            @Override
+            public String toString() { return this.phrase; }
         }
 
         static final class SPPlayer extends Player {
@@ -120,7 +123,8 @@ public class SecretePhraseCommand extends Command {
                 case 0:
                     return 0;
                 default:
-                    player.unusedPhrases.addAll(Arrays.asList(this.generatePhrases(0)));
+                    //TODO Variable Phrase number
+                    player.unusedPhrases.addAll(Arrays.asList(this.generatePhrases(5)));
                     return 1;
             }
         }
@@ -222,13 +226,18 @@ public class SecretePhraseCommand extends Command {
     protected void execute(Weebot bot, BetterMessageEvent event) {
         //Save the args
         String[] args = this.cleanArgs(bot, event.getArgs());
+        if (args.length < 2) {
+            event.reply("Please usen\n```start, join, callout, or end```\nto interact " +
+                    "with Secrete Phrase games.");
+            return;
+        }
 
         //Get the action
         ACTION action = parseAction(args[1]);
         if (action == null) {
             //TODO Send err?
             event.reply("Sorry, '" +
-                    String.join(" ", Arrays.copyOfRange(args, 1, args.length))
+                    String.join(" ", args)
                     + "' is not a command for the Secrete Phrase game. Please " +
                     "use:```\nstart, join, callout, or stop```"
             );
@@ -254,7 +263,9 @@ public class SecretePhraseCommand extends Command {
                 } else {
                     //If no game is running, start one.
                     bot.addPassive(new SecretePhrase(bot, event.getAuthor(), 10));
-                    System.out.println("START");
+                    event.reply("A new Secrete Phrase game has been started by @"
+                                + event.getMember().getEffectiveName() + "! Use ```"
+                                + "sphrase join```\nTo join the game.");
                     break;
                 }
             case STOP:
@@ -263,6 +274,7 @@ public class SecretePhraseCommand extends Command {
                     return;
                 } else {
                     game.endGame();
+                    bot.getPassives().remove(game);
                 }
                 break;
             case JOIN:
@@ -273,10 +285,31 @@ public class SecretePhraseCommand extends Command {
                     );
                     return;
                 } else {
-                    System.out.println("JOIN");
+                    SecretePhrase.SPPlayer player =
+                                new SecretePhrase.SPPlayer(event.getAuthor());
+                    int j = game.joinGame(player);
+                    if (j == 1) {
+                        event.reply("@" + event.getMember().getEffectiveName()
+                                + " has joined the Secrete Phrase game! Check your"
+                                + " direct messages to see your secrete phrases.");
+                        String out = "";
+                        for (int i = 0; i < player.unusedPhrases.size(); i++) {
+                            out = out.concat(
+                                    (i + 1) + ".)" + player.unusedPhrases.get(i) + "\n");
+                        }
+                        event.privateReply("```Secrete Phrases Game in "
+                                + event.getGuild().getName() + ":\n" + out + "```");
+                    } else if (j == 0) {
+                        event.reply("You are already in the Secrete Phrase game!");
+                        return;
+                    } else {
+                        event.reply("An Err occurred, try again.");
+                        return;
+                    }
                 }
                 break;
             case CALL:
+                //call @User Phrase Goes Here
                 if (game == null) {
                     event.reply("There is no Secrete Phrase game running. You can use```"
                             + "sphrase start``` to start a new game and ```sphrase " +
