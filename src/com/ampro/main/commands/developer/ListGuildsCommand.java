@@ -1,10 +1,12 @@
-package com.ampro.main.commands;
+package com.ampro.main.commands.developer;
 
 import com.ampro.main.Launcher;
+import com.ampro.main.commands.Command;
 import com.ampro.main.entities.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.ChannelType;
 
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -54,10 +56,11 @@ public class ListGuildsCommand extends Command {
      * a list of all Guilds hosting a Weebot and their Weebot's name, as well
      * as a private message containing more details about the Guild and their
      * bot.
+     * @param bot The Weebot who called
      * @param event {@link BetterMessageEvent}
      */
     @SuppressWarnings("unchecked")
-    protected void execute(BetterMessageEvent event) {
+    protected void execute(Weebot bot, BetterMessageEvent event) {
 
         Iterable<Weebot> botIterable = Launcher.getDatabase().getWeebots()
                 .values();
@@ -85,7 +88,9 @@ public class ListGuildsCommand extends Command {
                        + w.getBotId() + "\n\t"
                        + w.getNickname() + "\n\t"
                        + w.getCallsign() + "\n\t"
-                       + w.getBirthday().toString() + "\n\n"
+                       + w.getBirthday().format(DateTimeFormatter.ofPattern(
+                               "dd-MM-yy HH:mm:ss")) + "\n\t\t"
+                       + "\n"
                );
            }
            out += "```";
@@ -93,14 +98,5 @@ public class ListGuildsCommand extends Command {
        }
 
     }
-
-    /**
-     * Run this bot's own implementation of
-     * {@link ListGuildsCommand#execute(BetterMessageEvent)}
-     * @param bot The {@link Weebot} which called this command.
-     * @param event The {@link BetterMessageEvent} that called the command.
-     */
-    @Override
-    protected void execute(Weebot bot, BetterMessageEvent event) { this.execute(event); }
 
 }

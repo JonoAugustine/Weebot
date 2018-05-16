@@ -5,7 +5,7 @@
 package com.ampro.main.database;
 
 import com.ampro.main.Launcher;
-import com.ampro.main.commands.MiscCommands.WeebotSuggestionCommand.Suggestion;
+import com.ampro.main.commands.developer.WeebotSuggestionCommand.Suggestion;
 import com.ampro.main.entities.bot.Weebot;
 import net.dv8tion.jda.core.entities.User;
 

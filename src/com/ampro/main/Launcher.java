@@ -5,9 +5,17 @@
 
 package com.ampro.main;
 
-import com.ampro.main.commands.*;
-import com.ampro.main.commands.MiscCommands.*;
+import com.ampro.main.commands.Command;
+import com.ampro.main.commands.HelpCommand;
+import com.ampro.main.commands.ManageSettingsCommand;
+import com.ampro.main.commands.NotePadCommand;
+import com.ampro.main.commands.developer.ListGuildsCommand;
+import com.ampro.main.commands.developer.ShutdownCommand;
+import com.ampro.main.commands.developer.WeebotSuggestionCommand;
 import com.ampro.main.commands.games.SecretePhraseCommand;
+import com.ampro.main.commands.miscellaneous.PingCommand;
+import com.ampro.main.commands.miscellaneous.SelfDestructMessageCommand;
+import com.ampro.main.commands.miscellaneous.SpamCommand;
 import com.ampro.main.database.Database;
 import com.ampro.main.database.DatabaseManager;
 import com.ampro.main.entities.bot.Weebot;
