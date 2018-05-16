@@ -1,4 +1,4 @@
-package com.ampro.main.entities;
+package com.ampro.main.commands;
 
 import com.ampro.main.listener.events.BetterMessageEvent;
 

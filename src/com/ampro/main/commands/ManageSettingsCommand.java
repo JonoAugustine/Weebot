@@ -52,7 +52,6 @@ public class ManageSettingsCommand extends Command {
     }
 
     /**
-     * TODO settings controls
      * @param bot The {@link Weebot} which called this command.
      * @param event The {@link BetterMessageEvent} that called the command.
      */

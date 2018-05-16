@@ -204,6 +204,12 @@ public class CardsAgainstHumanityCommand extends Command {
         }
     }
 
+    public CardsAgainstHumanityCommand() {
+        super(
+                //TODO
+        );
+    }
+
     /**
      * Performs a check then runs the command.
      *

@@ -2,7 +2,7 @@ package com.ampro.main.commands.games;
 
 
 import com.ampro.main.commands.Command;
-import com.ampro.main.entities.IPassive;
+import com.ampro.main.commands.IPassive;
 import com.ampro.main.entities.bot.Weebot;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
@@ -140,7 +140,7 @@ public class SecretePhraseCommand extends Command {
 
         /**
          * End the game and decide a winner.
-         * @return an int for some reason TODO
+         * @return boolean for some reason //TODO
          */
         @Override
         protected boolean endGame() {
@@ -183,7 +183,7 @@ public class SecretePhraseCommand extends Command {
                 "SecretePhrase",
                 new ArrayList<>(Arrays.asList("sphrase")),
                 "A game designed by Dernst",
-                "", //TODO
+                "", //TODO argformat
                 true,
                 false,
                 0,
@@ -235,7 +235,6 @@ public class SecretePhraseCommand extends Command {
         //Get the action
         ACTION action = parseAction(args[1]);
         if (action == null) {
-            //TODO Send err?
             event.reply("Sorry, '" +
                     String.join(" ", args)
                     + "' is not a command for the Secrete Phrase game. Please " +

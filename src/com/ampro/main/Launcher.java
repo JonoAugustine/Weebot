@@ -62,6 +62,7 @@ public class Launcher {
 		//Launcher.jdaDevLogIn();
 		Launcher.setUpDatabase();
 		Launcher.setUpDirStructure();
+		Launcher.updateWeebots();
 
 		Collection c = DATABASE.getWeebots().values();
 		Iterator it = c.iterator();
@@ -157,15 +158,14 @@ public class Launcher {
         new File("/temp/in").mkdirs();
     }
 
-    /**
-     * Clears the temp folders.
-     */
-    private static void clearTempDirs() {
-        try {
-            FileUtils.cleanDirectory(new File("/temp"));
-        } catch (IOException e) {
-            System.err.println("Failed clear temp dir.");
-        }
+	/**
+	 * Calls the update method for each Weebot to setup NickNames //TODO and more?
+	 * changed during downtime.
+	 */
+	private static void updateWeebots() {
+		for (Weebot bot : DATABASE.getWeebots().values()) {
+			bot.updateGuildStanding();
+		}
     }
 
 	/**
@@ -201,6 +201,17 @@ public class Launcher {
 	   saveTimer.setName("Save Timer");
 	   Launcher.saveTimer.start();
    }
+
+	/**
+	 * Clears the temp folders.
+	 */
+	private static void clearTempDirs() {
+		try {
+			FileUtils.cleanDirectory(new File("/temp"));
+		} catch (IOException e) {
+			System.err.println("Failed clear temp dir.");
+		}
+	}
 
 	/**
 	 * Begin the shutdown sequence. Backup and save database.

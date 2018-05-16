@@ -15,10 +15,10 @@ package com.ampro.main.entities.bot;
 
 import com.ampro.main.Launcher;
 import com.ampro.main.commands.Command;
+import com.ampro.main.commands.IPassive;
 import com.ampro.main.commands.NotePadCommand.NotePad;
 import com.ampro.main.commands.games.Game;
 import com.ampro.main.commands.games.Player;
-import com.ampro.main.entities.IPassive;
 import com.ampro.main.listener.events.BetterEvent;
 import com.ampro.main.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
@@ -35,10 +35,6 @@ import java.util.*;
  *     the settings applied to the bot by said Guild. <br><br>
  *     Each Weebot is assigned an ID String consisting of the
  *     hosting Guild's unique ID + "W" (e.g. "1234W") <br><br>
- *
- * Development plans TODO: <br>
- *      Add a {@code Refresh} method to call on startup that updates and settings
- *      (like {@link Weebot#nickname}) that were changed during downtime.
  *
  * <br><br>
  * Development Questions TODO: <br>
@@ -223,10 +219,34 @@ public class Weebot implements Comparable<Weebot> {
         return true;
     }
 
+    /**
+     * Submit the event to any running {@link IPassive} implementations on this bot.
+     * @param event The event to distribute.
+     */
     private void submitToPassives(BetterMessageEvent event) {
         for (IPassive p : this.PASSIVES) {
             p.accept(event);
         }
+    }
+
+    /**
+     * Update the bot's mutable settings that may have changed during downtime like
+     * NickName.
+     */
+    public void updateGuildStanding() {
+        if (this.getGuildID() > 0) //Ignores the private bot
+            this.nickname = Launcher.getGuild(this.GUILD_ID)
+                                    .getMember(Launcher.getJda().getSelfUser())
+                                    .getEffectiveName();
+    }
+
+    @Override
+    public String toString() {
+        String out = "";
+        out += this.getBotId() + "\n\t";
+        out += this.getGuildName() + "\n\t";
+        out += this.getNickname() + "\n";
+        return out;
     }
 
     /**
@@ -238,15 +258,6 @@ public class Weebot implements Comparable<Weebot> {
     @Override
     public int compareTo(Weebot w2) {
         return (int) (this.getGuildID() - w2.getGuildID());
-    }
-
-    @Override
-    public String toString() {
-        String out = "";
-        out += this.getBotId() + "\n\t";
-        out += this.getGuildName() + "\n\t";
-        out += this.getNickname() + "\n";
-        return out;
     }
 
     /** @return The ID of the guild the bot is linked to.*/

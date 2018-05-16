@@ -137,7 +137,7 @@ public class NotePadCommand extends Command {
         }
 
         /**
-         * Check if the event can edit the NotePad. TODO separate lists for each entity.
+         * Check if the event can edit the NotePad.
          * @param event
          * @return False if the channel is not allowed. <br>
          *         False if the Member is not allowed. <br>
@@ -499,8 +499,8 @@ public class NotePadCommand extends Command {
      * notes # write/add <\the message> <br>
      * notes # insert # <\here the message> <br>
      * notes # edit # <\new message> <br>
-     * notes # lockto [some roles, memebers, or channels] TODO
-     * notes # lockout [some roles, memebers, or channels] TODO
+     * notes # lockto [some roles, memebers, or channels]
+     * notes # lockout [some roles, memebers, or channels] TODO add to arg format & Help
      * </code>
      * @param bot
      *         The {@link Weebot} which called this command.

@@ -80,7 +80,7 @@ public class Database {
      * Get the database's Weebots.
      * @return TreeMap of Weebot's mapped to their Guild ID
      */
-    public synchronized TreeMap getWeebots() {
+    public synchronized TreeMap<Long, Weebot> getWeebots() {
         return this.WEEBOTS;
     }
 
