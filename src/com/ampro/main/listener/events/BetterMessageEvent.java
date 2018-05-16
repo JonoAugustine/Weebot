@@ -42,8 +42,6 @@ import java.util.function.Consumer;
 public class BetterMessageEvent extends BetterEvent {
 
     public enum TYPE {RECIVED, EDITED, DELETED}
-
-
     /** The original event */
     private final GenericMessageEvent messageEvent;
     private final Message message;
@@ -318,6 +316,10 @@ public class BetterMessageEvent extends BetterEvent {
      */
     public final Member getMember() {
         return memberAuthor;
+    }
+
+    public final TYPE getType() {
+        return this.type;
     }
 
 }

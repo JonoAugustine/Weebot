@@ -64,8 +64,8 @@ public abstract class Game<P extends Player> {
     }
 
     //Some Very important but vague methods to implement in child.
-    protected abstract int startGame();
-    protected abstract int endGame();
+    protected abstract boolean startGame();
+    protected abstract boolean endGame();
 
     /**
      * Add {@code Player} to the {@code Game}.

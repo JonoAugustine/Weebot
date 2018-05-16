@@ -144,26 +144,26 @@ public class CardsAgainstHumanity
 
     }
 
+    protected int dealCards(CAHPlayer player) {
+        return -1; //TODO
+    }
+
     @Override
-    public int startGame() {
+    public boolean startGame() {
         //Well you can't play CAH with less than 3 people
         if (this.PLAYERS.size() < 3) {
-            return -1;
+            return false;
         }
         //More conditions for gamestart?
         this.RUNNING = true;
         //Oh yeah we need TODO the actual game
-        return 1;
-    }
-
-    protected int dealCards(CAHPlayer player) {
-        return -1; //TODO
+        return true;
     }
 
     /**
      * End the game, decide a winner.
      */
-    protected int endGame() {
+    protected boolean endGame() {
         ArrayList<CAHPlayer> players = this.playerIterable();
         CAHPlayer winner = this.PLAYERS.get(this.PLAYERS.firstKey());
         for (CAHPlayer p : players) {
@@ -177,7 +177,7 @@ public class CardsAgainstHumanity
                     this.WINNERS.add(p);
             }
         }
-        return 0;
+        return true;
     }
 
     /**

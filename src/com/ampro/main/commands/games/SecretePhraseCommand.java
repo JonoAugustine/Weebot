@@ -25,7 +25,8 @@ public class SecretePhraseCommand extends Command {
      *
      * @author Jonathan Augustine, Daniel Ernst
      */
-    public static class SecretePhrase extends Game<SecretePhrase.SPPlayer> implements IPassive {
+    public static final class SecretePhrase extends Game<SecretePhrase.SPPlayer>
+    implements IPassive {
 
         private static final class Phrase {
 
@@ -60,6 +61,8 @@ public class SecretePhraseCommand extends Command {
 
         }
 
+        private static final int MIN_PLAYERS = 2;
+
         private final long callMessageLimit;
 
         public SecretePhrase(Weebot bot, User author, long callMessageLimit) {
@@ -78,10 +81,27 @@ public class SecretePhraseCommand extends Command {
 
         @Override
         public void accept(BetterMessageEvent event) {
+            if (event.getType() != BetterMessageEvent.TYPE.RECIVED) return;
             User member = event.getAuthor();
             SPPlayer memberPlayer = this.PLAYERS.get(member.getIdLong());
-            if(memberPlayer == null) return;
-            this.usePhrase(memberPlayer, event.getMessage());
+            if(memberPlayer != null)
+                this.usePhrase(memberPlayer, event.getMessage());
+        }
+
+        /**
+         * Checks if a player used their phrase
+         * @param player The player
+         * @param message The message sent by the user
+         */
+        protected final void usePhrase(SPPlayer player, Message message) {
+            String string = message.getContentStripped();
+            for (Phrase p : player.unusedPhrases) {
+                if(string.contains(p.phrase)) {
+                    player.unusedPhrases.remove(p);
+                    player.usedPhrases.add(p);
+                    return;
+                }
+            }
         }
 
         /**
@@ -105,25 +125,13 @@ public class SecretePhraseCommand extends Command {
             }
         }
 
-        /**
-         * Checks if a player used their phrase
-         * @param player The player
-         * @param message The message sent by the user
-         */
-        protected final void usePhrase(SPPlayer player, Message message) {
-            String string = message.getContentStripped();
-            for (Phrase p : player.unusedPhrases) {
-                if(string.contains(p.phrase)) {
-                    player.unusedPhrases.remove(p);
-                    player.usedPhrases.add(p);
-                    return;
-                }
-            }
-        }
-
         @Override
-        protected int startGame() {
-            return 0;
+        protected boolean startGame() {
+            if (this.PLAYERS.values().size() < MIN_PLAYERS) {
+                return false;
+            }
+            this.RUNNING = true;
+            return true;
         }
 
         /**
@@ -131,8 +139,8 @@ public class SecretePhraseCommand extends Command {
          * @return an int for some reason TODO
          */
         @Override
-        protected int endGame() {
-            return 0;
+        protected boolean endGame() {
+            return true;
         }
 
         //Member Make a game
@@ -148,8 +156,9 @@ public class SecretePhraseCommand extends Command {
         //Time Runs out or Author ends game
 
         /**
-         * Generate "random" (?) phrases to give to a {@link SPPlayer player} in a private channel.
-         *
+         * Generate "random" (?) phrases to give to a {@link SPPlayer player}
+         * in a private channel.
+         * TODO How to generate phrases?
          * @param phrases
          *         The number of phrases to generate.
          *
@@ -157,9 +166,12 @@ public class SecretePhraseCommand extends Command {
          */
         private final Phrase[] generatePhrases(int phrases) {
             Phrase[] out = new Phrase[phrases];
-            //TODO How to generate phrases?
+            for (int i = 0; i < phrases; i++) {
+                out[i] = new Phrase("Test Phrase");
+            }
             return out;
         }
+
     }
 
     public SecretePhraseCommand() {
@@ -280,6 +292,7 @@ public class SecretePhraseCommand extends Command {
 
     @Override
     protected final boolean check(BetterMessageEvent event) {
+        if (event.getType() != BetterMessageEvent.TYPE.RECIVED) return false;
         //If it passes basic checks
         //Check if channel is @everyone
         if (super.check(event)) {
