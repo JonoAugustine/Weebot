@@ -12,7 +12,7 @@ import net.dv8tion.jda.core.entities.User;
 /**
   *
   */
-public abstract class CardGame<P extends Player, C extends Card>
+public abstract class CardGame<P extends Player>
                 extends Game<P> {
 
     /**

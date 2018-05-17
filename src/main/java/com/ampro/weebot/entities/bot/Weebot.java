@@ -20,7 +20,7 @@ import com.ampro.weebot.commands.NotePadCommand.NotePad;
 import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
 import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
-        .CardsAgainstHumanity.CAHCard;
+        .CardsAgainstHumanity.*;
 import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
@@ -80,7 +80,7 @@ public class Weebot implements Comparable<Weebot> {
     private final transient List<Game<? extends Player>> GAMES_RUNNING;
 
     /**A Map of custom Cards Against Humanity card lists mapped to "deck name" Strings.*/
-    private final ConcurrentHashMap<String, List<CAHCard>> CUSTOM_CAH_CARDS;
+    private final ConcurrentHashMap<String, CAHDeck> CUSTOM_CAH_DECKS;
 
     /** {@link IPassive} objects, cleared on exit */
     private final transient List<IPassive> PASSIVES;
@@ -111,7 +111,7 @@ public class Weebot implements Comparable<Weebot> {
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
         this.PASSIVES = new ArrayList<>();
-        this.CUSTOM_CAH_CARDS = new ConcurrentHashMap<>();
+        this.CUSTOM_CAH_DECKS = new ConcurrentHashMap<>();
     }
 
     /**
@@ -134,7 +134,7 @@ public class Weebot implements Comparable<Weebot> {
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
         PASSIVES = new ArrayList<>();
-        CUSTOM_CAH_CARDS = null;
+        CUSTOM_CAH_DECKS = null;
     }
 
     /**
@@ -409,40 +409,34 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     /**@return HashMap of Cards Against Humanity card lists mapped to Deck-Name Strings*/
-    public final ConcurrentHashMap<String, List<CAHCard>> getCustomCahCards() {
-        return this.CUSTOM_CAH_CARDS;
+    public final ConcurrentHashMap<String, CAHDeck> getCustomCahDeck() {
+        return this.CUSTOM_CAH_DECKS;
     }
 
     /**
      * @param deckname Name of the "deck" requested.
      * @return List of Cards Against Humanity cards mapped to the given deck name.
      */
-    public final List<CAHCard> getCustomCahCards(String deckname) {
-        return this.CUSTOM_CAH_CARDS.get(deckname);
+    public final CAHDeck getCustomCahDeck(String deckname) {
+        return this.CUSTOM_CAH_DECKS.get(deckname);
     }
 
     /**
-     * Make a new custom "Deck" of {@link CAHCard CAH cards}.
-     * @param deckname The name of the new Deck.
-     * @return False if the deck already exists.
+     * Make a new custom {@link CAHDeck Cards Against Humanity Deck}.
+     * @param deck The Deck to add.
+     * @return false if the deck already exists.
      */
-    public final boolean addCustomCahDeck(String deckname) {
-        return this.CUSTOM_CAH_CARDS.putIfAbsent(deckname, new ArrayList<>()) == null;
+    public final boolean addCustomCahDeck(CAHDeck deck) {
+        return this.CUSTOM_CAH_DECKS.putIfAbsent(deck.getName(), deck) == null;
     }
 
     /**
-     * Add a new custom {@link CAHCard CAH card} to a custom deck.
-     * @param deckname The name of the Deck to add the card to.
-     * @param card The card to add.
-     * @return False if the deck does not exist.
+     * Remove a custome {@link CAHDeck}.
+     * @param deckname The name of the deck.
+     * @return false if the deck does not exist.
      */
-    public final boolean addCustomCahCard(String deckname, CAHCard card) {
-        if (this.CUSTOM_CAH_CARDS.containsKey(deckname)) {
-            this.CUSTOM_CAH_CARDS.get(deckname).add(card);
-            return true;
-        } else {
-            return false;
-        }
+    public final boolean removeCustomCahDeck(String deckname) {
+        return this.CUSTOM_CAH_DECKS.remove(deckname) == null;
     }
 
     public final boolean addPassive(IPassive passive) {

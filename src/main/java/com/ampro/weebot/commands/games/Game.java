@@ -29,9 +29,9 @@ public abstract class Game<P extends Player> {
     }
 
     /** The ID of the hosting bot */
-    private final String HOST_ID;
+    protected final String HOST_ID;
     /** User ID of the User who started the game.*/
-    private final long AUTHOR_ID;
+    protected final long AUTHOR_ID;
     //Keep a list of all the Players
     protected final TreeMap<Long, P> PLAYERS;
     /** Is the game currently running? */
