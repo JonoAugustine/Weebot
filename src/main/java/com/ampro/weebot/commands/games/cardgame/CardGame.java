@@ -53,6 +53,11 @@ public abstract class CardGame<P extends Player, C extends Card>
         }
     }
 
-    protected abstract int dealCards(P player);
+    /**
+     * Deal cards to a player
+     * @param player The player to deal cards to.
+     * @return False if the player already has a full hand.
+     */
+    protected abstract boolean dealCards(P player);
 
 }

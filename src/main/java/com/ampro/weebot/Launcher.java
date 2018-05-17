@@ -12,6 +12,7 @@ import com.ampro.weebot.commands.developer.ListGuildsCommand;
 import com.ampro.weebot.commands.developer.ShutdownCommand;
 import com.ampro.weebot.commands.developer.WeebotSuggestionCommand;
 import com.ampro.weebot.commands.games.SecretePhraseCommand;
+import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand;
 import com.ampro.weebot.commands.miscellaneous.PingCommand;
 import com.ampro.weebot.commands.miscellaneous.SelfDestructMessageCommand;
 import com.ampro.weebot.commands.miscellaneous.SpamCommand;
@@ -38,7 +39,7 @@ import java.util.*;
  * Runner/Main class of the Weebot network.
  * Builds single JDA connection, instances of all {@link Command Commands}, and
  * {@link Database}.
- *
+ * //TODO Change all TreeMaps to {@link java.util.concurrent.ConcurrentHashMap}
  * @author Jonathan Augustine
  */
 public class Launcher {
@@ -52,7 +53,7 @@ public class Launcher {
 					new ManageSettingsCommand(), new ListGuildsCommand(),
                     new PingCommand(), new SpamCommand(), new NotePadCommand(),
                     new SelfDestructMessageCommand(), new SecretePhraseCommand(),
-                    new WeebotSuggestionCommand()
+                    new WeebotSuggestionCommand(), new CardsAgainstHumanityCommand()
 			));
 
 	/** The database */

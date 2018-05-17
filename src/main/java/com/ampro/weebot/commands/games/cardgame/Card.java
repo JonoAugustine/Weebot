@@ -5,7 +5,7 @@ package com.ampro.weebot.commands.games.cardgame;
  * Currenty holds no information in abstract,
  * Just here for future expansion and Generics
  */
-abstract class Card {
+public abstract class Card {
 
     /** Just a little backup case in case something goes REALLY wrong. */
     protected static class InvalidCardException extends Exception {

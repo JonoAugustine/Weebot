@@ -17,6 +17,8 @@ import java.util.Arrays;
  * <p>Contains all commands relating to any {@link Weebot} settings, as such,
  * takes commands leading with the name of any setting.</p>
  *
+ * TODO: Banning words
+ *
  * @author Jonathan Augustine
  */
 public class ManageSettingsCommand extends Command {

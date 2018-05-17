@@ -25,6 +25,7 @@ public abstract class Game<P extends Player> {
         public ModificationWhileRunningException() {}
         /** Constructor with message */
         public ModificationWhileRunningException(String err) { super(err); }
+
     }
 
     /** The ID of the hosting bot */

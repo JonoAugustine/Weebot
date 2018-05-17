@@ -19,6 +19,8 @@ import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.commands.NotePadCommand.NotePad;
 import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
+import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
+        .CardsAgainstHumanity.CAHCard;
 import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
@@ -26,8 +28,7 @@ import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.time.OffsetDateTime;
 import java.util.*;
-
-//import org.joda.time.LocalDateTime;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A representation of a Weebot entity linked to a Guild.<br>
@@ -35,6 +36,9 @@ import java.util.*;
  *     the settings applied to the bot by said Guild. <br><br>
  *     Each Weebot is assigned an ID String consisting of the
  *     hosting Guild's unique ID + "W" (e.g. "1234W") <br><br>
+ *
+ * TODO: Scanning for banned words
+ * TODO Change all TreeMaps to {@link java.util.concurrent.ConcurrentHashMap}
  *
  * <br><br>
  * Development Questions TODO: <br>
@@ -75,6 +79,10 @@ public class Weebot implements Comparable<Weebot> {
     /** List of {@code Game}s currently Running */
     private final transient List<Game<? extends Player>> GAMES_RUNNING;
 
+    /**A Map of custom Cards Against Humanity card lists mapped to "deck name" Strings.*/
+    private final ConcurrentHashMap<String, List<CAHCard>> CUSTOM_CAH_CARDS;
+
+    /** {@link IPassive} objects, cleared on exit */
     private final transient List<IPassive> PASSIVES;
 
     /** Map of "NotePads" */
@@ -102,7 +110,8 @@ public class Weebot implements Comparable<Weebot> {
         this.GAMES_RUNNING = new ArrayList<>();
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
-        PASSIVES = new ArrayList<>();
+        this.PASSIVES = new ArrayList<>();
+        this.CUSTOM_CAH_CARDS = new ConcurrentHashMap<>();
     }
 
     /**
@@ -125,6 +134,7 @@ public class Weebot implements Comparable<Weebot> {
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
         PASSIVES = new ArrayList<>();
+        CUSTOM_CAH_CARDS = null;
     }
 
     /**
@@ -396,6 +406,43 @@ public class Weebot implements Comparable<Weebot> {
      */
     public final void addRunningGame(Game<? extends Player> game) {
         this.GAMES_RUNNING.add(game);
+    }
+
+    /**@return HashMap of Cards Against Humanity card lists mapped to Deck-Name Strings*/
+    public final ConcurrentHashMap<String, List<CAHCard>> getCustomCahCards() {
+        return this.CUSTOM_CAH_CARDS;
+    }
+
+    /**
+     * @param deckname Name of the "deck" requested.
+     * @return List of Cards Against Humanity cards mapped to the given deck name.
+     */
+    public final List<CAHCard> getCustomCahCards(String deckname) {
+        return this.CUSTOM_CAH_CARDS.get(deckname);
+    }
+
+    /**
+     * Make a new custom "Deck" of {@link CAHCard CAH cards}.
+     * @param deckname The name of the new Deck.
+     * @return False if the deck already exists.
+     */
+    public final boolean addCustomCahDeck(String deckname) {
+        return this.CUSTOM_CAH_CARDS.putIfAbsent(deckname, new ArrayList<>()) == null;
+    }
+
+    /**
+     * Add a new custom {@link CAHCard CAH card} to a custom deck.
+     * @param deckname The name of the Deck to add the card to.
+     * @param card The card to add.
+     * @return False if the deck does not exist.
+     */
+    public final boolean addCustomCahCard(String deckname, CAHCard card) {
+        if (this.CUSTOM_CAH_CARDS.containsKey(deckname)) {
+            this.CUSTOM_CAH_CARDS.get(deckname).add(card);
+            return true;
+        } else {
+            return false;
+        }
     }
 
     public final boolean addPassive(IPassive passive) {

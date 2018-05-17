@@ -13,11 +13,18 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
+
+/**
+ * Run Cards Against Humanity games, TODO and make custom cards.
+ */
 public class CardsAgainstHumanityCommand extends Command {
 
     /**
      * A game of Cards Against Humanity.
+     * TODO How to get a standard list of black and white cards w/o literally writing it
      * @author Jonathan Augustine
      */
     public static final class CardsAgainstHumanity
@@ -29,7 +36,7 @@ public class CardsAgainstHumanityCommand extends Command {
          * Holds a Hand of cards and a list of cards won.
          *
          */
-        static class CAHPlayer extends Player {
+        final class CAHPlayer extends Player {
 
             /**
              * Currently held cards
@@ -37,39 +44,69 @@ public class CardsAgainstHumanityCommand extends Command {
              * and to the bot. Do not expose this to the guild channel, since that
              * would show the hand to all members and that's dumb.
              */
-            CAHCard[] HAND;
+            CAHCard[] hand;
             //Card pairs from rounds won
-            ArrayList<CAHCard> cardsWon;
+            final List<CAHCard> cardsWon;
 
             /** Make new user */
             CAHPlayer(User user) {
                 super(user);
+                this.hand = new CAHCard[CardsAgainstHumanity.this.HAND_SIZE];
+                this.cardsWon = new ArrayList<>();
             }
 
         }
 
-        static class CAHCard extends Card {
+        public static final class CAHCard extends Card {
 
-            //The winning card of the round
-            CAHCard winningCard;
             //White vs Black card
-            enum CARDTYPE { BLACK, WHITE
-            }
+            enum CARDTYPE { BLACK, WHITE }
+            /** White or Black card */
             final CARDTYPE type;
+
             /** Content of the card */
             final String cardText;
 
             /**
-             * Make a new card.
-             * @param type Black or White card type
-             * @param text The text of the card
+             * The winning {@link CARDTYPE#WHITE white card} of the round
+             * (Applies to {@link CARDTYPE#BLACK black cards})
              */
-            CAHCard(CARDTYPE type, String text) {
-                this.cardText = text;
-                this.type = type;
+            CAHCard winningCard;
+            /**
+             * The number of cards needed to fill in the card
+             * (Applies to {@link CARDTYPE#BLACK black cards})
+             */
+            final int blanks;
+
+            static final CAHCard makeBlackCard(String text, int blanks)
+            throws InvalidCardException {
+                if (blanks < 1) {
+                    throw new InvalidCardException(
+                            "Black Card needs at least one blank space."
+                    );
+                } else if (text.isEmpty()) {
+                    throw new InvalidCardException("Card text cannot be empty!");
+                } else {
+                    return new CAHCard(CARDTYPE.BLACK, text, blanks);
+                }
             }
 
-            void setWinningCard(CAHCard winningCard) throws InvalidCardException {
+            static final CAHCard makeWhiteCard(String text) throws InvalidCardException {
+                if (text.isEmpty()) {
+                    throw new InvalidCardException("Card text cannot be empty!");
+                } else {
+                    return new CAHCard(CARDTYPE.WHITE, text, -1);
+                }
+            }
+
+            CAHCard(CARDTYPE type, String text, int blanks) {
+                this.type = type;
+                this.cardText = text;
+                this.blanks = blanks;
+            }
+
+            void setWinningCard(CAHCard winningCard)
+                    throws InvalidCardException {
                 if (winningCard.type == CARDTYPE.BLACK)
                     throw new InvalidCardException(
                             "Winning Card cannot be of type CAHCard.CARDTYPE.BLACK"
@@ -80,8 +117,17 @@ public class CardsAgainstHumanityCommand extends Command {
 
         }
 
-        private static final int MIN_PLAYERS = 3;
+        public enum WIN_CONDITION {WINS, ROUNDS}
 
+        public enum GAME_STATE {
+            /** Players are choosing white cards */
+            CHOOSING,
+            /** Czar is reading played white cards */
+            READING
+
+        }
+
+        private static final int MIN_PLAYERS = 3;
         /** The hosting channel */
         private final Channel CHANNEL;
         //Cards delt to players
@@ -91,9 +137,8 @@ public class CardsAgainstHumanityCommand extends Command {
         //How many cards per hand?
         private final int HAND_SIZE;
         //End after certain # of wins or rounds?
-        public enum WIN_CONDITION {WINS, ROUNDS
-        }
         private WIN_CONDITION WIN_CONDITION;
+        /** The winners of the game */
         private ArrayList<CAHPlayer> WINNERS;
 
         /**
@@ -126,32 +171,37 @@ public class CardsAgainstHumanityCommand extends Command {
             this.HAND_SIZE = handSize;
         }
 
-        /**
-         * Adds User to the game.
-         * Gives the user a Player wrapper to interact with the game.
-         * Deals the player cards
-         * @param user User
-         * @return -1 if the user could not be added
-         *          0 if the user is already in the game
-         *          1 if the user was added
-         */
-        public int joinGame(User user) {
-
-            CAHPlayer player = new CAHPlayer(user);
-
-            switch(super.joinGame(player)) {
-                case -1: return -1;
-                case 0: return 0;
-                default:
-                    return this.dealCards(player);
+        @Override
+        protected boolean dealCards(CAHPlayer player) {
+            boolean delt = false;
+            for (CAHCard c : player.hand) {
+                if (c == null) {
+                    c = randomCard(CAHCard.CARDTYPE.WHITE);
+                    delt = true;
+                }
             }
-
+            return delt;
         }
 
-        protected int dealCards(CAHPlayer player) {
-            return -1; //TODO
+        /**
+         * @return a random {@link CAHCard.CARDTYPE#WHITE white} or
+         *         {@link CAHCard.CARDTYPE#BLACK black} card.
+         */
+        protected CAHCard randomCard(CAHCard.CARDTYPE type) {
+            switch (type) {
+                case BLACK:
+                    return null;
+                case WHITE:
+                    return null;
+                default:
+                    return null;
+            }
         }
 
+        /**
+         * Start the game of CAH.
+         * @return {@code false} if there are less than 3 players.
+         */
         @Override
         public boolean startGame() {
             //Well you can't play CAH with less than 3 people
@@ -202,13 +252,23 @@ public class CardsAgainstHumanityCommand extends Command {
                 this.WIN_CONDITION = wincondition;
             return prev;
         }
+
     }
 
     public CardsAgainstHumanityCommand() {
         super(
-                //TODO
+                "CardsAgainstHumanity",
+                new ArrayList<>(Arrays.asList("cah")),
+                "Start a game of CardsAgainstHumanity",
+                " ",
+                true,
+                false,
+                0,
+                false
         );
     }
+
+    private enum ACTION {START, MAKECARD}
 
     /**
      * Performs a check then runs the command.
@@ -234,6 +294,20 @@ public class CardsAgainstHumanityCommand extends Command {
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
 
+    }
+
+    /**
+     * TODO Parse an {@link ACTION action} from a string.
+     * @param arg The string to parse from.
+     * @return The action parsed or null if no action was found.
+     */
+    private ACTION parseAction(String arg) {
+        switch (arg) {
+            case "start":
+                return ACTION.START;
+            default:
+                return null;
+        }
     }
 
 }

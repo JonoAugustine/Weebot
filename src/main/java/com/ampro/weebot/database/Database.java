@@ -10,9 +10,8 @@ import com.ampro.weebot.entities.bot.Weebot;
 import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;
-import java.util.ArrayList;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A database for storing all the information about the Weebot program
@@ -20,22 +19,25 @@ import java.util.TreeMap;
  */
 public class Database {
 
-    /** All Weebots currently in circulation, mapped to their Guild's ID */
-    private final TreeMap<Long, Weebot> WEEBOTS;
-
     /** Array of registered developer Discord IDs */
-    private final ArrayList<Long> DEV_IDS;
+    private static final List<Long> DEV_IDS = new ArrayList<>(Arrays.asList(
+            139167730237571072L /*JONO*/, 186130584693637131L /*DERNST*/
+    ));
 
-    private final TreeMap<OffsetDateTime, Suggestion> SUGGESTIONS;
+    /**
+     * Map of all suggestions given through
+     * {@link com.ampro.weebot.commands.developer.WeebotSuggestionCommand}
+     */
+    private final ConcurrentHashMap<OffsetDateTime, Suggestion> SUGGESTIONS;
+
+    /** All Weebots currently in circulation, mapped to their Guild's ID */
+    private final ConcurrentHashMap<Long, Weebot> WEEBOTS;
 
     /** Build an empty {@code Database}.*/
     public Database() {
-        WEEBOTS = new TreeMap<>();
+        WEEBOTS = new ConcurrentHashMap<>();
         WEEBOTS.putIfAbsent(0L, new Weebot());
-    	DEV_IDS = new ArrayList<>();
-    	DEV_IDS.add(139167730237571072L); //Jono
-        DEV_IDS.add(186130584693637131L); //Dernst
-        SUGGESTIONS = new TreeMap<>();
+        SUGGESTIONS = new ConcurrentHashMap<>();
     }
 
     /**
@@ -80,7 +82,7 @@ public class Database {
      * Get the database's Weebots.
      * @return TreeMap of Weebot's mapped to their Guild ID
      */
-    public synchronized TreeMap<Long, Weebot> getWeebots() {
+    public synchronized ConcurrentHashMap<Long, Weebot> getWeebots() {
         return this.WEEBOTS;
     }
 
@@ -105,7 +107,7 @@ public class Database {
         SUGGESTIONS.putIfAbsent(suggestion.getSubmitTime(), suggestion);
     }
 
-    public TreeMap<OffsetDateTime, Suggestion> getSuggestions() {
+    public ConcurrentHashMap<OffsetDateTime, Suggestion> getSuggestions() {
         return SUGGESTIONS;
     }
 
@@ -127,8 +129,8 @@ public class Database {
     /**
      * @return ArrayList of registered developers.
      */
-    public synchronized ArrayList<Long> getDevelopers() {
-        return this.DEV_IDS;
+    public static synchronized List<Long> getDevelopers() {
+        return DEV_IDS;
     }
 
     @Override

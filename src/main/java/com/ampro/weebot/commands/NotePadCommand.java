@@ -450,18 +450,18 @@ public class NotePadCommand extends Command {
                         "notepads", "notes", "jotter", "todo", "note"
                 )),
                 "Write a note for me to keep track of for you",
-                "notes\n"   +
-                "notes #\n" +
-                "notes # file\n"    +
-                "notes # clear\n"   +
-                "notes # toss/trash/bin\n"  +
-                "notes # delete/remove #\n" +
-                "notes make [the name]\n"   +
-                "notes # write/add <new message>\n"    +
-                "notes # insert # <new message>\n"    +
-                "notes # edit # <new message>\n"   +
-                "notes # lockto [roles, members, or channels]\n"    +
-                "notes # lockout [roles, members,, or channels]\n",
+                        "notes\n"   +
+                        "notes make [the name]\n"   +
+                        "notes #\n" +
+                        "notes # file\n"    +
+                        "notes # clear\n"   +
+                        "notes # toss/trash/bin\n"  +
+                        "notes # delete/remove #\n" +
+                        "notes # write/add <new message>\n"    +
+                        "notes # insert # <new message>\n"    +
+                        "notes # edit # <new message>\n"   +
+                        "notes # lockto [roles, members, or channels]\n"    +
+                        "notes # lockout [roles, members, or channels]\n",
                 true,
                 false,
                 0,
@@ -499,8 +499,8 @@ public class NotePadCommand extends Command {
      * notes # write/add <\the message> <br>
      * notes # insert # <\here the message> <br>
      * notes # edit # <\new message> <br>
-     * notes # lockto [some roles, memebers, or channels]
-     * notes # lockout [some roles, memebers, or channels] TODO add to arg format & Help
+     * notes # lockto [some roles, members, or channels]
+     * notes # lockout [some roles, members, or channels]
      * </code>
      * @param bot
      *         The {@link Weebot} which called this command.
@@ -526,7 +526,6 @@ public class NotePadCommand extends Command {
             out = "Here are the available NotePads:```";
             i = 1;
             for (NotePad n : notes) {
-                //TODO add permission check here
                 if (n.allowedEdit(event)) {
                     out = out.concat(i + ".) " + n.name + "\n");
                 }
