@@ -20,7 +20,7 @@ import com.ampro.weebot.commands.NotePadCommand.NotePad;
 import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
 import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
-        .CardsAgainstHumanity.*;
+        .CardsAgainstHumanity.CAHDeck;
 import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
@@ -63,7 +63,7 @@ public class Weebot implements Comparable<Weebot> {
 
     /** Bot's nickname in hosting guild */
     private String nickname;
-    /** Guils's command string to call the bot */
+    /** Guild's command string to call the bot */
     private String callsign;
     /** Whether the bot is able to use explicit language */
     private boolean explicit;

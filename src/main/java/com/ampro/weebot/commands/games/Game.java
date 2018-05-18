@@ -47,6 +47,7 @@ public abstract class Game<P extends Player> {
         this.RUNNING = false;
         this.PLAYERS = new TreeMap<>();
         this.AUTHOR_ID = author.getIdLong();
+        this.addUser(author);
     }
 
     /**
@@ -62,11 +63,19 @@ public abstract class Game<P extends Player> {
             this.PLAYERS.putIfAbsent(p.getUser().getIdLong(), p);
         }
         this.AUTHOR_ID = author.getIdLong();
+        this.addUser(author);
     }
 
     //Some Very important but vague methods to implement in child.
     protected abstract boolean startGame();
     protected abstract boolean endGame();
+    /**
+     * Add a user to the game, wrapping the {@link User} in a new {@link Player}
+     * implementation.
+     * @param user The user to add.
+     * @return false if the user could not be added.
+     */
+    protected abstract boolean addUser(User user);
 
     /**
      * Add {@code Player} to the {@code Game}.

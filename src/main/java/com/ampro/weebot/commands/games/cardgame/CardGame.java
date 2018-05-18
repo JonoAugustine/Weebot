@@ -33,7 +33,8 @@ public abstract class CardGame<P extends Player>
     }
 
     /**
-     * Adds {@code player} to games and deals them {@code Card}s.
+     * Adds {@code player} to games.
+     * If the game is running they are dealt {@code Card cards}.
      *
      * @param player Player to add
      * @return -1 if player could not be added
@@ -48,7 +49,8 @@ public abstract class CardGame<P extends Player>
             case 0:
                 return 0;
             default:
-                this.dealCards(player);
+                if (this.RUNNING)
+                    this.dealCards(player);
                 return 1;
         }
     }

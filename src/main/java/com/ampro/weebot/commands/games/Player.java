@@ -38,18 +38,16 @@ public abstract class Player {
      * @param message String to send
      */
     private void privateMessage(String message) {
-        this.user.openPrivateChannel().complete()
-                .sendMessage(message).queue();
+        this.user.openPrivateChannel().queue(
+                channel -> channel.sendMessage(message).queue()
+        );
     }
 
     /**
-     * Send a private message to the {@code Player}.
-     * @param message Message to send
+     * Send a private message to the {@link Player}.
+     * @param message The message.
+     * @param consumer Lambda
      */
-    public void privateMessage(Message message) {
-        this.privateMessage(message.getContentRaw());
-    }
-
     public void privateMessage(String message, Consumer<Message> consumer) {
         this.user.openPrivateChannel().queue( privateChannel -> {
            privateChannel.sendMessage(message).queue( m -> {

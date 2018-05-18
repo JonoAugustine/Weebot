@@ -322,4 +322,8 @@ public class BetterMessageEvent extends BetterEvent {
         return this.type;
     }
 
+    /** @return {@link Message#getContentDisplay()} */
+    @Override
+    public String toString() { return this.message.getContentDisplay(); }
+
 }

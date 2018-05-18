@@ -107,6 +107,15 @@ public class SecretePhraseCommand extends Command {
             }
         }
 
+        @Override
+        public final boolean addUser(User user) {
+            if (this.joinGame(new SPPlayer(user)) < 1) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+
         /**
          * Adds {@code player} to games and generates phrases for them.
          *

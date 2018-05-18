@@ -17,13 +17,18 @@ import java.util.Random;
 
 
 /**
- * Run Cards Against Humanity games, TODO and make custom cards.
+ * Run Cards Against Humanity games, TODO and make custom cards. <br>
+ * Users can:<br>
+ *     start a game of CAH <br>
+ *     make custom White Cards <br>
+ *     make custom Black Cards <br>
+ *
  */
 public class CardsAgainstHumanityCommand extends Command {
 
     /**
      * A game of Cards Against Humanity.
-     * TODO How to get a standard list of black and white cards w/o literally writing it
+     * TODO How to load the standard cards from file. Everytime or just on startup?
      * @author Jonathan Augustine
      */
     public static final class CardsAgainstHumanity
@@ -38,19 +43,45 @@ public class CardsAgainstHumanityCommand extends Command {
 
             /**
              * Currently held cards
-             * This is visible to the {2code Player} in their privateChannel
-             * and to the bot. Do not expose this to the guild channel, since that
-             * would show the hand to all members and that's dumb.
+             * This is visible to the {@link Player} in their privateChannel
+             * <emp>Do not expose this to the guild channel, since that
+             * would show the hand to all members and that's dumb.</emp>
              */
             WhiteCard[] hand;
             /** {@link BlackCard BlackCards} won */
             final List<BlackCard> cardsWon;
+
+            Message handMessage;
 
             /** Make new user */
             CAHPlayer(User user) {
                 super(user);
                 this.hand = new WhiteCard[CardsAgainstHumanity.this.HAND_SIZE];
                 this.cardsWon = new ArrayList<>();
+            }
+
+            /**
+             * Send a private message to the player, saving the {@link Message} as
+             * {@link CAHPlayer#handMessage} for later editing.
+             * @param message The message to send.
+             */
+            public final void privateMessage(String message) {
+                super.privateMessage(message, m -> this.handMessage = m);
+            }
+
+            /**
+             * Update the {@link CAHPlayer#handMessage}. If the message cannot be edited,
+             * send a new one with the given message.
+             * @param newMmessage The new Message to update or send.
+             */
+            public final void updateHandMessage(String newMmessage) {
+                try {
+                    this.handMessage.editMessage(newMmessage).queue(
+                            message -> this.handMessage = message
+                    );
+                } catch (Exception e) {
+                    this.privateMessage(newMmessage, m -> this.handMessage = m);
+                }
             }
 
         }
@@ -60,6 +91,7 @@ public class CardsAgainstHumanityCommand extends Command {
          * <br> Can be locked to any number of Roles.
          */
         public static final class CAHDeck {
+
             final String name;
             final List<WhiteCard> whiteCards;
             final List<BlackCard> blackCards;
@@ -72,7 +104,7 @@ public class CardsAgainstHumanityCommand extends Command {
              * @param author The author of the Deck
              */
             public CAHDeck(String name, User author) {
-                this.name = name;
+                this.name = String.join("_", name.split(" "));
                 this.authorID = author.getIdLong();
                 this.whiteCards = new ArrayList<>();
                 this.blackCards = new ArrayList<>();
@@ -154,23 +186,28 @@ public class CardsAgainstHumanityCommand extends Command {
              * Make a new White Card.
              * @param cardText The text of the card
              */
-            WhiteCard(String cardText) {
-                this.cardText = cardText;
-            }
+            WhiteCard(String cardText) { this.cardText = cardText; }
 
+            @Override
+            public String toString() { return this.cardText; }
         }
 
         public static final class BlackCard extends Card {
 
+            /**The maximum number of white cards need to answer this card: {@value}*/
+            private static final int MAX_BLANKS = 5;
+
             /** Content of the card */
             final String cardText;
-            /** The winning {@link WhiteCard} of the round */
-            WhiteCard winningCard;
             /** The number of cards needed to fill in the card.*/
             final int blanks;
+            /** The winning {@link WhiteCard} of the round */
+            WhiteCard winningCard;
 
-            BlackCard(String text, int blanks) {
+            BlackCard(String text, int blanks) throws InvalidCardException {
                 this.cardText = text;
+                if (blanks > MAX_BLANKS)
+                    throw new InvalidCardException("Too many blanks");
                 this.blanks = blanks;
             }
 
@@ -194,12 +231,16 @@ public class CardsAgainstHumanityCommand extends Command {
         Random random = new Random();
         /** The hosting channel */
         private final Channel CHANNEL;
+        /** End after certain # of wins or rounds */
+        private WIN_CONDITION WIN_CONDITION;
+        private GAME_STATE STATE;
         /** The Deck of Cards playing with */
         private final CAHDeck deck;
-        //How many cards per hand?
+        //How many cards per handis?
         private final int HAND_SIZE;
-        //End after certain # of wins or rounds?
-        private WIN_CONDITION WIN_CONDITION;
+
+        /** The current Czar */
+        CAHPlayer czar;
         /** The winners of the game */
         private ArrayList<CAHPlayer> WINNERS;
 
@@ -225,8 +266,8 @@ public class CardsAgainstHumanityCommand extends Command {
          * @param users Users to add to the game
          * @param handSize Number of cards each play holds
          */
-        public CardsAgainstHumanity(Weebot bot, TextChannel channel, User author, int handSize
-                , User...users) {
+        public CardsAgainstHumanity(Weebot bot, TextChannel channel, User author,
+                                    int handSize , User...users) {
             super(bot, author);
             for (User u : users) {
                 this.PLAYERS.putIfAbsent(u.getIdLong(), new CAHPlayer(u));
@@ -236,6 +277,21 @@ public class CardsAgainstHumanityCommand extends Command {
             this.deck = null; //TODO
         }
 
+        /**
+         * Add a user to the game.
+         * @param user The user to add.
+         * @return false if the user is already in the game.
+         */
+        @Override
+        public final boolean addUser(User user) {
+            return this.PLAYERS.putIfAbsent(user.getIdLong(), new CAHPlayer(user)) == null;
+        }
+
+        /**
+         * Deal random {@link WhiteCard whitecards} to the player until
+         * @param player The player to deal cards to.
+         * @return
+         */
         @Override
         protected boolean dealCards(CAHPlayer player) {
             boolean delt = false;
@@ -261,6 +317,11 @@ public class CardsAgainstHumanityCommand extends Command {
             //More conditions for gamestart?
             this.RUNNING = true;
             //Oh yeah we need TODO the actual game
+            //Deal cards
+            for (CAHPlayer p : this.PLAYERS.values())
+                this.dealCards(p);
+            //Set Czar
+            //
             return true;
         }
 
@@ -311,7 +372,7 @@ public class CardsAgainstHumanityCommand extends Command {
         super(
                 "CardsAgainstHumanity",
                 new ArrayList<>(Arrays.asList("cah")),
-                "Start a game of CardsAgainstHumanity",
+                "Start a game of CardsAgainstHumanity or make custom cards.",
                 " ",
                 true,
                 false,
@@ -320,7 +381,16 @@ public class CardsAgainstHumanityCommand extends Command {
         );
     }
 
-    private enum ACTION {START, MAKECARD}
+    private enum ACTION {
+        /**Setup a new game*/
+        SETUP,
+        /**Start the game*/
+        START,
+        /** End the game */
+        END,
+        /**Make a custom white card*/
+        MAKEWHITECARD
+    }
 
     /**
      * Performs a check then runs the command.
@@ -332,7 +402,8 @@ public class CardsAgainstHumanityCommand extends Command {
      */
     @Override
     public void run(Weebot bot, BetterMessageEvent event) {
-
+        if (this.check(event))
+            this.execute(bot, event);
     }
 
     /**
@@ -345,6 +416,23 @@ public class CardsAgainstHumanityCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
+        String[] args = this.cleanArgs(bot, event);
+        String message = event.toString();
+        /*
+        cah setup [hand_size] [win_condition] [deck_name deck2_name...]
+        cah join
+        cah start
+        cah play/use <card_number> [card2_num] [card3_num] [card4_num] [card5_num]
+
+        cah make deck <deck_name>
+        cah make <deck_num> <white[card]> [card text]
+        cah make <deck_num> <black[card]> <blanks> [card text]
+
+        cah showdeck <deck_num> //TODO Probably bes in a private message
+
+        cah remove <deck_num> TODO maybe only on empty decks?
+        cah remove <deck_num> <card_num>
+         */
 
     }
 
@@ -355,8 +443,14 @@ public class CardsAgainstHumanityCommand extends Command {
      */
     private ACTION parseAction(String arg) {
         switch (arg) {
+            case "setup":
+                return ACTION.SETUP;
             case "start":
                 return ACTION.START;
+            case "end":
+            case "stop":
+                return ACTION.END;
+            //TODO: Card and Deck making
             default:
                 return null;
         }
