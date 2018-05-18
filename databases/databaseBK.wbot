@@ -9,13 +9,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 17
+            "day": 18
           },
           "time": {
-            "hour": 1,
-            "minute": 37,
-            "second": 57,
-            "nano": 496000000
+            "hour": 8,
+            "minute": 55,
+            "second": 11,
+            "nano": 130000000
           }
         },
         "offset": {
@@ -40,13 +40,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 17
+            "day": 18
           },
           "time": {
-            "hour": 1,
-            "minute": 37,
-            "second": 57,
-            "nano": 499000000
+            "hour": 8,
+            "minute": 55,
+            "second": 11,
+            "nano": 130000000
           }
         },
         "offset": {
@@ -60,7 +60,7 @@
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
-      "CUSTOM_CAH_CARDS": {},
+      "CUSTOM_CAH_DECKS": {},
       "NOTES": [],
       "spamLimit": 5
     },
@@ -72,13 +72,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 17
+            "day": 18
           },
           "time": {
-            "hour": 1,
-            "minute": 37,
-            "second": 57,
-            "nano": 499000000
+            "hour": 8,
+            "minute": 55,
+            "second": 11,
+            "nano": 130000000
           }
         },
         "offset": {
@@ -92,7 +92,7 @@
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
-      "CUSTOM_CAH_CARDS": {},
+      "CUSTOM_CAH_DECKS": {},
       "NOTES": [],
       "spamLimit": 5
     }

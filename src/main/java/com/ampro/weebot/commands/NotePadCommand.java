@@ -790,6 +790,11 @@ public class NotePadCommand extends Command {
 
     }
 
+    /**
+     * Make a file out of a notepad.
+     * @param pad The notepad
+     * @return A file of the notepad. Null if an err occurrs.
+     */
     private static File makeNotePadFile(NotePad pad) {
         File file = new File(Launcher.TEMP_OUT, pad.name + " NotePad.txt");
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {

@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.commands.games.cardgame;
 
+import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
@@ -14,8 +15,11 @@ import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.*;
 
 import javax.naming.InvalidNameException;
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -132,7 +136,7 @@ public class CardsAgainstHumanityCommand extends Command {
             }
 
             public CAHDeck() {
-                this.name = null;
+                this.name = "Default";
                 this.authorID = 0;
                 this.whiteCards = new ArrayList<>();
                 this.blackCards = new ArrayList<>();
@@ -147,42 +151,67 @@ public class CardsAgainstHumanityCommand extends Command {
                 //Load white cards
                 Scanner scanner;
                 try {
-                    scanner = new Scanner(WhiteCard.WC_STD);
+                    Files.readAllLines(WhiteCard.WC_STD.toPath())
+                         .iterator().forEachRemaining(
+                            line -> this.whiteCards.add(new WhiteCard(line))
+                    );
+
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
-                }
-                while (scanner.hasNext()) {
-                    this.whiteCards.add(new WhiteCard(scanner.nextLine()));
                 }
 
                 //Load black cards
                 try {
-                    scanner = new Scanner(BlackCard.BC_STD);
+                    Files.readAllLines(BlackCard.BC_STD.toPath()).iterator()
+                         .forEachRemaining( line -> {
+                             int blanks;
+                             if (line.startsWith("(Pick 2)")) {
+                                 blanks = 2;
+                                 line = line.substring("(Pick 2)".length());
+                             } else if (line.startsWith("(Pick 3)")) {
+                                 blanks = 3;
+                                 line = line.substring("(Pick 3)".length());
+                             } else {
+                                 blanks = 1;
+                             }
+                             try {
+                                 this.blackCards.add(new BlackCard(line, blanks));
+                             } catch (Card.InvalidCardException e){
+                                 //This should not happen since we are loading from pre-made so
+                                 //ignore
+                             }
+                         });
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
                 }
-                while (scanner.hasNext()) {
-                    String text = scanner.nextLine();
-                    int blanks;
-                    if (text.startsWith("(Pick 2)")) {
-                        blanks = 2;
-                        text = text.substring("(Pick 2)".length());
-                    } else if (text.startsWith("(Pick 3)")) {
-                        blanks = 3;
-                        text = text.substring("(Pick 3)".length());
-                    } else {
-                        blanks = 1;
-                    }
-                    try {
-                        this.blackCards.add(new BlackCard(text, blanks));
-                    } catch (Card.InvalidCardException e){
-                        //This should not happen since we are loading from pre-made so
-                        //ignore
-                    }
-                }
+
                 return true;
+            }
+
+            private File toFile() {
+                File file = new File(Launcher.TEMP_OUT,
+                                     this.name.replace("_", " ") + " Deck.txt"
+                );
+                try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("White Cards\n\n");
+                    int i = 0;
+                    for (WhiteCard wc : whiteCards) {
+                        sb.append(++i + ".) " + wc + "\n\n");
+                    }
+                    i = 0;
+                    sb.append("\n\nBlack Cards\n\n");
+                    for (BlackCard bc : blackCards) {
+                        sb.append(++i + ".) " + bc + "\n\n");
+                    }
+                    bw.write(sb.toString());
+                    return file;
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return null;
+                }
             }
 
             /**
@@ -255,7 +284,7 @@ public class CardsAgainstHumanityCommand extends Command {
         public static final class WhiteCard extends Card {
 
             /** The file of the standard white cards */
-            static final File WC_STD = new File("res/CAH/CAH_WHITE_CARDS");
+            static final File WC_STD = new File("res/CAH/CAH_WHITE_CARDS.card");
 
             /** Content of the card */
             final String cardText;
@@ -273,7 +302,7 @@ public class CardsAgainstHumanityCommand extends Command {
         public static final class BlackCard extends Card {
 
             /** The file of the standard black cards */
-            static final File BC_STD = new File("res/CAH/CAH_BLACK_CARDS");
+            static final File BC_STD = new File("res/CAH/CAH_BLACK_CARDS.card");
 
             /**The maximum number of white cards need to answer this card: {@value}*/
             private static final int MAX_BLANKS = 5;
@@ -295,6 +324,9 @@ public class CardsAgainstHumanityCommand extends Command {
             void setWinningCard(WhiteCard winningCard) {
                 this.winningCard = winningCard;
             }
+
+            @Override
+            public String toString() { return this.cardText; }
 
         }
 
@@ -449,6 +481,10 @@ public class CardsAgainstHumanityCommand extends Command {
         START,
         /** End the game */
         END,
+        /** View list of all decks */
+        VIEWALLDECKS,
+        /** View all cards in a deck */
+        DECKFILE,
         /**Make a custom white card*/
         MAKEWHITECARD,
         /**Make a custom black card*/
@@ -479,6 +515,7 @@ public class CardsAgainstHumanityCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
+        StringBuilder sb = new StringBuilder();
         String[] args = this.cleanArgs(bot, event);
         if (args.length < 2) {
             //TODO help
@@ -513,8 +550,8 @@ public class CardsAgainstHumanityCommand extends Command {
         cah make <deck_num> <white[card]> [card text]
         cah make <deck_num> <black[card]> <blanks> [card text]
 
-        cah showdeck <deck_num> //TODO Probably best in a private message
-        cah deckfile <deck_num>
+        cah showdeck <deck_name> //TODO Probably best in a private message
+        cah deckfile <deck_name>
 
         cah remove <deck_num> TODO maybe only on empty decks?
         cah remove <deck_num> <card_num>
@@ -583,6 +620,26 @@ public class CardsAgainstHumanityCommand extends Command {
                 }
                 return;
             case END:
+            case VIEWALLDECKS:
+            case DECKFILE:
+                CAHDeck deck;
+                List<WhiteCard> whiteCards;
+                List<BlackCard> blackCards;
+                try {
+                    synchronized (bot) {
+                        deck = bot.getCustomCahDeck(args[2]);
+                    }
+                    if (deck == null) throw new NullPointerException();
+                } catch (IndexOutOfBoundsException | NullPointerException e) {
+                    deck = new CAHDeck();
+                    deck.loadStandardCards();
+                }
+                File file = deck.toFile();
+                if (file != null) {
+                    event.privateReply(file, file.getName(), f -> f.deleteOnExit());
+                } else
+                    event.reply("Sorry, something went wrong...");
+                return;
             case MAKEBLACKCARD:
             case MAKEWHITECARD:
         }
@@ -603,6 +660,11 @@ public class CardsAgainstHumanityCommand extends Command {
             case "end":
             case "stop":
                 return ACTION.END;
+            case "alldecks":
+                return ACTION.VIEWALLDECKS;
+            case "deckfile":
+                return ACTION.DECKFILE;
+            case "make":
             //TODO: Card and Deck making
             default:
                 return null;
