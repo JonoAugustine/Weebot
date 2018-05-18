@@ -35,24 +35,16 @@ public abstract class CardGame<P extends Player>
     /**
      * Adds {@code player} to games.
      * If the game is running they are dealt {@code Card cards}.
-     *
-     * @param player Player to add
-     * @return -1 if player could not be added
-     *          0 if player is already in Game
-     *          1 if player was added
      */
     @Override
-    protected int joinGame(P player) {
-        switch(super.joinGame(player)) {
-            case -1:
-                return -1;
-            case 0:
-                return 0;
-            default:
-                if (this.RUNNING)
-                    this.dealCards(player);
-                return 1;
-        }
+    protected boolean joinGame(P player) {
+        if (super.joinGame(player)) {
+            if (this.RUNNING) {
+                this.dealCards(player);
+            }
+            return true;
+        } else
+            return false;
     }
 
     /**

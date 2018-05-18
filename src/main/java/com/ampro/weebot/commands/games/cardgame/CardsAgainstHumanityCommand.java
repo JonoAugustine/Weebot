@@ -374,8 +374,12 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         public final boolean addUser(Member member) {
-            return this.PLAYERS.putIfAbsent(member.getUser().getIdLong(),
-                                     new CAHPlayer(member)) == null;
+            if (this.RUNNING) {
+                return this.joinGame(new CAHPlayer(member));
+            } else {
+                return this.PLAYERS.putIfAbsent(member.getUser().getIdLong(),
+                                                new CAHPlayer(member)) == null;
+            }
         }
 
         @Override
@@ -479,6 +483,8 @@ public class CardsAgainstHumanityCommand extends Command {
         SETUP,
         /**Start the game*/
         START,
+        /** Join the game */
+        JOIN,
         /** End the game */
         END,
         /** View list of all decks */
@@ -550,8 +556,8 @@ public class CardsAgainstHumanityCommand extends Command {
         cah make <deck_num> <white[card]> [card text]
         cah make <deck_num> <black[card]> <blanks> [card text]
 
-        cah showdeck <deck_name> //TODO Probably best in a private message
-        cah deckfile <deck_name>
+        cah showdeck [deck_name] //TODO Probably best in a private message
+        cah deckfile [deck_name]
 
         cah remove <deck_num> TODO maybe only on empty decks?
         cah remove <deck_num> <card_num>
@@ -619,6 +625,29 @@ public class CardsAgainstHumanityCommand extends Command {
                                 + "\n to setup a new game.");
                 }
                 return;
+            case JOIN:
+                if (game != null) {
+                    if (!game.isRunning()) {
+                        game.addUser(event.getMember());
+                    } else {
+                        if (game.addUser(event.getMember())) {
+                            event.reply("You've been added to the game!");
+                        } else {
+                            event.reply("You're already in the game.", m -> {
+                                try {Thread.sleep(10*1000);}
+                                catch (InterruptedException e){}
+                                m.delete();
+                                event.deleteMessage();
+                            });
+                        }
+                    }
+                } else {
+                    event.reply("There is no Cards Against Humanity game setup or "
+                                + "running! Use ```"
+                                + "cah setup [hand_size] [deck_name] [deck2_name]...```"
+                                + "\n to setup a new game.");
+                }
+                return;
             case END:
             case VIEWALLDECKS:
             case DECKFILE:
@@ -657,6 +686,8 @@ public class CardsAgainstHumanityCommand extends Command {
                 return ACTION.SETUP;
             case "start":
                 return ACTION.START;
+            case "join":
+                return ACTION.JOIN;
             case "end":
             case "stop":
                 return ACTION.END;

@@ -82,18 +82,12 @@ public abstract class Game<P extends Player> {
      * This method only attempts to add the player, any more action
      * should be implemented in a class-specific implementation.
      * @param player The player to add
-     * @return -1 if player could not be added. <br>
-     *          0 if player is already in the Game. <br>
-     *          1 if player was added to the Game.
+     * @return  false if player is already in the Game. <br>
+     *          true if player was added to the Game.
      */
-    protected int joinGame(P player) {
-        if (false /** What should deny joining? */)
-            return -1;
-        if (this.PLAYERS.containsValue(player))
-            return 0;
-        else
-            return this.PLAYERS.putIfAbsent(player.getUser().getIdLong(), player) == null
-                   ? 1 : -1;
+    protected boolean joinGame(P player) {
+        return this.PLAYERS.putIfAbsent(player.getUser().getIdLong(), player) == null
+                   ? true : false;
     }
 
     /** Is the game ongoing? */
