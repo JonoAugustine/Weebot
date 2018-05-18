@@ -44,8 +44,12 @@ import java.util.*;
  */
 public class Launcher {
 
+	public static final File TEMP_OUT = new File("temp/out");
+	public static final File TEMP_IN = new File("temp/in");
+
 	private static JDA JDA_CLIENT;
 	private static Thread saveTimer;
+
 
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
@@ -70,7 +74,7 @@ public class Launcher {
 		Launcher.jdaLogIn();
 		//Launcher.jdaDevLogIn();
 		Launcher.setUpDatabase();
-		Launcher.setUpDirStructure();
+		Launcher.setUpTempDir();
 		Launcher.updateWeebots();
 
 		Collection c = DATABASE.getWeebots().values();
@@ -162,9 +166,9 @@ public class Launcher {
 		DatabaseManager.backUp(Launcher.DATABASE);
 	}
 
-	private static void setUpDirStructure() {
-        new File("/temp/out").mkdirs();
-        new File("/temp/in").mkdirs();
+	private static void setUpTempDir() {
+        new File("temp/out").mkdirs();
+        new File("temp/in").mkdirs();
     }
 
 	/**

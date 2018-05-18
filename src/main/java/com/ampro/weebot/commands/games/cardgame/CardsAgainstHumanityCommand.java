@@ -119,7 +119,7 @@ public class CardsAgainstHumanityCommand extends Command {
                 } catch (NumberFormatException e) {
                     if (name.equalsIgnoreCase("win") || name.equalsIgnoreCase("rounds"))
                         throw new InvalidNameException("Name cannot be reserved word");
-                    this.name = String.join("_", name.split(" "));
+                    this.name = String.join("_", name.split("\\s+", -1));
                 }
                 this.authorID = author.getIdLong();
                 this.whiteCards = new ArrayList<>();
@@ -154,7 +154,7 @@ public class CardsAgainstHumanityCommand extends Command {
 
                 //Load black cards
                 try {
-                    scanner = new Scanner(new File("/res/CAH/CAH_BLCK_CARDS"));
+                    scanner = new Scanner(new File("/res/CAH/CAH_BLACK_CARDS"));
                 } catch (IOException e) {
                     e.printStackTrace();
                     return false;
@@ -447,6 +447,10 @@ public class CardsAgainstHumanityCommand extends Command {
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
         String[] args = this.cleanArgs(bot, event);
+        if (args.length < 2) {
+            //TODO help
+            return;
+        }
         String message = event.toString();
         TextChannel channel = event.getTextChannel();
         ACTION action = this.parseAction(args[1]);
@@ -489,7 +493,7 @@ public class CardsAgainstHumanityCommand extends Command {
                     int hs = 5;
                     int deckIndex = 2;
                     try { hs = Integer.parseInt(args[2]); deckIndex++; }
-                    catch (NumberFormatException e) {}
+                    catch (NumberFormatException | IndexOutOfBoundsException e) {}
                     List<CAHDeck> decks = new ArrayList<>();
                     StringBuilder badDeckNames = new StringBuilder();
                     synchronized (bot) {
@@ -515,6 +519,9 @@ public class CardsAgainstHumanityCommand extends Command {
                     game = new CardsAgainstHumanity(bot, channel, event.getAuthor(),
                                                     hs, cahDeck);
                     bot.addRunningGame(game);
+                    event.reply("A new game of Cards Against "
+                                + event.getGuild().getName() + " has been setup!"
+                                + " Use ```cah join```\nto join the game.");
                 } else {
                     event.reply("There is already a game of Cards Against Humanity "
                                 + "being played in this text channel. Please end that "
@@ -523,6 +530,15 @@ public class CardsAgainstHumanityCommand extends Command {
                 }
                 return;
             case START:
+                if (game != null) {
+
+                } else {
+                    event.reply("There is no Cards Against Humanity game setup!"
+                                + " Use ```"
+                                + "cah setup [hand_size] [deck_name] [deck2_name]...```"
+                                + "\n to setup a new game.");
+                }
+                return;
             case END:
             case MAKEBLACKCARD:
             case MAKEWHITECARD:

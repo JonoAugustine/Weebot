@@ -13,6 +13,8 @@ import java.io.*;
  */
 public class DatabaseManager {
 
+    private static final File DIR = new File("databases");
+
     /**
      * Save the Database to file in the format:
      * <code>database.wbot</code>
@@ -20,15 +22,20 @@ public class DatabaseManager {
      *          -1 if the en error occurred.
      */
     public static synchronized int save(Database database) {
-        File file = new File("database.wbot");
+        File file = new File(DIR, "database.wbot");
         try {
-            file.createNewFile();
+            if (!DIR.mkdir()) {
+                System.err.println("\tDirectory not created.");
+            }
+            if (!file.createNewFile()) {
+                System.err.println("\tFile not created");
+            }
         } catch (IOException e) {
             System.err.println("IOException while creating Database file.");
             e.printStackTrace();
             return -1;
         }
-        try (Writer writer = new FileWriter("database.wbot")) {
+        try (Writer writer = new FileWriter(file)) {
             Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setExclusionStrategies().setPrettyPrinting().create();
 
             gson.toJson(database, writer);
@@ -47,16 +54,20 @@ public class DatabaseManager {
 
 
     public static synchronized int backUp(Database database) {
-
-        File file = new File("databaseBK.wbot");
+        File file = new File(DIR, "databaseBK.wbot");
         try {
-            file.createNewFile();
+            if (!DIR.mkdir()) {
+                System.err.println("\tDirectory not created.");
+            }
+            if (!file.createNewFile()) {
+                System.err.println("\tFile not created");
+            }
         } catch (IOException e) {
             System.err.println("IOException while creating Database backup file.");
             e.printStackTrace();
             return -1;
         }
-        try (Writer writer = new FileWriter("databaseBK.wbot")) {
+        try (Writer writer = new FileWriter(file)) {
             Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setExclusionStrategies().setPrettyPrinting().create();
 
             gson.toJson(database, writer);
@@ -82,7 +93,7 @@ public class DatabaseManager {
         Gson gson = new GsonBuilder().create();
         Database out = null;
         Database bk = null;
-        try (Reader reader = new FileReader("database.wbot")) {
+        try (Reader reader = new FileReader(new File(DIR, "database.wbot"))) {
             out = gson.fromJson(reader, Database.class);
         } catch (FileNotFoundException e) {
             System.err.println(
@@ -94,7 +105,7 @@ public class DatabaseManager {
             e.printStackTrace();
             return null;
         }
-        try (Reader bKreader = new FileReader("databaseBK.wbot")) {
+        try (Reader bKreader = new FileReader("/database/databaseBK.wbot")) {
              bk = gson.fromJson(bKreader, Database.class);
         } catch (FileNotFoundException e) {
             System.err.println("\tUnable to locate databseBK.wbot.");

@@ -176,14 +176,15 @@ public abstract class Command {
 
     /**
      * Checks for the Command with the given
-     * {@link com.ampro.main.listener.events.BetterMessageEvent} and
-     * {@link com.ampro.main.entities.bot.Weebot Weebot} that called it.
+     * {@link com.ampro.weebot.listener.events.BetterMessageEvent} and
+     * {@link com.ampro.weebot.entities.bot.Weebot Weebot} that called it.
      * <br>Will terminate and possibly respond with a failure message if any checks fail.
      *
      * @param  event
      *         The BetterMessageEvent passed to the command.
      */
     protected boolean check(BetterMessageEvent event) {
+        if (event.getType() != BetterMessageEvent.TYPE.RECIVED) return false;
 
         // child check
         //if(event.getArgs().length != 0) {

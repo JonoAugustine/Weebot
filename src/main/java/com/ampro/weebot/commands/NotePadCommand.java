@@ -268,7 +268,7 @@ public class NotePadCommand extends Command {
          * @param authorID
          */
         public NotePad(String name, long authorID) throws InvalidNameException {
-            this.name = String.join("_", name.split(" "));
+            this.name = String.join("_", name.split("\\s+", -1));
             this.authorID = authorID;
             if (!isOk(this.name)) throw new InvalidNameException();
             this.notes = new ArrayList<>();
@@ -290,7 +290,7 @@ public class NotePadCommand extends Command {
         public NotePad(User author, String name, long authorID, String... notes) throws
                 InvalidNameException {
             this.creationTime = OffsetDateTime.now();
-            this.name = String.join("_", name.split(" "));
+            this.name = String.join("_", name.split("\\s+", -1));
             this.authorID = authorID;
             if (!isOk(this.name)) throw new InvalidNameException();
             this.notes = new ArrayList<>();
@@ -311,7 +311,7 @@ public class NotePadCommand extends Command {
          */
         public NotePad(String name, Collection<String> notes, User author, long authorID) throws
                 InvalidNameException {
-            this.name = String.join("_", name.split(" "));
+            this.name = String.join("_", name.split("\\s+", -1));
             this.authorID = authorID;
             if (!isOk(this.name)) throw new InvalidNameException();
             this.notes = new ArrayList<>();
@@ -791,8 +791,8 @@ public class NotePadCommand extends Command {
     }
 
     private static File makeNotePadFile(NotePad pad) {
-        String name = "/temp/out/" + pad.name + " NotePad.txt";
-        try (BufferedWriter bw = new BufferedWriter(new FileWriter(name))) {
+        File file = new File(Launcher.TEMP_OUT, pad.name + " NotePad.txt");
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
             String out = pad.name + "\n\n";
             int i = 1;
             for (NotePad.Note n : pad) {
@@ -806,9 +806,8 @@ public class NotePadCommand extends Command {
             }
 
             bw.write(out);
-            return new File(name);
+            return file;
         } catch (IOException e) {
-
             e.printStackTrace();
             return null;
         }
