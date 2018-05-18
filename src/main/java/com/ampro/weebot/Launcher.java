@@ -220,7 +220,7 @@ public class Launcher {
 	 */
 	private static void clearTempDirs() {
 		try {
-			FileUtils.cleanDirectory(new File("/temp"));
+			FileUtils.cleanDirectory(new File("temp"));
 		} catch (IOException e) {
 			System.err.println("Failed clear temp dir.");
 		}
