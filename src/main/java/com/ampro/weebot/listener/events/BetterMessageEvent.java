@@ -73,7 +73,7 @@ public class BetterMessageEvent extends BetterEvent {
             throw new InvalidAuthorException("User is self.");
         }
 
-        this.arguments = message.getContentStripped().trim().split(" ");
+        this.arguments = message.getContentStripped().trim().split("\\s+", -1);
 
         if (event instanceof MessageDeleteEvent) {
             this.type = TYPE.DELETED;
@@ -109,7 +109,7 @@ public class BetterMessageEvent extends BetterEvent {
 
         this.messageEvent = event;
 
-        this.arguments = message.getContentStripped().trim().split(" ");
+        this.arguments = message.getContentStripped().trim().split("\\s+", -1);
 
         if (event instanceof MessageDeleteEvent) {
             this.type = TYPE.DELETED;
