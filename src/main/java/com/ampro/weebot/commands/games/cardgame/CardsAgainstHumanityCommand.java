@@ -5,15 +5,19 @@
 package com.ampro.weebot.commands.games.cardgame;
 
 import com.ampro.weebot.commands.Command;
+import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
+import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
+        .CardsAgainstHumanity.*;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.*;
 
+import javax.naming.InvalidNameException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
@@ -22,6 +26,7 @@ import java.util.Random;
  *     start a game of CAH <br>
  *     make custom White Cards <br>
  *     make custom Black Cards <br>
+ *     TODO play against the bot
  *
  */
 public class CardsAgainstHumanityCommand extends Command {
@@ -103,8 +108,15 @@ public class CardsAgainstHumanityCommand extends Command {
              * @param name Name of the deck
              * @param author The author of the Deck
              */
-            public CAHDeck(String name, User author) {
-                this.name = String.join("_", name.split(" "));
+            public CAHDeck(String name, User author) throws InvalidNameException {
+                try {
+                    Integer.parseInt(name);
+                    throw new InvalidNameException("Name cannot be a number.");
+                } catch (NumberFormatException e) {
+                    if (name.equalsIgnoreCase("win") || name.equalsIgnoreCase("rounds"))
+                        throw new InvalidNameException("Name cannot be reserved word");
+                    this.name = String.join("_", name.split(" "));
+                }
                 this.authorID = author.getIdLong();
                 this.whiteCards = new ArrayList<>();
                 this.blackCards = new ArrayList<>();
@@ -228,9 +240,8 @@ public class CardsAgainstHumanityCommand extends Command {
 
         private static final int MIN_PLAYERS = 3;
 
-        Random random = new Random();
         /** The hosting channel */
-        private final Channel CHANNEL;
+        private final long channelID;
         /** End after certain # of wins or rounds */
         private WIN_CONDITION WIN_CONDITION;
         private GAME_STATE STATE;
@@ -254,25 +265,7 @@ public class CardsAgainstHumanityCommand extends Command {
                                     int handSize) {
             super(bot, author);
             this.PLAYERS.putIfAbsent(AUTHOR_ID, new CAHPlayer(author));
-            this.CHANNEL = channel;
-            this.HAND_SIZE = handSize;
-            this.deck = null; //TODO
-        }
-
-        /**
-         * Initialize a new CardsAgainstHumanity game.
-         * @param bot Weebot hosting the game
-         * @param channel TextChannel to play the game in
-         * @param users Users to add to the game
-         * @param handSize Number of cards each play holds
-         */
-        public CardsAgainstHumanity(Weebot bot, TextChannel channel, User author,
-                                    int handSize , User...users) {
-            super(bot, author);
-            for (User u : users) {
-                this.PLAYERS.putIfAbsent(u.getIdLong(), new CAHPlayer(u));
-            }
-            this.CHANNEL = channel;
+            this.channelID = channel.getIdLong();
             this.HAND_SIZE = handSize;
             this.deck = null; //TODO
         }
@@ -297,7 +290,8 @@ public class CardsAgainstHumanityCommand extends Command {
             boolean delt = false;
             for (WhiteCard c : player.hand) {
                 if (c == null) {
-                    c = deck.whiteCards.get(random.nextInt(deck.whiteCards.size()));
+                    c = deck.whiteCards.get(ThreadLocalRandom
+                                            .current().nextInt(deck.whiteCards.size()));
                     delt = true;
                 }
             }
@@ -321,7 +315,9 @@ public class CardsAgainstHumanityCommand extends Command {
             for (CAHPlayer p : this.PLAYERS.values())
                 this.dealCards(p);
             //Set Czar
-            //
+            CAHPlayer[] ar = this.PLAYERS.values().toArray(new CAHPlayer[0]);
+            this.czar = ar[ThreadLocalRandom.current().nextInt(0, ar.length + 1)];
+            this.STATE = GAME_STATE.CHOOSING;
             return true;
         }
 
@@ -364,8 +360,6 @@ public class CardsAgainstHumanityCommand extends Command {
             return prev;
         }
 
-
-
     }
 
     public CardsAgainstHumanityCommand() {
@@ -373,7 +367,7 @@ public class CardsAgainstHumanityCommand extends Command {
                 "CardsAgainstHumanity",
                 new ArrayList<>(Arrays.asList("cah")),
                 "Start a game of CardsAgainstHumanity or make custom cards.",
-                " ",
+                " ", //TODO ArgFormat
                 true,
                 false,
                 0,
@@ -389,7 +383,9 @@ public class CardsAgainstHumanityCommand extends Command {
         /** End the game */
         END,
         /**Make a custom white card*/
-        MAKEWHITECARD
+        MAKEWHITECARD,
+        /**Make a custom black card*/
+        MAKEBLACKCARD
     }
 
     /**
@@ -418,8 +414,26 @@ public class CardsAgainstHumanityCommand extends Command {
     protected void execute(Weebot bot, BetterMessageEvent event) {
         String[] args = this.cleanArgs(bot, event);
         String message = event.toString();
+        TextChannel channel = event.getTextChannel();
+        ACTION action = this.parseAction(args[1]);
+        if (action == null) {
+            event.reply("Sorry, '" + args[1] + "' is not an available command.");
+            //TODO Better help
+            return;
+        }
+        //Attempt to find a running game in this channel
+        CardsAgainstHumanity game = null;
+        for (Game g : bot.getRunningGames()) {
+            if (g instanceof CardsAgainstHumanity) {
+                if (((CardsAgainstHumanity) g).channelID == channel.getIdLong()) {
+                    game = (CardsAgainstHumanity) g;
+                    break;
+                }
+            }
+        }
+
         /*
-        cah setup [hand_size] [win_condition] [deck_name deck2_name...]
+        cah setup [hand_size] [win_condition] [deck_name] [deck2_name]...
         cah join
         cah start
         cah play/use <card_number> [card2_num] [card3_num] [card4_num] [card5_num]
@@ -428,11 +442,42 @@ public class CardsAgainstHumanityCommand extends Command {
         cah make <deck_num> <white[card]> [card text]
         cah make <deck_num> <black[card]> <blanks> [card text]
 
-        cah showdeck <deck_num> //TODO Probably bes in a private message
+        cah showdeck <deck_num> //TODO Probably best in a private message
+        cah deckfile <deck_num>
 
         cah remove <deck_num> TODO maybe only on empty decks?
         cah remove <deck_num> <card_num>
          */
+
+        switch (action) {
+            case SETUP:
+                if (game == null) {
+                    int hs = 5;
+                    WIN_CONDITION win = null;
+                    try {
+                        hs = Integer.parseInt(args[2]);
+                        win = this.parseWinCondition(args[3]);
+                    }
+                    catch (NumberFormatException e) {
+                        win = this.parseWinCondition(args[2]);
+                    } finally {
+                        if (win == null)
+                            win = WIN_CONDITION.WINS;
+                    }
+                    game = new CardsAgainstHumanity(bot, channel, event.getAuthor(), hs);
+
+                } else {
+                    event.reply("There is already a game of Cards Against Humanity "
+                                + "being played in this text channel. Please end that "
+                                + "game before starting a new one, or setup a new game "
+                                + "in a different text channel.");
+                }
+                return;
+            case START:
+            case END:
+            case MAKEBLACKCARD:
+            case MAKEWHITECARD:
+        }
 
     }
 
@@ -442,7 +487,7 @@ public class CardsAgainstHumanityCommand extends Command {
      * @return The action parsed or null if no action was found.
      */
     private ACTION parseAction(String arg) {
-        switch (arg) {
+        switch (arg.toLowerCase()) {
             case "setup":
                 return ACTION.SETUP;
             case "start":
@@ -451,6 +496,22 @@ public class CardsAgainstHumanityCommand extends Command {
             case "stop":
                 return ACTION.END;
             //TODO: Card and Deck making
+            default:
+                return null;
+        }
+    }
+
+    /**
+     * Parse a {@link WIN_CONDITION win condition} from a string.
+     * @param arg The string to parse from.
+     * @return The parsed win condition or null if one was not found.
+     */
+    private final WIN_CONDITION parseWinCondition(String arg) {
+        switch (arg.toLowerCase()) {
+            case "wins":
+                return WIN_CONDITION.WINS;
+            case "rounds":
+                return WIN_CONDITION.ROUNDS;
             default:
                 return null;
         }

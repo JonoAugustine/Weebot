@@ -396,7 +396,7 @@ public class Weebot implements Comparable<Weebot> {
      * @return A list of {@link Game} instances currently
      *              being run by the bot.
      */
-    public List<Game<? extends Player>> getGAMES_RUNNING() {
+    public List<Game<? extends Player>> getRunningGames() {
         return this.GAMES_RUNNING;
     }
 
