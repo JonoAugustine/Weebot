@@ -234,19 +234,60 @@ public class BetterMessageEvent extends BetterEvent {
 
     /**
      * Send a private message to the author of the event.
-     * @param message {@link Message} to send
+     * @param message Message string.
+     * @param consumer Consumer lambda
      */
-    public void privateReply(Message message) {
+    public void privateReply(String message, Consumer<Message> consumer) {
         switch (this.messageEvent.getChannelType()) {
             case TEXT:
-                this.author.openPrivateChannel().queue(c ->
-                    c.sendMessage(message).queue()
+                this.author.openPrivateChannel().queue(
+                        (channel) -> channel.sendMessage(message).queue(
+                                m -> consumer.accept(m)
+                        )
                 );
                 return;
             default:
-                this.reply(message);
+                this.reply(message, consumer);
                 break;
         }
+    }
+
+    /**
+     * Send a file in a private channel.
+     * @param file The file to send
+     * @param filename The name of the file.
+     */
+    public void privateReply(File file, String filename) {
+        switch (this.messageEvent.getChannelType()) {
+            case TEXT:
+                this.author.openPrivateChannel().queue(
+                        (channel) -> channel.sendFile(file, filename).queue()
+                );
+                return;
+            default:
+                this.reply(file, filename);
+                break;
+        }
+    }
+
+    /**
+     * Send a file in a private channel.
+     * @param file
+     * @param filename
+     * @param consumer
+     */
+    public void privateReply(File file, String filename, Consumer<File> consumer) {
+        switch (this.messageEvent.getChannelType()) {
+            case TEXT:
+                this.author.openPrivateChannel().queue(
+                        (channel) -> channel.sendFile(file, filename).queue()
+                );
+                return;
+            default:
+                this.reply(file, filename, consumer);
+                break;
+        }
+        synchronized (file) { consumer.accept(file); }
     }
 
     /** Delete the message. */
