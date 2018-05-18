@@ -636,7 +636,7 @@ public class CardsAgainstHumanityCommand extends Command {
                             event.reply("You're already in the game.", m -> {
                                 try {Thread.sleep(10*1000);}
                                 catch (InterruptedException e){}
-                                m.delete();
+                                m.delete().queue();
                                 event.deleteMessage();
                             });
                         }

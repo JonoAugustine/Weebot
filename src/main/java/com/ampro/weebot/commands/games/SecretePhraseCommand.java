@@ -109,11 +109,7 @@ public class SecretePhraseCommand extends Command {
 
         @Override
         public final boolean addUser(User user) {
-            if (this.joinGame(new SPPlayer(user)) < 1) {
-                return false;
-            } else {
-                return true;
-            }
+            return this.joinGame(new SPPlayer(user));
         }
 
         /**
@@ -125,17 +121,13 @@ public class SecretePhraseCommand extends Command {
          * @return -1 if player could not be added 0 if player is already in Game 1 if player was added
          */
         @Override
-        protected int joinGame(SPPlayer player) {
-            switch (super.joinGame(player)) {
-                case -1:
-                    return -1;
-                case 0:
-                    return 0;
-                default:
-                    //TODO Variable Phrase number
-                    player.unusedPhrases.addAll(Arrays.asList(this.generatePhrases(5)));
-                    return 1;
-            }
+        protected boolean joinGame(SPPlayer player) {
+            if (super.joinGame(player)) {
+                //TODO Variable Phrase number
+                player.unusedPhrases.addAll(Arrays.asList(this.generatePhrases(5)));
+                return true;
+            } else
+                return false;
         }
 
         @Override
@@ -296,8 +288,7 @@ public class SecretePhraseCommand extends Command {
                 } else {
                     SecretePhrase.SPPlayer player =
                                 new SecretePhrase.SPPlayer(event.getAuthor());
-                    int j = game.joinGame(player);
-                    if (j == 1) {
+                    if (game.joinGame(player)) {
                         event.reply("@" + event.getMember().getEffectiveName()
                                 + " has joined the Secrete Phrase game! Check your"
                                 + " direct messages to see your secrete phrases.");
@@ -308,11 +299,8 @@ public class SecretePhraseCommand extends Command {
                         }
                         event.privateReply("```Secrete Phrases Game in "
                                 + event.getGuild().getName() + ":\n" + out + "```");
-                    } else if (j == 0) {
-                        event.reply("You are already in the Secrete Phrase game!");
-                        return;
                     } else {
-                        event.reply("An Err occurred, try again.");
+                        event.reply("You are already in the Secrete Phrase game!");
                         return;
                     }
                 }
