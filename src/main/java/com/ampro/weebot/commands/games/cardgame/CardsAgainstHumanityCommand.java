@@ -337,7 +337,7 @@ public class CardsAgainstHumanityCommand extends Command {
             READING
         }
 
-        private static final int MIN_PLAYERS = 3;
+        private static final int MIN_PLAYERS = 1;
 
         /** The hosting channel */
         private final TextChannel channel;
@@ -437,9 +437,10 @@ public class CardsAgainstHumanityCommand extends Command {
             } else if (player == this.czar) {
                 return -2;
             }
+            player.playedCards = new WhiteCard[cards.length];
             int i = 0;
             for (Integer c : cards) {
-                player.playedCards[i] = player.hand[c];
+                player.playedCards[i++] = player.hand[c];
                 player.hand[c] = null;
             }
             return 0;
@@ -752,11 +753,11 @@ public class CardsAgainstHumanityCommand extends Command {
                         return;
                     }
                     //Check for minimum number of cards
-                    if(args.length < 2 + game.blackCard.blanks) {
+                    if(args.length >= 2 + game.blackCard.blanks) {
                         int[] cards = new int[game.blackCard.blanks];
                         try {
                             for (int i = 2; i < args.length; i++) {
-                                cards[i - 2] = Integer.parseInt(args[i]);
+                                cards[i - 2] = Integer.parseInt(args[i]) - 1;
                             }
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
@@ -773,7 +774,7 @@ public class CardsAgainstHumanityCommand extends Command {
                             case 0:
                                 event.reply("*Personally, I hope you win.*", m -> {
                                     try {
-                                        Thread.sleep(10 * 1000);
+                                        Thread.sleep(3 * 1000);
                                     } catch (InterruptedException e) {
                                     }
                                     m.delete().queue();
@@ -846,7 +847,8 @@ public class CardsAgainstHumanityCommand extends Command {
                                     }
                         );
                     }
-                    // todo
+                    // todo picking & response
+
                     //Setup next round
                     game.setupNextRound();
 
