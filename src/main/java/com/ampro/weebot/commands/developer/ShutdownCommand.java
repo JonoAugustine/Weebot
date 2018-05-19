@@ -28,6 +28,7 @@ public class ShutdownCommand extends Command {
                 , true
                 , 0
                 , true
+                , false
         );
     }
 

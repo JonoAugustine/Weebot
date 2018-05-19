@@ -460,11 +460,12 @@ public class NotePadCommand extends Command {
                         "notes # write/add <new message>\n"    +
                         "notes # insert # <new message>\n"    +
                         "notes # edit # <new message>\n"   +
-                        "notes # lockto [roles, members, or channels]\n"    +
-                        "notes # lockout [roles, members, or channels]\n",
+                        "notes # lockto <roles, members, or channels>\n"    +
+                        "notes # lockout <roles, members, or channels>\n",
                 true,
                 false,
                 0,
+                false,
                 false
         );
     }

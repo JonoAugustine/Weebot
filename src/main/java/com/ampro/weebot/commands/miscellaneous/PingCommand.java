@@ -22,6 +22,7 @@ public class PingCommand extends Command {
                 , false
                 , 0
                 , false
+                , false
         );
     }
 

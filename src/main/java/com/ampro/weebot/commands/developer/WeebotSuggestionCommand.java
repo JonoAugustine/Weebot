@@ -75,6 +75,7 @@ public class WeebotSuggestionCommand extends Command {
                 false,
                 false,
                 0,
+                false,
                 false
         );
     }

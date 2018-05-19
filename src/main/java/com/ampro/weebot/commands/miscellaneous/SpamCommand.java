@@ -15,7 +15,9 @@ import java.util.Arrays;
 public class SpamCommand extends Command {
 
     public SpamCommand() {
-        super("Spam", new ArrayList<>(Arrays.asList("spamthis", "spamattack")), "Spam the chat", "<spam> [number_of_spams] [message]", false, false, 0, false);
+        super("Spam", new ArrayList<>(Arrays.asList("spamthis", "spamattack")), "Spam the chat", "<spam> [number_of_spams] [message]", false, false, 0, false,
+              false
+        );
         this.setUserPermissions(new Permission[]{Permission.MESSAGE_WRITE, Permission.MESSAGE_MANAGE});
     }
 

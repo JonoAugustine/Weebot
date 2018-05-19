@@ -30,6 +30,7 @@ public class ListGuildsCommand extends Command {
                 , false
                 , 0
                 , false
+                , false
         );
     }
 

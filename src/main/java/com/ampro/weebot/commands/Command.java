@@ -104,6 +104,8 @@ public abstract class Command {
     /** {@code true} if this command should be hidden from the help. */
     protected final boolean hidden;
 
+    protected final boolean nsfw;
+
     /**
      * The {@link com.jagrosh.jdautilities.command.Command.CooldownScope CooldownScope}
      * of the command. This defines how far of a scope cooldowns have.
@@ -129,6 +131,7 @@ public abstract class Command {
         this.ownerOnly  = false;
         this.cooldown   = 0;
         this.hidden     = false;
+        this.nsfw       = false;
     }
 
 
@@ -142,11 +145,12 @@ public abstract class Command {
      * @param ownerOnly Can this only be used by Weebot developers?
      * @param cooldown Cooldown time
      * @param hidden Should this be hidden from general help calls from
-     *                  {@link HelpCommand}?
+*                  {@link HelpCommand}?
+     * @param nsfw
      */
     protected Command(String name, List<String> aliases, String help,
-                      /*String helpLong,*/ String argFormat, boolean guildOnly,
-                      boolean ownerOnly, int cooldown, boolean hidden) {
+            /*String helpLong,*/ String argFormat, boolean guildOnly, boolean ownerOnly,
+                      int cooldown, boolean hidden, boolean nsfw) {
 
         this.name       = name;
         this.aliases    = aliases;
@@ -157,7 +161,7 @@ public abstract class Command {
         this.ownerOnly  = ownerOnly;
         this.cooldown   = cooldown;
         this.hidden     = hidden;
-
+        this.nsfw = nsfw;
     }
 
     /**

@@ -188,6 +188,7 @@ public class SecretePhraseCommand extends Command {
                 true,
                 false,
                 0,
+                false,
                 false
         );
     }

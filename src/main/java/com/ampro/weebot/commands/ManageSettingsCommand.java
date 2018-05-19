@@ -41,7 +41,7 @@ public class ManageSettingsCommand extends Command {
                 , false
                 , 0
                 , false
-        );
+                , false);
     }
 
     @Override

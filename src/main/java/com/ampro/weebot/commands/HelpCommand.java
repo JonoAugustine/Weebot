@@ -28,13 +28,8 @@ public class HelpCommand extends Command {
                 , false
                 , 0
                 , false
+                , false
         );
-    }
-
-    public HelpCommand(String name, List<String> aliases, String help
-                        , String argFormat, boolean guildOnly, boolean ownerOnly
-                        , int cooldown, boolean hidden) {
-        super(name, aliases, help, argFormat, guildOnly, ownerOnly, cooldown, hidden);
     }
 
     /**

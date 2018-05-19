@@ -586,12 +586,14 @@ public class CardsAgainstHumanityCommand extends Command {
                 "CardsAgainstHumanity",
                 new ArrayList<>(Arrays.asList("cah")),
                 "Start a game of CardsAgainstHumanity or make custom cards.",
-                " ", //TODO ArgFormat
+                "cah <command> [arguments]",
                 true,
                 false,
                 0,
+                false,
                 false
         );
+
     }
 
     private static final String NO_GAME_FOUND =
@@ -683,9 +685,9 @@ public class CardsAgainstHumanityCommand extends Command {
         cah pick <card_set_num>
         cah myhand
 
-        cah make deck <deck_name>
-        cah make <deck_num> <white[card]> [card text]
-        cah make <deck_num> <black[card]> <blanks> [card text]
+        cah makedeck <deck_name>
+        cah makecard <deck_num> <white[card]> [card text]
+        cah makecard <deck_num> <black[card]> <blanks> [card text]
 
         cah alldecks
         cah deckfile [deck_name]
@@ -1091,4 +1093,27 @@ public class CardsAgainstHumanityCommand extends Command {
         }
     }
 
+    @Override
+    public String getHelp() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("```Cards Against Humanity Command Help:\n\n")
+          .append("<required> , [optional], /situational_required/\n\n");
+
+        sb.append("setup [hand_size] [deck_name] [deck2_name]...\n")
+          .append("cah join\n").append("cah start\n")
+          .append("cah play <card1_number> /card2_num/.../card5_num/\n")
+          .append("cah pick <card_set_num>\n").append("cah myhand\n")
+          .append("\ncah makedeck <deck_name>\n")
+          .append("cah make <deck_num> <white[card]> <card text>\n")
+          .append("cah make <deck_num> <black[card]> <blanks> <card text>\n")
+          .append("cah alldecks **\n").append("cah deckfile [deck_name]\n")
+          .append("cah remove <deck_num> **\n")
+          .append("cah remove <deck_num> <card_num> **\n")
+          .append("```");
+
+        sb.append("\n(Commands marked '**' are still under construction.)"); //todo
+
+        return sb.toString();
+    }
 }

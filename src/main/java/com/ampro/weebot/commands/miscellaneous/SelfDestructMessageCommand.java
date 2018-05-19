@@ -17,13 +17,13 @@ import java.util.Arrays;
 public class SelfDestructMessageCommand extends Command {
 
     public SelfDestructMessageCommand() {
-        super(
-                "SelfDestruct",
-                new ArrayList<>(Arrays.asList("deleteme", "cleanthis",
-                        "deletethis", "covertracks")),
-                "Deletes the marked message after the given amount of time (30 sec by default)",
-                "<callsign><deleteme> <time or X> [message]",
-                true, false, 0, false);
+        super("SelfDestruct", new ArrayList<>(
+                      Arrays.asList("deleteme", "cleanthis", "deletethis", "covertracks")),
+
+              "Deletes the marked message after the given amount of time (30 sec by " +
+                      "default)",
+              "<callsign><deleteme> <time or X> [message]", true, false, 0, false, false
+        );
     }
     /**
      * Performs a check then runs the command in a new thread.
