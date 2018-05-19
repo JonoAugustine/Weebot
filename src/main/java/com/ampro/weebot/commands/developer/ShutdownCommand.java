@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 /**
  * Safely shuts down all the bots, initiating proper database saving in
- * {@link com.ampro.main.Launcher}.
+ * {@link com.ampro.weebot.Launcher}.
  *
  * @author Jonathan Augustine
  */
@@ -20,7 +20,7 @@ public class ShutdownCommand extends Command {
         super(
                 "ShutDown"
                 , new ArrayList<>(Arrays.asList(
-                        "killbots", "devkill", "tite"
+                        "killbots", "devkill", "tite", "ohbuggeroff"
                 ))
                 , "Safely shutdown the Weebots."
                 , ""

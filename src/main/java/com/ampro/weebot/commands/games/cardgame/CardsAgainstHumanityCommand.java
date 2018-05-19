@@ -321,7 +321,7 @@ public class CardsAgainstHumanityCommand extends Command {
             /** The number of cards needed to fill in the card.*/
             final int blanks;
             /** The winning {@link WhiteCard} of the round */
-            WhiteCard winningCard;
+            WhiteCard[] winningCards;
 
             BlackCard(String text, int blanks) throws InvalidCardException {
                 this.cardText = text;
@@ -485,6 +485,14 @@ public class CardsAgainstHumanityCommand extends Command {
             return true;
         }
 
+        /**
+         * Setup the game and players for the next round. <br>
+         *     1.) nullify {@link CAHPlayer#playedCards played cards}
+         *          and deal new cards.
+         *     2.) Set new random black card.
+         *     3.) Set next Czar
+         *     4.) Set game state to {@link GAME_STATE#CHOOSING CHOOSING}
+         */
         protected void setupNextRound() {
             //Deal new cards
             for (CAHPlayer p : PLAYERS.values()) {
@@ -496,11 +504,17 @@ public class CardsAgainstHumanityCommand extends Command {
             }
 
             //Set the new black card
-            int rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
-            blackCard = this.deck.blackCards.get(rand);
+            int rand;
+            BlackCard t;
+            do {
+                rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
+                t = this.deck.blackCards.get(rand);
+            } while (t.equals(this.blackCard));
+
+            blackCard = t;
 
             //Set next czar
-            if (this.czarIterator.hasNext())
+            if(this.czarIterator.hasNext())
                 czar = czarIterator.next();
             else {
                 //Reset the iterator if we reached the end of the list
@@ -709,8 +723,11 @@ public class CardsAgainstHumanityCommand extends Command {
                                                     cahDeck
                     );
                     bot.addRunningGame(game);
-                    event.reply("A new game of *Cards Against " + event.getGuild()
-                                                                       .getName() + "* has been setup!" + " Use ```cah join```\nto join the game.");
+                    event.reply("A new game of *Cards Against "
+                                + event.getGuild().getName()
+                                + "* has been setup!" + "\nUse ```cah join```\nto join "
+                                + "the game."
+                                + " and ```cah start```\n to start the game.");
                 } else {
                     event.reply(
                             "There is already a game of Cards Against Humanity " + "being played in this text channel. Please end that " + "game before starting a new one, or setup a new game " + "in a different text channel.");
@@ -718,6 +735,16 @@ public class CardsAgainstHumanityCommand extends Command {
                 return;
             case START:
                 if(game != null) {
+                    if (game.isRunning()) {
+                        event.reply("There is already a game of Cards Against Humanity"
+                                    + " running.", m -> {
+                            try { Thread.sleep(5 * 1000); }
+                            catch (InterruptedException e) {}
+                            m.delete().queue();
+                            event.deleteMessage();
+                        });
+                        return;
+                    }
                     if(game.startGame()) {
                         event.reply("The Card Czar is "
                                     + game.czar.member.getEffectiveName()
@@ -793,15 +820,20 @@ public class CardsAgainstHumanityCommand extends Command {
                             return;
                         } catch (IndexOutOfBoundsException e) {
                             event.reply(
-                                    "Too many cards. Choose " + game.blackCard.blanks + " cards.");
-                            //TODO
+                                    "Too many cards. Choose " + game.blackCard.blanks
+                                            + " cards.", m -> {
+                                        try { Thread.sleep(5 * 1000); }
+                                        catch (InterruptedException e2) {}
+                                        m.delete().queue();
+                                        event.deleteMessage();
+                                    });
                             return;
                         }
                         switch (game.playCards(game.getPlayer(event.getAuthor()), cards)) {
                             case 0:
                                 event.reply("*Personally, I hope you win.*", m -> {
                                     try {
-                                        Thread.sleep(3 * 1000);
+                                        Thread.sleep(1 * 1000);
                                     } catch (InterruptedException e) {
                                     }
                                     m.delete().queue();
@@ -831,8 +863,12 @@ public class CardsAgainstHumanityCommand extends Command {
                         }
                     } else {
                         event.reply("Not enough cards. Choose " + game.blackCard.blanks
-                                            + " cards.");
-                        //TODO
+                                            + " cards.", m -> {
+                            try { Thread.sleep(5 * 1000); }
+                            catch (InterruptedException e2){}
+                            m.delete().queue();
+                            event.deleteMessage();
+                        });
                         return;
                     }
                     if(game.allCardsPlayed()) {
@@ -844,7 +880,7 @@ public class CardsAgainstHumanityCommand extends Command {
                         int i = 1;
                         Collections.shuffle(game.playerList);
                         for (CAHPlayer p : game.playerList) {
-                            sb.append((i++) + ":");
+                            sb.append((i++) + ":\n");
                             for (WhiteCard wc : p.playedCards) {
                                 sb.append("\t> " + wc + "\n");
                             }
@@ -875,8 +911,19 @@ public class CardsAgainstHumanityCommand extends Command {
                                     }
                         );
                     }
+                    if (event.getAuthor().getIdLong()
+                            != game.czar.member.getUser().getIdLong()) {
+                        event.reply("Only the Card Czar, **"
+                                    + game.czar.member.getEffectiveName()
+                                    + "** can pick a winner.", m -> {
+                            try { Thread.sleep(2 * 1000); }
+                            catch (InterruptedException e) {}
+                            m.delete().queue();
+                            event.deleteMessage();
+                        });
+                        return;
+                    }
                     sb.setLength(0);
-                    //todo picking & response
                     //Pick the winner by index (Since we shuffled the player list
                     //when we sent the list of played cards, then iterated through
                     //the shuffled list, we can use the index of the shuffled list
@@ -893,8 +940,13 @@ public class CardsAgainstHumanityCommand extends Command {
                         return;
                     }
 
+                    //Give the won cards to the winner
+                    game.blackCard.winningCards = winner.playedCards;
+                    winner.cardsWon.add(game.blackCard);
+
                     sb.append("***").append(winner.member.getEffectiveName())
-                      .append("*** wins this round!\nHere's how the game is going so ")
+                      .append("*** wins this round!:tada: :tada: :tada:")
+                      .append("\nHere's how the game is going so ")
                       .append("far:\n\n");
 
                     game.playerList.sort(new scoreComparator());
