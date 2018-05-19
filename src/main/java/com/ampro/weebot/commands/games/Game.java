@@ -9,6 +9,7 @@ import net.dv8tion.jda.core.entities.User;
 
 import java.util.ArrayList;
 import java.util.TreeMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * Basis of a Weebot Game.
@@ -33,7 +34,7 @@ public abstract class Game<P extends Player> {
     /** User ID of the User who started the game.*/
     protected final long AUTHOR_ID;
     //Keep a list of all the Players
-    protected final TreeMap<Long, P> PLAYERS;
+    protected final ConcurrentHashMap<Long, P> PLAYERS;
     /** Is the game currently running? */
     protected boolean RUNNING;
 
@@ -45,7 +46,7 @@ public abstract class Game<P extends Player> {
     protected Game(Weebot bot, User author) {
         this.HOST_ID = bot.getBotId();
         this.RUNNING = false;
-        this.PLAYERS = new TreeMap<>();
+        this.PLAYERS = new ConcurrentHashMap<>();
         this.AUTHOR_ID = author.getIdLong();
         this.addUser(author);
     }
@@ -58,7 +59,7 @@ public abstract class Game<P extends Player> {
     protected Game(Weebot bot, User author, P... players) {
         this.HOST_ID = bot.getBotId();
         this.RUNNING = false;
-        this.PLAYERS = new TreeMap<>();
+        this.PLAYERS = new ConcurrentHashMap<>();
         for (P p : players) {
             this.PLAYERS.putIfAbsent(p.getUser().getIdLong(), p);
         }
@@ -107,6 +108,8 @@ public abstract class Game<P extends Player> {
     public long getAUTHOR_ID() {
         return AUTHOR_ID;
     }
+
+    public ConcurrentHashMap<Long, P> getPlayers() { return this.PLAYERS; }
 
     /**
      * Get a player.
