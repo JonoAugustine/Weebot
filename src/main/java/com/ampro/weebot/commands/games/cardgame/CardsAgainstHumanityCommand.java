@@ -100,6 +100,13 @@ public class CardsAgainstHumanityCommand extends Command {
 
         }
 
+        static final class scoreComparator implements Comparator<CAHPlayer> {
+            @Override
+            public int compare(CAHPlayer p1, CAHPlayer p2) {
+                return p1.cardsWon.size() - p2.cardsWon.size();
+            }
+        }
+
         /**
          * A deck of {@link BlackCard Black} and {@link WhiteCard White} cards.
          * <br> Can be locked to any number of Roles.
@@ -282,7 +289,8 @@ public class CardsAgainstHumanityCommand extends Command {
         public static final class WhiteCard extends Card {
 
             /** The file of the standard white cards */
-            static final File WC_STD = new File("res/CAH/CAH_WHITE_CARDS.card");
+            static final transient File WC_STD =
+                    new File("res/CAH/CAH_WHITE_CARDS.card");
 
             /** Content of the card */
             final String cardText;
@@ -300,7 +308,8 @@ public class CardsAgainstHumanityCommand extends Command {
         public static final class BlackCard extends Card {
 
             /** The file of the standard black cards */
-            static final File BC_STD = new File("res/CAH/CAH_BLACK_CARDS.card");
+            static final transient File BC_STD =
+                    new File("res/CAH/CAH_BLACK_CARDS.card");
 
             /**The maximum number of white cards needed to answer this card: {@value}*/
             private static final int MAX_BLANKS = 5;
@@ -337,7 +346,7 @@ public class CardsAgainstHumanityCommand extends Command {
             READING
         }
 
-        private static final int MIN_PLAYERS = 1;
+        private static final transient int MIN_PLAYERS = 3;
 
         /** The hosting channel */
         private final TextChannel channel;
@@ -350,6 +359,8 @@ public class CardsAgainstHumanityCommand extends Command {
         /** The current Czar */
         CAHPlayer czar;
         Iterator<CAHPlayer> czarIterator;
+        /** We use this to standardize the order in which players are accesesed */
+        List<CAHPlayer> playerList;
         BlackCard blackCard;
         /** The winners of the game */
         private ArrayList<CAHPlayer> WINNERS;
@@ -366,6 +377,7 @@ public class CardsAgainstHumanityCommand extends Command {
             this.channel = channel;
             this.HAND_SIZE = handSize;
             this.PLAYERS.putIfAbsent(AUTHOR_ID, new CAHPlayer(author));
+            this.playerList = new ArrayList<>(PLAYERS.values());
             this.deck = deck;
             deck.loadStandardCards();
         }
@@ -376,11 +388,21 @@ public class CardsAgainstHumanityCommand extends Command {
          * @return false if the player is already in the game.
          */
         public final boolean addUser(Member member) {
+            CAHPlayer p = new CAHPlayer(member);
             if (this.RUNNING) {
-                return this.joinGame(new CAHPlayer(member));
+                if (this.joinGame(p)) {
+                    this.playerList.add(p);
+                    return true;
+                } else {
+                    return false;
+                }
             } else {
-                return this.PLAYERS.putIfAbsent(member.getUser().getIdLong(),
-                                                new CAHPlayer(member)) == null;
+                if (this.PLAYERS.putIfAbsent(member.getUser().getIdLong(), p) == null) {
+                    this.playerList.add(p);
+                    return true;
+                } else {
+                    return false;
+                }
             }
         }
 
@@ -465,11 +487,13 @@ public class CardsAgainstHumanityCommand extends Command {
 
         protected void setupNextRound() {
             //Deal new cards
-            for (CAHPlayer p : PLAYERS.values())
+            for (CAHPlayer p : PLAYERS.values()) {
+                p.playedCards = null;
                 if(!this.dealCards(p)) {
                     System.err.println("Not delt!");
                     return;
                 }
+            }
 
             //Set the new black card
             int rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
@@ -479,6 +503,7 @@ public class CardsAgainstHumanityCommand extends Command {
             if (this.czarIterator.hasNext())
                 czar = czarIterator.next();
             else {
+                //Reset the iterator if we reached the end of the list
                 this.czarIterator = PLAYERS.values().iterator();
                 czar = czarIterator.next();
             }
@@ -635,6 +660,7 @@ public class CardsAgainstHumanityCommand extends Command {
         cah join
         cah start
         cah play/use <card_number> [card2_num] [card3_num] [card4_num] [card5_num]
+        cah pick <card_set_num>
 
         cah make deck <deck_name>
         cah make <deck_num> <white[card]> [card text]
@@ -700,7 +726,8 @@ public class CardsAgainstHumanityCommand extends Command {
                                     + ".\n\nHere's the first Black Card:```"
                                     + game .blackCard.cardText + "\n```");
                     } else {
-                        event.reply("You need at least **3** players to start a game of" + " Cards Against Humanity.");
+                        event.reply("You need at least **3** players to start a game of"
+                                    + " Cards Against Humanity.");
                     }
                 } else {
                     event.reply(NO_GAME_FOUND);
@@ -815,8 +842,9 @@ public class CardsAgainstHumanityCommand extends Command {
                                     + " choose your victor.*\n```");
 
                         int i = 1;
-                        for (CAHPlayer p : game.getPlayers().values()) {
-                            sb.append((i++) + ": \n");
+                        Collections.shuffle(game.playerList);
+                        for (CAHPlayer p : game.playerList) {
+                            sb.append((i++) + ":");
                             for (WhiteCard wc : p.playedCards) {
                                 sb.append("\t> " + wc + "\n");
                             }
@@ -829,7 +857,7 @@ public class CardsAgainstHumanityCommand extends Command {
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
-            case PICK:
+            case PICK: //cah pick <card_set_num>
                 if(game != null) {
                     if(game.STATE != GAME_STATE.READING) {
                         //If the players are still choosing their cards we don't want to
@@ -847,8 +875,37 @@ public class CardsAgainstHumanityCommand extends Command {
                                     }
                         );
                     }
-                    // todo picking & response
+                    sb.setLength(0);
+                    //todo picking & response
+                    //Pick the winner by index (Since we shuffled the player list
+                    //when we sent the list of played cards, then iterated through
+                    //the shuffled list, we can use the index of the shuffled list
+                    //to get the chosen winner.
+                    CAHPlayer winner;
+                    try {
+                        winner = game.playerList.get(Integer.parseInt(args[2]) - 1);
+                    } catch (NumberFormatException e) {
+                        event.reply("I couldn't understand '" + args[2] + "'.");
+                        return;
+                    } catch (IndexOutOfBoundsException e) {
+                        event.reply("Please choose one of the listed cards by " +
+                                            "their number");
+                        return;
+                    }
 
+                    sb.append("***").append(winner.member.getEffectiveName())
+                      .append("*** wins this round!\nHere's how the game is going so ")
+                      .append("far:\n\n");
+
+                    game.playerList.sort(new scoreComparator());
+
+                    for (CAHPlayer p : game.playerList) {
+                        sb.append("*").append(p.member.getEffectiveName())
+                          .append("* : ").append(p.cardsWon.size()).append("\n\n");
+                    }
+
+                    event.reply(sb.toString());
+                    sb.setLength(0);
                     //Setup next round
                     game.setupNextRound();
 
@@ -925,7 +982,6 @@ public class CardsAgainstHumanityCommand extends Command {
             case "use":
             case "play":
                 return ACTION.PLAY;
-            case "choose":
             case "pick":
                 return ACTION.PICK;
             case "alldecks":
