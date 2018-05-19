@@ -25,7 +25,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
- * Run Cards Against Humanity games, TODO and make custom cards. <br>
+ * Run Cards Against Humanity games,
+ * TODO and make custom cards. <br>
  * Users can:<br>
  *     start a game of CAH <br>
  *     make custom White Cards <br>
@@ -37,7 +38,7 @@ public class CardsAgainstHumanityCommand extends Command {
 
     /**
      * A game of Cards Against Humanity.
-     * TODO How to load the standard cards from file. Everytime or just on startup?
+     *
      * @author Jonathan Augustine
      */
     public static final class CardsAgainstHumanity
@@ -680,7 +681,7 @@ public class CardsAgainstHumanityCommand extends Command {
         cah make <deck_num> <white[card]> [card text]
         cah make <deck_num> <black[card]> <blanks> [card text]
 
-        cah showdeck [deck_name] //TODO Probably best in a private message
+        cah alldecks
         cah deckfile [deck_name]
 
         cah remove <deck_num> TODO maybe only on empty decks?
@@ -981,12 +982,23 @@ public class CardsAgainstHumanityCommand extends Command {
                             return;
                         }
                     }
-                    event.reply("Game ended. Here is the standing:");//TODO
+                    sb.setLength(0);
+                    sb.append("\nHere's how the game went: ");
+
+                    game.playerList.sort(new scoreComparator());
+
+                    for (CAHPlayer p : game.playerList) {
+                        sb.append("*").append(p.member.getEffectiveName())
+                          .append("* : ").append(p.cardsWon.size()).append("\n\n");
+                    }
+
+                    event.reply(sb.toString());
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
                 return;
             case VIEWALLDECKS:
+                return;
             case DECKFILE:
                 CAHDeck deck;
                 List<WhiteCard> whiteCards;
@@ -1004,17 +1016,20 @@ public class CardsAgainstHumanityCommand extends Command {
                 File file = deck.toFile();
                 if(file != null) {
                     event.privateReply(file, file.getName(), f -> f.deleteOnExit());
+                    event.deleteMessage();
                 } else
                     event.reply("Sorry, something went wrong...");
                 return;
             case MAKEBLACKCARD:
+                return;
             case MAKEWHITECARD:
+                return;
         }
 
     }
 
     /**
-     * TODO Parse an {@link ACTION action} from a string.
+     * Parse an {@link ACTION action} from a string.
      * @param arg The string to parse from.
      * @return The action parsed or null if no action was found.
      */
@@ -1041,7 +1056,6 @@ public class CardsAgainstHumanityCommand extends Command {
             case "deckfile":
                 return ACTION.DECKFILE;
             case "make":
-            //TODO: Card and Deck making
             default:
                 return null;
         }

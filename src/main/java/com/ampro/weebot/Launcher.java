@@ -39,7 +39,7 @@ import java.util.*;
  * Runner/Main class of the Weebot network.
  * Builds single JDA connection, instances of all {@link Command Commands}, and
  * {@link Database}.
- * //TODO Change all TreeMaps to {@link java.util.concurrent.ConcurrentHashMap}
+ *
  * @author Jonathan Augustine
  */
 public class Launcher {
