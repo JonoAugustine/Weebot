@@ -682,16 +682,32 @@ public class CardsAgainstHumanityCommand extends Command {
                             }
                         } catch (NumberFormatException e) {
 
+                        } catch (IndexOutOfBoundsException e) {
+                            event.reply("Too many cards");//TODO
                         }
                     } else {
-                        event.reply(" ");
+                        event.reply("Not enough cards");//TODO
                     }
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
-
+                return;
+            case PICK:
                 return;
             case END:
+                if (game != null) {
+                    game.endGame();
+                    synchronized (bot) {
+                        if (!bot.getRunningGames().remove(game)) {
+                            System.err.println("Err encounted while removing game.");
+                            return;
+                        }
+                    }
+                    event.reply("Game ended. Here is the standing:");//TODO
+                } else {
+                    event.reply(NO_GAME_FOUND);
+                }
+                return;
             case VIEWALLDECKS:
             case DECKFILE:
                 CAHDeck deck;
