@@ -261,9 +261,9 @@ public class Weebot implements Comparable<Weebot> {
 
     /**
      * @param w2 Weebot to compare to.
-     * @return -1 if the Guild/Server ID is less than parameter's
+     * @return  negative int if the Guild/Server ID is less than parameter's
      * 			0 if equal to parameter's
-     * 			1 if greater than parameter's
+     * 			positive int if greater than parameter's
      */
     @Override
     public int compareTo(Weebot w2) {

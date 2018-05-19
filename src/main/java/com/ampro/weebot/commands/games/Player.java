@@ -12,7 +12,7 @@ import java.util.function.Consumer;
 /**
  * Base Wrapper Class for Members currently involved in a Webot {@code Game}
  */
-public abstract class Player {
+public abstract class Player implements Comparable<Player> {
 
     /** User this Player is wrapped around */
     private final User user;
@@ -54,6 +54,11 @@ public abstract class Player {
                consumer.accept(m);
            });
         });
+    }
+
+    @Override
+    public int compareTo(Player p2) {
+        return (int) (this.user.getIdLong() - p2.user.getIdLong());
     }
 
 }
