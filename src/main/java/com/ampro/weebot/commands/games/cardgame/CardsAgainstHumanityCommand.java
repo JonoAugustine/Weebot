@@ -20,10 +20,7 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -352,6 +349,7 @@ public class CardsAgainstHumanityCommand extends Command {
 
         /** The current Czar */
         CAHPlayer czar;
+        Iterator<CAHPlayer> czarIterator;
         BlackCard blackCard;
         /** The winners of the game */
         private ArrayList<CAHPlayer> WINNERS;
@@ -410,6 +408,22 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         /**
+         * Send all players their hands.
+         */
+        protected void sendHands() {
+            PLAYERS.values().forEach( p -> {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Cards against ")
+                  .append(Launcher.getGuild(Long.parseLong(this.HOST_ID.replace("W", "")))
+                                  .getName()).append("```");
+                for (int i = 0; i < p.hand.length; i++) {
+                    sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
+                }
+                p.updateHandMessage(sb.append(" ```").toString());
+            });
+        }
+
+        /**
          * Put the cards in the player's {@link CAHPlayer#playedCards}.
          * @param player
          * @param cards card indices
@@ -432,38 +446,71 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         /**
+         * Check if all players have played their cards. If so, change
+         * {@link GAME_STATE GAME STATE} to {@link GAME_STATE#READING READING}.
+         * @return true if all players have played their cards.
+         */
+        private boolean allCardsPlayed() {
+            for (CAHPlayer p : this.PLAYERS.values()) {
+                if (p.playedCards == null) {
+                    return false;
+                }
+            }
+            //If all the playedCards are not null, we are done and the game state
+            //progresses to READING
+            this.STATE = GAME_STATE.READING;
+            return true;
+        }
+
+        protected void setupNextRound() {
+            //Deal new cards
+            for (CAHPlayer p : PLAYERS.values())
+                if(!this.dealCards(p)) {
+                    System.err.println("Not delt!");
+                    return;
+                }
+
+            //Set the new black card
+            int rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
+            blackCard = this.deck.blackCards.get(rand);
+
+            //Set next czar
+            if (this.czarIterator.hasNext())
+                czar = czarIterator.next();
+            else {
+                this.czarIterator = PLAYERS.values().iterator();
+                czar = czarIterator.next();
+            }
+
+            //Game state
+            this.STATE = GAME_STATE.CHOOSING;
+
+        }
+
+        /**
          * Start the game of CAH.
          * @return {@code false} if there are less than 3 players.
          */
         @Override
         public boolean startGame() {
-            if (this.PLAYERS.size() < MIN_PLAYERS) {
+            if(this.PLAYERS.size() < MIN_PLAYERS) {
                 return false;
             }
             //Oh yeah we need TODO the actual game
             //Deal cards
             for (CAHPlayer p : this.PLAYERS.values())
-                if (!this.dealCards(p)) {
+                if(!this.dealCards(p)) {
                     System.err.println("Not delt!");
                     return false;
                 }
-            CAHPlayer[] ar = this.PLAYERS.values().toArray(new CAHPlayer[0]);
-            this.czar = ar[ThreadLocalRandom.current().nextInt(0, ar.length)];
+            this.czarIterator = this.PLAYERS.values().iterator();
+            this.czar = czarIterator.next();
             //Set the first black card
             int rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
-            blackCard = this.deck.blackCards.remove(rand);
+            blackCard = this.deck.blackCards.get(rand);
 
             //Send card hands
-            PLAYERS.values().forEach( p -> {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Cards against " + Launcher.getGuild(
-                        Long.parseLong(this.HOST_ID.replace("W", ""))).getName()
-                            + "```");
-                for (int i = 0; i < p.hand.length; i++) {
-                    sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
-                }
-                p.privateMessage(sb.append(" ```").toString());
-            });
+            sendHands();
             //Game state
             this.RUNNING = true;
             this.STATE = GAME_STATE.CHOOSING;
@@ -475,9 +522,9 @@ public class CardsAgainstHumanityCommand extends Command {
          */
         protected boolean endGame() {
             ArrayList<CAHPlayer> players = this.playerIterable();
-            CAHPlayer winner = this.PLAYERS.get(this.PLAYERS.firstKey());
+            CAHPlayer winner = players.get(0);
             for (CAHPlayer p : players) {
-                if (winner.cardsWon.size() < p.cardsWon.size())
+                if (p.cardsWon.size() > winner.cardsWon.size())
                     winner = p;
             }
             for (CAHPlayer p : players) {
@@ -514,6 +561,8 @@ public class CardsAgainstHumanityCommand extends Command {
         START,
         /** Join the game */
         JOIN,
+        /** Player lease the game */
+        LEAVE,
         /** End the game */
         END,
         /** Play cards */
@@ -556,14 +605,14 @@ public class CardsAgainstHumanityCommand extends Command {
     protected void execute(Weebot bot, BetterMessageEvent event) {
         StringBuilder sb = new StringBuilder();
         String[] args = this.cleanArgs(bot, event);
-        if (args.length < 2) {
+        if(args.length < 2) {
             //TODO help
             return;
         }
         String message = event.toString();
         TextChannel channel = event.getTextChannel();
         ACTION action = this.parseAction(args[1]);
-        if (action == null) {
+        if(action == null) {
             event.reply("Sorry, '" + args[1] + "' is not an available command.");
             //TODO Better help
             return;
@@ -571,9 +620,9 @@ public class CardsAgainstHumanityCommand extends Command {
         //Attempt to find a running game in this channel
         CardsAgainstHumanity game = null;
         for (Game g : bot.getRunningGames()) {
-            if (g instanceof CardsAgainstHumanity) {
-                if (((CardsAgainstHumanity) g).channel.getIdLong()
-                                                == channel.getIdLong()) {
+            if(g instanceof CardsAgainstHumanity) {
+                if(((CardsAgainstHumanity) g).channel.getIdLong() == channel.getIdLong
+                        ()) {
                     game = (CardsAgainstHumanity) g;
                     break;
                 }
@@ -599,11 +648,14 @@ public class CardsAgainstHumanityCommand extends Command {
 
         switch (action) {
             case SETUP:
-                if (game == null) {
+                if(game == null) {
                     int hs = 5;
                     int deckIndex = 2;
-                    try { hs = Integer.parseInt(args[2]); deckIndex++; }
-                    catch (NumberFormatException | IndexOutOfBoundsException e) {}
+                    try {
+                        hs = Integer.parseInt(args[2]);
+                        deckIndex++;
+                    } catch (NumberFormatException | IndexOutOfBoundsException e) {
+                    }
                     List<CAHDeck> decks = new ArrayList<>();
                     StringBuilder badDeckNames = new StringBuilder();
                     synchronized (bot) {
@@ -626,43 +678,43 @@ public class CardsAgainstHumanityCommand extends Command {
                             cahDeck.addBlackCard(bc);
                         }
                     }
-                    game = new CardsAgainstHumanity(bot, channel, event.getMember(),
-                                                    hs, cahDeck);
+                    game = new CardsAgainstHumanity(bot, channel, event.getMember(), hs,
+                                                    cahDeck
+                    );
                     bot.addRunningGame(game);
-                    event.reply("A new game of *Cards Against "
-                                + event.getGuild().getName() + "* has been setup!"
-                                + " Use ```cah join```\nto join the game.");
+                    event.reply("A new game of *Cards Against " + event.getGuild()
+                                                                       .getName() + "* has been setup!" + " Use ```cah join```\nto join the game.");
                 } else {
-                    event.reply("There is already a game of Cards Against Humanity "
-                                + "being played in this text channel. Please end that "
-                                + "game before starting a new one, or setup a new game "
-                                + "in a different text channel.");
+                    event.reply(
+                            "There is already a game of Cards Against Humanity " + "being played in this text channel. Please end that " + "game before starting a new one, or setup a new game " + "in a different text channel.");
                 }
                 return;
             case START:
-                if (game != null) {
-                    if (game.startGame()) {
+                if(game != null) {
+                    if(game.startGame()) {
                         event.reply("The Card Czar is "
                                     + game.czar.member.getEffectiveName()
-                                    + ", please select your cards in the private chat I "
-                                    + "sent you.\n\nHere's the first Black Card:```"
-                                    + game.blackCard.cardText + "\n```");
+                                    + ", please select your cards from the private chat"
+                                    + " I sent you."
+                                    + ".\n\nHere's the first Black Card:```"
+                                    + game .blackCard.cardText + "\n```");
                     } else {
-                        event.reply("You need at least **3** players to start a game of"
-                                    + " Cards Against Humanity.");
+                        event.reply("You need at least **3** players to start a game of" + " Cards Against Humanity.");
                     }
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
                 return;
             case JOIN:
-                if (game != null) {
-                    if (game.addUser(event.getMember())) {
+                if(game != null) {
+                    if(game.addUser(event.getMember())) {
                         event.reply("*You've been added to the game!*");
                     } else {
                         event.reply("***You're already in the game.***", m -> {
-                            try { Thread.sleep(10*1000); }
-                            catch (InterruptedException e){}
+                            try {
+                                Thread.sleep(10 * 1000);
+                            } catch (InterruptedException e) {
+                            }
                             m.delete().queue();
                             event.deleteMessage();
                         });
@@ -671,22 +723,36 @@ public class CardsAgainstHumanityCommand extends Command {
                     event.reply(NO_GAME_FOUND);
                 }
                 return;
-            case PLAY: //cah play <card1_number> [card2_num]...[card5_num]
+            case LEAVE:
                 if (game != null) {
-                    if (game.STATE != GAME_STATE.CHOOSING) {
+                    if (game.getPlayers().remove(event.getAuthor().getIdLong()) != null) {
+                        event.reply(event.getMember().getEffectiveName() + "has been "
+                                    + "removed from the game; thanks for playing!");
+                        return;
+                    }
+                } else {
+                    event.reply(NO_GAME_FOUND);
+                }
+                return;
+            case PLAY: //cah play <card1_number> [card2_num]...[card5_num]
+                if(game != null) {
+                    if(game.STATE != GAME_STATE.CHOOSING) {
                         //If we are at the reading period, dont let people play cards.
                         //Respond then delete both messages to clean clutter
                         event.reply("Please wait for the next round to play more cards.",
                                     m -> {
-                                        try { Thread.sleep(5 * 1000); }
-                                        catch (InterruptedException e) {}
+                                        try {
+                                            Thread.sleep(5 * 1000);
+                                        } catch (InterruptedException e) {
+                                        }
                                         m.delete().queue();
                                         event.deleteMessage();
-                                    });
+                                    }
+                        );
                         return;
                     }
                     //Check for minimum number of cards
-                    if (args.length < 2 + game.blackCard.blanks) {
+                    if(args.length < 2 + game.blackCard.blanks) {
                         int[] cards = new int[game.blackCard.blanks];
                         try {
                             for (int i = 2; i < args.length; i++) {
@@ -694,54 +760,112 @@ public class CardsAgainstHumanityCommand extends Command {
                             }
                         } catch (NumberFormatException e) {
                             e.printStackTrace();
-                            event.reply("Sorry, I had some trouble reading your request.");
+                            event.reply("Sorry, I had some trouble reading your request" +
+                                                ".");
                             return;
                         } catch (IndexOutOfBoundsException e) {
-                            event.reply("Too many cards. Choose "+ game.blackCard.blanks
-                                        + " cards.");
+                            event.reply(
+                                    "Too many cards. Choose " + game.blackCard.blanks + " cards.");
                             //TODO
                             return;
                         }
                         switch (game.playCards(game.getPlayer(event.getAuthor()), cards)) {
                             case 0:
+                                event.reply("*Personally, I hope you win.*", m -> {
+                                    try {
+                                        Thread.sleep(10 * 1000);
+                                    } catch (InterruptedException e) {
+                                    }
+                                    m.delete().queue();
+                                    event.deleteMessage();
+                                });
                                 break;
                             case -1:
+                                event.reply("*You've already played your cards.*", m -> {
+                                    try {
+                                        Thread.sleep(5 * 1000);
+                                    } catch (InterruptedException e) {
+                                    }
+                                    m.delete().queue();
+                                    event.deleteMessage();
+                                });
+                                return;
                             case -2:
+                                event.reply("*The Card Czar can't play a card.*", m -> {
+                                    try {
+                                        Thread.sleep(5 * 1000);
+                                    } catch (InterruptedException e) {
+                                    }
+                                    m.delete().queue();
+                                    event.deleteMessage();
+                                });
+                                return;
                         }
                     } else {
-                        event.reply("Not enough cards. Choose "+ game.blackCard.blanks
-                                    + " cards.");
+                        event.reply("Not enough cards. Choose " + game.blackCard.blanks
+                                            + " cards.");
                         //TODO
                         return;
                     }
+                    if(game.allCardsPlayed()) {
+                        sb.setLength(0);
+                        sb.append(
+                                "*All players have played their cards. Czar, please"
+                                    + " choose your victor.*\n```");
+
+                        int i = 1;
+                        for (CAHPlayer p : game.getPlayers().values()) {
+                            sb.append((i++) + ": \n");
+                            for (WhiteCard wc : p.playedCards) {
+                                sb.append("\t> " + wc + "\n");
+                            }
+                            sb.append("\n");
+                        }
+                        sb.append("```");
+                        event.reply(sb.toString());
+                    }
+                    return;
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
-                return;
             case PICK:
-                if (game != null) {
-                    if (game.STATE != GAME_STATE.READING) {
+                if(game != null) {
+                    if(game.STATE != GAME_STATE.READING) {
                         //If the players are still choosing their cards we don't want to
                         //let the czar pick anything, so reply and delete the messages to
                         //clear clutter
                         event.reply("*Players are still choosing thier cards, please "
-                                    + "wait for them to finish*.", m -> {
-                            try { Thread.sleep(5 * 1000); }
-                            catch (InterruptedException e) {}
-                            m.delete().queue();
-                            event.deleteMessage();
-                        });
+                                            + "wait for them to finish*.",
+                                    m -> {
+                                        try {
+                                            Thread.sleep(5 * 1000);
+                                        } catch (InterruptedException e) {
+                                        }
+                                        m.delete().queue();
+                                        event.deleteMessage();
+                                    }
+                        );
                     }
+                    // todo
+                    //Setup next round
+                    game.setupNextRound();
 
+                    event.reply("The Card Czar is " + game.czar.member.getEffectiveName()
+                                + ", select your cards from the private chat I sent you"
+                                + "\n\nHere's the Black Card:```"
+                                + game.blackCard.cardText + "\n```");
+
+                    //Send new card hands
+                    game.sendHands();
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
                 return;
             case END:
-                if (game != null) {
+                if(game != null) {
                     game.endGame();
                     synchronized (bot) {
-                        if (!bot.getRunningGames().remove(game)) {
+                        if(!bot.getRunningGames().remove(game)) {
                             System.err.println("Err encounted while removing game.");
                             return;
                         }
@@ -760,13 +884,14 @@ public class CardsAgainstHumanityCommand extends Command {
                     synchronized (bot) {
                         deck = bot.getCustomCahDeck(args[2]);
                     }
-                    if (deck == null) throw new NullPointerException();
+                    if(deck == null)
+                        throw new NullPointerException();
                 } catch (IndexOutOfBoundsException | NullPointerException e) {
                     deck = new CAHDeck();
                     deck.loadStandardCards();
                 }
                 File file = deck.toFile();
-                if (file != null) {
+                if(file != null) {
                     event.privateReply(file, file.getName(), f -> f.deleteOnExit());
                 } else
                     event.reply("Sorry, something went wrong...");
@@ -790,6 +915,8 @@ public class CardsAgainstHumanityCommand extends Command {
                 return ACTION.START;
             case "join":
                 return ACTION.JOIN;
+            case "leave":
+                return ACTION.LEAVE;
             case "end":
             case "stop":
                 return ACTION.END;
