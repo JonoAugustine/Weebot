@@ -108,4 +108,13 @@ public abstract class Game<P extends Player> {
         return AUTHOR_ID;
     }
 
+    /**
+     * Get a player.
+     * @param user The user who's player to get.
+     * @return The player or null if no player is found.
+     */
+    public P getPlayer(User user) {
+        return this.PLAYERS.get(user.getIdLong());
+    }
+
 }
