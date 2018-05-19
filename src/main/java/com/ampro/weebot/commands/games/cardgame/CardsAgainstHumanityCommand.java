@@ -63,6 +63,7 @@ public class CardsAgainstHumanityCommand extends Command {
              * would show the hand to all members and that's dumb.</emp>
              */
             WhiteCard[] hand;
+            WhiteCard[] playedCards;
             /** {@link BlackCard BlackCards} won */
             final List<BlackCard> cardsWon;
 
@@ -304,8 +305,10 @@ public class CardsAgainstHumanityCommand extends Command {
             /** The file of the standard black cards */
             static final File BC_STD = new File("res/CAH/CAH_BLACK_CARDS.card");
 
-            /**The maximum number of white cards need to answer this card: {@value}*/
+            /**The maximum number of white cards needed to answer this card: {@value}*/
             private static final int MAX_BLANKS = 5;
+            /**The minimum number of white cards needed to answer this card: {@value}*/
+            private static final int MIN_BLANKS = 1;
 
             /** Content of the card */
             final String cardText;
@@ -318,11 +321,9 @@ public class CardsAgainstHumanityCommand extends Command {
                 this.cardText = text;
                 if (blanks > MAX_BLANKS)
                     throw new InvalidCardException("Too many blanks");
+                else if (blanks < MIN_BLANKS)
+                    throw new InvalidCardException("Too few blanks");
                 this.blanks = blanks;
-            }
-
-            void setWinningCard(WhiteCard winningCard) {
-                this.winningCard = winningCard;
             }
 
             @Override
@@ -342,7 +343,7 @@ public class CardsAgainstHumanityCommand extends Command {
         private static final int MIN_PLAYERS = 3;
 
         /** The hosting channel */
-        private final long channelID;
+        private final TextChannel channel;
         private GAME_STATE STATE;
         /** The Deck of Cards playing with */
         private final CAHDeck deck;
@@ -352,7 +353,6 @@ public class CardsAgainstHumanityCommand extends Command {
         /** The current Czar */
         CAHPlayer czar;
         BlackCard blackCard;
-        final List<WhiteCard> playedCards;
         /** The winners of the game */
         private ArrayList<CAHPlayer> WINNERS;
 
@@ -365,14 +365,18 @@ public class CardsAgainstHumanityCommand extends Command {
         public CardsAgainstHumanity(Weebot bot, TextChannel channel, Member author,
                                     int handSize, CAHDeck deck) {
             super(bot, author.getUser());
-            this.PLAYERS.putIfAbsent(AUTHOR_ID, new CAHPlayer(author));
-            this.channelID = channel.getIdLong();
+            this.channel = channel;
             this.HAND_SIZE = handSize;
-            this.playedCards = new ArrayList<>();
+            this.PLAYERS.putIfAbsent(AUTHOR_ID, new CAHPlayer(author));
             this.deck = deck;
             deck.loadStandardCards();
         }
 
+        /**
+         * Add a new player by Member. If the game is running, deals cards. if not, wont.
+         * @param member
+         * @return false if the player is already in the game.
+         */
         public final boolean addUser(Member member) {
             if (this.RUNNING) {
                 return this.joinGame(new CAHPlayer(member));
@@ -394,11 +398,11 @@ public class CardsAgainstHumanityCommand extends Command {
         protected boolean dealCards(CAHPlayer player) {
             boolean delt = false;
             int rand;
-            for (WhiteCard c : player.hand) {
-                if (c == null) {
+            for (int i = 0; i < player.hand.length; i++) {
+                if (player.hand[i] == null) {
                     rand = ThreadLocalRandom.current()
                                             .nextInt(deck.whiteCards.size());
-                    c = deck.whiteCards.get(rand);
+                    player.hand[i] = deck.whiteCards.get(rand);
                     delt = true;
                 }
             }
@@ -406,17 +410,25 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         /**
-         * Remove a card and place it in the played cards pile.
-         * @param player The player
-         * @param card The card
-         * @return false if the card is already in the pile
+         * Put the cards in the player's {@link CAHPlayer#playedCards}.
+         * @param player
+         * @param cards card indices
+         * @return  0 if the cards were played <br>
+         *         -1 if the player has already played their cards<br>
+         *         -2 if the player is the czar
          */
-        protected boolean playCard(CAHPlayer player, int card) {
-            if (this.playedCards.add(player.hand[card])) {
-                player.hand[card] = null;
-                return true;
+        protected int playCards(CAHPlayer player, int[] cards) {
+            if (player.playedCards != null) {
+                return -1;
+            } else if (player == this.czar) {
+                return -2;
             }
-            return false;
+            int i = 0;
+            for (Integer c : cards) {
+                player.playedCards[i] = player.hand[c];
+                player.hand[c] = null;
+            }
+            return 0;
         }
 
         /**
@@ -425,20 +437,33 @@ public class CardsAgainstHumanityCommand extends Command {
          */
         @Override
         public boolean startGame() {
-            //Well you can't play CAH with less than 3 people
-            if (this.PLAYERS.size() < 3) {
+            if (this.PLAYERS.size() < MIN_PLAYERS) {
                 return false;
             }
             //Oh yeah we need TODO the actual game
             //Deal cards
             for (CAHPlayer p : this.PLAYERS.values())
-                this.dealCards(p);
-            //Set Czar
+                if (!this.dealCards(p)) {
+                    System.err.println("Not delt!");
+                    return false;
+                }
             CAHPlayer[] ar = this.PLAYERS.values().toArray(new CAHPlayer[0]);
-            this.czar = ar[ThreadLocalRandom.current().nextInt(0, ar.length + 1)];
+            this.czar = ar[ThreadLocalRandom.current().nextInt(0, ar.length)];
             //Set the first black card
             int rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
             blackCard = this.deck.blackCards.get(rand);
+
+            //Send card hands
+            PLAYERS.values().forEach( p -> {
+                StringBuilder sb = new StringBuilder();
+                sb.append("Cards against " + Launcher.getGuild(
+                        Long.parseLong(this.HOST_ID.replace("W", ""))).getName()
+                            + "```");
+                for (int i = 0; i < p.hand.length; i++) {
+                    sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
+                }
+                p.privateMessage(sb.append(" ```").toString());
+            });
             //Game state
             this.RUNNING = true;
             this.STATE = GAME_STATE.CHOOSING;
@@ -478,6 +503,10 @@ public class CardsAgainstHumanityCommand extends Command {
         );
     }
 
+    private static final String NO_GAME_FOUND =
+            "There is no Cards Against Humanity game setup or running! Use ```"
+            + "cah setup [hand_size] [deck_name] [deck2_name]...```to setup a new game.";
+
     private enum ACTION {
         /**Setup a new game*/
         SETUP,
@@ -487,6 +516,10 @@ public class CardsAgainstHumanityCommand extends Command {
         JOIN,
         /** End the game */
         END,
+        /** Play cards */
+        PLAY,
+        /** Czar Choose a winning card */
+        PICK,
         /** View list of all decks */
         VIEWALLDECKS,
         /** View all cards in a deck */
@@ -539,7 +572,8 @@ public class CardsAgainstHumanityCommand extends Command {
         CardsAgainstHumanity game = null;
         for (Game g : bot.getRunningGames()) {
             if (g instanceof CardsAgainstHumanity) {
-                if (((CardsAgainstHumanity) g).channelID == channel.getIdLong()) {
+                if (((CardsAgainstHumanity) g).channel.getIdLong()
+                                                == channel.getIdLong()) {
                     game = (CardsAgainstHumanity) g;
                     break;
                 }
@@ -608,45 +642,54 @@ public class CardsAgainstHumanityCommand extends Command {
             case START:
                 if (game != null) {
                     if (game.startGame()) {
-                        event.reply("The Card Czar is @"
+                        event.reply("The Card Czar is "
                                     + game.czar.member.getEffectiveName()
                                     + ", please select your cards in the private chat I "
                                     + "sent you.\n\nHere's the first Black Card:```"
-                                    + game.blackCard.cardText + "```");
+                                    + game.blackCard.cardText + "\n```");
                     } else {
                         event.reply("You need at least **3** players to start a game of"
                                     + " Cards Against Humanity.");
                     }
-                    return;
                 } else {
-                    event.reply("There is no Cards Against Humanity game setup!"
-                                + " Use ```"
-                                + "cah setup [hand_size] [deck_name] [deck2_name]...```"
-                                + "\n to setup a new game.");
+                    event.reply(NO_GAME_FOUND);
                 }
                 return;
             case JOIN:
                 if (game != null) {
-                    if (!game.isRunning()) {
-                        game.addUser(event.getMember());
+                    if (game.addUser(event.getMember())) {
+                        event.reply("*You've been added to the game!*");
                     } else {
-                        if (game.addUser(event.getMember())) {
-                            event.reply("You've been added to the game!");
-                        } else {
-                            event.reply("You're already in the game.", m -> {
-                                try {Thread.sleep(10*1000);}
-                                catch (InterruptedException e){}
-                                m.delete().queue();
-                                event.deleteMessage();
-                            });
-                        }
+                        event.reply("***You're already in the game.***", m -> {
+                            try { Thread.sleep(10*1000); }
+                            catch (InterruptedException e){}
+                            m.delete().queue();
+                            event.deleteMessage();
+                        });
                     }
                 } else {
-                    event.reply("There is no Cards Against Humanity game setup or "
-                                + "running! Use ```"
-                                + "cah setup [hand_size] [deck_name] [deck2_name]...```"
-                                + "\n to setup a new game.");
+                    event.reply(NO_GAME_FOUND);
                 }
+                return;
+            case PLAY: //cah play/use <card1_number> [card2_num] [card3_num]...[card5_num]
+                if (game != null) {
+                    //Check for minimum number of cards
+                    if (args.length == 2 + game.blackCard.blanks) {
+                        int[] cardIndicies = new int[game.blackCard.blanks];
+                        try {
+                            for (int i = 2; i < args.length; i++) {
+
+                            }
+                        } catch (NumberFormatException e) {
+
+                        }
+                    } else {
+                        event.reply(" ");
+                    }
+                } else {
+                    event.reply(NO_GAME_FOUND);
+                }
+
                 return;
             case END:
             case VIEWALLDECKS:
@@ -691,6 +734,12 @@ public class CardsAgainstHumanityCommand extends Command {
             case "end":
             case "stop":
                 return ACTION.END;
+            case "use":
+            case "play":
+                return ACTION.PLAY;
+            case "choose":
+            case "pick":
+                return ACTION.PICK;
             case "alldecks":
                 return ACTION.VIEWALLDECKS;
             case "deckfile":

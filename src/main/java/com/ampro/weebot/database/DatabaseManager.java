@@ -25,10 +25,10 @@ public class DatabaseManager {
         File file = new File(DIR, "database.wbot");
         try {
             if (!DIR.mkdir()) {
-                System.err.println("\tDirectory not created.");
+                //System.err.println("\tDirectory not created.");
             }
             if (!file.createNewFile()) {
-                System.err.println("\tFile not created");
+                //System.err.println("\tFile not created");
             }
         } catch (IOException e) {
             System.err.println("IOException while creating Database file.");
@@ -57,10 +57,10 @@ public class DatabaseManager {
         File file = new File(DIR, "databaseBK.wbot");
         try {
             if (!DIR.mkdir()) {
-                System.err.println("\tDirectory not created.");
+                //System.err.println("\tDirectory not created.");
             }
             if (!file.createNewFile()) {
-                System.err.println("\tFile not created");
+                //System.err.println("\tFile not created");
             }
         } catch (IOException e) {
             System.err.println("IOException while creating Database backup file.");
