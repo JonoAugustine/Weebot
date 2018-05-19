@@ -451,7 +451,7 @@ public class CardsAgainstHumanityCommand extends Command {
             this.czar = ar[ThreadLocalRandom.current().nextInt(0, ar.length)];
             //Set the first black card
             int rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
-            blackCard = this.deck.blackCards.get(rand);
+            blackCard = this.deck.blackCards.remove(rand);
 
             //Send card hands
             PLAYERS.values().forEach( p -> {
@@ -671,28 +671,71 @@ public class CardsAgainstHumanityCommand extends Command {
                     event.reply(NO_GAME_FOUND);
                 }
                 return;
-            case PLAY: //cah play/use <card1_number> [card2_num] [card3_num]...[card5_num]
+            case PLAY: //cah play <card1_number> [card2_num]...[card5_num]
                 if (game != null) {
+                    if (game.STATE != GAME_STATE.CHOOSING) {
+                        //If we are at the reading period, dont let people play cards.
+                        //Respond then delete both messages to clean clutter
+                        event.reply("Please wait for the next round to play more cards.",
+                                    m -> {
+                                        try { Thread.sleep(5 * 1000); }
+                                        catch (InterruptedException e) {}
+                                        m.delete().queue();
+                                        event.deleteMessage();
+                                    });
+                        return;
+                    }
                     //Check for minimum number of cards
-                    if (args.length == 2 + game.blackCard.blanks) {
-                        int[] cardIndicies = new int[game.blackCard.blanks];
+                    if (args.length < 2 + game.blackCard.blanks) {
+                        int[] cards = new int[game.blackCard.blanks];
                         try {
                             for (int i = 2; i < args.length; i++) {
-
+                                cards[i - 2] = Integer.parseInt(args[i]);
                             }
                         } catch (NumberFormatException e) {
-
+                            e.printStackTrace();
+                            event.reply("Sorry, I had some trouble reading your request.");
+                            return;
                         } catch (IndexOutOfBoundsException e) {
-                            event.reply("Too many cards");//TODO
+                            event.reply("Too many cards. Choose "+ game.blackCard.blanks
+                                        + " cards.");
+                            //TODO
+                            return;
+                        }
+                        switch (game.playCards(game.getPlayer(event.getAuthor()), cards)) {
+                            case 0:
+                                break;
+                            case -1:
+                            case -2:
                         }
                     } else {
-                        event.reply("Not enough cards");//TODO
+                        event.reply("Not enough cards. Choose "+ game.blackCard.blanks
+                                    + " cards.");
+                        //TODO
+                        return;
                     }
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
                 return;
             case PICK:
+                if (game != null) {
+                    if (game.STATE != GAME_STATE.READING) {
+                        //If the players are still choosing their cards we don't want to
+                        //let the czar pick anything, so reply and delete the messages to
+                        //clear clutter
+                        event.reply("*Players are still choosing thier cards, please "
+                                    + "wait for them to finish*.", m -> {
+                            try { Thread.sleep(5 * 1000); }
+                            catch (InterruptedException e) {}
+                            m.delete().queue();
+                            event.deleteMessage();
+                        });
+                    }
+
+                } else {
+                    event.reply(NO_GAME_FOUND);
+                }
                 return;
             case END:
                 if (game != null) {
