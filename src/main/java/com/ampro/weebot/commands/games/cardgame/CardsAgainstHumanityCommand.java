@@ -91,13 +91,14 @@ public class CardsAgainstHumanityCommand extends Command {
              */
             public final void updateHandMessage(String newMmessage) {
                 try {
-                    this.handMessage.editMessage(newMmessage).queue(
-                            message -> this.handMessage = message
-                    );
+                    this.handMessage.editMessage(newMmessage).queue(message -> this
+                            .handMessage = message);
                 } catch (Exception e) {
                     this.privateMessage(newMmessage, m -> this.handMessage = m);
                 }
             }
+
+
 
         }
 
@@ -431,14 +432,16 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         /**
-         * Send all players their hands.
+         * Send all players their hands and the current black card.
          */
         protected void sendHands() {
             PLAYERS.values().forEach( p -> {
                 StringBuilder sb = new StringBuilder();
                 sb.append("Cards against ")
                   .append(Launcher.getGuild(Long.parseLong(this.HOST_ID.replace("W", "")))
-                                  .getName()).append("```");
+                                  .getName())
+                  .append("```Black Card:\n").append(this.blackCard)
+                  .append("\n\n\nYour deck:\n\n");
                 for (int i = 0; i < p.hand.length; i++) {
                     sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
                 }
@@ -608,6 +611,8 @@ public class CardsAgainstHumanityCommand extends Command {
         END,
         /** Play cards */
         PLAY,
+        /** Resend the player their hand */
+        SENDHAND,
         /** Czar Choose a winning card */
         PICK,
         /** View list of all decks */
@@ -676,6 +681,7 @@ public class CardsAgainstHumanityCommand extends Command {
         cah start
         cah play/use <card_number> [card2_num] [card3_num] [card4_num] [card5_num]
         cah pick <card_set_num>
+        cah myhand
 
         cah make deck <deck_name>
         cah make <deck_num> <white[card]> [card text]
@@ -973,6 +979,28 @@ public class CardsAgainstHumanityCommand extends Command {
                     event.reply(NO_GAME_FOUND);
                 }
                 return;
+            case SENDHAND:
+                if (game != null) {
+                    CAHPlayer p = game.getPlayer(event.getAuthor());
+                    if (p != null) {
+                        sb.setLength(0);
+                        sb.append("Cards against ").append(Launcher.getGuild(
+                                Long.parseLong(game.getHOST_ID().replace("W", ""))).getName())
+                          .append("```Black Card:\n").append(game.blackCard).append
+                                ("\n\n\nYour deck:\n\n");
+                        for (int i = 0; i < p.hand.length; i++) {
+                            sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
+                        }
+                        p.privateMessage(sb.append(" ```").toString());
+                        event.deleteMessage();
+                    } else {
+                        event.reply("You are not in the game. Use ```cah join``` to " +
+                                            "join.");
+                    }
+                } else {
+                    event.reply(NO_GAME_FOUND);
+                }
+                return;
             case END:
                 if(game != null) {
                     game.endGame();
@@ -1049,6 +1077,8 @@ public class CardsAgainstHumanityCommand extends Command {
             case "use":
             case "play":
                 return ACTION.PLAY;
+            case "myhand":
+                return ACTION.SENDHAND;
             case "pick":
                 return ACTION.PICK;
             case "alldecks":
