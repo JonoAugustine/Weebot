@@ -1073,9 +1073,8 @@ public class CardsAgainstHumanityCommand extends Command {
                 sb.append("*Cards against ").append(event.getGuild().getName())
                   .append(" Custom Decks*```");
                 decks.forEach( deck -> {
-                    int i = 1;
                     if (deck.isAllowed(event.getMember()))
-                        sb.append(i++).append(".) " + deck.name).append("\n\n");
+                        sb.append(">" + deck.name).append("\n\n");
                 });
                 sb.append(" ```");
                 event.reply(sb.toString());
@@ -1100,7 +1099,7 @@ public class CardsAgainstHumanityCommand extends Command {
                       .append("*'. Use```cah alldecks```to see all available decks.");
                     event.reply(sb.toString());
                 }
-                sb.append("```").append(this.name.replace("_", " "))
+                sb.append("```").append(cahDeck.name.replace("_", " "))
                   .append(" Deck:\n\n\n").append("White Cards:\n\n");
                 int i = 0;
                 for (WhiteCard wc : cahDeck.whiteCards) {
