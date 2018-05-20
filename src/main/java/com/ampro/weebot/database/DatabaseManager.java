@@ -13,7 +13,7 @@ import java.io.*;
  */
 public class DatabaseManager {
 
-    private static final File DIR = new File("databases");
+    public static final File DIR = new File("databases");
 
     /**
      * Save the Database to file in the format:

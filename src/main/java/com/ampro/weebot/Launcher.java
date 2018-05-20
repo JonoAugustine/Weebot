@@ -8,6 +8,7 @@ package com.ampro.weebot;
 import com.ampro.weebot.commands.HelpCommand;
 import com.ampro.weebot.commands.ManageSettingsCommand;
 import com.ampro.weebot.commands.NotePadCommand;
+import com.ampro.weebot.commands.developer.DatabaseFileCommand;
 import com.ampro.weebot.commands.developer.ListGuildsCommand;
 import com.ampro.weebot.commands.developer.ShutdownCommand;
 import com.ampro.weebot.commands.developer.WeebotSuggestionCommand;
@@ -53,7 +54,7 @@ public class Launcher {
 
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
-					new HelpCommand(), new ShutdownCommand(),
+					new HelpCommand(), new ShutdownCommand(), new DatabaseFileCommand(),
 					new ManageSettingsCommand(), new ListGuildsCommand(),
                     new PingCommand(), new SpamCommand(), new NotePadCommand(),
                     new SelfDestructMessageCommand(), new SecretePhraseCommand(),
