@@ -17,8 +17,8 @@ import java.util.Arrays;
 public class SelfDestructMessageCommand extends Command {
 
     public SelfDestructMessageCommand() {
-        super("SelfDestruct", new ArrayList<>(
-                      Arrays.asList("deleteme", "cleanthis", "deletethis", "covertracks")),
+        super("SelfDestruct", new ArrayList<>(Arrays.asList(
+                "deleteme", "cleanthis", "deletethis","covertracks", "whome?", "podh")),
 
               "Deletes the marked message after the given amount of time (30 sec by " +
                       "default)",
@@ -81,6 +81,19 @@ public class SelfDestructMessageCommand extends Command {
         }
 
         event.deleteMessage();
+    }
+
+    @Override
+    public String getHelp() {
+        StringBuilder sb = new StringBuilder();
+
+        sb.append("```Self Destruct Command Help:\n\n")
+          .append("selfdestruct [Whatever you want to say]\n\n")
+          .append("'selfdestruct' can be replaced with any of these:\n")
+          .append(this.aliases)
+          .append("```");
+
+        return sb.toString();
     }
 
 }
