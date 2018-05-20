@@ -5,6 +5,7 @@
 
 package com.ampro.weebot;
 
+import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.HelpCommand;
 import com.ampro.weebot.commands.ManageSettingsCommand;
 import com.ampro.weebot.commands.NotePadCommand;
@@ -21,7 +22,6 @@ import com.ampro.weebot.database.Database;
 import com.ampro.weebot.database.DatabaseManager;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.jda.JDABuilder;
-import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.listener.EventDispatcher;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
@@ -173,8 +173,8 @@ public class Launcher {
     }
 
 	/**
-	 * Calls the update method for each Weebot to setup NickNames //TODO and more?
-	 * changed during downtime.
+	 * Calls the update method for each Weebot to setup NickNames
+	 * changed during downtime and initialize transient variables.
 	 */
 	private static void updateWeebots() {
 		for (Weebot bot : DATABASE.getWeebots().values()) {

@@ -23,8 +23,10 @@ import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
         .CardsAgainstHumanity.CAHDeck;
 import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;
 import java.util.*;
@@ -253,6 +255,11 @@ public class Weebot implements Comparable<Weebot> {
         if (this.PASSIVES == null) {
             this.PASSIVES = new ArrayList<>();
         }
+    }
+
+    /**@return The bot's self use from {@link JDA#getSelfUser()}. */
+    public final User asUser() {
+        return Launcher.getJda().getSelfUser();
     }
 
     @Override

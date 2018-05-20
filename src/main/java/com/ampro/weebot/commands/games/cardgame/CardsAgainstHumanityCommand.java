@@ -8,8 +8,7 @@ import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
-import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
-        .CardsAgainstHumanity.*;
+import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand.CardsAgainstHumanity.*;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -713,7 +712,6 @@ public class CardsAgainstHumanityCommand extends Command {
             if(this.PLAYERS.size() < MIN_PLAYERS) {
                 return false;
             }
-            //Oh yeah we need TODO the actual game
             //Deal cards
             for (CAHPlayer p : this.PLAYERS.values())
                 if(!this.dealCards(p)) {
@@ -786,6 +784,8 @@ public class CardsAgainstHumanityCommand extends Command {
         JOIN,
         /** Player lease the game */
         LEAVE,
+        /** Invite the bot to play */
+        ADDBOT,
         /** End the game */
         END,
         /** Play cards */
@@ -835,15 +835,16 @@ public class CardsAgainstHumanityCommand extends Command {
         StringBuilder sb = new StringBuilder();
         String[] args = this.cleanArgs(bot, event);
         if(args.length < 2) {
-            //TODO help
+            event.reply(
+                    "What do you want me to do? ```help cah``` for a list of commands");
             return;
         }
-        String message = event.toString();
         TextChannel channel = event.getTextChannel();
         ACTION action = this.parseAction(args[1]);
         if(action == null) {
-            event.reply("Sorry, '" + args[1] + "' is not an available command.");
-            //TODO Better help
+            sb.append("Sorry, '" + args[1] + "' is not an available command.")
+                    .append("```help cah``` for a list of commands.");
+            event.reply(sb.toString());
             return;
         }
         //Attempt to find a running game in this channel
@@ -862,6 +863,7 @@ public class CardsAgainstHumanityCommand extends Command {
         }
         //Some cases later will need this
         CAHDeck cahDeck;
+        CAHPlayer botPlayer;
         /*
         cah remove <deck_num> TODO maybe only on empty decks?
         cah remove <deck_num> <card_num>
@@ -927,6 +929,7 @@ public class CardsAgainstHumanityCommand extends Command {
                     }
                     if(game.startGame()) {
                         event.reply(game.blackCardEmbed());
+                        botPlayer = game.getPlayer(bot.asUser());
                     } else {
                         event.reply("You need at least **3** players to start a game of"
                                     + " Cards Against Humanity.");
@@ -942,7 +945,27 @@ public class CardsAgainstHumanityCommand extends Command {
                     } else {
                         event.reply("***You're already in the game.***", m -> {
                             try {
-                                Thread.sleep(10 * 1000);
+                                Thread.sleep(5 * 1000);
+                            } catch (InterruptedException e) {
+                            }
+                            m.delete().queue();
+                            event.deleteMessage();
+                        });
+                    }
+                } else {
+                    event.reply(NO_GAME_FOUND);
+                }
+                return;
+            case ADDBOT:
+                if (game != null) {
+                    Member botMember =
+                            event.getGuild().getMember(Launcher.getJda().getSelfUser());
+                    if (game.addUser(botMember)) {
+                        event.reply("*knocks door down* The robots have come to play.");
+                    } else {
+                        event.reply("***I am already in the game*** :wink:", m -> {
+                            try {
+                                Thread.sleep(5 * 1000);
                             } catch (InterruptedException e) {
                             }
                             m.delete().queue();
@@ -1112,6 +1135,8 @@ public class CardsAgainstHumanityCommand extends Command {
 
                     //Send new card hands
                     game.sendHands();
+
+                    //If the bot is playing
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
@@ -1390,6 +1415,11 @@ public class CardsAgainstHumanityCommand extends Command {
                 return ACTION.START;
             case "join":
                 return ACTION.JOIN;
+            case "+bot":
+            case "wbot":
+            case "addbot":
+            case "inviteebot":
+                return ACTION.ADDBOT;
             case "leave":
                 return ACTION.LEAVE;
             case "end":
@@ -1440,6 +1470,7 @@ public class CardsAgainstHumanityCommand extends Command {
           .append("cah join\n").append("cah start\n")
           .append("cah play <card1_number> /card2_num/.../card5_num/\n")
           .append("cah pick <card_set_num>\n").append("cah myhand\n")
+          .append("cah addbot\n")
           .append("\ncah makedeck <deck_name>\n")
           .append("cah makewhitecard/mkwc <deck_name> <card text>\n")
           .append("cah makeblackcard/mkbc <deck_name> <blanks> <card text>\n")
