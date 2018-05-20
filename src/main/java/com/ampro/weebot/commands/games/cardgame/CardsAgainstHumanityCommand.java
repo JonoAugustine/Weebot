@@ -12,16 +12,19 @@ import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
         .CardsAgainstHumanity.*;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 
 import javax.naming.InvalidNameException;
+import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.util.*;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 
@@ -97,8 +100,6 @@ public class CardsAgainstHumanityCommand extends Command {
                     this.privateMessage(newMmessage, m -> this.handMessage = m);
                 }
             }
-
-
 
         }
 
@@ -369,7 +370,7 @@ public class CardsAgainstHumanityCommand extends Command {
             READING
         }
 
-        private static final transient int MIN_PLAYERS = 3;
+        private static final transient int MIN_PLAYERS = 1;
 
         /** The hosting channel */
         private final TextChannel channel;
@@ -510,6 +511,155 @@ public class CardsAgainstHumanityCommand extends Command {
             //progresses to READING
             this.STATE = GAME_STATE.READING;
             return true;
+        }
+
+        /** @return An embed of the black card and the played cards */
+        private MessageEmbed playedCardsEmbed() {
+            if (this.STATE != GAME_STATE.READING) return null;
+            // Create the EmbedBuilder instance
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.setColor(new Color(0x20F457));
+
+            //Add embed author:
+            //1. Arg: name as string
+            //2. Arg: url as string (can be null)
+            //3. Arg: icon url as string (can be null)
+            eb.setAuthor("Cards against " + channel.getGuild().getName(),
+                         null, channel.getGuild().getIconUrl());
+
+            //Set the title:
+            //1. Arg: title as string
+            //2. Arg: URL as string or could also be null
+            eb.setTitle("Czar:  " + czar.member.getEffectiveName(), null);
+
+            eb.setDescription("All the players have played their cards" +
+                                      " -- Czar, please choose your victor.");
+
+            //Add fields to embed:
+            //1. Arg: title as string
+            //2. Arg: text as string
+            //3. Arg: inline mode true / false
+            eb.addField("Black Card:", this.blackCard.cardText, false);
+
+            Collections.shuffle(this.playerList);
+            StringBuilder sb = new StringBuilder();
+            int i = 1;
+            for (CAHPlayer p : this.playerList) {
+                int k = 1;
+                for (WhiteCard wc : p.playedCards) {
+                    if (p.playedCards.length > 1)
+                        sb.append((k++) + ".) ");
+                    sb.append(wc + "\n");
+                }
+                eb.addField("Player " + i++, sb.toString() , false);
+            }
+
+            //Add spacer like field
+            //Arg: inline mode true / false
+            eb.addBlankField(false);
+
+            eb.addField("How to Play:",
+                        "Select the best card (or set of cards) with 'cah pick #'.",
+                        false);
+
+            //1. Arg: text as string
+            //2. icon url as string (can be null)
+            eb.setFooter("Run by Weebot",
+                         Launcher.getJda().getSelfUser().getAvatarUrl()
+            );
+
+            //Set image:
+            //Arg: image url as string
+            //eb.setImage();
+
+            //Set thumbnail image:
+            //Arg: image url as string
+            //eb.setThumbnail();
+
+            return eb.build();
+
+        }
+
+        /** @return A round-start black card*/
+        private MessageEmbed blackCardEmbed() {
+            // Create the EmbedBuilder instance
+            EmbedBuilder eb = new EmbedBuilder();
+
+            eb.setColor(new Color(0x20F457));
+
+            //Add embed author:
+            //1. Arg: name as string
+            //2. Arg: url as string (can be null)
+            //3. Arg: icon url as string (can be null)
+            eb.setAuthor("Cards against " + channel.getGuild().getName(),
+                         null, channel.getGuild().getIconUrl());
+
+            //Set the title:
+            //1. Arg: title as string
+            //2. Arg: URL as string or could also be null
+            eb.setTitle("Czar:  " + czar.member.getEffectiveName(), null);
+
+            //Add fields to embed:
+            //1. Arg: title as string
+            //2. Arg: text as string
+            //3. Arg: inline mode true / false
+            eb.addField("Black Card (Pick "+ this.blackCard.blanks +"):",
+                        this.blackCard.cardText,false);
+
+            //Add spacer like field
+            //Arg: inline mode true / false
+            eb.addBlankField(false);
+
+            eb.addField("How to Play:",
+                        "Select your cards from the private chat I sent you.",
+                        false);
+
+            //1. Arg: text as string
+            //2. icon url as string (can be null)
+            eb.setFooter("Run by Weebot",
+                         Launcher.getJda().getSelfUser().getAvatarUrl()
+            );
+
+            return eb.build();
+        }
+
+        private MessageEmbed winnerEmbed(CAHPlayer winner) {
+            // Create the EmbedBuilder instance
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.setColor(new Color(0x20F457));
+
+            //Add embed author:
+            //1. Arg: name as string
+            //2. Arg: url as string (can be null)
+            //3. Arg: icon url as string (can be null)
+            eb.setAuthor("Cards against " + channel.getGuild().getName(),
+                         null, channel.getGuild().getIconUrl());
+
+            //Set the title:
+            //1. Arg: title as string
+            //2. Arg: URL as string or could also be null
+            eb.setTitle(winner.member.getEffectiveName()
+                                + " wins this round!!!:tada: :tada:",
+                        null);
+
+            this.playerList.sort(new scoreComparator());
+            StringBuilder sb = new StringBuilder();
+            for (CAHPlayer p : this.playerList) {
+                sb.append("*").append(p.member.getEffectiveName())
+                  .append("* : ").append(p.cardsWon.size()).append("\n");
+            }
+
+            eb.addField("Leader Board:", sb.toString(), false);
+
+            eb.addBlankField(false);
+
+            //1. Arg: text as string
+            //2. icon url as string (can be null)
+            eb.setFooter("Run by Weebot",
+                         Launcher.getJda().getSelfUser().getAvatarUrl()
+            );
+
+            return eb.build();
         }
 
         /**
@@ -776,12 +926,7 @@ public class CardsAgainstHumanityCommand extends Command {
                         return;
                     }
                     if(game.startGame()) {
-                        event.reply("The Card Czar is "
-                                    + game.czar.member.getEffectiveName()
-                                    + ", please select your cards from the private chat"
-                                    + " I sent you."
-                                    + ".\n\nHere's the first Black Card:```"
-                                    + game .blackCard.cardText + "\n```");
+                        event.reply(game.blackCardEmbed());
                     } else {
                         event.reply("You need at least **3** players to start a game of"
                                     + " Cards Against Humanity.");
@@ -902,22 +1047,7 @@ public class CardsAgainstHumanityCommand extends Command {
                         return;
                     }
                     if(game.allCardsPlayed()) {
-                        sb.setLength(0);
-                        sb.append(
-                                "*All players have played their cards. Czar, please"
-                                    + " choose your victor.*\n```");
-
-                        int i = 1;
-                        Collections.shuffle(game.playerList);
-                        for (CAHPlayer p : game.playerList) {
-                            sb.append((i++) + ":\n");
-                            for (WhiteCard wc : p.playedCards) {
-                                sb.append("\t> " + wc + "\n");
-                            }
-                            sb.append("\n");
-                        }
-                        sb.append("```");
-                        event.reply(sb.toString());
+                        event.reply(game.playedCardsEmbed());
                     }
                     return;
                 } else {
@@ -973,27 +1103,12 @@ public class CardsAgainstHumanityCommand extends Command {
                     game.blackCard.winningCards = winner.playedCards;
                     winner.cardsWon.add(game.blackCard);
 
-                    sb.append("***").append(winner.member.getEffectiveName())
-                      .append("*** wins this round!:tada: :tada: :tada:")
-                      .append("\nHere's how the game is going so ")
-                      .append("far:\n\n");
+                    event.reply(game.winnerEmbed(winner));
 
-                    game.playerList.sort(new scoreComparator());
-
-                    for (CAHPlayer p : game.playerList) {
-                        sb.append("*").append(p.member.getEffectiveName())
-                          .append("* : ").append(p.cardsWon.size()).append("\n\n");
-                    }
-
-                    event.reply(sb.toString());
-                    sb.setLength(0);
                     //Setup next round
                     game.setupNextRound();
 
-                    event.reply("The Card Czar is " + game.czar.member.getEffectiveName()
-                                + ", select your cards from the private chat I sent you"
-                                + "\n\nHere's the Black Card:```"
-                                + game.blackCard.cardText + "\n```");
+                    event.reply(game.blackCardEmbed());
 
                     //Send new card hands
                     game.sendHands();
@@ -1043,7 +1158,7 @@ public class CardsAgainstHumanityCommand extends Command {
                         }
                     }
                     sb.setLength(0);
-                    sb.append("\nHere's how the game went: ");
+                    sb.append("\nHere's how the game went:\n");
 
                     game.playerList.sort(new scoreComparator());
 
@@ -1074,7 +1189,7 @@ public class CardsAgainstHumanityCommand extends Command {
                   .append(" Custom Decks*```");
                 decks.forEach( deck -> {
                     if (deck.isAllowed(event.getMember()))
-                        sb.append(">" + deck.name).append("\n\n");
+                        sb.append("> " + deck.name).append("\n\n");
                 });
                 sb.append(" ```");
                 event.reply(sb.toString());
@@ -1291,6 +1406,7 @@ public class CardsAgainstHumanityCommand extends Command {
                 return ACTION.VIEWALLDECKS;
             case "viewdeck":
             case "seedeck":
+            case "see":
                 return ACTION.VIEWDECK;
             case "deckfile":
                 return ACTION.DECKFILE;
@@ -1327,7 +1443,7 @@ public class CardsAgainstHumanityCommand extends Command {
           .append("\ncah makedeck <deck_name>\n")
           .append("cah makewhitecard/mkwc <deck_name> <card text>\n")
           .append("cah makeblackcard/mkbc <deck_name> <blanks> <card text>\n")
-          .append("cah alldecks \n").append("cah viewdeck <deck_name>")
+          .append("cah alldecks \n").append("cah see <deck_name>")
           .append("cah deckfile [deck_name]\n")
           .append("cah remove <deck_num> **\n")
           .append("cah remove <deck_num> <card_num> **\n")
@@ -1337,4 +1453,5 @@ public class CardsAgainstHumanityCommand extends Command {
 
         return sb.toString();
     }
+
 }

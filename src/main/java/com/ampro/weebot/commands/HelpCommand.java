@@ -119,9 +119,9 @@ public class HelpCommand extends Command {
           .append("\t- Official decks up to Expansion 3\n")
           .append("\t- Sever Custom Decks\n")
           .append("- Secrete Phrase (Under construction)\n")
-          .append("- Self-destruct messages 'deleteme'\n")
-          .append("- List all guilds hosting a Weebot 'listguilds'\n")
-          .append("- Ping 'ping'")
+          .append("- Self-destruct messages ('deleteme')\n")
+          .append("- List all guilds hosting a Weebot ('listguilds')\n")
+          .append("- Ping ('ping')")
           .append("```");
         event.privateReply(sb.toString());
 

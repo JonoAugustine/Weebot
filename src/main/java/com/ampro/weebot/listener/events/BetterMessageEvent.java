@@ -27,6 +27,7 @@ import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent;
 
 import java.io.File;
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -168,15 +169,6 @@ public class BetterMessageEvent extends BetterEvent {
 
     }
 
-
-    /**
-     * Send a message to the channel the event came from.
-     * @param message {@code net.dv8tion.jda.core.entities.Message} to send
-     */
-    private void reply(Message message) {
-        this.reply(message.getContentRaw());
-    }
-
     /**
      * Reply with a file and message.
      * @param file
@@ -213,6 +205,10 @@ public class BetterMessageEvent extends BetterEvent {
                 return;
         }
         synchronized (file) { consumer.accept(file); }
+    }
+
+    public void reply(MessageEmbed embed) {
+        this.message.getChannel().sendMessage(embed).queue();
     }
 
     /**
@@ -303,6 +299,11 @@ public class BetterMessageEvent extends BetterEvent {
      */
     public String[] getArgs() {
         return this.arguments;
+    }
+
+
+    public List<Message.Attachment> getAttatchment() {
+        return this.message.getAttachments();
     }
 
     @Override
