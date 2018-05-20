@@ -93,11 +93,38 @@ public class HelpCommand extends Command {
      * @param event The event that invoked this.
      */
     private void genericHelp(Weebot bot, BetterMessageEvent event) {
-        //TODO genericHelp response
-        String out = "```" + bot.getNickname() + " Help:\n";
-        out += "Sorry, this command is still under construction.\n";
-        out += "```";
-        event.reply(out);
+        StringBuilder sb = new StringBuilder();
+        sb.append("**Settings**\n").append("```")
+          .append("- Set bot nickname with 'setname <name>'\n")
+          .append("- Change the prefix with 'prefix <new_prefix>'\n")
+          .append("- (Dis)Allow the bot to use explicit language")
+          .append(" with 'expl on/off'\n")
+          .append("- Allow or disallow the bot to use NSFW commands")
+          .append(" with 'nsfw of/off'\n")
+          .append("- Server-wide word bans. (Under construction)")
+          .append("- (Dis)Allow the bot to respond to actions not directed to it.")
+          .append("(Under construction)\n\n")
+          .append("```");
+        event.privateReply(sb.toString());
+
+        sb.setLength(0);
+
+        sb.append("**Commands**\nAsk this for more details```help [command_name]```.\n")
+          .append("```")
+          .append("- Note Pads ('notes')\n")
+          .append("\t- Write and edit Note Pads\n")
+          .append("\t- Lock Note Pads to roles, members, and text channels\n")
+          .append("- Reminders (Under construction)\n")
+          .append("- Cards Against Humanity ('cah')\n")
+          .append("\t- Official decks up to Expansion 3\n")
+          .append("\t- Sever Custom Decks\n")
+          .append("- Secrete Phrase (Under construction)\n")
+          .append("- Self-destruct messages 'deleteme'\n")
+          .append("- List all guilds hosting a Weebot 'listguilds'\n")
+          .append("- Ping 'ping'")
+          .append("```");
+        event.privateReply(sb.toString());
+
     }
 
     /**
@@ -112,6 +139,13 @@ public class HelpCommand extends Command {
         out += "Sorry, this command is still under construction.\n";
         out += "```";
         event.reply(out);
+    }
+
+    @Override
+    public String getHelp() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Help Help...wait what?");
+        return sb.toString();
     }
 
 }

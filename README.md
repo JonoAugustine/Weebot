@@ -20,12 +20,21 @@ development progress.
     - Server-wide word bans. (Under construction)
     - Allow or disallow the bot to respond to actions not directed to it.
 - Commands
+    - Utility
+        - Note Pads
+            - Write and edit Note Pads to keep track of ideas and plans.
+            - Lock Note Pads to specific roles, members, and text channels.
+        - Reminders (Under construction)
     - Discord Games (Played on Discord chats)
         - Cards Against Humanity (Under construction).
+            - Official decks up to Expansion 3.
+            - In-sever Custom Decks.
         - "Secrete Message" (Under construction).
     - Novelty/misc
         - Self-destruct messages.
         - List all guilds hosting a Weebot.
+        - Ping (Pong)
+
 
 ----
 <a name='Roadmap'></a>
