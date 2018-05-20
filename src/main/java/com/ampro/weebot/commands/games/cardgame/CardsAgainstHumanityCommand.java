@@ -12,6 +12,7 @@ import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
         .CardsAgainstHumanity.*;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 
 import javax.naming.InvalidNameException;
@@ -53,7 +54,6 @@ public class CardsAgainstHumanityCommand extends Command {
 
             final Member member;
 
-            PLAYER_STATE state;
             /**
              * Currently held cards
              * This is visible to the {@link Player} in their privateChannel
@@ -126,17 +126,14 @@ public class CardsAgainstHumanityCommand extends Command {
              * @param name Name of the deck
              * @param author The author of the Deck
              */
-            public CAHDeck(String name, User author)
+            public CAHDeck(String name, Member author)
                     throws InvalidNameException {
                 try {
                     Integer.parseInt(name);
                     throw new InvalidNameException("Name cannot be a number.");
-                } catch (NumberFormatException e) {
-                    if (name.equalsIgnoreCase("win") || name.equalsIgnoreCase("rounds"))
-                        throw new InvalidNameException("Name cannot be reserved word");
-                    this.name = String.join("_", name.split("\\s+", -1));
-                }
-                this.authorID = author.getIdLong();
+                } catch (NumberFormatException e) {}
+                this.name = String.join("_", name.split("\\s+", -1));
+                this.authorID = author.getUser().getIdLong();
                 this.whiteCards = new ArrayList<>();
                 this.blackCards = new ArrayList<>();
                 this.roleLocks  = new ArrayList<>();
@@ -211,7 +208,8 @@ public class CardsAgainstHumanityCommand extends Command {
                     i = 0;
                     sb.append("\n\nBlack Cards\n\n");
                     for (BlackCard bc : blackCards) {
-                        sb.append(++i + ".) " + bc + "\n\n");
+                        sb.append(++i + ".) (Pick ").append(bc.blanks).append(")")
+                          .append(bc).append("\n\n");
                     }
                     bw.write(sb.toString());
                     return file;
@@ -227,7 +225,9 @@ public class CardsAgainstHumanityCommand extends Command {
              * @return False if the card already exists in the deck.
              */
             public boolean addWhiteCard(WhiteCard card) {
-                return this.whiteCards.add(card);
+                if (!this.whiteCards.contains(card))
+                    return this.whiteCards.add(card);
+                return false;
             }
 
             /**
@@ -236,7 +236,9 @@ public class CardsAgainstHumanityCommand extends Command {
              * @return false if the deck already contains the card.
              */
             public boolean addBlackCard(BlackCard card) {
-                return this.blackCards.add(card);
+                if (!this.blackCards.contains(card))
+                    return this.blackCards.add(card);
+                return false;
             }
 
             /**
@@ -278,6 +280,8 @@ public class CardsAgainstHumanityCommand extends Command {
                     return true;
                 } else if (member.getUser().getIdLong() ==  this.authorID) {
                     return true;
+                } else if (member.hasPermission(Permission.ADMINISTRATOR)) {
+                    return true;
                 }
                 for (Role r : member.getRoles()) {
                     if (this.roleLocks.contains(r.getIdLong()))
@@ -305,9 +309,26 @@ public class CardsAgainstHumanityCommand extends Command {
 
             @Override
             public String toString() { return this.cardText; }
+
+            @Override
+            public boolean equals(Object o) {
+                try {
+                    return ((WhiteCard) o).cardText == this.cardText;
+                } catch (ClassCastException e) {
+                    return false;
+                }
+            }
+
         }
 
         public static final class BlackCard extends Card {
+
+            static final class TooFewBlanksException extends InvalidCardException {
+                TooFewBlanksException() { super(); }
+            }
+            static final class TooManyBlanksException extends InvalidCardException {
+                TooManyBlanksException() { super(); }
+            }
 
             /** The file of the standard black cards */
             static final transient File BC_STD =
@@ -325,12 +346,13 @@ public class CardsAgainstHumanityCommand extends Command {
             /** The winning {@link WhiteCard} of the round */
             WhiteCard[] winningCards;
 
-            BlackCard(String text, int blanks) throws InvalidCardException {
+            BlackCard(String text, int blanks)
+                    throws TooFewBlanksException, TooManyBlanksException {
                 this.cardText = text;
                 if (blanks > MAX_BLANKS)
-                    throw new InvalidCardException("Too many blanks");
+                    throw new TooManyBlanksException();
                 else if (blanks < MIN_BLANKS)
-                    throw new InvalidCardException("Too few blanks");
+                    throw new TooFewBlanksException();
                 this.blanks = blanks;
             }
 
@@ -338,8 +360,6 @@ public class CardsAgainstHumanityCommand extends Command {
             public String toString() { return this.cardText; }
 
         }
-
-        enum PLAYER_STATE {CHOOSING, PLAYED}
 
         public enum GAME_STATE {
             /** Players are choosing white cards */
@@ -440,7 +460,8 @@ public class CardsAgainstHumanityCommand extends Command {
                 sb.append("Cards against ")
                   .append(Launcher.getGuild(Long.parseLong(this.HOST_ID.replace("W", "")))
                                   .getName())
-                  .append("```Black Card:\n").append(this.blackCard)
+                  .append("```Black Card (Pick ").append(this.blackCard.blanks)
+                  .append("):\n").append(this.blackCard)
                   .append("\n\n\nYour deck:\n\n");
                 for (int i = 0; i < p.hand.length; i++) {
                     sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
@@ -579,6 +600,10 @@ public class CardsAgainstHumanityCommand extends Command {
             return true;
         }
 
+        protected final boolean isCzar(Member member) {
+            return member == this.czar.member;
+        }
+
     }
 
     public CardsAgainstHumanityCommand() {
@@ -621,6 +646,8 @@ public class CardsAgainstHumanityCommand extends Command {
         VIEWALLDECKS,
         /** View all cards in a deck */
         DECKFILE,
+        /** Make a custom deck */
+        MAKEDECK,
         /**Make a custom white card*/
         MAKEWHITECARD,
         /**Make a custom black card*/
@@ -667,37 +694,24 @@ public class CardsAgainstHumanityCommand extends Command {
         }
         //Attempt to find a running game in this channel
         CardsAgainstHumanity game = null;
-        for (Game g : bot.getRunningGames()) {
-            if(g instanceof CardsAgainstHumanity) {
-                if(((CardsAgainstHumanity) g).channel.getIdLong() == channel.getIdLong
-                        ()) {
-                    game = (CardsAgainstHumanity) g;
-                    break;
+        if (action != ACTION.DECKFILE && action != (ACTION.MAKEBLACKCARD)
+                && action != (ACTION.MAKEWHITECARD) && action != (ACTION.MAKEDECK)) {
+            for (Game g : bot.getRunningGames()) {
+                if(g instanceof CardsAgainstHumanity) {
+                    if(((CardsAgainstHumanity) g).channel.getIdLong() == channel.getIdLong()) {
+                        game = (CardsAgainstHumanity) g;
+                        break;
+                    }
                 }
             }
         }
-
         /*
-        cah setup [hand_size] [deck_name] [deck2_name]...
-        cah join
-        cah start
-        cah play/use <card_number> [card2_num] [card3_num] [card4_num] [card5_num]
-        cah pick <card_set_num>
-        cah myhand
-
-        cah makedeck <deck_name>
-        cah makecard <deck_num> <white[card]> [card text]
-        cah makecard <deck_num> <black[card]> <blanks> [card text]
-
-        cah alldecks
-        cah deckfile [deck_name]
-
         cah remove <deck_num> TODO maybe only on empty decks?
         cah remove <deck_num> <card_num>
          */
 
         switch (action) {
-            case SETUP:
+            case SETUP: //cah setup [hand_size] [deck_name] [deck2_name]...
                 if(game == null) {
                     int hs = 5;
                     int deckIndex = 2;
@@ -920,8 +934,7 @@ public class CardsAgainstHumanityCommand extends Command {
                                     }
                         );
                     }
-                    if (event.getAuthor().getIdLong()
-                            != game.czar.member.getUser().getIdLong()) {
+                    if (!game.isCzar(event.getMember())) {
                         event.reply("Only the Card Czar, **"
                                     + game.czar.member.getEffectiveName()
                                     + "** can pick a winner.", m -> {
@@ -1027,32 +1040,172 @@ public class CardsAgainstHumanityCommand extends Command {
                     event.reply(NO_GAME_FOUND);
                 }
                 return;
-            case VIEWALLDECKS:
+            case VIEWALLDECKS: //cah alldecks
+                sb.setLength(0);
+                Collection<CAHDeck> decks;
+                synchronized (bot) {
+                    decks = bot.getCustomCahDecks().values();
+                }
+                if (decks.isEmpty()) {
+                    sb.append("There are no custom decks in this server.")
+                      .append(" You can make a new deck using")
+                      .append("```cah mkdk <deck name>```");
+                    event.reply(sb.toString());
+                    return;
+                }
+                sb.append("*Cards against ").append(event.getGuild().getName())
+                  .append(" Custom Decks*```");
+                decks.forEach( deck -> {
+                    int i = 1;
+                    if (deck.isAllowed(event.getMember()))
+                        sb.append(i++).append(".) " + deck.name).append("\n\n");
+                });
+                sb.append(" ```");
+                event.reply(sb.toString());
                 return;
-            case DECKFILE:
+            case MAKEDECK: //cah mkdk <deck_name>
+                sb.setLength(0);
                 CAHDeck deck;
+                try {
+                    deck = new CAHDeck(String.join(" ", Arrays.copyOfRange(args, 2, args.length)),
+                                       event.getMember());
+                } catch (InvalidNameException e) {
+                    event.reply("Sorry, deck names cannot be a number.");
+                    return;
+                } catch (IndexOutOfBoundsException e) {
+                    sb.append("Please use the format```cah mkdk <deck name>```")
+                      .append("to make a new deck.");
+                    event.reply(sb.toString());
+                    return;
+                }
+                if (deck.name.isEmpty()) {
+                    sb.append("The deck's name cannot be empty!");
+                    event.reply(sb.toString());
+                    return;
+                }
+                synchronized (bot) {
+                    if (!bot.addCustomCahDeck(deck)) {
+                        sb.append("A deck with the name *").append(deck.name)
+                          .append("* already exists in this server.");
+                        event.reply(sb.toString());
+                        return;
+                    }
+                }
+                sb.append("*").append(deck.name).append("* was created!\n\n")
+                  .append(" Use```cah mkwc <deck_name> <card text>```")
+                  .append("to make new white (played) cards and add them to the deck.")
+                  .append("\n\nOr use ```cah mkbc <deck_name> <blanks> <card text>```")
+                  .append("to make new black (read) cards and add them to the deck.");
+                event.reply(sb.toString());
+                return;
+            case MAKEBLACKCARD: //cah mkbc <deck_name> <blanks> <card text>
+                sb.setLength(0);
+                if (args.length < 5) {
+                    sb.append("Please provide a deck name, number of blanks,")
+                      .append(" and card text in this format:")
+                      .append("```cah mkbc <deck_nam> <blanks> <card text>```");
+                    event.reply(sb.toString());
+                    return;
+                }
+                CAHDeck cahDeck = null;
+                synchronized (bot) {
+                    cahDeck = bot.getCustomCahDeck(args[2]);
+                }
+                if (cahDeck == null) {
+                    sb.append("The deck '*").append(args[2]).append("*' could not be")
+                      .append("found.");
+                    event.reply(sb.toString());
+                } else if (!cahDeck.isAllowed(event.getMember())) {
+                    sb.append("You do not have permission to modify deck '*")
+                      .append(cahDeck.name).append("*'.");
+                    event.reply(sb.toString());
+                }
+                int blanks;
+                try {
+                    blanks = Integer.parseInt(args[3]);
+                } catch (NumberFormatException e) {
+                    sb.append("Please provide a deck name, number of blanks,")
+                      .append(" and card text in this format:")
+                      .append("```cah mkbc <deck_nam> <blanks> <card text>```");
+                    event.reply(sb.toString());
+                    return;
+                }
+
+                String txt = String.join(" ", Arrays.copyOfRange(args, 4, args.length));
+                BlackCard blackCard;
+                try {
+                    blackCard = new BlackCard(txt, blanks);
+                } catch (BlackCard.TooFewBlanksException e) {
+                    sb.append("*The maximum number of blanks is ")
+                      .append(BlackCard.MAX_BLANKS).append("*.");
+                    event.reply(sb.toString());
+                    return;
+                } catch (BlackCard.TooManyBlanksException e) {
+                    sb.append("*The minimum number of blanks is ")
+                      .append(BlackCard.MIN_BLANKS).append("*.");
+                    event.reply(sb.toString());
+                    return;
+                }
+
+                if (cahDeck.addBlackCard(blackCard)) {
+                    sb.append("The Black Card was added to deck *")
+                      .append(cahDeck.name).append("*");
+                    event.reply(sb.toString());
+                } else {
+                    event.reply("This card already exists.");
+                }
+                return;
+            case MAKEWHITECARD: //cah mkwc <deck_name> <card text>
+                sb.setLength(0);
+                if (args.length < 4) {
+                    sb.append("Please provide a deck name and card text in this format:")
+                      .append("```cah mkwc <deck_nam> <card text>```");
+                    event.reply(sb.toString());
+                    return;
+                }
+                cahDeck = null;
+                synchronized (bot) {
+                    cahDeck = bot.getCustomCahDeck(args[2]);
+                }
+                if (cahDeck == null) {
+                    sb.append("The deck '*").append(args[2]).append("*' could not be")
+                      .append("found.");
+                    event.reply(sb.toString());
+                } else if (!cahDeck.isAllowed(event.getMember())) {
+                    sb.append("You do not have permission to modify deck '*")
+                      .append(cahDeck.name).append("*'.");
+                    event.reply(sb.toString());
+                }
+                String text = String.join(" ", Arrays.copyOfRange(args, 3, args.length));
+                WhiteCard card = new WhiteCard(text);
+                if (!cahDeck.addWhiteCard(card)) {
+                    event.reply("This card already exists.");
+                    return;
+                }
+                sb.append("The White Card was added to deck *").append(cahDeck.name)
+                  .append("*");
+                event.reply(sb.toString());
+                return;
+            case DECKFILE: //cah deckfile [deck_name]
+                CAHDeck out;
                 List<WhiteCard> whiteCards;
                 List<BlackCard> blackCards;
                 try {
                     synchronized (bot) {
-                        deck = bot.getCustomCahDeck(args[2]);
+                        out = bot.getCustomCahDeck(args[2]);
                     }
-                    if(deck == null)
+                    if(out == null)
                         throw new NullPointerException();
                 } catch (IndexOutOfBoundsException | NullPointerException e) {
-                    deck = new CAHDeck();
-                    deck.loadStandardCards();
+                    out = new CAHDeck();
+                    out.loadStandardCards();
                 }
-                File file = deck.toFile();
+                File file = out.toFile();
                 if(file != null) {
                     event.privateReply(file, file.getName(), f -> f.deleteOnExit());
                     event.deleteMessage();
                 } else
                     event.reply("Sorry, something went wrong...");
-                return;
-            case MAKEBLACKCARD:
-                return;
-            case MAKEWHITECARD:
                 return;
         }
 
@@ -1087,7 +1240,20 @@ public class CardsAgainstHumanityCommand extends Command {
                 return ACTION.VIEWALLDECKS;
             case "deckfile":
                 return ACTION.DECKFILE;
-            case "make":
+            case "makedeck":
+            case "mkdeck":
+            case "mkdk":
+                return ACTION.MAKEDECK;
+            case "makeblackcard":
+            case "makeblack":
+            case "makebc":
+            case "mkbc":
+                return ACTION.MAKEBLACKCARD;
+            case "makewhitecard":
+            case "makewhite":
+            case "makewc":
+            case "mkwc":
+                return ACTION.MAKEWHITECARD;
             default:
                 return null;
         }
@@ -1105,9 +1271,9 @@ public class CardsAgainstHumanityCommand extends Command {
           .append("cah play <card1_number> /card2_num/.../card5_num/\n")
           .append("cah pick <card_set_num>\n").append("cah myhand\n")
           .append("\ncah makedeck <deck_name>\n")
-          .append("cah make <deck_num> <white[card]> <card text>\n")
-          .append("cah make <deck_num> <black[card]> <blanks> <card text>\n")
-          .append("cah alldecks **\n").append("cah deckfile [deck_name]\n")
+          .append("cah makewhitecard/mkwc <deck_name> <card text>\n")
+          .append("cah makeblackcard/mkbc <deck_name> <blanks> <card text>\n")
+          .append("cah alldecks \n").append("cah deckfile [deck_name]\n")
           .append("cah remove <deck_num> **\n")
           .append("cah remove <deck_num> <card_num> **\n")
           .append("```");

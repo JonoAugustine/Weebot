@@ -9,13 +9,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 19
+            "day": 20
           },
           "time": {
-            "hour": 12,
-            "minute": 48,
-            "second": 53,
-            "nano": 219000000
+            "hour": 3,
+            "minute": 1,
+            "second": 40,
+            "nano": 575000000
           }
         },
         "offset": {
@@ -40,13 +40,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 19
+            "day": 20
           },
           "time": {
-            "hour": 12,
-            "minute": 48,
-            "second": 53,
-            "nano": 220000000
+            "hour": 3,
+            "minute": 1,
+            "second": 40,
+            "nano": 578000000
           }
         },
         "offset": {
@@ -60,7 +60,27 @@
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
-      "CUSTOM_CAH_DECKS": {},
+      "CUSTOM_CAH_DECKS": {
+        "NL": {
+          "name": "NL",
+          "whiteCards": [
+            {
+              "cardText": "Karen Thomas"
+            },
+            {
+              "cardText": "Delete teh gayz"
+            }
+          ],
+          "blackCards": [
+            {
+              "cardText": "Where did Matt go?",
+              "blanks": 1
+            }
+          ],
+          "authorID": 139167730237571072,
+          "roleLocks": []
+        }
+      },
       "NOTES": [],
       "spamLimit": 5
     },
@@ -72,13 +92,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 19
+            "day": 20
           },
           "time": {
-            "hour": 12,
-            "minute": 48,
-            "second": 53,
-            "nano": 220000000
+            "hour": 3,
+            "minute": 1,
+            "second": 40,
+            "nano": 578000000
           }
         },
         "offset": {
