@@ -200,6 +200,7 @@ public class Launcher {
 	private static synchronized void startSaveTimer(double min) {
 	   Launcher.saveTimer = new Thread( () -> {
 		   int i = 1;
+		   long time = Math.round((1000 * 60) * min);
 		   try {
 			   while (true) {
 			       if (Launcher.JDA_CLIENT.getStatus()  == Status.SHUTDOWN)
@@ -211,7 +212,7 @@ public class Launcher {
                        System.err.println("Database back up: " + i);
                    }
                    i++;
-                   Thread.sleep(Math.round((1000 * 60) * min));
+                   Thread.sleep(time);
 			   }
 		   } catch (InterruptedException e) {
 			   e.printStackTrace();
@@ -236,10 +237,10 @@ public class Launcher {
 	 * Begin the shutdown sequence. Backup and save database.
 	 */
 	public static void shutdown() {
-		Launcher.JDA_CLIENT.shutdown();
+		for (Object o : Launcher.JDA_CLIENT.getRegisteredListeners())
+		    JDA_CLIENT.removeEventListener(o);
 
-		try { Launcher.saveTimer.join(); }
-		catch (InterruptedException e) {}
+		Launcher.saveTimer.interrupt();
 		System.err.println("Shutdown signal received. Saving database.");
 		DatabaseManager.save(Launcher.DATABASE);
 
@@ -255,6 +256,7 @@ public class Launcher {
 			System.out.println(it.next());
 		}
 		System.out.println("-------------------------------DONE");
+		JDA_CLIENT.shutdown();
 
 	}
 
