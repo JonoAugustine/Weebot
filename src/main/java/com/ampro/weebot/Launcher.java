@@ -199,18 +199,24 @@ public class Launcher {
 	 */
 	private static synchronized void startSaveTimer(double min) {
 	   Launcher.saveTimer = new Thread( () -> {
-			   try {
-				   while(true) {
-				       if (Launcher.getJda().getStatus() != Status.CONNECTED)
-				           continue;
-					   DatabaseManager.backUp(Launcher.DATABASE);
-					   Thread.sleep(Math.round((1000 * 60) * min));
-				   }
-			   } catch (InterruptedException e) {
-				   e.printStackTrace();
+		   int i = 1;
+		   try {
+			   while (true) {
+			       if (Launcher.JDA_CLIENT.getStatus()  == Status.SHUTDOWN)
+			           break;
+				   if(Launcher.getJda().getStatus() != Status.CONNECTED)
+					   continue;
+				   DatabaseManager.backUp(Launcher.DATABASE);
+				   if(i % 10 == 0) {
+                       System.err.println("Database back up: " + i);
+                   }
+                   i++;
+                   Thread.sleep(Math.round((1000 * 60) * min));
 			   }
+		   } catch (InterruptedException e) {
+			   e.printStackTrace();
 		   }
-	   );
+	   });
 	   saveTimer.setName("Save Timer");
 	   Launcher.saveTimer.start();
    }
@@ -232,9 +238,9 @@ public class Launcher {
 	public static void shutdown() {
 		Launcher.JDA_CLIENT.shutdown();
 
-		Launcher.saveTimer.interrupt();
+		try { Launcher.saveTimer.join(); }
+		catch (InterruptedException e) {}
 		System.err.println("Shutdown signal received. Saving database.");
-		DatabaseManager.backUp(Launcher.DATABASE);
 		DatabaseManager.save(Launcher.DATABASE);
 
 		System.err.println("Clearing temp directories.");

@@ -105,7 +105,7 @@ public class DatabaseManager {
             e.printStackTrace();
             return null;
         }
-        try (Reader bKreader = new FileReader("/database/databaseBK.wbot")) {
+        try (Reader bKreader = new FileReader(new File(DIR, "databaseBK.wbot"))) {
              bk = gson.fromJson(bKreader, Database.class);
         } catch (FileNotFoundException e) {
             System.err.println("\tUnable to locate databseBK.wbot.");
