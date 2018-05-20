@@ -77,13 +77,13 @@ public class Weebot implements Comparable<Weebot> {
     /** Commands not allowed on the server channels.*/
     private final TreeMap<TextChannel, ArrayList<Class<? extends Command>>> COMMANDS_DISABLED;
     /** List of {@code Game}s currently Running */
-    private final transient List<Game<? extends Player>> GAMES_RUNNING;
+    private transient List<Game<? extends Player>> GAMES_RUNNING;
 
     /**A Map of custom Cards Against Humanity card lists mapped to "deck name" Strings.*/
     private final ConcurrentHashMap<String, CAHDeck> CUSTOM_CAH_DECKS;
 
     /** {@link IPassive} objects, cleared on exit */
-    private final transient List<IPassive> PASSIVES;
+    private transient List<IPassive> PASSIVES;
 
     /** Map of "NotePads" */
     private final ArrayList<NotePad> NOTES;
@@ -241,13 +241,18 @@ public class Weebot implements Comparable<Weebot> {
 
     /**
      * Update the bot's mutable settings that may have changed during downtime like
-     * NickName.
+     * NickName. And initialize transient variables.
      */
-    public void updateGuildStanding() {
+    public void updateBotOnStartup() {
         if (this.getGuildID() > 0) //Ignores the private bot
             this.nickname = Launcher.getGuild(this.GUILD_ID)
                                     .getMember(Launcher.getJda().getSelfUser())
                                     .getEffectiveName();
+        if (this.GAMES_RUNNING == null)
+            this.GAMES_RUNNING = new ArrayList<>();
+        if (this.PASSIVES == null) {
+            this.PASSIVES = new ArrayList<>();
+        }
     }
 
     @Override
