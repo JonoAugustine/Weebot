@@ -1,7 +1,3 @@
-/**
- *
- */
-
 package com.ampro.weebot.commands.games.cardgame;
 
 import com.ampro.weebot.Launcher;
@@ -105,7 +101,7 @@ public class CardsAgainstHumanityCommand extends Command {
         static final class scoreComparator implements Comparator<CAHPlayer> {
             @Override
             public int compare(CAHPlayer p1, CAHPlayer p2) {
-                return p1.cardsWon.size() - p2.cardsWon.size();
+                return p2.cardsWon.size() - p1.cardsWon.size();
             }
         }
 
@@ -369,7 +365,7 @@ public class CardsAgainstHumanityCommand extends Command {
             READING
         }
 
-        private static final transient int MIN_PLAYERS = 1;
+        private static final transient int MIN_PLAYERS = 3;
 
         /** The hosting channel */
         private final TextChannel channel;
@@ -458,17 +454,17 @@ public class CardsAgainstHumanityCommand extends Command {
          */
         protected void sendHands() {
             PLAYERS.values().forEach( p -> {
-                StringBuilder sb = new StringBuilder();
-                sb.append("Cards against ")
-                  .append(Launcher.getGuild(Long.parseLong(this.HOST_ID.replace("W", "")))
-                                  .getName())
-                  .append("```Black Card (Pick ").append(this.blackCard.blanks)
-                  .append("):\n").append(this.blackCard)
-                  .append("\n\n\nYour deck:\n\n");
-                for (int i = 0; i < p.hand.length; i++) {
-                    sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
+                if (!p.getUser().isBot()) {
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("Cards against ").append(Launcher.getGuild(
+                            Long.parseLong(this.HOST_ID.replace("W", ""))).getName()).append("```Black Card (Pick ").append(this.blackCard.blanks)
+                      .append("):\n").append(this.blackCard).append("\n\n\nYour deck:\n" +
+                                                                            "\n");
+                    for (int i = 0; i < p.hand.length; i++) {
+                        sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
+                    }
+                    p.updateHandMessage(sb.append(" ```").toString());
                 }
-                p.updateHandMessage(sb.append(" ```").toString());
             });
         }
 
@@ -502,7 +498,7 @@ public class CardsAgainstHumanityCommand extends Command {
          */
         private boolean allCardsPlayed() {
             for (CAHPlayer p : this.PLAYERS.values()) {
-                if (p.playedCards == null) {
+                if (p.playedCards == null && czar != p) {
                     return false;
                 }
             }
@@ -545,6 +541,7 @@ public class CardsAgainstHumanityCommand extends Command {
             int i = 1;
             for (CAHPlayer p : this.playerList) {
                 int k = 1;
+                sb.setLength(0);
                 for (WhiteCard wc : p.playedCards) {
                     if (p.playedCards.length > 1)
                         sb.append((k++) + ".) ");
@@ -650,6 +647,35 @@ public class CardsAgainstHumanityCommand extends Command {
 
             eb.addField("Leader Board:", sb.toString(), false);
 
+            //eb.addBlankField(false);
+
+            //1. Arg: text as string
+            //2. icon url as string (can be null)
+            eb.setFooter("Run by Weebot",
+                         Launcher.getJda().getSelfUser().getAvatarUrl()
+            );
+
+            return eb.build();
+        }
+
+        private MessageEmbed endGameEmbed() {
+            EmbedBuilder eb = new EmbedBuilder();
+            eb.setColor(new Color(0x20F457));
+
+            eb.setAuthor("Cards against " + channel.getGuild().getName(),
+                         null, channel.getGuild().getIconUrl());
+
+            eb.setTitle("Match Over! Here's how it went: ", null);
+
+            this.playerList.sort(new scoreComparator());
+            StringBuilder sb = new StringBuilder();
+            for (CAHPlayer p : this.playerList) {
+                sb.append("*").append(p.member.getEffectiveName())
+                  .append("* : ").append(p.cardsWon.size()).append("\n");
+            }
+
+            eb.addField("Leader Board:", sb.toString(), false);
+
             eb.addBlankField(false);
 
             //1. Arg: text as string
@@ -657,6 +683,11 @@ public class CardsAgainstHumanityCommand extends Command {
             eb.setFooter("Run by Weebot",
                          Launcher.getJda().getSelfUser().getAvatarUrl()
             );
+
+            //Set image:
+            //Arg: image url as string
+            if (playerList.get(0).cardsWon.size() != playerList.get(1).cardsWon.size())
+                eb.setImage(this.playerList.get(0).member.getUser().getAvatarUrl());
 
             return eb.build();
         }
@@ -690,13 +721,15 @@ public class CardsAgainstHumanityCommand extends Command {
             blackCard = t;
 
             //Set next czar
-            if(this.czarIterator.hasNext())
-                czar = czarIterator.next();
-            else {
-                //Reset the iterator if we reached the end of the list
-                this.czarIterator = PLAYERS.values().iterator();
-                czar = czarIterator.next();
-            }
+            do {
+                if(this.czarIterator.hasNext())
+                    czar = czarIterator.next();
+                else {
+                    //Reset the iterator if we reached the end of the list
+                    this.czarIterator = PLAYERS.values().iterator();
+                    czar = czarIterator.next();
+                }
+            } while (czar.getUser().isBot()); //Don't let the bot be czar
 
             //Game state
             this.STATE = GAME_STATE.CHOOSING;
@@ -719,7 +752,10 @@ public class CardsAgainstHumanityCommand extends Command {
                     return false;
                 }
             this.czarIterator = this.PLAYERS.values().iterator();
-            this.czar = czarIterator.next();
+            do {
+                this.czar = playerList.get(new Random().nextInt(playerList.size()));
+                while (czarIterator.hasNext() && czarIterator.next() != czar) {}
+            } while (czar.getUser().isBot());
             //Set the first black card
             int rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
             blackCard = this.deck.blackCards.get(rand);
@@ -930,6 +966,13 @@ public class CardsAgainstHumanityCommand extends Command {
                     if(game.startGame()) {
                         event.reply(game.blackCardEmbed());
                         botPlayer = game.getPlayer(bot.asUser());
+                        if (botPlayer != null) {
+                            int[] cards = new int[game.blackCard.blanks];
+                            for (int i = 0; i < cards.length; i++) {
+                                cards[i] = new Random().nextInt(5);
+                            }
+                            game.playCards(botPlayer, cards);
+                        }
                     } else {
                         event.reply("You need at least **3** players to start a game of"
                                     + " Cards Against Humanity.");
@@ -962,6 +1005,13 @@ public class CardsAgainstHumanityCommand extends Command {
                             event.getGuild().getMember(Launcher.getJda().getSelfUser());
                     if (game.addUser(botMember)) {
                         event.reply("*knocks door down* The robots have come to play.");
+                        if (game.STATE == GAME_STATE.CHOOSING) {
+                            int[] cards = new int[game.blackCard.blanks];
+                            for (int i = 0; i < cards.length; i++) {
+                                cards[i] = new Random().nextInt(5);
+                            }
+                            game.playCards(game.getPlayer(bot.asUser()), cards);
+                        }
                     } else {
                         event.reply("***I am already in the game*** :wink:", m -> {
                             try {
@@ -1137,6 +1187,14 @@ public class CardsAgainstHumanityCommand extends Command {
                     game.sendHands();
 
                     //If the bot is playing
+                    botPlayer = game.getPlayer(bot.asUser());
+                    if (botPlayer != null) {
+                        int[] cards = new int[game.blackCard.blanks];
+                        for (int i = 0; i < cards.length; i++) {
+                            cards[i] = new Random().nextInt(5);
+                        }
+                        game.playCards(botPlayer, cards);
+                    }
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
@@ -1165,16 +1223,6 @@ public class CardsAgainstHumanityCommand extends Command {
                 return;
             case END:
                 if(game != null) {
-                    if (!game.isRunning()) {
-                        synchronized (bot) {
-                            if(!bot.getRunningGames().remove(game)) {
-                                System.err.println("Err encounted while removing game.");
-                                return;
-                            }
-                        }
-                        event.reply("Game cancelled.");
-                        return;
-                    }
                     game.endGame();
                     synchronized (bot) {
                         if(!bot.getRunningGames().remove(game)) {
@@ -1182,17 +1230,12 @@ public class CardsAgainstHumanityCommand extends Command {
                             return;
                         }
                     }
-                    sb.setLength(0);
-                    sb.append("\nHere's how the game went:\n");
-
-                    game.playerList.sort(new scoreComparator());
-
-                    for (CAHPlayer p : game.playerList) {
-                        sb.append("*").append(p.member.getEffectiveName())
-                          .append("* : ").append(p.cardsWon.size()).append("\n\n");
+                    if (!game.isRunning()) {
+                        event.reply("Game cancelled.");
+                        return;
                     }
+                    event.reply(game.endGameEmbed());
 
-                    event.reply(sb.toString());
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
@@ -1418,7 +1461,7 @@ public class CardsAgainstHumanityCommand extends Command {
             case "+bot":
             case "wbot":
             case "addbot":
-            case "inviteebot":
+            case "invitebot":
                 return ACTION.ADDBOT;
             case "leave":
                 return ACTION.LEAVE;
