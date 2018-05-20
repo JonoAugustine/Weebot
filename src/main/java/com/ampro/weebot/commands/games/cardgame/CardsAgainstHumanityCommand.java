@@ -26,10 +26,10 @@ import java.util.concurrent.ThreadLocalRandom;
 
 
 /**
- * Run Cards Against Humanity games,
- * TODO and make custom cards. <br>
+ * Run Cards Against Humanity games, and make custom cards. <br>
  * Users can:<br>
  *     start a game of CAH <br>
+ *     make custom Card Decks <br>
  *     make custom White Cards <br>
  *     make custom Black Cards <br>
  *     TODO play against the bot
@@ -194,6 +194,7 @@ public class CardsAgainstHumanityCommand extends Command {
                 return true;
             }
 
+            /** @return A File of the Deck's black and white cards. */
             private File toFile() {
                 File file = new File(Launcher.TEMP_OUT,
                                      this.name.replace("_", " ") + " Deck.txt"
@@ -208,7 +209,7 @@ public class CardsAgainstHumanityCommand extends Command {
                     i = 0;
                     sb.append("\n\nBlack Cards\n\n");
                     for (BlackCard bc : blackCards) {
-                        sb.append(++i + ".) (Pick ").append(bc.blanks).append(")")
+                        sb.append(++i + ".) (Pick ").append(bc.blanks).append(") ")
                           .append(bc).append("\n\n");
                     }
                     bw.write(sb.toString());
@@ -385,7 +386,7 @@ public class CardsAgainstHumanityCommand extends Command {
         List<CAHPlayer> playerList;
         BlackCard blackCard;
         /** The winners of the game */
-        private ArrayList<CAHPlayer> WINNERS;
+        private final ArrayList<CAHPlayer> winners;
 
         /**
          * Initialize a new CardsAgainstHumanity game.
@@ -400,6 +401,7 @@ public class CardsAgainstHumanityCommand extends Command {
             this.HAND_SIZE = handSize;
             this.PLAYERS.putIfAbsent(AUTHOR_ID, new CAHPlayer(author));
             this.playerList = new ArrayList<>(PLAYERS.values());
+            this.winners = new ArrayList<>();
             this.deck = deck;
             deck.loadStandardCards();
         }
@@ -594,7 +596,7 @@ public class CardsAgainstHumanityCommand extends Command {
             }
             for (CAHPlayer p : players) {
                 if (winner.cardsWon.size() == p.cardsWon.size())
-                    this.WINNERS.add(p);
+                    this.winners.add(p);
             }
 
             return true;
@@ -644,7 +646,9 @@ public class CardsAgainstHumanityCommand extends Command {
         PICK,
         /** View list of all decks */
         VIEWALLDECKS,
-        /** View all cards in a deck */
+        /** View all cards in deck */
+        VIEWDECK,
+        /** Get deck in a file */
         DECKFILE,
         /** Make a custom deck */
         MAKEDECK,
@@ -695,7 +699,8 @@ public class CardsAgainstHumanityCommand extends Command {
         //Attempt to find a running game in this channel
         CardsAgainstHumanity game = null;
         if (action != ACTION.DECKFILE && action != (ACTION.MAKEBLACKCARD)
-                && action != (ACTION.MAKEWHITECARD) && action != (ACTION.MAKEDECK)) {
+                && action != (ACTION.MAKEWHITECARD) && action != (ACTION.MAKEDECK)
+                && action != ACTION.VIEWALLDECKS && action != ACTION.VIEWDECK) {
             for (Game g : bot.getRunningGames()) {
                 if(g instanceof CardsAgainstHumanity) {
                     if(((CardsAgainstHumanity) g).channel.getIdLong() == channel.getIdLong()) {
@@ -705,6 +710,8 @@ public class CardsAgainstHumanityCommand extends Command {
                 }
             }
         }
+        //Some cases later will need this
+        CAHDeck cahDeck;
         /*
         cah remove <deck_num> TODO maybe only on empty decks?
         cah remove <deck_num> <card_num>
@@ -733,7 +740,7 @@ public class CardsAgainstHumanityCommand extends Command {
                             }
                         }
                     }
-                    CAHDeck cahDeck = new CAHDeck();
+                    cahDeck = new CAHDeck();
                     for (CAHDeck d : decks) {
                         for (WhiteCard wc : d.whiteCards) {
                             cahDeck.addWhiteCard(wc);
@@ -1018,10 +1025,20 @@ public class CardsAgainstHumanityCommand extends Command {
                 return;
             case END:
                 if(game != null) {
+                    if (!game.isRunning()) {
+                        synchronized (bot) {
+                            if(!bot.getRunningGames().remove(game)) {
+                                System.err.println("Err encounted while removing game.");
+                                return;
+                            }
+                        }
+                        event.reply("Game cancelled.");
+                        return;
+                    }
                     game.endGame();
                     synchronized (bot) {
                         if(!bot.getRunningGames().remove(game)) {
-                            System.err.println("Err encounted while removing game.");
+                            System.err.println("Err encountered while removing game.");
                             return;
                         }
                     }
@@ -1062,6 +1079,41 @@ public class CardsAgainstHumanityCommand extends Command {
                 });
                 sb.append(" ```");
                 event.reply(sb.toString());
+                return;
+            case VIEWDECK: //cah viewdeck <deck_name>
+                sb.setLength(0);
+                if (args.length != 3) {
+                    sb.append("Please use the format:```cah viewdeck <deck_name>```");
+                    event.reply(sb.toString());
+                    return;
+                }
+                synchronized (bot) {
+                    cahDeck = bot.getCustomCahDeck(args[2]);
+                }
+                if (cahDeck == null) {
+                    sb.append("There is no deck named '*").append(args[2])
+                      .append("*'. Use```cah alldecks```to see all available decks.");
+                    event.reply(sb.toString());
+                } else if (!cahDeck.isAllowed(event.getMember())) {
+                    sb.append("You do not have permission to view deck '*")
+                      .append(args[2])
+                      .append("*'. Use```cah alldecks```to see all available decks.");
+                    event.reply(sb.toString());
+                }
+                sb.append("```").append(this.name.replace("_", " "))
+                  .append(" Deck:\n\n\n").append("White Cards:\n\n");
+                int i = 0;
+                for (WhiteCard wc : cahDeck.whiteCards) {
+                    sb.append(++i + ".) " + wc + "\n\n");
+                }
+                i = 0;
+                sb.append("\n\nBlack Cards\n\n");
+                for (BlackCard bc : cahDeck.blackCards) {
+                    sb.append(++i + ".) ").append(bc).append("\n\n");
+                }
+                sb.append("```");
+                event.privateReply(sb.toString());
+                event.deleteMessage();
                 return;
             case MAKEDECK: //cah mkdk <deck_name>
                 sb.setLength(0);
@@ -1107,7 +1159,7 @@ public class CardsAgainstHumanityCommand extends Command {
                     event.reply(sb.toString());
                     return;
                 }
-                CAHDeck cahDeck = null;
+                cahDeck = null;
                 synchronized (bot) {
                     cahDeck = bot.getCustomCahDeck(args[2]);
                 }
@@ -1238,6 +1290,9 @@ public class CardsAgainstHumanityCommand extends Command {
                 return ACTION.PICK;
             case "alldecks":
                 return ACTION.VIEWALLDECKS;
+            case "viewdeck":
+            case "seedeck":
+                return ACTION.VIEWDECK;
             case "deckfile":
                 return ACTION.DECKFILE;
             case "makedeck":
@@ -1273,7 +1328,8 @@ public class CardsAgainstHumanityCommand extends Command {
           .append("\ncah makedeck <deck_name>\n")
           .append("cah makewhitecard/mkwc <deck_name> <card text>\n")
           .append("cah makeblackcard/mkbc <deck_name> <blanks> <card text>\n")
-          .append("cah alldecks \n").append("cah deckfile [deck_name]\n")
+          .append("cah alldecks \n").append("cah viewdeck <deck_name>")
+          .append("cah deckfile [deck_name]\n")
           .append("cah remove <deck_num> **\n")
           .append("cah remove <deck_num> <card_num> **\n")
           .append("```");
