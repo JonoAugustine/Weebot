@@ -1,6 +1,5 @@
 package com.ampro.weebot.commands.developer;
 
-import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.database.DatabaseManager;
 import com.ampro.weebot.entities.bot.Weebot;

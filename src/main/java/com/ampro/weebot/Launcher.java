@@ -178,7 +178,7 @@ public class Launcher {
 	 */
 	private static void updateWeebots() {
 		for (Weebot bot : DATABASE.getWeebots().values()) {
-			bot.updateGuildStanding();
+			bot.updateBotOnStartup();
 		}
     }
 
