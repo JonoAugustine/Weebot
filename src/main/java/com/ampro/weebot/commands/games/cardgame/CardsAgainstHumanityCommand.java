@@ -498,7 +498,7 @@ public class CardsAgainstHumanityCommand extends Command {
          */
         private boolean allCardsPlayed() {
             for (CAHPlayer p : this.PLAYERS.values()) {
-                if (p.playedCards == null && czar != p) {
+                if (p.playedCards == null && p != czar) {
                     return false;
                 }
             }
@@ -540,6 +540,10 @@ public class CardsAgainstHumanityCommand extends Command {
             StringBuilder sb = new StringBuilder();
             int i = 1;
             for (CAHPlayer p : this.playerList) {
+                //Skip the Czar but still count up so the indexing doesn't go wack
+                if (p == czar) {
+                    i++; continue;
+                }
                 int k = 1;
                 sb.setLength(0);
                 for (WhiteCard wc : p.playedCards) {
@@ -564,13 +568,8 @@ public class CardsAgainstHumanityCommand extends Command {
                          Launcher.getJda().getSelfUser().getAvatarUrl()
             );
 
-            //Set image:
             //Arg: image url as string
-            //eb.setImage();
-
-            //Set thumbnail image:
-            //Arg: image url as string
-            //eb.setThumbnail();
+            eb.setThumbnail(czar.member.getUser().getAvatarUrl());
 
             return eb.build();
 
@@ -1170,6 +1169,16 @@ public class CardsAgainstHumanityCommand extends Command {
                         event.reply("Please choose one of the listed cards by " +
                                             "their number");
                         return;
+                    }
+
+                    if (winner == game.czar) {
+                        event.reply("*Please select one of the players listed*",
+                                    m -> {
+                                    try { Thread.sleep(5 * 1000); }
+                                    catch (InterruptedException e) {}
+                                    m.delete().queue();
+                                    event.deleteMessage();
+                        });
                     }
 
                     //Give the won cards to the winner
