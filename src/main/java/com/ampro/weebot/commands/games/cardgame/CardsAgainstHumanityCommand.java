@@ -30,7 +30,7 @@ import java.util.concurrent.ThreadLocalRandom;
  *     make custom Card Decks <br>
  *     make custom White Cards <br>
  *     make custom Black Cards <br>
- *     TODO play against the bot
+ *     play against the bot
  *
  */
 public class CardsAgainstHumanityCommand extends Command {
@@ -105,7 +105,7 @@ public class CardsAgainstHumanityCommand extends Command {
             }
         }
 
-        /**
+    /**
          * A deck of {@link BlackCard Black} and {@link WhiteCard White} cards.
          * <br> Can be locked to any number of Roles.
          */
@@ -1535,6 +1535,93 @@ public class CardsAgainstHumanityCommand extends Command {
         sb.append("\n(Commands marked '**' are still under construction.)"); //todo
 
         return sb.toString();
+
+    }
+
+    @Override
+    public MessageEmbed getEmbedHelp() {
+        EmbedBuilder eb = new EmbedBuilder();
+
+        eb.setColor(new Color(0x31FF00));
+
+        eb.setAuthor("Cards Against Weebot", null
+                , Launcher.getJda().getSelfUser().getAvatarUrl());
+
+        eb.setThumbnail(
+                "https://cardsagainsthumanity.com/v8/images/social-3f4a4c57.png");
+
+        eb.setTitle("Cards Against Weebot Humanity (cah)",
+                "https://www.cardsagainsthumanity.com/");
+
+        StringBuffer sb = new StringBuffer();
+        sb.append("Play a game of Cards Against Humanity and ")
+                .append("make custom card decks with user-made cards.");
+        eb.setDescription(sb.toString());
+        sb.setLength(0);
+
+        eb.addField("Guide",
+                "<required> , [optional], /situational_required/",false);
+
+        eb.addField("Game Setup",
+                "cah setup [hand_size] [deck_name] [deck2_name]...",
+                false);
+
+        eb.addField("Join Game", "cah join", false);
+
+        eb.addField("Start Game (Requires 3 players)",
+                "cah start", false);
+
+        eb.addField("Add Weebot to the Game",
+                "cah +bot\n*Aliases*: addbot, invitebot",
+                false);
+
+        eb.addField("Play Your Card(s)",
+                    "cah play <card1_number> /card2_num/.../card5_num/"
+                    + "\n*Alias*: use", false);
+
+        eb.addField("Card Czar Pick Winning Card(s)",
+                "cah pick <card_set_num>", false);
+
+        eb.addField("Re-send Your Hand of Cards", "cah myhand",
+                false);
+
+        eb.addField("Make a Custom Deck",
+                "cah makedeck <deck_name>",
+                false);
+
+        eb.addField("Make a Custom White Card",
+                "cah mkwc <deck_name> <card text>\n*Aliases*: " +
+                        "makewhitecard, makewc", false);
+
+
+        eb.addField("Make a Custom Black Card",
+                "cah mkbc <deck_name> <card text>\n*Aliases*: " +
+                        "makeblackcard, makebc", false);
+
+
+        eb.addField("View all Custom Decks",
+                    "cah alldecks", false);
+
+        eb.addField("View a Custom Deck's Cards",
+                "cah viewdeck <deck_name>\n*Alias*: seedeck", false);
+
+        eb.addField("Get a Custom Deck as a Text File",
+                "cah deckfile <deck_name>", false);
+
+        eb.addField("Remove Custom Deck **",
+                    "cah remove <deck_number>", false);
+
+        eb.addField("Remove Custom Card **",
+                "cah remove <deck_num> <card_number>", false);
+
+        eb.addField("Under Construction ",
+                     "Commands marked '**' are still under construction",
+                false);
+
+        eb.setFooter("Run by Weebot",
+                Launcher.getJda().getSelfUser().getAvatarUrl());
+
+        return eb.build();
     }
 
 }

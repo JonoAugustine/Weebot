@@ -3,11 +3,10 @@ package com.ampro.weebot.commands;
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Random;
 
 /**
  * A {@link Command} to send information and help to the use requesting it.
@@ -69,19 +68,14 @@ public class HelpCommand extends Command {
         } else {
             for (Command c : Launcher.getCommands()) {
                 if(c.isCommandFor(args[1])) {
-                    event.reply(c.getHelp());
+                    MessageEmbed eb = c.getEmbedHelp();
+                    if (eb == null) {
+                        event.reply(c.getHelp());
+                    } else {
+                        event.reply(c.getEmbedHelp());
+                    }
                     return;
                 }
-            }
-            if(event.getGuild().getName() == "Numberless Liquidators") {
-                switch (new Random().nextInt() % 2) {
-                    case 0:
-                        event.reply("Check your DMs hot stuff :stuck_out_tongue_winking_eye:");
-                    default:
-                        event.privateReply("Think of me :smirk: https://bit.ly/1LnkxHw");
-                }
-            } else {
-                event.reply("Help isn't on the way just yet...(under construction)");
             }
         }
 

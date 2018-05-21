@@ -20,6 +20,7 @@ import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.ChannelType;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.TextChannel;
 
 import java.util.ArrayList;
@@ -355,6 +356,14 @@ public abstract class Command {
      */
     public String getHelp() {
         return help;
+    }
+
+    /**
+     * Return the help as a {@link MessageEmbed}.
+     * @return null if not implemented.
+     */
+    public MessageEmbed getEmbedHelp() {
+        return null;
     }
 
     /**

@@ -8,7 +8,6 @@ import com.ampro.weebot.entities.bot.Weebot;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.ArrayList;
-import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -70,6 +69,7 @@ public abstract class Game<P extends Player> {
     //Some Very important but vague methods to implement in child.
     protected abstract boolean startGame();
     protected abstract boolean endGame();
+
     /**
      * Add a user to the game, wrapping the {@link User} in a new {@link Player}
      * implementation.
