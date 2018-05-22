@@ -1,9 +1,13 @@
 package com.ampro.weebot.commands.miscellaneous;
 
 
+import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.MessageEmbed;
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,8 +25,8 @@ public class SelfDestructMessageCommand extends Command {
                 "deleteme", "cleanthis", "deletethis","covertracks", "whome?", "podh",
                 "sdc")),
 
-              "Deletes the marked message after the given amount of time (30 sec by " +
-                      "default)",
+              "Deletes the marked message after the given amount of time (30 sec by "
+                      + "default)",
               "<callsign><deleteme> <time or X> [message]", true, false, 0, false, false
         );
     }
@@ -82,6 +86,16 @@ public class SelfDestructMessageCommand extends Command {
         }
 
         event.deleteMessage();
+    }
+
+    @Override
+    public MessageEmbed getEmbedHelp() {
+        String d =
+        "Deletes the marked message after the given amount of time (30 sec by default)";
+        EmbedBuilder eb = Launcher.makeEmbedBuilder("Self Destruct Message",
+                                                    null,
+                                                    d);
+        return eb.build();
     }
 
     @Override
