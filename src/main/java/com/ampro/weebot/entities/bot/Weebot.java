@@ -85,7 +85,7 @@ public class Weebot implements Comparable<Weebot> {
     private final ConcurrentHashMap<String, CAHDeck> CUSTOM_CAH_DECKS;
 
     /** {@link IPassive} objects, cleared on exit */
-    private transient List<IPassive> PASSIVES;
+    protected transient List<IPassive> PASSIVES;
 
     /** Map of "NotePads" */
     private final ArrayList<NotePad> NOTES;

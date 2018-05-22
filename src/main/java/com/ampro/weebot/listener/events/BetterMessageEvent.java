@@ -318,6 +318,11 @@ public class BetterMessageEvent extends BetterEvent {
         return this.message.getAttachments();
     }
 
+
+    public boolean mentions(User user) {
+        return this.message.isMentioned(user);
+    }
+
     @Override
     public Event getEvent() {
         return this.messageEvent;
