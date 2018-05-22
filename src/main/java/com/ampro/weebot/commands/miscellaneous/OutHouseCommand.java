@@ -89,6 +89,25 @@ public class OutHouseCommand extends Command {
 
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
+        StringBuilder sb = new StringBuilder();
+        long hours;
+        try {
+            hours = Long.parseLong(this.cleanArgs(bot, event.getArgs())[1]);
+        } catch (IndexOutOfBoundsException e) {
+            hours = 1;
+        } catch (NumberFormatException e) {
+            sb.append("Sorry, I couldn't read that number. Please give a time in")
+              .append(" in hours from *0* to *").append(Long.MAX_VALUE).append("*");
+            event.reply(sb.toString());
+            return;
+        }
+
+        synchronized (Launcher.GLOBAL_WEEBOT) {
+            Launcher.GLOBAL_WEEBOT.getPassives()
+                                  .add(new OutHouse(event.getAuthor(), hours));
+        }
+
+        event.reply("I will hold down the for while you're away!");
 
     }
 }
