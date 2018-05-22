@@ -9,17 +9,16 @@ import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.HelpCommand;
 import com.ampro.weebot.commands.ManageSettingsCommand;
 import com.ampro.weebot.commands.NotePadCommand;
-import com.ampro.weebot.commands.developer.DatabaseFileCommand;
-import com.ampro.weebot.commands.developer.ListGuildsCommand;
-import com.ampro.weebot.commands.developer.ShutdownCommand;
-import com.ampro.weebot.commands.developer.WeebotSuggestionCommand;
+import com.ampro.weebot.commands.developer.*;
 import com.ampro.weebot.commands.games.SecretePhraseCommand;
 import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand;
+import com.ampro.weebot.commands.miscellaneous.OutHouseCommand;
 import com.ampro.weebot.commands.miscellaneous.PingCommand;
 import com.ampro.weebot.commands.miscellaneous.SelfDestructMessageCommand;
 import com.ampro.weebot.commands.miscellaneous.SpamCommand;
 import com.ampro.weebot.database.Database;
 import com.ampro.weebot.database.DatabaseManager;
+import com.ampro.weebot.entities.bot.GlobalWeebot;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.jda.JDABuilder;
 import com.ampro.weebot.listener.EventDispatcher;
@@ -54,13 +53,17 @@ public class Launcher {
 	private static JDA JDA_CLIENT;
 	private static Thread saveTimer;
 
+	public static final GlobalWeebot GLOBAL_WEEBOT = new GlobalWeebot();
+
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
 					new HelpCommand(), new ShutdownCommand(), new DatabaseFileCommand(),
+					new RestartCommand(),
 					new ManageSettingsCommand(), new ListGuildsCommand(),
                     new PingCommand(), new SpamCommand(), new NotePadCommand(),
                     new SelfDestructMessageCommand(), new SecretePhraseCommand(),
-                    new WeebotSuggestionCommand(), new CardsAgainstHumanityCommand()
+                    new WeebotSuggestionCommand(), new CardsAgainstHumanityCommand(),
+					new OutHouseCommand()
 			));
 
 	/** The database */
@@ -138,7 +141,7 @@ public class Launcher {
 	 * Adds event listeners to the JDA.
 	 */
 	private static void addListeners() {
-   		Launcher.JDA_CLIENT.addEventListener(new EventDispatcher());
+   		Launcher.JDA_CLIENT.addEventListener(new EventDispatcher(), GLOBAL_WEEBOT);
    }
 
 	/**

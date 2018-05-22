@@ -587,7 +587,7 @@ public class CardsAgainstHumanityCommand extends Command {
          *
          * @return true if all players have played their cards.
          */
-        private boolean allCardsPlayed() {
+        private final boolean allCardsPlayed() {
             for (CAHPlayer p : this.PLAYERS.values()) {
                 if(p.playedCards == null && p != czar) {
                     return false;
@@ -600,7 +600,7 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         /** @return An embed of the black card and the played cards */
-        private MessageEmbed playedCardsEmbed() {
+        private final MessageEmbed playedCardsEmbed() {
             if(this.STATE != GAME_STATE.READING) {
                 return null;
             }

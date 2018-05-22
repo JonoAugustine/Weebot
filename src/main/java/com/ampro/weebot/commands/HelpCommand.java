@@ -127,7 +127,7 @@ public class HelpCommand extends Command {
 
         eb.setTitle("Weeb(B)ot Features");
         sb.append("Use ' help <feature_command> ' for a list of commands\n")
-          .append("(*The feature's command is shown as 'Feature (command)'.");
+          .append("(*The feature's command is shown as 'Feature (command)').");
         eb.setDescription(sb.toString());
         sb.setLength(0);
 
@@ -149,6 +149,9 @@ public class HelpCommand extends Command {
         sb.append("Delete the message after a given amount of seconds")
           .append(" (30 sec by default)");
         eb.addField("Self-destruct messages (sdc)", sb.toString(), false)
+          .addField("Have me respond to your Mentions while AFK (ohc)",
+                    "I will respond to any user who mentions you on your behalf.",
+                    false)
           .addField("List all guilds hosting a Weebot (listguilds)",
                     "See everywhere I live...that's not creepy at all...", false)
           .addField("Ping (ping)", "pong", false);
