@@ -157,20 +157,6 @@ public class HelpCommand extends Command {
 
     }
 
-    /**
-     * Send a list of all the {@link Command}s Weebots can perform
-     * and how to use them.
-     * @param bot The bot who called
-     * @param event The event that invoked
-     */
-    private void commandsHelp(Weebot bot, BetterMessageEvent event) {
-        //TODO commandsHelp
-        String out = "```" + bot.getNickname() + " Commands:\n";
-        out += "Sorry, this command is still under construction.\n";
-        out += "```";
-        event.reply(out);
-    }
-
     @Override
     public String getHelp() {
         return "Help Help...wait what?";

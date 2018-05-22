@@ -512,7 +512,10 @@ public class CardsAgainstHumanityCommand extends Command {
             int rand;
             for (int i = 0; i < player.hand.length; i++) {
                 if(player.hand[i] == null) {
-                    rand = ThreadLocalRandom.current().nextInt(deck.whiteCards.size());
+                    do {
+                        rand = ThreadLocalRandom.current()
+                                                .nextInt(deck.whiteCards.size());
+                    } while (playerHasCard(deck.whiteCards.get(rand)));
                     player.hand[i] = deck.whiteCards.get(rand);
                     delt = true;
                 }
@@ -563,6 +566,19 @@ public class CardsAgainstHumanityCommand extends Command {
                 player.hand[c] = null;
             }
             return 0;
+        }
+
+        /**
+         * Check if any player has the given whiteCard
+         * @param card The card to check
+         */
+        private final boolean playerHasCard(WhiteCard card) {
+            for (CAHPlayer p : this.playerList) {
+                for (WhiteCard wc : p.hand) {
+                    if (wc.equals(card)) return true;
+                }
+            }
+            return false;
         }
 
         /**
