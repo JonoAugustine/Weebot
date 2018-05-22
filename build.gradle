@@ -56,6 +56,15 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.1'
 }
 
+// holds classes included into client.jar and util.jar, so they are to be excluded from server.jar
+/*ext.serverExcludes = []
+task updaterJar(type: Jar) {
+    from(sourceSets.main.output) {
+        include "com/ampro/updater/**"
+        project.ext.serverExcludes.addAll(includes)
+    }
+}*/
+
 compileJava.options.encoding = 'UTF-8'
 
 jar {

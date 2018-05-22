@@ -58,7 +58,7 @@ public class Launcher {
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
 					new HelpCommand(), new ShutdownCommand(), new DatabaseFileCommand(),
-					new RestartCommand(),
+					//new RestartCommand(),
 					new ManageSettingsCommand(), new ListGuildsCommand(),
                     new PingCommand(), new SpamCommand(), new NotePadCommand(),
                     new SelfDestructMessageCommand(), new SecretePhraseCommand(),

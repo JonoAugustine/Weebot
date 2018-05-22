@@ -41,7 +41,9 @@ public class OutHouseCommand extends Command {
             if (!event.isPrivate()) {
                 if(event.getType() == BetterMessageEvent.TYPE.RECIVED && event
                         .getAuthor() == user || this.remainingHours <= 0) {
-                    this.finish();
+                    synchronized (Launcher.GLOBAL_WEEBOT) {
+                        Launcher.GLOBAL_WEEBOT.getPassives().remove(this);
+                    }
                     event.reply("*Welcome back " + user.getName() + "*");
                     return;
 
@@ -57,11 +59,6 @@ public class OutHouseCommand extends Command {
             }
         }
 
-        private void finish() {
-            synchronized (Launcher.GLOBAL_WEEBOT) {
-                Launcher.GLOBAL_WEEBOT.getPassives().remove(this);
-            }
-        }
     }
 
     public OutHouseCommand() {
