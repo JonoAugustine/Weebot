@@ -1754,8 +1754,8 @@ public class CardsAgainstHumanityCommand extends Command {
                     "cah mkwc <deck_name> <card text>\n*Aliases*: " + "makewhitecard, " +
                             "makewc",false)
           .addField("Make a Custom Black Card",
-                    "cah mkbc <deck_name> <card text>\n*Aliases*: " + "makeblackcard, " +
-                            "makebc",false)
+                    "cah mkbc <deck_name> <numberOfBlanks> <card text>\n*Aliases*: " 
+					+ "makeblackcard, makebc", false)
           .addField("View all Custom Decks", "cah alldecks", false)
           .addField("View a Custom Deck's Cards",
                     "cah viewdeck <deck_name>\n*Alias*: seedeck", false)
