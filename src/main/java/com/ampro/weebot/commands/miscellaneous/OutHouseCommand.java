@@ -29,6 +29,7 @@ public class OutHouseCommand extends Command {
 
         public OutHouse(User user, long hours) {
             startTime = OffsetDateTime.now();
+            this.remainingHours = hours;
             this.user = user;
         }
 
@@ -46,7 +47,6 @@ public class OutHouseCommand extends Command {
                     return;
 
                 } else if(event.mentions(this.user)) {
-                    String timeLeft;
                     StringBuilder sb = new StringBuilder();
                     sb.append("*Sorry, ").append(user.getName())
                       .append(" is currently unavailable. Please try mentioning them again ")
