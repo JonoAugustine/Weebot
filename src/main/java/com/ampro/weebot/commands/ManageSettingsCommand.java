@@ -33,7 +33,8 @@ public class ManageSettingsCommand extends Command {
                         "participate", "activeparticipate", "interrupt",
                         "livebot", "chatbot",
                         "naughty", "nsfw",
-                        "spamlimit"
+                        "spamlimit",
+                        "msc"
                 ))
                 , "See and change my settings."
                 ,"[true/false/on/off]"

@@ -18,7 +18,8 @@ public class SelfDestructMessageCommand extends Command {
 
     public SelfDestructMessageCommand() {
         super("SelfDestruct", new ArrayList<>(Arrays.asList(
-                "deleteme", "cleanthis", "deletethis","covertracks", "whome?", "podh")),
+                "deleteme", "cleanthis", "deletethis","covertracks", "whome?", "podh",
+                "sdc")),
 
               "Deletes the marked message after the given amount of time (30 sec by " +
                       "default)",
