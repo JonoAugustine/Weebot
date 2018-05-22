@@ -1732,67 +1732,42 @@ public class CardsAgainstHumanityCommand extends Command {
         eb.setDescription(sb.toString());
         sb.setLength(0);
 
-        eb.addField("Guide", "<required> , [optional], /situational_required/", false);
+        eb.addField("Guide",
+                "<required> , [optional], /situationally_required/",false)
 
-        eb.addField("Game Setup", "cah setup [hand_size] [deck_name] [deck2_name]...",
-                    false
-        );
-
-        eb.addField("Join Game", "cah join", false);
-
-        eb.addField("Start Game (Requires 3 players)", "cah start", false);
-
-        eb.addField("Add Weebot to the Game", "cah +bot\n*Aliases*: addbot, invitebot",
-                    false
-        );
-
-        eb.addField("Play Your Card(s)",
+          .addField("Game Setup", "cah setup [hand_size] [deck_name] [deck2_name]...",
+                    false)
+          .addField("Join Game", "cah join", false)
+          .addField("Start Game (Requires 3 players)", "cah start", false)
+          .addField("Add Weebot to the Game", "cah +bot\n*Aliases*: addbot, invitebot",
+                    false)
+          .addField("Play Your Card(s)",
                     "cah play <card1_number> /card2_num/.../card5_num/" + "\n*Alias*: " +
                             "use",
-                    false
-        );
-
-        eb.addField("Card Czar Pick Winning Card(s)", "cah pick <card_set_num>", false);
-
-        eb.addField("Re-send Your Hand of Cards", "cah myhand", false);
-
-        eb.addField("Make a Custom Deck", "cah makedeck <deck_name>", false);
-
-        eb.addField("Make a Custom White Card",
+                    false)
+          .addField("Card Czar Pick Winning Card(s)", "cah pick " +
+                "<card_set_num>", false)
+          .addField("Re-send Your Hand of Cards", "cah myhand", false)
+          .addField("Make a Custom Deck", "cah makedeck <deck_name>", false)
+          .addField("Make a Custom White Card",
                     "cah mkwc <deck_name> <card text>\n*Aliases*: " + "makewhitecard, " +
-                            "makewc",
-                    false
-        );
-
-
-        eb.addField("Make a Custom Black Card",
+                            "makewc",false)
+          .addField("Make a Custom Black Card",
                     "cah mkbc <deck_name> <card text>\n*Aliases*: " + "makeblackcard, " +
-                            "makebc",
-                    false
-        );
-
-
-        eb.addField("View all Custom Decks", "cah alldecks", false);
-
-        eb.addField("View a Custom Deck's Cards",
-                    "cah viewdeck <deck_name>\n*Alias*: seedeck", false
-        );
-
-        eb.addField("Get a Custom Deck as a Text File", "cah deckfile <deck_name>",
-                    false
-        );
-
-        eb.addField("Remove Custom Deck **", "cah remove <deck_number>", false);
-
-        eb.addField("Remove Custom Card **", "cah remove <deck_num> <card_number>",
-                    false
-        );
-
-        eb.addField("Under Construction ",
-                    "Commands marked '**' are still under construction", false
-        );
-
-        eb.setFooter("Run by Weebot", Launcher.getJda().getSelfUser().getAvatarUrl());
+                            "makebc",false)
+          .addField("View all Custom Decks", "cah alldecks", false)
+          .addField("View a Custom Deck's Cards",
+                    "cah viewdeck <deck_name>\n*Alias*: seedeck", false)
+          .addField("Get " +
+                        "a Custom Deck as a Text File", "cah deckfile <deck_name>",
+                    false)
+          .addField("Remove Custom Deck **", "cah remove " +
+                "<deck_number>", false)
+          .addField("Remove Custom Card **", "cah remove <deck_num> <card_number>",
+                    false)
+          .addField("Under Construction ",
+                    "Commands marked '**' are still under construction", false)
+          .setFooter("Run by Weebot", Launcher.getJda().getSelfUser().getAvatarUrl());
 
         return eb.build();
     }

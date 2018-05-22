@@ -3,6 +3,7 @@ package com.ampro.weebot.commands;
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 
@@ -847,6 +848,7 @@ public class NotePadCommand extends Command {
                 case "toss":
                 case "trash":
                 case "bin":
+                case "garbo":
                     return ACTION.TRASH;
                 case "file":
                     return ACTION.FILE;
@@ -945,6 +947,51 @@ public class NotePadCommand extends Command {
             (String arg, BetterMessageEvent event) {
         event.reply("I couldn't find a note " + arg + ". Please use a number" +
                             " listed in the NotePad.");
+    }
+
+    @Override
+    public final MessageEmbed getEmbedHelp() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Write and edit server NotePads\n")
+          .append("Note Pads can be locked to specific")
+          .append("roles, members, and text channels.\n")
+          .append("<required> , [optional], /situationally_required/");
+        EmbedBuilder eb = Launcher.makeEmbedBuilder("Note Pad", null, sb.toString());
+        sb.setLength(0);
+
+        eb.addField("See all available NotePads", "notes", false)
+          .addField("Make a NotePad",
+                  "notes make [The_Name]\n*If no name is given, the date and time will " +
+                          "be used as the name of the NotePad*", false)
+          .addField("See the contents of a Note Pad",
+        "notes <notepad_number>\n*To find the NotePad's number, use 'notes'*",
+                  false)
+          .addField("Write to a NotePad",
+                  "notes write <notepad_number> <The Message>\n*Alias:* add",
+                  false)
+          .addField("Insert a Note into the NotePad",
+                    "notes <notepad_number> insert <The Message>", false)
+          .addField("Edit (replace) a Note",
+                  "notes <notepad_number> edit <note_number> <New Message>", false)
+          .addField("Delete a Note from a NotePad",
+                    "notes <notepad_number> delete <note_number>\n*Alias*: remove\n",
+                    false)
+          .addField("Clear a NotePad of all Notes", "notes <notepad_number> clear",
+                   false)
+          .addField("Get a NotePad as a text file", "notes <notepad_number> file",
+                  false)
+          .addField("Lock access to a NotePad",
+                  "notes <notepad_number> lockto [roles, members, or channels]", false)
+          .addField("Lock a NotePad's access from Roles, Members, or Channels",
+                  "notes <notepad_number> lockout [roles, members, or channels]", false)
+          .addField("Delete a NotePad",
+                  "notes <notepad_number> trash\n*Aliases*:toss, bin, garbo", false)
+          .addField("Notes",
+                  "any instance of *'notes'* can be replaced with any of the following: "
+                    + "\n" + this.aliases.toString() + ".", false);
+
+        return eb.build();
+
     }
 
     @Override

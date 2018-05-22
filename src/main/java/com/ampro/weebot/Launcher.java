@@ -24,6 +24,7 @@ import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.jda.JDABuilder;
 import com.ampro.weebot.listener.EventDispatcher;
 import net.dv8tion.jda.core.AccountType;
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDA.Status;
 import net.dv8tion.jda.core.entities.Game;
@@ -32,9 +33,11 @@ import net.dv8tion.jda.core.exceptions.RateLimitedException;
 import org.apache.commons.io.FileUtils;
 
 import javax.security.auth.login.LoginException;
+import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.List;
 
 /**
  * Runner/Main class of the Weebot network.
@@ -50,7 +53,6 @@ public class Launcher {
 
 	private static JDA JDA_CLIENT;
 	private static Thread saveTimer;
-
 
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
@@ -315,6 +317,31 @@ public class Launcher {
 	/** Get the JDA */
 	public static JDA getJda() {
 		return Launcher.JDA_CLIENT;
+	}
+
+	/** @return EmbedBuilder with the standard Weebot green and Author set to "Weebot" */
+	public static final EmbedBuilder getStandardEmbedBuilder() {
+		return new EmbedBuilder()
+				.setColor(new Color(0x31FF00))
+				.setAuthor("Weebot", null, JDA_CLIENT.getSelfUser().getAvatarUrl())
+				.setFooter("Run by Weebot", JDA_CLIENT.getSelfUser().getAvatarUrl());
+	}
+
+	/**
+	 * Makes a standard format EmbedBuilder with standard color and author
+	 * , the given title, title URL, and description.
+	 * @param title The title of the Embed
+	 * @param titleLink The site to link to in the Title
+	 * @param description The description that appears under the title
+	 * @return A Weebot-standard EmbedBuilder
+	 */
+	public static final EmbedBuilder makeEmbedBuilder(String title,
+	                                                  String titleLink,
+	                                                  String description) {
+		return getStandardEmbedBuilder()
+				.setTitle(title, titleLink)
+				.setDescription(description);
+
 	}
 
 }
