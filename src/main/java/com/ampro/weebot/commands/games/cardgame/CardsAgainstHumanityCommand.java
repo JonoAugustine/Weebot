@@ -381,6 +381,7 @@ public class CardsAgainstHumanityCommand extends Command {
         /** We use this to standardize the order in which players are accesesed */
         List<CAHPlayer> playerList;
         BlackCard blackCard;
+        int round;
         /** The winners of the game */
         private final ArrayList<CAHPlayer> winners;
 
@@ -586,8 +587,9 @@ public class CardsAgainstHumanityCommand extends Command {
             //1. Arg: name as string
             //2. Arg: url as string (can be null)
             //3. Arg: icon url as string (can be null)
-            eb.setAuthor("Cards against " + channel.getGuild().getName(),
-                         null, channel.getGuild().getIconUrl());
+            eb.setAuthor("Cards against " + channel.getGuild().getName()
+                                 + " | round " + round, null,
+                         channel.getGuild().getIconUrl());
 
             //Set the title:
             //1. Arg: title as string
@@ -720,18 +722,22 @@ public class CardsAgainstHumanityCommand extends Command {
             blackCard = t;
 
             //Set next czar
+            CAHPlayer temp;
             do {
                 if(this.czarIterator.hasNext())
-                    czar = czarIterator.next();
+                    temp = czarIterator.next();
                 else {
                     //Reset the iterator if we reached the end of the list
                     this.czarIterator = PLAYERS.values().iterator();
-                    czar = czarIterator.next();
+                    temp = czarIterator.next();
                 }
-            } while (czar.getUser().isBot()); //Don't let the bot be czar
+                //Don't let the bot be czar or a repeat czar
+            } while (czar.getUser().isBot() && temp != czar);
+            czar = temp;
 
             //Game state
             this.STATE = GAME_STATE.CHOOSING;
+            round++;
 
         }
 
@@ -752,8 +758,8 @@ public class CardsAgainstHumanityCommand extends Command {
                 }
             this.czarIterator = this.PLAYERS.values().iterator();
             do {
+                //Set a random Czar
                 this.czar = playerList.get(new Random().nextInt(playerList.size()));
-                while (czarIterator.hasNext() && czarIterator.next() != czar) {}
             } while (czar.getUser().isBot());
             //Set the first black card
             int rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
@@ -1179,6 +1185,7 @@ public class CardsAgainstHumanityCommand extends Command {
                                     m.delete().queue();
                                     event.deleteMessage();
                         });
+                        return;
                     }
 
                     //Give the won cards to the winner
@@ -1550,7 +1557,7 @@ public class CardsAgainstHumanityCommand extends Command {
         eb.setThumbnail(
                 "https://cardsagainsthumanity.com/v8/images/social-3f4a4c57.png");
 
-        eb.setTitle("Cards Against Weebot Humanity (cah)",
+        eb.setTitle("Cards Against Humanity (cah)",
                 "https://www.cardsagainsthumanity.com/");
 
         StringBuffer sb = new StringBuffer();
