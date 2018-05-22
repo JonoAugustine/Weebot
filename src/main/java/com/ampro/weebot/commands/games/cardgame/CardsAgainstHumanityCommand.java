@@ -1711,7 +1711,8 @@ public class CardsAgainstHumanityCommand extends Command {
 
         StringBuffer sb = new StringBuffer();
         sb.append("Play a game of Cards Against Humanity and ")
-          .append("make custom decks with user-made cards.");
+          .append("make custom decks with user-made cards.\n")
+          .append("(Official decks up to Expansion 3)");
         eb.setDescription(sb.toString());
         sb.setLength(0);
 
