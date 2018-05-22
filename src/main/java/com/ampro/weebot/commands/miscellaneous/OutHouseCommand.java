@@ -38,24 +38,22 @@ public class OutHouseCommand extends Command {
         public void accept(BetterMessageEvent event) {
             this.remainingHours -=
                     ChronoUnit.HOURS.between(startTime, OffsetDateTime.now());
-            if (event.getType() == BetterMessageEvent.TYPE.RECIVED
-                    && event.getAuthor() == user
-                    && !event.isPrivate()
-                    || this.remainingHours <= 0)
-            {
-                this.finish();
-                event.reply("*Welcome back " + user.getName() + "*");
-                return;
+            if (!event.isPrivate()) {
+                if(event.getType() == BetterMessageEvent.TYPE.RECIVED && event
+                        .getAuthor() == user || this.remainingHours <= 0) {
+                    this.finish();
+                    event.reply("*Welcome back " + user.getName() + "*");
+                    return;
 
-            } else if (event.mentions(this.user)) {
-                String timeLeft;
-                StringBuilder sb = new StringBuilder();
-                sb.append("*Sorry, ").append(user.getName())
-                  .append(" is currently unavailable. Please try mentioning them again ")
-                  .append("in ").append(this.remainingHours)
-                  .append(" hours. Thank you.*");
-                event.reply(sb.toString());
-                return;
+                } else if(event.mentions(this.user)) {
+                    String timeLeft;
+                    StringBuilder sb = new StringBuilder();
+                    sb.append("*Sorry, ").append(user.getName())
+                      .append(" is currently unavailable. Please try mentioning them again ")
+                      .append("in ").append(this.remainingHours).append(" hours. Thank you.*");
+                    event.reply(sb.toString());
+                    return;
+                }
             }
         }
 
