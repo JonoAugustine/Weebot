@@ -5,10 +5,8 @@ import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
-import com.sun.org.apache.bcel.internal.generic.LADD;
 import net.dv8tion.jda.core.entities.User;
 
-import java.lang.reflect.Member;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;

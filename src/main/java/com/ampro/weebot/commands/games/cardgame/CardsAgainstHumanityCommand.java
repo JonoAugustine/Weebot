@@ -1004,7 +1004,7 @@ public class CardsAgainstHumanityCommand extends Command {
                             if(d != null && d.isAllowed(event.getMember())) {
                                 reqDecks.add(d);
                             } else {
-                                badDeckNames.append(d.name + ", ");
+                                badDeckNames.append(args[i] + ", ");
                             }
                         }
                     }
@@ -1024,7 +1024,8 @@ public class CardsAgainstHumanityCommand extends Command {
 
                     if(badDeckNames.length() > 0) {
                         badDeckNames.setLength(badDeckNames.length() - 2);
-                        sb.append("\n\nThese decks do not exist or are locked from you: ")
+                        sb.append(
+                                "\n\nThese decks do not exist or are locked from you:\n")
                           .append(badDeckNames.toString())
                           .append(". Use ``cah alldecks`` to see all available decks");
                     }
