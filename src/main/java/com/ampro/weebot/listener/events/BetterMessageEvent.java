@@ -286,6 +286,13 @@ public class BetterMessageEvent extends BetterEvent {
         synchronized (file) { consumer.accept(file); }
     }
 
+
+    public void privateReply(MessageEmbed embed) {
+        this.author.openPrivateChannel().queue( c -> {
+            c.sendMessage(embed).queue();
+        });
+    }
+
     /** Delete the message. */
     public void deleteMessage() {
         this.messageEvent.getChannel().getMessageById(this.messageEvent.getMessageIdLong())
@@ -301,7 +308,12 @@ public class BetterMessageEvent extends BetterEvent {
         return this.arguments;
     }
 
-
+    /**
+     * An unmodifiable list of {@link net.dv8tion.jda.core.entities.Message.Attachment Attachments} that are attached to this message.
+     * <br>Most likely this will only ever be 1 {@link net.dv8tion.jda.core.entities.Message.Attachment Attachment} at most.
+     *
+     * @return Unmodifiable list of {@link net.dv8tion.jda.core.entities.Message.Attachment Attachments}.
+     */
     public List<Message.Attachment> getAttatchment() {
         return this.message.getAttachments();
     }
