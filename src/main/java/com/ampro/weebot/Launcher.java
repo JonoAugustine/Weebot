@@ -347,4 +347,18 @@ public class Launcher {
 
 	}
 
+	/**
+	 * Makes a standard format EmbedBuilder with standard color and author
+	 * , the given title, title URL, and description.
+	 * @param title The title of the Embed
+	 * @param titleURL The site to link to in the Title
+	 * @param description The description that appears under the title
+	 * @return A Weebot-standard EmbedBuilder
+	 */
+	public static final EmbedBuilder makeEmbedBuilder(String title, String titleURL,
+	                                                  StringBuilder description) {
+		return makeEmbedBuilder(title, titleURL, description.toString());
+	}
+
+
 }
