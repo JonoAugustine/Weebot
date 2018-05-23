@@ -33,18 +33,20 @@ public class GlobalWeebot extends Weebot implements EventListener {
     @Override
     public void onEvent(Event event) {
         if (event instanceof MessageReceivedEvent) {
-            for (IPassive p : this.PASSIVES) {
+            if(((MessageReceivedEvent) event).getAuthor().isBot()) {
+                return;
+            }
+            this.PASSIVES.forEach(p -> {
                 try {
-                    p.accept(new BetterMessageEvent(
-                            (MessageReceivedEvent) event,
-                            ((MessageReceivedEvent) event).getAuthor()
-                             )
-                    );
+                    p.accept(new BetterMessageEvent((MessageReceivedEvent) event,
+                                                    ((MessageReceivedEvent) event).getAuthor()
+                    ));
                 } catch (BetterEvent.InvalidEventException e) {
                     e.printStackTrace();
                     System.err.println("Err in GlobalWeebot BetterMessageEvent wrapper");
                 }
-            }
+            });
         }
     }
+
 }
