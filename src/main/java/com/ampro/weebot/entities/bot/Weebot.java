@@ -421,7 +421,7 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     /**@return HashMap of Cards Against Humanity card lists mapped to Deck-Name Strings*/
-    public final ConcurrentHashMap<String, CAHDeck> getCustomCahDecks() {
+    public final synchronized ConcurrentHashMap<String, CAHDeck> getCustomCahDecks() {
         return this.CUSTOM_CAH_DECKS;
     }
 
@@ -429,7 +429,7 @@ public class Weebot implements Comparable<Weebot> {
      * @param deckname Name of the "deck" requested.
      * @return Cards Against Humanity Deck mapped to the name. Null if not found.
      */
-    public final CAHDeck getCustomCahDeck(String deckname) {
+    public final synchronized CAHDeck getCustomCahDeck(String deckname) {
         return this.CUSTOM_CAH_DECKS.get(deckname);
     }
 
@@ -438,7 +438,7 @@ public class Weebot implements Comparable<Weebot> {
      * @param deck The Deck to add.
      * @return false if the deck already exists.
      */
-    public final boolean addCustomCahDeck(CAHDeck deck) {
+    public final synchronized boolean addCustomCahDeck(CAHDeck deck) {
         return this.CUSTOM_CAH_DECKS.putIfAbsent(deck.getName(), deck) == null;
     }
 
