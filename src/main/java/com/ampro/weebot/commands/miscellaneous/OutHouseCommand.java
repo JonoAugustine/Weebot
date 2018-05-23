@@ -5,6 +5,7 @@ import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;
@@ -39,20 +40,26 @@ public class OutHouseCommand extends Command {
                     ChronoUnit.HOURS.between(startTime, OffsetDateTime.now());
             if (!event.isPrivate()) {
                 if(event.getType() == BetterMessageEvent.TYPE.RECIVED && event
-                        .getAuthor() == user || this.remainingHours <= 0) {
+                        .getAuthor() == user) {
                     synchronized (Launcher.GLOBAL_WEEBOT) {
                         Launcher.GLOBAL_WEEBOT.getPassives().remove(this);
                     }
-                    event.reply("*Welcome back " + user.getName() + "*");
+                    Member mem = event.getGuild().getMember(this.user);
+                    event.reply("*Welcome back " + mem.getEffectiveName() + "*");
                     return;
-
                 } else if(event.mentions(this.user)) {
                     StringBuilder sb = new StringBuilder();
-                    sb.append("*Sorry, ").append(user.getName())
+                    sb.append("*Sorry, ")
+                      .append(event.getGuild().getMember(this.user).getEffectiveName())
                       .append(" is currently unavailable. Please try mentioning them again ")
-                      .append("in ").append(this.remainingHours).append(" hours. Thank you.*");
+                      .append("in ").append(this.remainingHours)
+                      .append(" hours. Thank you.*");
                     event.reply(sb.toString());
                     return;
+                } else if (this.remainingHours <= 0) {
+                    synchronized (Launcher.GLOBAL_WEEBOT) {
+                        Launcher.GLOBAL_WEEBOT.getPassives().remove(this);
+                    }
                 }
             }
         }
@@ -62,7 +69,7 @@ public class OutHouseCommand extends Command {
     public OutHouseCommand() {
         super(
                 "OutHouse",
-                new ArrayList<>(Arrays.asList("oh")),
+                new ArrayList<>(Arrays.asList("ohc")),
                 "Have the bot respond to anyone who mentions you for the given time.",
                 "outhouse [time]",
                 false,
@@ -100,7 +107,7 @@ public class OutHouseCommand extends Command {
                                   .add(new OutHouse(event.getAuthor(), hours));
         }
 
-        event.reply("I will hold down the for while you're away!");
+        event.reply("I will hold down the fort while you're away! :guardsman: ");
 
     }
 }
