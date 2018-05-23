@@ -69,29 +69,19 @@ public class CardsAgainstHumanityCommand extends Command {
             }
 
             /**
-             * Send a private message to the player, saving the {@link Message} as {@link
-             * CAHPlayer#handMessage} for later editing.
-             *
-             * @param message
-             *         The message to send.
-             */
-            public final void privateMessage(String message) {
-                super.privateMessage(message, m -> this.handMessage = m);
-            }
-
-            /**
              * Update the {@link CAHPlayer#handMessage}. If the message cannot be edited,
              * send a new one with the given message.
              *
-             * @param newMmessage
+             * @param embed
              *         The new Message to update or send.
              */
-            public final void updateHandMessage(String newMmessage) {
+            public final void updateHandMessage(MessageEmbed embed) {
                 try {
-                    this.handMessage.editMessage(newMmessage)
-                                    .queue(message -> this.handMessage = message);
+                    this.handMessage.editMessage(embed).queue(
+                            message -> this.handMessage = message
+                    );
                 } catch (Exception e) {
-                    this.privateMessage(newMmessage, m -> this.handMessage = m);
+                    super.privateMessage(embed, m -> this.handMessage = m);
                 }
             }
 
@@ -125,12 +115,12 @@ public class CardsAgainstHumanityCommand extends Command {
              * @param author
              *         The author of the Deck
              */
-            public CAHDeck(String name, Member author) throws InvalidNameException {
+            public CAHDeck(String name, Member author, Guild guild)
+                    throws InvalidNameException {
                 try {
                     Integer.parseInt(name);
                     throw new InvalidNameException("Name cannot be a number.");
-                } catch (NumberFormatException e) {
-                }
+                } catch (NumberFormatException e) {}
                 this.name = String.join("_", name.split("\\s+", -1));
                 this.authorID = author.getUser().getIdLong();
                 this.whiteCards = new ArrayList<>();
@@ -184,6 +174,41 @@ public class CardsAgainstHumanityCommand extends Command {
              */
             private final CAHDeck loadFrom(List<CAHDeck> decks) {
                 return this.loadFrom(decks.toArray(new CAHDeck[decks.size()]));
+            }
+
+            /**
+             * @return The deck in a
+             * {@link Launcher#makeEmbedBuilder standard Weebot embed}
+             */
+            private MessageEmbed toEmbed(Guild guild) {
+                StringBuilder sb = new StringBuilder()
+                        .append("Custom Cards Against Humanity Deck from *")
+                        .append(guild.getName()).append("* created by *")
+                        .append(Launcher.getJda().getUserById(authorID).getName())
+                        .append("*");
+                EmbedBuilder eb = Launcher.makeEmbedBuilder(this.name, null, sb);
+                eb.setThumbnail(
+                        "https://cardsagainsthumanity.com/v8/images/social-3f4a4c57.png");
+                sb.setLength(0);
+                for (int i = 0; i < this.whiteCards.size(); i++) {
+                    sb.append(i + 1).append(".) ").append(this.whiteCards.get(i))
+                      .append("\n\n");
+                }
+                eb.addField("White Cards", sb.toString(), false);
+
+                eb.addBlankField(false);
+
+                sb.setLength(0);
+                for (int i = 0; i < this.blackCards.size(); i++) {
+                    sb.append(i + 1).append(".) ").append(this.blackCards.get(i))
+                      .append("\n\n");
+                }
+                eb.addField("Black Cards", sb.toString(), false);
+
+                eb.addBlankField(false);
+
+                return eb.build();
+
             }
 
             /** @return A File of the Deck's black and white cards. */
@@ -332,7 +357,7 @@ public class CardsAgainstHumanityCommand extends Command {
             public boolean equals(Object o) {
                 try {
                     return ((WhiteCard) o).cardText == this.cardText;
-                } catch (ClassCastException e) {
+                } catch (ClassCastException | NullPointerException e) {
                     return false;
                 }
             }
@@ -390,7 +415,8 @@ public class CardsAgainstHumanityCommand extends Command {
 
         public enum GAME_STATE {
             /** Players are choosing white cards */
-            CHOOSING, /** Czar is reading played white cards */
+            CHOOSING,
+            /** Czar is reading played white cards */
             READING
         }
 
@@ -412,7 +438,7 @@ public class CardsAgainstHumanityCommand extends Command {
         /** We use this to standardize the order in which players are accesesed */
         List<CAHPlayer> playerList;
         BlackCard blackCard;
-        int round;
+        int round = 1;
         /** The winners of the game */
         private final ArrayList<CAHPlayer> winners;
 
@@ -498,6 +524,50 @@ public class CardsAgainstHumanityCommand extends Command {
             return false;
         }
 
+
+        /**
+         * Setup the game and players for the next round. <br> 1.) nullify {@link
+         * CAHPlayer#playedCards played cards} and deal new cards. 2.) Set new random
+         * black card. 3.) Set next Czar 4.) Set game state to {@link GAME_STATE#CHOOSING
+         * CHOOSING}
+         */
+        protected void setupNextRound() {
+            //Deal new cards
+            for (CAHPlayer p : PLAYERS.values()) {
+                p.playedCards = null;
+                this.dealCards(p);
+            }
+
+            //Set the new black card
+            int rand;
+            BlackCard t;
+            do {
+                rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
+                t = this.deck.blackCards.get(rand);
+            } while (t.equals(this.blackCard));
+
+            this.blackCard = t;
+
+            //Set next czar
+            CAHPlayer temp;
+            do {
+                if(this.czarIterator.hasNext()) {
+                    temp = czarIterator.next();
+                } else {
+                    //Reset the iterator if we reached the end of the list
+                    this.czarIterator = PLAYERS.values().iterator();
+                    temp = czarIterator.next();
+                }
+                //Don't let the bot be czar or a repeat czar
+            } while (temp.getUser().isBot()
+                    || (temp == czar && playerList.size() > 2 /*4 dev vs bot test*/));
+            czar = temp;
+
+            //Game state
+            this.STATE = GAME_STATE.CHOOSING;
+            round++;
+        }
+
         /**
          * Deal random {@link WhiteCard whitecards} to the player until
          *
@@ -528,19 +598,35 @@ public class CardsAgainstHumanityCommand extends Command {
          */
         protected void sendHands() {
             PLAYERS.values().forEach(p -> {
-                if(!p.getUser().isBot()) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("Cards against ").append(Launcher.getGuild(
-                            Long.parseLong(this.HOST_ID.replace("W", ""))).getName())
-                      .append("```Black Card (Pick ").append(this.blackCard.blanks)
-                      .append("):\n").append(this.blackCard)
-                      .append("\n\n\nYour deck:\n" + "\n");
-                    for (int i = 0; i < p.hand.length; i++) {
-                        sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
-                    }
-                    p.updateHandMessage(sb.append(" ```").toString());
-                }
+                this.sendHand(p);
             });
+        }
+
+        /**
+         * Send the player their hand of cards.
+         * @param player The player
+         */
+        protected void sendHand(CAHPlayer player) {
+            if(!player.getUser().isBot()) {
+                StringBuilder sb = new StringBuilder();
+                EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
+
+                sb.append("Cards against ").append(channel.getGuild().getName())
+                  .append(" | round ").append(round);
+                eb.setAuthor(sb.toString(), null, channel.getGuild().getIconUrl());
+                sb.setLength(0);
+
+                eb.addField("Black Card (Pick " + this.blackCard.blanks + "):",
+                            this.blackCard.cardText, false);
+
+                for (int i = 0; i < player.hand.length; i++) {
+                    sb.append((i + 1) + ".) " + player.hand[i] + "\n\n");
+                }
+
+                eb.addField("Your Deck", sb.toString(), false);
+
+                player.updateHandMessage(eb.build());
+            }
         }
 
         /**
@@ -575,7 +661,7 @@ public class CardsAgainstHumanityCommand extends Command {
         private final boolean playerHasCard(WhiteCard card) {
             for (CAHPlayer p : this.playerList) {
                 for (WhiteCard wc : p.hand) {
-                    if (wc.equals(card)) return true;
+                    if (wc != null) if (wc.equals(card)) return true;
                 }
             }
             return false;
@@ -656,7 +742,8 @@ public class CardsAgainstHumanityCommand extends Command {
             eb.addBlankField(false);
 
             eb.addField("How to Play:",
-                        "Select the best card (or set of cards) with 'cah pick #'.", false
+                        "*Select the best card (or set of cards) with *cah pick #*.",
+                        false
             );
 
             //1. Arg: text as string
@@ -704,7 +791,10 @@ public class CardsAgainstHumanityCommand extends Command {
             eb.addBlankField(false);
 
             eb.addField("How to Play:",
-                        "Select your cards from the private chat I sent you.", false
+                        "Select your cards from the private chat I sent you. \n" +
+                                "*cah play <card_number> " +
+                                "/card2_number/.../card5_number/*",
+                        false
             );
 
             //1. Arg: text as string
@@ -788,59 +878,13 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         /**
-         * Setup the game and players for the next round. <br> 1.) nullify {@link
-         * CAHPlayer#playedCards played cards} and deal new cards. 2.) Set new random
-         * black card. 3.) Set next Czar 4.) Set game state to {@link GAME_STATE#CHOOSING
-         * CHOOSING}
-         */
-        protected void setupNextRound() {
-            //Deal new cards
-            for (CAHPlayer p : PLAYERS.values()) {
-                p.playedCards = null;
-                if(!this.dealCards(p)) {
-                    System.err.println("Not delt!");
-                    return;
-                }
-            }
-
-            //Set the new black card
-            int rand;
-            BlackCard t;
-            do {
-                rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
-                t = this.deck.blackCards.get(rand);
-            } while (t.equals(this.blackCard));
-
-            blackCard = t;
-
-            //Set next czar
-            CAHPlayer temp;
-            do {
-                if(this.czarIterator.hasNext()) {
-                    temp = czarIterator.next();
-                } else {
-                    //Reset the iterator if we reached the end of the list
-                    this.czarIterator = PLAYERS.values().iterator();
-                    temp = czarIterator.next();
-                }
-                //Don't let the bot be czar or a repeat czar
-            } while (czar.getUser().isBot() && temp != czar);
-            czar = temp;
-
-            //Game state
-            this.STATE = GAME_STATE.CHOOSING;
-            round++;
-
-        }
-
-        /**
          * Start the game of CAH.
          *
          * @return {@code false} if there are less than 3 players.
          */
         @Override
         public boolean startGame() {
-            if(this.PLAYERS.size() < MIN_PLAYERS) {
+            if(this.PLAYERS.size() < MIN_PLAYERS && !this.hasDev()) {
                 return false;
             }
             //Deal cards
@@ -890,6 +934,16 @@ public class CardsAgainstHumanityCommand extends Command {
             return member == this.czar.member;
         }
 
+        /** @return true if the game has a dev as a player */
+        private final boolean hasDev() {
+            for (CAHPlayer p : this.playerList) {
+                if(Launcher.checkDevID(p.getUser().getIdLong()))
+                    return true;
+            }
+            return false;
+        }
+
+
     }
 
     public CardsAgainstHumanityCommand() {
@@ -919,7 +973,10 @@ public class CardsAgainstHumanityCommand extends Command {
         DECKFILE, /** Make a custom deck */
         MAKEDECK, /** Make a custom white card */
         MAKEWHITECARD, /** Make a custom black card */
-        MAKEBLACKCARD
+        MAKEBLACKCARD,
+        REMOVEDECK,
+        REMOVEBLACKCARD,
+        REMOVEWHITECARD
     }
 
     /**
@@ -1066,6 +1123,9 @@ public class CardsAgainstHumanityCommand extends Command {
                             }
                             game.playCards(botPlayer, cards);
                         }
+                        if(game.allCardsPlayed()) {
+                            event.reply(game.playedCardsEmbed());
+                        }
                     } else {
                         event.reply(
                                 "You need at least **3** players to start a game of" +
@@ -1122,11 +1182,15 @@ public class CardsAgainstHumanityCommand extends Command {
                 return;
             case LEAVE:
                 if(game != null) {
-                    if(game.getPlayers().remove(event.getAuthor().getIdLong()) != null) {
+                    if(game.playerList.remove(game.getPlayer(event.getAuthor()))) {
+                        game.getPlayers().remove(event.getAuthor().getIdLong());
                         event.reply(event.getMember()
                                          .getEffectiveName() + "has been " + "removed " +
                                             "from the game; thanks for playing!");
                         return;
+                    }
+                    if(game.allCardsPlayed()) {
+                        event.reply(game.playedCardsEmbed());
                     }
                 } else {
                     event.reply(NO_GAME_FOUND);
@@ -1316,6 +1380,9 @@ public class CardsAgainstHumanityCommand extends Command {
                         }
                         game.playCards(botPlayer, cards);
                     }
+                    if(game.allCardsPlayed()) {
+                        event.reply(game.playedCardsEmbed());
+                    }
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
@@ -1324,21 +1391,11 @@ public class CardsAgainstHumanityCommand extends Command {
                 if(game != null) {
                     CAHPlayer p = game.getPlayer(event.getAuthor());
                     if(p != null) {
-                        sb.setLength(0);
-                        sb.append("Cards against ").append(Launcher.getGuild(
-                                Long.parseLong(game.getHOST_ID().replace("W", "")))
-                                                                   .getName())
-                          .append("```Black Card:\n").append(game.blackCard)
-                          .append("\n\n\nYour deck:\n\n");
-                        for (int i = 0; i < p.hand.length; i++) {
-                            sb.append((i + 1) + ".) " + p.hand[i] + "\n\n");
-                        }
-                        p.privateMessage(sb.append(" ```").toString());
+                        game.sendHand(p);
                         event.deleteMessage();
                     } else {
                         event.reply(
-                                "You are not in the game. Use ```cah join``` to " +
-                                        "join.");
+                                "You are not in the game. Use ```cah join``` to join.");
                     }
                 } else {
                     event.reply(NO_GAME_FOUND);
@@ -1406,19 +1463,7 @@ public class CardsAgainstHumanityCommand extends Command {
                       .append("*'. Use```cah alldecks```to see all available decks.");
                     event.reply(sb.toString());
                 }
-                sb.append("```").append(cahDeck.name.replace("_", " "))
-                  .append(" Deck:\n\n\n").append("White Cards:\n\n");
-                int i = 0;
-                for (WhiteCard wc : cahDeck.whiteCards) {
-                    sb.append(++i + ".) " + wc + "\n\n");
-                }
-                i = 0;
-                sb.append("\n\nBlack Cards\n\n");
-                for (BlackCard bc : cahDeck.blackCards) {
-                    sb.append(++i + ".) ").append(bc).append("\n\n");
-                }
-                sb.append("```");
-                event.privateReply(sb.toString());
+                event.privateReply(cahDeck.toEmbed(event.getGuild()));
                 event.deleteMessage();
                 return;
             case MAKEDECK: //cah mkdk <deck_name>
@@ -1427,7 +1472,7 @@ public class CardsAgainstHumanityCommand extends Command {
                 try {
                     deck = new CAHDeck(
                             String.join(" ", Arrays.copyOfRange(args, 2, args.length)),
-                            event.getMember()
+                            event.getMember(), event.getGuild()
                     );
                 } catch (InvalidNameException e) {
                     event.reply("Sorry, deck names cannot be a number.");
@@ -1523,9 +1568,7 @@ public class CardsAgainstHumanityCommand extends Command {
                     return;
                 }
                 cahDeck = null;
-                synchronized (bot) {
-                    cahDeck = bot.getCustomCahDeck(args[2]);
-                }
+                cahDeck = bot.getCustomCahDeck(args[2]);
                 if(cahDeck == null) {
                     sb.append("The deck '*").append(args[2]).append("*' could not be")
                       .append("found.");
@@ -1544,6 +1587,70 @@ public class CardsAgainstHumanityCommand extends Command {
                 sb.append("The White Card was added to deck *").append(cahDeck.name)
                   .append("*");
                 event.reply(sb.toString());
+                return;
+            case REMOVEDECK: //cah rmdk <deck_name>
+
+                return;
+            case REMOVEWHITECARD: //cah rmwc <deckname> <card_number>
+                int cardIndex;
+                try {
+                    cardIndex = Integer.parseInt(args[3]) - 1;
+                    cahDeck = bot.getCustomCahDeck(args[2]);
+
+                } catch (IndexOutOfBoundsException | NumberFormatException e) {
+                    sb.append("Please provide a deck name and")
+                      .append(" whitecard number like this:")
+                      .append("```cah rmwc <deck_name> <card_number>");
+                    event.reply(sb.toString());
+                    return;
+                }
+                if (cahDeck == null) {
+                    sb.append("I could not find a deck named '*").append(args[2])
+                      .append("*'. Make sure the deck name has any spaces replaced with")
+                      .append("underscores ( _ ).");
+                    event.reply(sb.toString());
+                    return;
+                }
+
+                try {
+                    cahDeck.whiteCards.remove(cardIndex);
+                } catch (IndexOutOfBoundsException e) {
+                    sb.append(cardIndex).append(" is not an available card.");
+                    event.reply(sb.toString());
+                    return;
+                }
+
+                event.reply("*The whitecard was removed.*");
+                return;
+            case REMOVEBLACKCARD:
+                try {
+                    cardIndex = Integer.parseInt(args[3]) - 1;
+                    cahDeck = bot.getCustomCahDeck(args[2]);
+
+                } catch (IndexOutOfBoundsException | NumberFormatException e) {
+                    sb.append("Please provide a deck name and")
+                      .append(" whitecard number like this:")
+                      .append("```cah rmwc <deck_name> <card_number>");
+                    event.reply(sb.toString());
+                    return;
+                }
+                if (cahDeck == null) {
+                    sb.append("I could not find a deck named '*").append(args[2])
+                      .append("*'. Make sure the deck name has any spaces replaced with")
+                      .append("underscores ( _ ).");
+                    event.reply(sb.toString());
+                    return;
+                }
+
+                try {
+                    cahDeck.blackCards.remove(cardIndex);
+                } catch (IndexOutOfBoundsException e) {
+                    sb.append(cardIndex).append(" is not an available card.");
+                    event.reply(sb.toString());
+                    return;
+                }
+
+                event.reply("*The blackcard was removed.*");
                 return;
             case DECKFILE: //cah deckfile [deck_name]
                 try {
@@ -1635,6 +1742,13 @@ public class CardsAgainstHumanityCommand extends Command {
             case "makewc":
             case "mkwc":
                 return ACTION.MAKEWHITECARD;
+            case "rmbc":
+                return ACTION.REMOVEBLACKCARD;
+            case "rmwc":
+                return ACTION.REMOVEWHITECARD;
+            case "rmdk":
+            case "bin":
+                return ACTION.REMOVEDECK;
             default:
                 return null;
         }
@@ -1754,7 +1868,7 @@ public class CardsAgainstHumanityCommand extends Command {
                     "cah mkwc <deck_name> <card text>\n*Aliases*: " + "makewhitecard, " +
                             "makewc",false)
           .addField("Make a Custom Black Card",
-                    "cah mkbc <deck_name> <numberOfBlanks> <card text>\n*Aliases*: " 
+                    "cah mkbc <deck_name> <numberOfBlanks> <card text>\n*Aliases*: "
 					+ "makeblackcard, makebc", false)
           .addField("View all Custom Decks", "cah alldecks", false)
           .addField("View a Custom Deck's Cards",
