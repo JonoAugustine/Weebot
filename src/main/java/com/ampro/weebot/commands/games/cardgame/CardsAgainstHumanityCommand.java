@@ -969,14 +969,15 @@ public class CardsAgainstHumanityCommand extends Command {
         SENDHAND, /** Czar Choose a winning card */
         PICK, /** View list of all decks */
         VIEWALLDECKS, /** View all cards in deck */
+        MAKEWHITECARD, /** Make a custom black card */
         VIEWDECK, /** Get deck in a file */
         DECKFILE, /** Make a custom deck */
         MAKEDECK, /** Make a custom white card */
-        MAKEWHITECARD, /** Make a custom black card */
         MAKEBLACKCARD,
         REMOVEDECK,
         REMOVEBLACKCARD,
-        REMOVEWHITECARD
+        REMOVEWHITECARD,
+        LOCKDECK
     }
 
     /**
@@ -1503,6 +1504,29 @@ public class CardsAgainstHumanityCommand extends Command {
                   .append("to make new black (read) cards and add them to the deck.");
                 event.reply(sb.toString());
                 return;
+            case LOCKDECK:
+                cahDeck = bot.getCustomCahDeck(args[2]);
+                if(cahDeck == null) {
+                    sb.append("The deck '*").append(args[2]).append("*' could not be")
+                      .append("found.");
+                    event.reply(sb.toString());
+                } else if(!cahDeck.isAllowed(event.getMember())) {
+                    sb.append("You do not have permission to modify deck '*")
+                      .append(cahDeck.name).append("*'.");
+                    event.reply(sb.toString());
+                }
+                if (event.getMessage().getMentionedRoles().isEmpty()) {
+                    event.reply("*Please mention a Role to lock the deck's access.*");
+                    return;
+                }
+                sb.append("The deck was locked to the role(s): ");
+                for (Role role : event.getMessage().getMentionedRoles()) {
+                    cahDeck.roleLocks.add(role.getIdLong());
+                    sb.append(role.getName()).append(", ");
+                }
+                sb.setLength(sb.length() - 2);
+                event.reply(sb.toString());
+                return;
             case MAKEBLACKCARD: //cah mkbc <deck_name> <blanks> <card text>
                 sb.setLength(0);
                 if(args.length < 5) {
@@ -1749,6 +1773,9 @@ public class CardsAgainstHumanityCommand extends Command {
             case "rmdk":
             case "bin":
                 return ACTION.REMOVEDECK;
+            case "lock":
+            case "lockto":
+                return ACTION.LOCKDECK;
             default:
                 return null;
         }
@@ -1865,19 +1892,19 @@ public class CardsAgainstHumanityCommand extends Command {
           .addField("Re-send Your Hand of Cards", "cah myhand", false)
           .addField("Make a Custom Deck", "cah makedeck <deck_name>", false)
           .addField("Make a Custom White Card",
-                    "cah mkwc <deck_name> <card text>\n*Aliases*: " + "makewhitecard, " +
-                            "makewc",false)
+                    "cah mkwc <deck_name> <card text>\n*Aliases*: makewhitecard, makewc",
+                    false)
           .addField("Make a Custom Black Card",
                     "cah mkbc <deck_name> <numberOfBlanks> <card text>\n*Aliases*: "
 					+ "makeblackcard, makebc", false)
           .addField("View all Custom Decks", "cah alldecks", false)
           .addField("View a Custom Deck's Cards",
                     "cah viewdeck <deck_name>\n*Alias*: seedeck", false)
-          .addField("Get " +
-                        "a Custom Deck as a Text File", "cah deckfile <deck_name>",
+          .addField("Lock a Custom Deck to One or More Roles", "cah lock <deck_name>",
                     false)
-          .addField("Remove Custom Deck **", "cah remove " +
-                "<deck_number>", false)
+          .addField("Get a Custom Deck as a Text File", "cah deckfile <deck_name>",
+                    false)
+          .addField("Remove Custom Deck **", "cah remove <deck_number>", false)
           .addField("Remove Custom Card **", "cah remove <deck_num> <card_number>",
                     false)
           .addField("Under Construction ",
