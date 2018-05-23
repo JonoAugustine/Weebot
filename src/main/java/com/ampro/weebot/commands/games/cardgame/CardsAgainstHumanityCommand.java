@@ -991,7 +991,9 @@ public class CardsAgainstHumanityCommand extends Command {
     @Override
     public void run(Weebot bot, BetterMessageEvent event) {
         if(this.check(event)) {
-            this.execute(bot, event);
+            Thread thread = new Thread(() -> this.execute(bot, event));
+            thread.setName(bot.getBotId() + " : CAHCommand");
+            thread.start();
         }
     }
 
