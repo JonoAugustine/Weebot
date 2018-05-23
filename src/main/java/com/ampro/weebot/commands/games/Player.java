@@ -5,6 +5,7 @@
 package com.ampro.weebot.commands.games;
 
 import net.dv8tion.jda.core.entities.Message;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.function.Consumer;
@@ -53,6 +54,17 @@ public abstract class Player implements Comparable<Player> {
            privateChannel.sendMessage(message).queue( m -> {
                consumer.accept(m);
            });
+        });
+    }
+
+    /**
+     * Send a private embed message to the player.
+     * @param embed The MessageEmbed to send.
+     * @param consumer Message Consumer
+     */
+    public void privateMessage(MessageEmbed embed, Consumer<Message> consumer) {
+        this.user.openPrivateChannel().queue(privateChannel -> {
+            privateChannel.sendMessage(embed).queue( message -> consumer.accept(message));
         });
     }
 
