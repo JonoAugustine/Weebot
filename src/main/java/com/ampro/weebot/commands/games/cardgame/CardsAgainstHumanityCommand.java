@@ -30,7 +30,6 @@ import java.util.concurrent.ThreadLocalRandom;
  * game of CAH <br> make custom Card Decks <br> make custom White Cards <br> make custom
  * Black Cards <br> play against the bot
  *
- * TODO New card at top of deck at dealing
  */
 public class CardsAgainstHumanityCommand extends Command {
 
@@ -622,12 +621,13 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         /**
-         * Deal random {@link WhiteCard whitecards} to the player until
+         * Deal random {@link WhiteCard whitecards} to the player at the "top" of their
+         * hand
          *
          * @param player
          *         The player to deal cards to.
          *
-         * @return
+         * @return false if no cards were given to the player
          */
         @Override
         protected boolean dealCards(CAHPlayer player) {
@@ -635,12 +635,19 @@ public class CardsAgainstHumanityCommand extends Command {
             int rand;
             for (int i = 0; i < player.hand.length; i++) {
                 if(player.hand[i] == null) {
+                    //deal the card
                     do {
                         rand = ThreadLocalRandom.current()
                                                 .nextInt(this.whiteCards.size());
                     } while (playerHasCard(this.whiteCards.get(rand)));
                     player.hand[i] = this.whiteCards.get(rand);
                     delt = true;
+                    //Move the card to the front
+                    for (int k = i; k > 0; k--) {
+                        WhiteCard temp = player.hand[k];
+                        player.hand[k] = player.hand[k - 1];
+                        player.hand[k - 1] = temp;
+                    }
                 }
             }
             return delt;
@@ -1016,7 +1023,6 @@ public class CardsAgainstHumanityCommand extends Command {
             }
             return false;
         }
-
 
     }
 
