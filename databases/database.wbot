@@ -69,11 +69,21 @@
             },
             {
               "cardText": "Delete teh gayz"
+            },
+            {
+              "cardText": "Late-night ejaculations"
+            },
+            {
+              "cardText": "Totally not pedophilia"
             }
           ],
           "blackCards": [
             {
               "cardText": "Where did Matt go?",
+              "blanks": 1
+            },
+            {
+              "cardText": "It\u0027s not delivery, it\u0027s \\_\\_\\_\\_.",
               "blanks": 1
             }
           ],
@@ -82,7 +92,7 @@
         }
       },
       "NOTES": [],
-      "spamLimit": 5
+      "spamLimit": 3
     },
     "218979588716494848": {
       "GUILD_ID": 218979588716494848,

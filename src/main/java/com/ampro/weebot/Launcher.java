@@ -322,7 +322,7 @@ public class Launcher {
 		return Launcher.JDA_CLIENT;
 	}
 
-	/** @return EmbedBuilder with the standard Weebot green and Author set to "Weebot" */
+	/**@return EmbedBuilder with the standard green, Author set to "Weebot", and footer */
 	public static final EmbedBuilder getStandardEmbedBuilder() {
 		return new EmbedBuilder()
 				.setColor(new Color(0x31FF00))

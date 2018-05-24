@@ -8,6 +8,7 @@ import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
         .CardsAgainstHumanity.*;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import com.sun.org.apache.regexp.internal.RE;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
@@ -28,6 +29,8 @@ import java.util.concurrent.ThreadLocalRandom;
  * Run Cards Against Humanity games, and make custom cards. <br> Users can:<br> start a
  * game of CAH <br> make custom Card Decks <br> make custom White Cards <br> make custom
  * Black Cards <br> play against the bot
+ *
+ * TODO New card at top of deck at dealing
  */
 public class CardsAgainstHumanityCommand extends Command {
 
@@ -427,8 +430,15 @@ public class CardsAgainstHumanityCommand extends Command {
         /** The hosting channel */
         private final TextChannel channel;
         private GAME_STATE STATE;
-        /** The Deck of Cards playing with */
-        private final CAHDeck deck;
+        /** Unused Black cards */
+        private final List<BlackCard> blackCards;
+        /** Unused White cards */
+        private final List<WhiteCard> whiteCards;
+        /** Used Black Cards */
+        private final List<BlackCard> usedBlackCards;
+        /** Used White Cards */
+        private final List<WhiteCard> usedWhiteCards;
+
         //How many cards per handis?
         private final int HAND_SIZE;
 
@@ -460,37 +470,21 @@ public class CardsAgainstHumanityCommand extends Command {
             this.PLAYERS.putIfAbsent(AUTHOR_ID, new CAHPlayer(author));
             this.playerList = new ArrayList<>(PLAYERS.values());
             this.winners = new ArrayList<>();
+
+            this.blackCards = new ArrayList<>();
+            this.whiteCards = new ArrayList<>();
+            this.usedBlackCards = new ArrayList<>();
+            this.usedWhiteCards = new ArrayList<>();
             if(decks == null || decks.length == 0) {
-                this.deck = STD_DECK;
+                this.blackCards.addAll(STD_DECK.blackCards);
+                this.whiteCards.addAll(STD_DECK.whiteCards);
                 return;
             } else {
-                this.deck = new CAHDeck();
                 for (CAHDeck d : decks) {
-                    this.deck.blackCards.addAll(d.blackCards);
-                    this.deck.whiteCards.addAll(d.whiteCards);
+                    this.blackCards.addAll(d.blackCards);
+                    this.whiteCards.addAll(d.whiteCards);
                 }
             }
-        }
-
-        /**
-         * Initialize a new CardsAgainstHumanity game with the standard deck.
-         *
-         * @param bot
-         *         Weebot hosting the game
-         * @param channel
-         *         TextChannel to play the game in
-         * @param handSize
-         *         Number of cards each play holds
-         */
-        public CardsAgainstHumanity(Weebot bot, TextChannel channel, Member author,
-                                    int handSize) {
-            super(bot, author.getUser());
-            this.channel = channel;
-            this.HAND_SIZE = handSize;
-            this.PLAYERS.putIfAbsent(AUTHOR_ID, new CAHPlayer(author));
-            this.playerList = new ArrayList<>(PLAYERS.values());
-            this.winners = new ArrayList<>();
-            this.deck = STD_DECK;
         }
 
         /**
@@ -524,7 +518,6 @@ public class CardsAgainstHumanityCommand extends Command {
             return false;
         }
 
-
         /**
          * Setup the game and players for the next round. <br> 1.) nullify {@link
          * CAHPlayer#playedCards played cards} and deal new cards. 2.) Set new random
@@ -534,6 +527,9 @@ public class CardsAgainstHumanityCommand extends Command {
         protected void setupNextRound() {
             //Deal new cards
             for (CAHPlayer p : PLAYERS.values()) {
+                if (czar == p) continue;
+                this.whiteCards.removeAll(Arrays.asList(p.playedCards));
+                this.usedWhiteCards.addAll(Arrays.asList(p.playedCards));
                 p.playedCards = null;
                 this.dealCards(p);
             }
@@ -541,12 +537,17 @@ public class CardsAgainstHumanityCommand extends Command {
             //Set the new black card
             int rand;
             BlackCard t;
+            if (this.blackCards.isEmpty()) {
+                Collections.shuffle(this.usedBlackCards);
+                this.blackCards.addAll(this.usedBlackCards);
+                this.usedBlackCards.clear();
+            }
             do {
-                rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
-                t = this.deck.blackCards.get(rand);
+                rand = ThreadLocalRandom.current().nextInt(this.blackCards.size());
+                t = this.blackCards.remove(rand);
             } while (t.equals(this.blackCard));
-
             this.blackCard = t;
+            this.usedBlackCards.add(t);
 
             //Set next czar
             CAHPlayer temp;
@@ -566,6 +567,58 @@ public class CardsAgainstHumanityCommand extends Command {
             //Game state
             this.STATE = GAME_STATE.CHOOSING;
             round++;
+
+        }
+
+        /**
+         * Cancel the round (if the Czar leaves), pick a new Black card and return
+         * played cards.
+         */
+        protected synchronized void cancelRound() {
+
+            //Return played cards
+            this.playerList.forEach( p -> {
+                for (WhiteCard wc : p.playedCards) {
+                    for (int i = 0; i < p.hand.length; i++) {
+                        if (p.hand[i] == null) {
+                            p.hand[i] = wc;
+                            break;
+                        }
+                    }
+                }
+                p.playedCards = null;
+            });
+            //Change Czar
+            this.czarIterator = PLAYERS.values().iterator();
+            do {
+                if(this.czarIterator.hasNext()) {
+                    czar = czarIterator.next();
+                } else {
+                    //Reset the iterator if we reached the end of the list
+                    this.czarIterator = PLAYERS.values().iterator();
+                    czar = czarIterator.next();
+                }
+                //Don't let the bot be czar
+            } while (czar.getUser().isBot() && this.playerList.size() > 1);
+
+            //Change the black card
+            int rand;
+            BlackCard t;
+            if (this.blackCards.isEmpty()) {
+                Collections.shuffle(this.usedBlackCards);
+                this.blackCards.addAll(this.usedBlackCards);
+                this.usedBlackCards.clear();
+            }
+            do {
+                rand = ThreadLocalRandom.current().nextInt(this.blackCards.size());
+                t = this.blackCards.remove(rand);
+            } while (t.equals(this.blackCard));
+            this.blackCard = t;
+            this.usedBlackCards.add(t);
+
+            //Change game state
+            this.STATE = GAME_STATE.CHOOSING;
+
         }
 
         /**
@@ -584,9 +637,9 @@ public class CardsAgainstHumanityCommand extends Command {
                 if(player.hand[i] == null) {
                     do {
                         rand = ThreadLocalRandom.current()
-                                                .nextInt(deck.whiteCards.size());
-                    } while (playerHasCard(deck.whiteCards.get(rand)));
-                    player.hand[i] = deck.whiteCards.get(rand);
+                                                .nextInt(this.whiteCards.size());
+                    } while (playerHasCard(this.whiteCards.get(rand)));
+                    player.hand[i] = this.whiteCards.get(rand);
                     delt = true;
                 }
             }
@@ -806,8 +859,7 @@ public class CardsAgainstHumanityCommand extends Command {
 
         private MessageEmbed winnerEmbed(CAHPlayer winner) {
             // Create the EmbedBuilder instance
-            EmbedBuilder eb = new EmbedBuilder();
-            eb.setColor(new Color(0x20F457));
+            EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
 
             //Add embed author:
             //1. Arg: name as string
@@ -834,11 +886,30 @@ public class CardsAgainstHumanityCommand extends Command {
 
             eb.addField("Leader Board:", sb.toString(), false);
 
-            //eb.addBlankField(false);
-
             //1. Arg: text as string
             //2. icon url as string (can be null)
             eb.setFooter("Run by Weebot", Launcher.getJda().getSelfUser().getAvatarUrl());
+
+            return eb.build();
+        }
+
+        /** @return A Message Embed of the game's leaderboard */
+        private MessageEmbed leaderBoardEmbed() {
+            EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
+
+            eb.setAuthor("Cards against " + channel.getGuild().getName(), null,
+                         channel.getGuild().getIconUrl()
+            );
+
+            List<CAHPlayer> sortedPlayers = this.playerList;
+            sortedPlayers.sort(new scoreComparator());
+            StringBuilder sb = new StringBuilder();
+            for (CAHPlayer p : sortedPlayers) {
+                sb.append("*").append(p.member.getEffectiveName()).append("* : ")
+                  .append(p.cardsWon.size()).append("\n");
+            }
+
+            eb.setTitle("Leader Board:").setDescription(sb.toString());
 
             return eb.build();
         }
@@ -870,9 +941,12 @@ public class CardsAgainstHumanityCommand extends Command {
 
             //Set image:
             //Arg: image url as string
-            if(playerList.get(0).cardsWon.size() != playerList.get(1).cardsWon.size()) {
+            if(playerList.size() > 1 &&
+                    playerList.get(0).cardsWon.size()
+                            != playerList.get(1).cardsWon.size()) {
                 eb.setImage(this.playerList.get(0).member.getUser().getAvatarUrl());
             }
+
 
             return eb.build();
         }
@@ -899,8 +973,9 @@ public class CardsAgainstHumanityCommand extends Command {
                 this.czar = playerList.get(new Random().nextInt(playerList.size()));
             } while (czar.getUser().isBot());
             //Set the first black card
-            int rand = ThreadLocalRandom.current().nextInt(deck.blackCards.size());
-            blackCard = this.deck.blackCards.get(rand);
+            int rand = ThreadLocalRandom.current().nextInt(this.blackCards.size());
+            blackCard = this.blackCards.remove(rand);
+            this.usedBlackCards.add(blackCard);
 
             //Send card hands
             sendHands();
@@ -926,7 +1001,6 @@ public class CardsAgainstHumanityCommand extends Command {
                     this.winners.add(p);
                 }
             }
-
             return true;
         }
 
@@ -966,7 +1040,10 @@ public class CardsAgainstHumanityCommand extends Command {
         ADDBOT, /** End the game */
         END, /** Play cards */
         PLAY, /** Resend the player their hand */
-        SENDHAND, /** Czar Choose a winning card */
+        SENDHAND,
+        /** See the current Leaderboard */
+        LEADERBOARD,
+        /** Czar Choose a winning card */
         PICK, /** View list of all decks */
         VIEWALLDECKS, /** View all cards in deck */
         MAKEWHITECARD, /** Make a custom black card */
@@ -1042,7 +1119,6 @@ public class CardsAgainstHumanityCommand extends Command {
         CAHPlayer botPlayer;
         /*
         cah remove <deck_num> TODO maybe only on empty decks?
-        cah remove <deck_num> <card_num>
          */
 
         switch (action) {
@@ -1185,16 +1261,50 @@ public class CardsAgainstHumanityCommand extends Command {
                 return;
             case LEAVE:
                 if(game != null) {
-                    if(game.playerList.remove(game.getPlayer(event.getAuthor()))) {
-                        game.getPlayers().remove(event.getAuthor().getIdLong());
-                        event.reply(event.getMember()
-                                         .getEffectiveName() + "has been " + "removed " +
-                                            "from the game; thanks for playing!");
-                        return;
-                    }
-                    if(game.allCardsPlayed()) {
-                        event.reply(game.playedCardsEmbed());
-                    }
+                        if (game.playerList.remove(game.getPlayer(event.getAuthor()))) {
+                            CAHPlayer x = game.getPlayers()
+                                              .remove(event.getAuthor().getIdLong());
+
+                            //Remove the player's played cards
+                            sb.append(event.getMember().getEffectiveName())
+                              .append(" has left the game; thanks for playing!");
+                            event.reply(sb.toString());
+                            sb.setLength(0);
+                            if(game.playerList.size() < 3) {
+                                sb.append("*There are not enough players to continue!*")
+                                  .append(" The game will be cancelled :cry:. Try ")
+                                  .append("starting a new game with at least 3 players.");
+                                game.endGame();
+                                if(!bot.getRunningGames().remove(game)) {
+                                    System.err.println(
+                                            "Err encountered while removing game.");
+                                    return;
+                                }
+                                if(!game.isRunning()) {
+                                    event.reply("*Game cancelled.*");
+                                    return;
+                                }
+                                event.reply(sb.toString());
+                                event.reply(game.endGameEmbed());
+                                return;
+                            } else if(x == game.czar) {
+                                //Cancel the round if the Czar leaves
+                                    game.cancelRound();
+                                    sb.append(
+                                            "*The Card Czar has left before picking a winner")
+                                      .append(", the round will be cancelled and all played ")
+                                      .append(" cards returned*.");
+                                    event.reply(sb.toString());
+                                    event.reply("A new Round will now begin.");
+                                    event.reply(game.blackCardEmbed());
+                                    return;
+                            } else if(game.allCardsPlayed()) {
+                                event.reply(game.playedCardsEmbed());
+                            }
+                            return;
+                        } else {
+                            event.reply("I don't think you're playing anyway...");
+                        }
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
@@ -1400,6 +1510,13 @@ public class CardsAgainstHumanityCommand extends Command {
                         event.reply(
                                 "You are not in the game. Use ```cah join``` to join.");
                     }
+                } else {
+                    event.reply(NO_GAME_FOUND);
+                }
+                return;
+            case LEADERBOARD:
+                if (game != null) {
+                    event.reply(game.leaderBoardEmbed());
                 } else {
                     event.reply(NO_GAME_FOUND);
                 }
@@ -1746,6 +1863,10 @@ public class CardsAgainstHumanityCommand extends Command {
                 return ACTION.SENDHAND;
             case "pick":
                 return ACTION.PICK;
+            case "leaderboard":
+            case "frags":
+            case "lb":
+                return ACTION.LEADERBOARD;
             case "alldecks":
                 return ACTION.VIEWALLDECKS;
             case "viewdeck":
@@ -1892,6 +2013,9 @@ public class CardsAgainstHumanityCommand extends Command {
           .addField("Card Czar Pick Winning Card(s)", "cah pick " +
                 "<card_set_num>", false)
           .addField("Re-send Your Hand of Cards", "cah myhand", false)
+          .addField("See the Curent Leader Board",
+                    "cah leaderboard\n*Aliases:* LB, frags", false)
+          .addBlankField(false)
           .addField("Make a Custom Deck", "cah makedeck <deck_name>", false)
           .addField("Make a Custom White Card",
                     "cah mkwc <deck_name> <card text>\n*Aliases*: makewhitecard, makewc",
