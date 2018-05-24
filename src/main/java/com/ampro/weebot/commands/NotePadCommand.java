@@ -29,7 +29,8 @@ public class NotePadCommand extends Command {
      * Each notepad has a {@link String} name and {@link ArrayList} of
      * {@link Note Notes}.
      * <br>
-     *     A {@link Weebot} can have up to //TODO concurrent NotePads at once.
+     *     A {@link Weebot} can have up to {@link NotePadCommand#MAX_NOTEPADS}
+     *     concurrent NotePads at once.
      * <br>
      *     A NotePad can have access restricted by {@link TextChannel},
      *     {@link User}/{@link Member}, or {@link Role}.
@@ -441,6 +442,9 @@ public class NotePadCommand extends Command {
 
     }
 
+    /** The maximum number of note pads a Weebot will hold for a single guild */
+    private static final int MAX_NOTEPADS = 20;
+
     private enum ACTION {MAKE, WRITE, INSERT, EDIT, GET, LOCKTO, LOCKOUT, DELETE, CLEAR,
                             TRASH, FILE}
 
@@ -543,6 +547,14 @@ public class NotePadCommand extends Command {
 
         //Check for the make command, since it is a special abnormality.
         if (parseAction(args[1]) == ACTION.MAKE) {
+            if (notes.size() >= MAX_NOTEPADS) {
+                StringBuilder sb = new StringBuilder()
+                        .append("*There are already ").append(MAX_NOTEPADS)
+                        .append(" in this server. Please remove a NotePad before")
+                        .append("creating a new one.*");
+                event.reply(sb.toString());
+                return;
+            }
             //If no name was given
             NotePad nPad;
             if (args.length == 2) {

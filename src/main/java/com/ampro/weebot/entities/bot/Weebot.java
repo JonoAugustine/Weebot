@@ -77,7 +77,8 @@ public class Weebot implements Comparable<Weebot> {
     private boolean ACTIVE_PARTICIPATE;
 
     /** Commands not allowed on the server channels.*/
-    private final TreeMap<TextChannel, ArrayList<Class<? extends Command>>> COMMANDS_DISABLED;
+    private final ConcurrentHashMap<TextChannel, ArrayList<Class<? extends Command>>>
+            COMMANDS_DISABLED;
     /** List of {@code Game}s currently Running */
     private transient List<Game<? extends Player>> GAMES_RUNNING;
 
@@ -108,7 +109,7 @@ public class Weebot implements Comparable<Weebot> {
         this.NSFW = false;
         this.BANNED_WORDS = new ArrayList<>();
         this.ACTIVE_PARTICIPATE = false;
-        this.COMMANDS_DISABLED = new TreeMap<>();
+        this.COMMANDS_DISABLED = new ConcurrentHashMap<>();
         this.GAMES_RUNNING = new ArrayList<>();
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
@@ -131,7 +132,7 @@ public class Weebot implements Comparable<Weebot> {
         this.NSFW = false;
         this.BANNED_WORDS = new ArrayList<>();
         this.ACTIVE_PARTICIPATE = false;
-        this.COMMANDS_DISABLED = new TreeMap<>();
+        this.COMMANDS_DISABLED = new ConcurrentHashMap<>();
         this.GAMES_RUNNING = null;
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;

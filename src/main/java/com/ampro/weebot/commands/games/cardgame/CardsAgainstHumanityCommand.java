@@ -1123,9 +1123,6 @@ public class CardsAgainstHumanityCommand extends Command {
         //Some cases later will need this
         CAHDeck cahDeck;
         CAHPlayer botPlayer;
-        /*
-        cah remove <deck_num> TODO maybe only on empty decks?
-         */
 
         switch (action) {
             case SETUP: //cah setup [hand_size] [deck_name] [deck2_name]...
@@ -1738,7 +1735,9 @@ public class CardsAgainstHumanityCommand extends Command {
                 event.reply(sb.toString());
                 return;
             case REMOVEDECK: //cah rmdk <deck_name>
-
+        /*
+        cah remove <deck_num> TODO maybe only on empty decks?
+         */
                 return;
             case REMOVEWHITECARD: //cah rmwc <deckname> <card_number>
                 int cardIndex;
@@ -1975,7 +1974,7 @@ public class CardsAgainstHumanityCommand extends Command {
           .append("cah deckfile [deck_name]\n").append("cah remove <deck_num> **\n")
           .append("cah remove <deck_num> <card_num> **\n").append("```");
 
-        sb.append("\n(Commands marked '**' are still under construction.)"); //todo
+        sb.append("\n(Commands marked '**' are still under construction.)");
 
         return sb.toString();
 
@@ -2037,7 +2036,9 @@ public class CardsAgainstHumanityCommand extends Command {
           .addField("Get a Custom Deck as a Text File", "cah deckfile <deck_name>",
                     false)
           .addField("Remove Custom Deck **", "cah remove <deck_number>", false)
-          .addField("Remove Custom Card **", "cah remove <deck_num> <card_number>",
+          .addField("Remove Custom White Card ","cah rmwc <deck_num> <card_number>",
+                    false)
+          .addField("Remove Custom Black Card ","cah rmbc <deck_num> <card_number>",
                     false)
           .addField("Under Construction ",
                     "Commands marked '**' are still under construction", false)
