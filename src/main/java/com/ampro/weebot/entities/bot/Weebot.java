@@ -40,7 +40,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *     hosting Guild's unique ID + "W" (e.g. "1234W") <br><br>
  *
  * TODO: Scanning for banned words
- * TODO Change all TreeMaps to {@link java.util.concurrent.ConcurrentHashMap}
  *
  * <br><br>
  * Development Questions TODO: <br>
@@ -451,7 +450,7 @@ public class Weebot implements Comparable<Weebot> {
         return this.PASSIVES.add(passive);
     }
 
-    public final List<IPassive> getPassives() {
+    public final synchronized List<IPassive> getPassives() {
         return this.PASSIVES;
     }
 

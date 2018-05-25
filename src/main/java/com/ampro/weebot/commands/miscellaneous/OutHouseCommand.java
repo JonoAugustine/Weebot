@@ -5,7 +5,9 @@ import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;
@@ -27,11 +29,20 @@ public class OutHouseCommand extends Command {
         final User user;
         long remainingHours;
         final OffsetDateTime startTime;
+        final String message;
 
         public OutHouse(User user, long hours) {
             startTime = OffsetDateTime.now();
             this.remainingHours = hours;
             this.user = user;
+            this.message = null;
+        }
+
+        public OutHouse(User user, long hours, String message) {
+            startTime = OffsetDateTime.now();
+            this.remainingHours = hours;
+            this.user = user;
+            this.message = message;
         }
 
         @Override
@@ -50,8 +61,12 @@ public class OutHouseCommand extends Command {
                 } else if(event.mentions(this.user)) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("*Sorry, ")
-                      .append(event.getGuild().getMember(this.user).getEffectiveName())
-                      .append(" is currently unavailable. Please try mentioning them again ")
+                      .append(event.getGuild().getMember(this.user).getEffectiveName());
+                    if (this.message != null)
+                        sb.append(" is out ").append(this.message);
+                      else
+                        sb.append(" is currently unavailable. ");
+                      sb.append("Please try mentioning them again ")
                       .append("in ").append(this.remainingHours)
                       .append(" hours. Thank you.*");
                     event.reply(sb.toString());
@@ -89,12 +104,17 @@ public class OutHouseCommand extends Command {
 
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
+        //ohc [hours] [message here]
         StringBuilder sb = new StringBuilder();
+        String[] args = this.cleanArgs(bot, event.getArgs());
         long hours;
+        int messageIndex;
         try {
-            hours = Long.parseLong(this.cleanArgs(bot, event.getArgs())[1]);
+            hours = Long.parseLong(args[1]);
+            messageIndex = 2;
         } catch (IndexOutOfBoundsException e) {
             hours = 1;
+            messageIndex = 1;
         } catch (NumberFormatException e) {
             sb.append("Sorry, I couldn't read that number. Please give a time in")
               .append(" in hours from *0* to *").append(Long.MAX_VALUE).append("*");
@@ -102,12 +122,28 @@ public class OutHouseCommand extends Command {
             return;
         }
 
-        synchronized (Launcher.GLOBAL_WEEBOT) {
-            Launcher.GLOBAL_WEEBOT.getPassives()
-                                  .add(new OutHouse(event.getAuthor(), hours));
+        String m = String.join(" ", Arrays.copyOfRange(args, messageIndex, args.length));
+        OutHouse oh;
+        if (m.isEmpty()) {
+            oh = new OutHouse(event.getAuthor(), hours);
+        } else {
+            oh = new OutHouse(event.getAuthor(), hours, m);
         }
+        Launcher.GLOBAL_WEEBOT.getPassives().add(oh);
 
         event.reply("I will hold down the fort while you're away! :guardsman: ");
 
+    }
+
+    @Override
+    public MessageEmbed getEmbedHelp() {
+        EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
+
+        eb.setTitle("OutHouse Command")
+          .setDescription("Have the bot respond to mentions for you while you're away.")
+          .addField("Guid", "[optional]", false)
+          .addField("ohc [hours] [afk-message]", "*Alias*: outhouse", false);
+
+        return eb.build();
     }
 }
