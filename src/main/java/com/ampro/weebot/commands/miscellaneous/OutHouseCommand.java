@@ -116,10 +116,8 @@ public class OutHouseCommand extends Command {
             hours = 1;
             messageIndex = 1;
         } catch (NumberFormatException e) {
-            sb.append("Sorry, I couldn't read that number. Please give a time in")
-              .append(" in hours from *0* to *").append(Long.MAX_VALUE).append("*");
-            event.reply(sb.toString());
-            return;
+            hours = 1;
+            messageIndex = 1;
         }
 
         String m = String.join(" ", Arrays.copyOfRange(args, messageIndex, args.length));
