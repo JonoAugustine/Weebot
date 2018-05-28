@@ -282,6 +282,9 @@ public class Weebot implements Comparable<Weebot> {
         return this.GUILD_ID;
     }
 
+    /** @return The Guild hosting the bot */
+    public final Guild getGuild() { return Launcher.getGuild(this.GUILD_ID); }
+
     /** @return Name of the Guild or "PRIVATE BOT" if the private message bot.*/
     public final String getGuildName() {
         return this.GUILD_ID != 0L ? Launcher.getGuild(this.GUILD_ID).getName() : "PRIVATE BOT";

@@ -12,6 +12,7 @@ import com.ampro.weebot.commands.NotePadCommand;
 import com.ampro.weebot.commands.developer.*;
 import com.ampro.weebot.commands.games.SecretePhraseCommand;
 import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand;
+import com.ampro.weebot.commands.ManageSettingsCommand.ShowSettingsCommand;
 import com.ampro.weebot.commands.miscellaneous.OutHouseCommand;
 import com.ampro.weebot.commands.miscellaneous.PingCommand;
 import com.ampro.weebot.commands.miscellaneous.SelfDestructMessageCommand;
@@ -58,7 +59,7 @@ public class Launcher {
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
 					new HelpCommand(), new ShutdownCommand(), new DatabaseFileCommand(),
-					//new RestartCommand(),
+					/*new RestartCommand(),*/ new ShowSettingsCommand(),
 					new ManageSettingsCommand(), new ListGuildsCommand(),
                     new PingCommand(), new SpamCommand(), new NotePadCommand(),
                     new SelfDestructMessageCommand(), new SecretePhraseCommand(),

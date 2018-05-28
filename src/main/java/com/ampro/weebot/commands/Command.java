@@ -20,6 +20,7 @@ import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.ChannelType;
+import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.TextChannel;
 
@@ -170,7 +171,13 @@ public abstract class Command {
      * @param bot The {@link Weebot} that called the command.
      * @param event The {@link BetterMessageEvent} that called the command.
      */
-    public abstract void run(Weebot bot, BetterMessageEvent event);
+    public void run(Weebot bot, BetterMessageEvent event) {
+        if(this.check(event)) {
+            Thread thread = new Thread(() -> this.execute(bot, event));
+            thread.setName(bot.getBotId() + " : " + this.name);
+            thread.start();
+        }
+    }
 
     /**
      * Performs the action of the command.
@@ -200,7 +207,24 @@ public abstract class Command {
         //    }
         //}
 
-        //user permission check
+        if (event.getMember() != null) {
+            //user permission check
+            Member callMember = event.getMember();
+            for (Permission p : this.userPermissions) {
+                if (!callMember.hasPermission(p)) {
+                    return false;
+                }
+            }
+
+            //Bot permissions
+            Member selfMember = event.getGuild().getMember(Launcher.getJda()
+                                                                   .getSelfUser());
+            for (Permission p : this.botPermissions) {
+                if (!selfMember.hasPermission(p)) {
+                    return false;
+                }
+            }
+        }
 
         //If the command is for developer's only, check if the event Author's
         //ID is registered as a developer.
@@ -213,8 +237,6 @@ public abstract class Command {
         if (this.guildOnly && event.getMessageChannel().getType() != ChannelType.TEXT) {
             return false;
         }
-
-        //Bot permissions
 
         //required role check
 

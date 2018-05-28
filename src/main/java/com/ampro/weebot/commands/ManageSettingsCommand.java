@@ -4,11 +4,15 @@ import com.ampro.weebot.Launcher;
 import com.ampro.weebot.database.DatabaseManager;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Member;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.managers.GuildController;
 
+import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 
@@ -22,6 +26,63 @@ import java.util.Arrays;
  * @author Jonathan Augustine
  */
 public class ManageSettingsCommand extends Command {
+
+    /** Send a list of the Bot's settings. */
+    public static final class ShowSettingsCommand extends Command {
+
+        public ShowSettingsCommand() {
+            super("Settings"
+                    , new ArrayList<>(Arrays.asList("seesettings", "setting", "ssc"))
+                    , "See my settings."
+                    ,""
+                    , true
+                    , false
+                    , 0
+                    , false
+                    , false
+            );
+            this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        }
+
+        /**
+         * Send a list of the Bot's settings.
+         * @param bot The {@link Weebot} who called.
+         * @param event The {@link BetterMessageEvent} that invoked
+         */
+        @Override
+        protected final void execute(Weebot bot, BetterMessageEvent event) {
+            StringBuilder sb = new StringBuilder();
+            EmbedBuilder eb = Launcher.makeEmbedBuilder(
+                    "Wanna learn about me?",null
+                    , "Use *help msc* for help changing settings"
+            );
+            synchronized (bot) {
+                eb.addField("I live here", bot.getGuild().getName(), true);
+                boolean b = false;
+                if (!bot.getNickname().equalsIgnoreCase("weebot")) {
+                    eb.addField("My nickname is", bot.getNickname(), true);
+                }
+                eb.addField("Call me with",
+                            bot.getCallsign() + " or @" + bot.getNickname(), true)
+                  .addField("Explicit responses", bot.isExplicit() ? "on" : "off", true)
+                  .addField("NSFW Commands", bot.isNSFW() ? "on" : "off", true)
+                  .addField("Active Chatbot", bot.canParticipate() ? "on" : "off", true)
+                  .addField("Spam Limit", bot.getSpamLimit() + "", true)
+                  .addField("You can change any setting like this",
+                            "<setting_name> [new_value]\nwhere [new_value] " +
+                                    "can be either [true/on/false/off] or [abc123...]",
+                            false);
+            }
+            event.reply(eb.build());
+        }
+
+        @Override
+        public MessageEmbed getEmbedHelp() {
+            return Launcher.makeEmbedBuilder("Show Settings",null,
+                                             "See my settings.").build();
+
+        }
+    }
 
     public ManageSettingsCommand() {
         super("Settings"
@@ -42,16 +103,8 @@ public class ManageSettingsCommand extends Command {
                 , false
                 , 0
                 , false
-                , false);
-    }
-
-    @Override
-    public void run(Weebot bot, BetterMessageEvent event) {
-        if(this.check(event)) {
-            Thread thread = new Thread(() -> this.execute(bot, event));
-            thread.setName(bot.getBotId() + " : SettingsCommand");
-            thread.start();
-        }
+                , false
+        );
     }
 
     /**
@@ -68,11 +121,6 @@ public class ManageSettingsCommand extends Command {
         //then both cases go to the next available code
         // (e.g. name and nickname cases both go to this.changeNickname)
         switch (args[0]) {
-            case "managesettings":
-            case "settings":
-            case "setting":
-                this.listGuildSettings(bot, event);
-                break;
             case "setname":
             case "changename":
             case "nickname":
@@ -106,39 +154,6 @@ public class ManageSettingsCommand extends Command {
         }
         synchronized (Launcher.getDatabase()) {
             DatabaseManager.backUp(Launcher.getDatabase());
-        }
-    }
-
-    /**
-     * Send a list of the Bot's settings.
-     * @param bot The {@link Weebot} who called.
-     * @param event The {@link BetterMessageEvent} that invoked
-     */
-    private void listGuildSettings(Weebot bot, BetterMessageEvent event) {
-        synchronized (bot) {
-            String out = "Wanna learn about me?";
-            out += "\n```";
-            out += "I live here: " + Launcher.getGuild(bot.getGuildID()).getName();
-            out += "\n";
-            out += "I now go by: " + bot.getNickname();
-            out += "\n";
-            out += "Call me with: " + bot.getCallsign() + " or @" + bot.getNickname();
-            out += "\n";
-            out += "I am " + (bot.isExplicit() ? "" : "not ") + "explicit";
-            out += "\n";
-            out += "I " + (bot.isNSFW() ? "am " : "not ") + "NSFW";
-            out += "\n";
-            out += "I " + (bot.canParticipate() ? "" : "won't ") + "join conversations if I'm not called.";
-            out += "\n";
-            out += "I can spam up to " + bot.getSpamLimit() + " times";
-            out += "```\n";
-            out += "You can change any setting like this:" + "```<setting_name> [new_value]```\nwhere ``[new_value]`` "
-                    + "can be either ``[true/on/false/off]`` or ``[abc123...]``";
-
-            //out += "\n";
-            //out += "\n";
-
-            event.reply(out);
         }
     }
 
@@ -391,6 +406,40 @@ public class ManageSettingsCommand extends Command {
                     break;
             }
         }
+    }
+
+    @Override
+    public MessageEmbed getEmbedHelp() {
+        EmbedBuilder eb = new EmbedBuilder();
+        StringBuilder sb = new StringBuilder();
+
+        eb.setColor(new Color(0x31FF00))
+          .setAuthor("Weebot", null, Launcher.getJda().getSelfUser().getAvatarUrl())
+          .setThumbnail(Launcher.getJda().getSelfUser().getAvatarUrl())
+          .setFooter("Run by Weebot", Launcher.getJda().getSelfUser().getAvatarUrl());
+
+        eb.setTitle("Weeb(B)ot Settings")
+          .addField("Change My in-Sever NickName",
+                    "setname <new nickname>\n*Aliases*: nickname, changename",
+                    false);
+
+        sb.append("callw <new_callsign>")
+          .append("*Aliases*: callsign, callwith, prefix")
+          .append("*Note*: The prefix must be under 4 characters long");
+        eb.addField("Change my Callsign/Prefix", sb.toString(), false);
+        sb.setLength(0);
+
+        eb.addField("(Dis)Allow Bot to Use Explicit Language",
+                    "expl on/off\n*Aliases:*explicit, vulgar, pottymouth",
+                    false)
+          .addField("(Dis)Allow the bot to use NSFW commands",
+                    "nsfw on/off\n*Alias*: naughty",
+                    false)
+          .addField("Server-wide word bans", "(*Under construction*)", false)
+          .addField("(Dis)Allow the bot to respond to actions not directed to it",
+                    "(*Under construction*)", false);
+
+        return eb.build();
     }
 
 }

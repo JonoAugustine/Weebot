@@ -93,33 +93,9 @@ public class HelpCommand extends Command {
         EmbedBuilder eb = new EmbedBuilder();
         StringBuilder sb = new StringBuilder();
 
-        eb.setColor(new Color(0x31FF00))
-          .setAuthor("Weebot", null, Launcher.getJda().getSelfUser().getAvatarUrl())
-          .setThumbnail(Launcher.getJda().getSelfUser().getAvatarUrl())
-          .setFooter("Run by Weebot", Launcher.getJda().getSelfUser().getAvatarUrl());
-
-        eb.setTitle("Weeb(B)ot Settings")
-          .addField("Change My in-Sever NickName",
-                    "setname <new nickname>\n*Aliases*: nickname, changename",
-                    false);
-
-        sb.append("callw <new_callsign>")
-          .append("*Aliases*: callsign, callwith, prefix")
-          .append("*Note*: The prefix must be under 4 characters long");
-        eb.addField("Change my Callsign/Prefix", sb.toString(), false);
-        sb.setLength(0);
-
-        eb.addField("(Dis)Allow Bot to Use Explicit Language",
-                    "expl on/off\n*Aliases:*explicit, vulgar, pottymouth",
-                    false)
-          .addField("(Dis)Allow the bot to use NSFW commands",
-                    "nsfw on/off\n*Alias*: naughty",
-                    false)
-          .addField("Server-wide word bans", "(*Under construction*)", false)
-          .addField("(Dis)Allow the bot to respond to actions not directed to it",
-                "(*Under construction*)", false);
-
-        event.privateReply(eb.build());
+        event.privateReply(
+                Launcher.getCommand(ManageSettingsCommand.class).getEmbedHelp()
+        );
 
         sb.setLength(0);
         eb.clearFields();
