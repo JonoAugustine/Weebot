@@ -966,9 +966,10 @@ public class NotePadCommand extends Command {
         StringBuilder sb = new StringBuilder();
         sb.append("Write and edit server NotePads\n")
           .append("Note Pads can be locked to specific")
-          .append("roles, members, and text channels.\n")
-          .append("<required> , [optional], /situationally_required/");
-        EmbedBuilder eb = Launcher.makeEmbedBuilder("Note Pad", null, sb.toString());
+          .append("roles, members, and text channels.\n");
+
+        EmbedBuilder eb = Launcher.makeEmbedBuilder("Note Pad",
+                                                    null, sb.toString());
         sb.setLength(0);
 
         eb.addField("See all available NotePads", "notes", false)
@@ -997,31 +998,15 @@ public class NotePadCommand extends Command {
           .addField("Lock a NotePad's access from Roles, Members, or Channels",
                   "notes <notepad_number> lockout [roles, members, or channels]", false)
           .addField("Delete a NotePad",
-                  "notes <notepad_number> trash\n*Aliases*:toss, bin, garbo", false)
-          .addField("Notes",
-                  "any instance of *'notes'* can be replaced with any of the following: "
-                    + "\n" + this.aliases.toString() + ".", false);
+                  "notes <notepad_number> trash\n*Aliases*:toss, bin, garbo", false);
+
+        sb.append("Any usagage of '*notes*' can be replaced with any of the following:\n")
+          .append(this.aliases.toString() + ".\n\n")
+          .append("<required>   [optional]   /situationally_required/");
+        eb.addField("Extra", sb.toString(), false);
 
         return eb.build();
 
-    }
-
-    @Override
-    public String getHelp() {
-        String out = "";
-
-        out += "```";
-
-        out += "NotePadCommand Help:\n\n"
-            +  "<required> , [optional]\n\n";
-
-        out += this.argFormat
-            +  "\nNote: any instance of 'notes' can be replaced with any of the following"
-            + this.aliases.toString() + ".\n"
-            + "Note: X # Y # = X <notepad_number> Y <note_number>.";
-        out += "```";
-
-        return out;
     }
 
 }
