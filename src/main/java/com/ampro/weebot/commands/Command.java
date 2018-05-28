@@ -120,22 +120,6 @@ public abstract class Command {
     protected final static String USER_PERM
             = "%s You must have the %s permission in this %s to use that!";
 
-    /**
-     * Build a new Command with empty, null, or false variables.
-     */
-    protected Command() {
-        this.name       = null;
-        this.aliases    = null;
-        this.help = null;
-        //this.helpLong   = null;
-        this.argFormat  = null;
-        this.guildOnly  = false;
-        this.ownerOnly  = false;
-        this.cooldown   = 0;
-        this.hidden     = false;
-        this.nsfw       = false;
-    }
-
 
     /**
      * Build a Command with each variable assigned.
