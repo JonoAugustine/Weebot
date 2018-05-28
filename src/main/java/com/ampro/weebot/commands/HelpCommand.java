@@ -90,16 +90,12 @@ public class HelpCommand extends Command {
      */
     private void genericHelp(Weebot bot, BetterMessageEvent event) {
 
-        EmbedBuilder eb = new EmbedBuilder();
-        StringBuilder sb = new StringBuilder();
-
         event.privateReply(
                 Launcher.getCommand(ManageSettingsCommand.class).getEmbedHelp()
         );
 
-        sb.setLength(0);
-        eb.clearFields();
-
+        EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
+        StringBuilder sb = new StringBuilder();
 
         eb.setTitle("Weeb(B)ot Features");
         sb.append("Use ' help <feature_command> ' for a list of commands\n")

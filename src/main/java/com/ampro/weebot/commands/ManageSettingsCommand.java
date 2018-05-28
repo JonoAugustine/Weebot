@@ -41,7 +41,6 @@ public class ManageSettingsCommand extends Command {
                     , false
                     , false
             );
-            this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
         }
 
         /**
@@ -105,6 +104,7 @@ public class ManageSettingsCommand extends Command {
                 , false
                 , false
         );
+        this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
     }
 
     /**
@@ -410,21 +410,25 @@ public class ManageSettingsCommand extends Command {
 
     @Override
     public MessageEmbed getEmbedHelp() {
-        EmbedBuilder eb = new EmbedBuilder();
+        EmbedBuilder eb = Launcher.getStandardEmbedBuilder()
+                .setTitle("Manage Weebot Settings");
+
         StringBuilder sb = new StringBuilder();
+        if (this.userPermissions.length != 0) {
+            sb.append("Required User Permissions:* ");
+            for (Permission p : this.userPermissions)
+                sb.append(p.getName()).append(", ");
+            sb.setLength(sb.length() - 2);
+            sb.append("*");
+            eb.setDescription(sb.toString());
+        }
 
-        eb.setColor(new Color(0x31FF00))
-          .setAuthor("Weebot", null, Launcher.getJda().getSelfUser().getAvatarUrl())
-          .setThumbnail(Launcher.getJda().getSelfUser().getAvatarUrl())
-          .setFooter("Run by Weebot", Launcher.getJda().getSelfUser().getAvatarUrl());
-
-        eb.setTitle("Weeb(B)ot Settings")
-          .addField("Change My in-Sever NickName",
+        eb.addField("Change My in-Sever NickName",
                     "setname <new nickname>\n*Aliases*: nickname, changename",
                     false);
 
-        sb.append("callw <new_callsign>")
-          .append("*Aliases*: callsign, callwith, prefix")
+        sb.append("callw <new_callsign>\n")
+          .append("*Aliases*: callsign, callwith, prefix\n")
           .append("*Note*: The prefix must be under 4 characters long");
         eb.addField("Change my Callsign/Prefix", sb.toString(), false);
         sb.setLength(0);
