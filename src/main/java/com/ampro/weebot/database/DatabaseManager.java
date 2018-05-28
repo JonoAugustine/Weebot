@@ -1,7 +1,10 @@
 package com.ampro.weebot.database;
 
+import com.ampro.weebot.commands.IPassive;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 
 import java.io.*;
 
@@ -15,13 +18,23 @@ public class DatabaseManager {
 
     public static final File DIR = new File("databases");
 
+    private static final Gson GSON
+            = new GsonBuilder().enableComplexMapKeySerialization()
+                               .setExclusionStrategies().setPrettyPrinting()
+                               .registerTypeAdapter(IPassive.class,
+                                                    new InterfaceAdapter<>())
+                               .create();
+
     /**
      * Save the Database to file in the format:
      * <code>database.wbot</code>
      * @return 1 if the file was saved.
-     *          -1 if the en error occurred.
+     *        -1 if an IO error occurred.
+     *        -2 if a Gson exception was thrown
+     *
      */
     public static synchronized int save(Database database) {
+        if (!corruptBackupCheck()) return -2;
         File file = new File(DIR, "database.wbot");
         try {
             if (!DIR.mkdir()) {
@@ -36,11 +49,8 @@ public class DatabaseManager {
             return -1;
         }
         try (Writer writer = new FileWriter(file)) {
-            Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setExclusionStrategies().setPrettyPrinting().create();
-
-            gson.toJson(database, writer);
+            GSON.toJson(database, writer);
             System.out.println("Database saved.");
-            return 1;
         } catch (FileNotFoundException e) {
             System.err.println("File not found while writing gson to file.");
             e.printStackTrace();
@@ -50,6 +60,7 @@ public class DatabaseManager {
             e.printStackTrace();
             return -1;
         }
+        return 1;
     }
 
 
@@ -68,9 +79,7 @@ public class DatabaseManager {
             return -1;
         }
         try (Writer writer = new FileWriter(file)) {
-            Gson gson = new GsonBuilder().enableComplexMapKeySerialization().setExclusionStrategies().setPrettyPrinting().create();
-
-            gson.toJson(database, writer);
+            GSON.toJson(database, writer);
             return 1;
         } catch (FileNotFoundException e) {
             System.err.println("File not found while writing gson backup to file.");
@@ -90,11 +99,10 @@ public class DatabaseManager {
      *             null if database not found.
      */
     public static synchronized Database load() {
-        Gson gson = new GsonBuilder().create();
         Database out = null;
         Database bk = null;
         try (Reader reader = new FileReader(new File(DIR, "database.wbot"))) {
-            out = gson.fromJson(reader, Database.class);
+            out = GSON.fromJson(reader, Database.class);
         } catch (FileNotFoundException e) {
             System.err.println(
                     "Unable to locate database.wbot."
@@ -106,7 +114,7 @@ public class DatabaseManager {
             return null;
         }
         try (Reader bKreader = new FileReader(new File(DIR, "databaseBK.wbot"))) {
-             bk = gson.fromJson(bKreader, Database.class);
+             bk = GSON.fromJson(bKreader, Database.class);
         } catch (FileNotFoundException e) {
             System.err.println("\tUnable to locate databseBK.wbot.");
             //e.printStackTrace();
@@ -120,6 +128,26 @@ public class DatabaseManager {
         }
         out = out != null ? out : bk;
         return out == bk ? out : bk;
+    }
+
+    /**
+     * Attempt to load the backup file. If any {@link Gson} exceptions are thrown
+     * while the file is found, return false.
+     *
+     * @return {@code false} if gson fails to load the backup.
+     */
+    private static synchronized boolean corruptBackupCheck() {
+        try (Reader reader = new FileReader(new File(DIR, "databaseBK.wbot"))) {
+            Database test = GSON.fromJson(reader, Database.class);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return false;
+        } catch (FileNotFoundException e) {
+            return true;
+        } catch (IOException e) {
+            return true;
+        }
+        return true;
     }
 
 }

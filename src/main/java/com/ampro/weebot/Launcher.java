@@ -54,7 +54,7 @@ public class Launcher {
 	private static JDA JDA_CLIENT;
 	private static Thread saveTimer;
 
-	public static final GlobalWeebot GLOBAL_WEEBOT = new GlobalWeebot();
+	public static GlobalWeebot GLOBAL_WEEBOT;
 
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
@@ -171,6 +171,8 @@ public class Launcher {
 		}
 		System.err.println("\tBacking up database.");
 		DatabaseManager.backUp(Launcher.DATABASE);
+		GLOBAL_WEEBOT = DATABASE.getGlobalWeebot() == null
+                        ? new GlobalWeebot() : DATABASE.getGlobalWeebot();
 	}
 
 	private static void setUpTempDir() {
@@ -248,21 +250,23 @@ public class Launcher {
 		    JDA_CLIENT.removeEventListener(o);
 
 		Launcher.saveTimer.interrupt();
-		System.err.println("Shutdown signal received. Saving database.");
-		DatabaseManager.save(Launcher.DATABASE);
+		System.err.println("Shutdown signal received.");
+		switch (DatabaseManager.save(Launcher.DATABASE)) {
+            case -1:
+                System.err.println("\tCould not save backup due to file exception.");
+                break;
+            case -2:
+                System.err.println("\tCould not save backup due to corrupt Json.");
+                break;
+            default:
+                System.out.println("\tDatabase saved.");
+		}
 
-		System.err.println("Clearing temp directories.");
+		System.err.println("\tClearing temp directories.");
 		Launcher.clearTempDirs();
 
-		System.out.println("Successfully shutdown.");
+		System.out.println("\tSuccessfully shutdown.");
 
-		Collection c = DATABASE.getWeebots().values();
-		Iterator it = c.iterator();
-		System.out.println("Printing bots from database---------");
-		while(it.hasNext()) {
-			System.out.println(it.next());
-		}
-		System.out.println("-------------------------------DONE");
 		JDA_CLIENT.shutdown();
 
 	}

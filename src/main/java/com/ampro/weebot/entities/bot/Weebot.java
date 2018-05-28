@@ -14,6 +14,7 @@
 package com.ampro.weebot.entities.bot;
 
 import com.ampro.weebot.Launcher;
+import com.ampro.weebot.commands.AutoAdminCommand;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.commands.NotePadCommand.NotePad;
@@ -70,6 +71,8 @@ public class Weebot implements Comparable<Weebot> {
     private boolean explicit;
     /** Words banned on the server */
     private final List<String> BANNED_WORDS;
+
+    private final AutoAdminCommand.AutoAdmin AUTO_ADMIN;
     /** Whether the bot is able to be NSFW */
     private boolean NSFW;
     /** Whether the bot is able to respond to actions not directed to it */
@@ -85,7 +88,7 @@ public class Weebot implements Comparable<Weebot> {
     private final ConcurrentHashMap<String, CAHDeck> CUSTOM_CAH_DECKS;
 
     /** {@link IPassive} objects, cleared on exit */
-    protected transient List<IPassive> PASSIVES;
+    protected List<IPassive> PASSIVES;
 
     /** Map of "NotePads" */
     private final ArrayList<NotePad> NOTES;
@@ -114,6 +117,7 @@ public class Weebot implements Comparable<Weebot> {
         this.spamLimit = 5;
         this.PASSIVES = new ArrayList<>();
         this.CUSTOM_CAH_DECKS = new ConcurrentHashMap<>();
+        AUTO_ADMIN = new AutoAdminCommand.AutoAdmin();
     }
 
     /**
@@ -137,6 +141,7 @@ public class Weebot implements Comparable<Weebot> {
         this.spamLimit = 5;
         PASSIVES = new ArrayList<>();
         CUSTOM_CAH_DECKS = null;
+        AUTO_ADMIN = null;
     }
 
     /**

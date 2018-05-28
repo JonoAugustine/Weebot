@@ -6,6 +6,7 @@ package com.ampro.weebot.database;
 
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.developer.WeebotSuggestionCommand.Suggestion;
+import com.ampro.weebot.entities.bot.GlobalWeebot;
 import com.ampro.weebot.entities.bot.Weebot;
 import net.dv8tion.jda.core.entities.User;
 
@@ -30,11 +31,14 @@ public class Database {
      */
     private final ConcurrentHashMap<OffsetDateTime, Suggestion> SUGGESTIONS;
 
+    private final GlobalWeebot GLOBAL_WEEBOT;
+
     /** All Weebots currently in circulation, mapped to their Guild's ID */
     private final ConcurrentHashMap<Long, Weebot> WEEBOTS;
 
     /** Build an empty {@code Database}.*/
     public Database() {
+        GLOBAL_WEEBOT = new GlobalWeebot();
         WEEBOTS = new ConcurrentHashMap<>();
         WEEBOTS.putIfAbsent(0L, new Weebot());
         SUGGESTIONS = new ConcurrentHashMap<>();
@@ -86,6 +90,15 @@ public class Database {
         return this.WEEBOTS;
     }
 
+    public synchronized GlobalWeebot getGlobalWeebot() { return GLOBAL_WEEBOT; }
+
+    /**
+     * @return ArrayList of registered developers.
+     */
+    public static synchronized List<Long> getDevelopers() {
+        return DEV_IDS;
+    }
+
     /**
      * Add a developer ID
      * @param id long user ID
@@ -124,13 +137,6 @@ public class Database {
             }
         }
         return out;
-    }
-
-    /**
-     * @return ArrayList of registered developers.
-     */
-    public static synchronized List<Long> getDevelopers() {
-        return DEV_IDS;
     }
 
     @Override

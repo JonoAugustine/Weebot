@@ -1,5 +1,67 @@
 {
   "SUGGESTIONS": {},
+  "GLOBAL_WEEBOT": {
+    "USER_PASSIVES": {
+      "139167730237571072": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.miscellaneous.OutHouseCommand$OutHouse",
+          "DATA": {
+            "userID": 139167730237571072,
+            "remainingHours": 4,
+            "startTime": {
+              "dateTime": {
+                "date": {
+                  "year": 2018,
+                  "month": 5,
+                  "day": 28
+                },
+                "time": {
+                  "hour": 4,
+                  "minute": 23,
+                  "second": 56,
+                  "nano": 468000000
+                }
+              },
+              "offset": {
+                "totalSeconds": -14400
+              }
+            },
+            "message": "hello"
+          }
+        }
+      ]
+    },
+    "GUILD_ID": 0,
+    "BOT_ID": "0W",
+    "BIRTHDAY": {
+      "dateTime": {
+        "date": {
+          "year": 2018,
+          "month": 5,
+          "day": 28
+        },
+        "time": {
+          "hour": 4,
+          "minute": 22,
+          "second": 10,
+          "nano": 928000000
+        }
+      },
+      "offset": {
+        "totalSeconds": -14400
+      }
+    },
+    "nickname": "Weebot",
+    "callsign": "",
+    "explicit": false,
+    "BANNED_WORDS": [],
+    "NSFW": false,
+    "ACTIVE_PARTICIPATE": false,
+    "COMMANDS_DISABLED": {},
+    "PASSIVES": [],
+    "NOTES": [],
+    "spamLimit": 5
+  },
   "WEEBOTS": {
     "0": {
       "GUILD_ID": 0,
@@ -9,13 +71,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 20
+            "day": 28
           },
           "time": {
-            "hour": 3,
-            "minute": 1,
-            "second": 40,
-            "nano": 575000000
+            "hour": 4,
+            "minute": 22,
+            "second": 10,
+            "nano": 928000000
           }
         },
         "offset": {
@@ -29,6 +91,7 @@
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
+      "PASSIVES": [],
       "NOTES": [],
       "spamLimit": 5
     },
@@ -40,13 +103,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 20
+            "day": 28
           },
           "time": {
-            "hour": 3,
-            "minute": 1,
-            "second": 40,
-            "nano": 578000000
+            "hour": 4,
+            "minute": 22,
+            "second": 10,
+            "nano": 928000000
           }
         },
         "offset": {
@@ -57,42 +120,16 @@
       "callsign": "\u003c\u003e",
       "explicit": false,
       "BANNED_WORDS": [],
+      "AUTO_ADMIN": {
+        "name": "NAME"
+      },
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
-      "CUSTOM_CAH_DECKS": {
-        "NL": {
-          "name": "NL",
-          "whiteCards": [
-            {
-              "cardText": "Karen Thomas"
-            },
-            {
-              "cardText": "Delete teh gayz"
-            },
-            {
-              "cardText": "Late-night ejaculations"
-            },
-            {
-              "cardText": "Totally not pedophilia"
-            }
-          ],
-          "blackCards": [
-            {
-              "cardText": "Where did Matt go?",
-              "blanks": 1
-            },
-            {
-              "cardText": "It\u0027s not delivery, it\u0027s \\_\\_\\_\\_.",
-              "blanks": 1
-            }
-          ],
-          "authorID": 139167730237571072,
-          "roleLocks": []
-        }
-      },
+      "CUSTOM_CAH_DECKS": {},
+      "PASSIVES": [],
       "NOTES": [],
-      "spamLimit": 3
+      "spamLimit": 5
     },
     "218979588716494848": {
       "GUILD_ID": 218979588716494848,
@@ -102,13 +139,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 20
+            "day": 28
           },
           "time": {
-            "hour": 3,
-            "minute": 1,
-            "second": 40,
-            "nano": 578000000
+            "hour": 4,
+            "minute": 22,
+            "second": 10,
+            "nano": 929000000
           }
         },
         "offset": {
@@ -119,10 +156,14 @@
       "callsign": "\u003c\u003e",
       "explicit": false,
       "BANNED_WORDS": [],
+      "AUTO_ADMIN": {
+        "name": "NAME"
+      },
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
       "CUSTOM_CAH_DECKS": {},
+      "PASSIVES": [],
       "NOTES": [],
       "spamLimit": 5
     }
