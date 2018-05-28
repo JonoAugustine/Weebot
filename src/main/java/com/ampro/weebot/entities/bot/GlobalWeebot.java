@@ -18,7 +18,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GlobalWeebot extends Weebot implements EventListener {
 
     /** A Map of {@link IPassive} objects mapped to user IDs */
-    private static final ConcurrentHashMap<Long, List<IPassive>> USER_PASSIVES
+    private final ConcurrentHashMap<Long, List<IPassive>> USER_PASSIVES
             = new ConcurrentHashMap<>();
 
     /**
@@ -52,7 +52,7 @@ public class GlobalWeebot extends Weebot implements EventListener {
     }
 
     /** @return */
-    public static final synchronized Map<Long, List<IPassive>> getUserPassives() {
+    public  final synchronized Map<Long, List<IPassive>> getUserPassives() {
         return USER_PASSIVES;
     }
 
@@ -61,7 +61,7 @@ public class GlobalWeebot extends Weebot implements EventListener {
      * @return The List of {@link com.ampro.weebot.commands.IPassive IPassives} mapped
      * to the given user. Null if there are no passives mapped to the user.
      */
-    public static final synchronized List<IPassive> getUserPassives(User user) {
+    public  final synchronized List<IPassive> getUserPassives(User user) {
         return USER_PASSIVES.get(user.getIdLong());
     }
 
@@ -76,7 +76,7 @@ public class GlobalWeebot extends Weebot implements EventListener {
      * @return {@code false} if the {@link IPassive} already exists in the
      * {@link User user's} list of {@link IPassive passives}.
      */
-    public static final synchronized boolean addUserPassive(User user, IPassive passive) {
+    public final synchronized boolean addUserPassive(User user, IPassive passive) {
         List<IPassive> pasList = USER_PASSIVES.get(user);
         if (pasList == null) {
             pasList = new ArrayList<>();
@@ -91,7 +91,7 @@ public class GlobalWeebot extends Weebot implements EventListener {
      *     {@code false} if the user's passive list does not contain the parameter or
      *     is null
      */
-    public static final synchronized boolean userHasPassive(User user, IPassive passive) {
+    public final synchronized boolean userHasPassive(User user, IPassive passive) {
         try {
             return USER_PASSIVES.get(user.getIdLong()).contains(passive);
         } catch (NullPointerException e) {

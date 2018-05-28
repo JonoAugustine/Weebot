@@ -6,13 +6,11 @@ import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.entities.bot.GlobalWeebot;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
-import com.sun.org.apache.bcel.internal.generic.LADD;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.User;
 
-import javax.swing.*;
 import java.time.OffsetDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -28,7 +26,7 @@ public class OutHouseCommand extends Command {
     /** An instantiable representation of a User's OutHouse. */
     public static final class OutHouse implements IPassive {
 
-        final User user;
+        final long userID;
         long remainingHours;
         final OffsetDateTime startTime;
         final String message;
@@ -36,19 +34,20 @@ public class OutHouseCommand extends Command {
         public OutHouse(User user, long hours) {
             startTime = OffsetDateTime.now();
             this.remainingHours = hours;
-            this.user = user;
+            this.userID = user.getIdLong();
             this.message = null;
         }
 
         public OutHouse(User user, long hours, String message) {
             startTime = OffsetDateTime.now();
             this.remainingHours = hours;
-            this.user = user;
+            this.userID = user.getIdLong();
             this.message = message;
         }
 
         @Override
         public void accept(BetterMessageEvent event) {
+            User user = Launcher.getJda().getUserById(userID);
             this.remainingHours -=
                     ChronoUnit.HOURS.between(startTime, OffsetDateTime.now());
             if (!event.isPrivate()) {
@@ -57,13 +56,13 @@ public class OutHouseCommand extends Command {
                     synchronized (Launcher.GLOBAL_WEEBOT) {
                         Launcher.GLOBAL_WEEBOT.getPassives().remove(this);
                     }
-                    Member mem = event.getGuild().getMember(this.user);
+                    Member mem = event.getGuild().getMember(user);
                     event.reply("*Welcome back " + mem.getEffectiveName() + "*");
                     return;
-                } else if(event.mentions(this.user)) {
+                } else if(event.mentions(user)) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("*Sorry, ")
-                      .append(event.getGuild().getMember(this.user).getEffectiveName());
+                      .append(event.getGuild().getMember(user).getEffectiveName());
                     if (this.message != null)
                         sb.append(" is out ").append(this.message);
                       else
@@ -108,7 +107,7 @@ public class OutHouseCommand extends Command {
     protected void execute(Weebot bot, BetterMessageEvent event) {
         //ohc [hours] [message here]
         StringBuilder sb = new StringBuilder();
-        List<IPassive> pas = GlobalWeebot.getUserPassives(event.getAuthor());
+        List<IPassive> pas = Launcher.GLOBAL_WEEBOT.getUserPassives(event.getAuthor());
 
         //Check if the user already has a OHC running
         if (pas != null) {
@@ -146,7 +145,7 @@ public class OutHouseCommand extends Command {
         }
 
 
-        if (GlobalWeebot.addUserPassive(event.getAuthor(), oh))
+        if (Launcher.GLOBAL_WEEBOT.addUserPassive(event.getAuthor(), oh))
             event.reply("I will hold down the fort while you're away! :guardsman: ");
         else
             event.reply("Sorry, something went wrong :cry:. Please try again later.");
@@ -164,4 +163,5 @@ public class OutHouseCommand extends Command {
 
         return eb.build();
     }
+
 }
