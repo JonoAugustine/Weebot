@@ -71,8 +71,6 @@ public class Weebot implements Comparable<Weebot> {
     private String callsign;
     /** Whether the bot is able to use explicit language */
     private boolean explicit;
-    /** Bot's passive admin capabilities */
-    private AutoAdmin AUTO_ADMIN;
     /** Whether the bot is able to be NSFW */
     private boolean NSFW;
     /** Whether the bot is able to respond to actions not directed to it */
@@ -348,15 +346,16 @@ public class Weebot implements Comparable<Weebot> {
 
     /** Set the bot's AutoAdmin */
     public final synchronized void setAutoAdmin(AutoAdmin autoAdmin) {
-        for (IPassive p : this.passives) if (p instanceof AutoAdmin) {
-            this.passives.remove(p);
-        }
-        this.AUTO_ADMIN = autoAdmin;
-        this.passives.add(this.AUTO_ADMIN);
+        this.passives.removeIf( (IPassive p) -> p instanceof AutoAdmin);
+        this.passives.add(0, autoAdmin);
     }
 
     /** Get the bot's AutoAdmin */
-    public final synchronized AutoAdmin getAutoAdmin() { return this.AUTO_ADMIN; }
+    public final synchronized AutoAdmin getAutoAdmin() {
+        for (IPassive p : this.passives)
+            if (p instanceof AutoAdmin) return (AutoAdmin) p;
+        return null;
+    }
 
     /** @return {@code true} if the bot is allowed to be not-safe-for-work.*/
     public boolean isNSFW() {

@@ -1,7 +1,10 @@
 {
   "SUGGESTIONS": {},
   "GLOBAL_WEEBOT": {
-    "USER_PASSIVES": {},
+    "USER_PASSIVES": {
+      "451005806222245889": [],
+      "139167730237571072": []
+    },
     "PASSIVE_LIMIT": 1000,
     "GUILD_ID": 0,
     "BOT_ID": "0W",
@@ -93,7 +96,24 @@
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
       "CUSTOM_CAH_DECKS": {},
-      "passives": [],
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.management.AutoAdminCommand$AutoAdmin",
+          "DATA": {
+            "dead": false,
+            "guildID": 139168039634468865,
+            "bannedWords": {
+              "arctan": []
+            },
+            "userRecords": {},
+            "exemptUsers": [],
+            "exemptRoles": [],
+            "kickThresh": 0,
+            "sofThresh": 0,
+            "hardThresh": 0
+          }
+        }
+      ],
       "NOTES": [],
       "spamLimit": 5
     },

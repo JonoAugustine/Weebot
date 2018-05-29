@@ -3,24 +3,22 @@ package com.ampro.weebot.commands.management;
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
-import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
-import net.dv8tion.jda.core.events.guild.update.GuildUpdateOwnerEvent;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A Managemnet interface for changing the bot's admin rules and capabilities
- * TODO...all of it?
+ * TODO Exempted IDs
+ * TODO Kick/ban thresh
  */
 public class AutoAdminCommand extends Command {
 
@@ -78,6 +76,11 @@ public class AutoAdminCommand extends Command {
                 return eb.build();
             }
 
+            String memberName() {
+                return Launcher.getGuild(AutoAdmin.this.guildID)
+                               .getMemberById(userID).getEffectiveName();
+            }
+
         }
 
         private boolean dead;
@@ -117,12 +120,35 @@ public class AutoAdminCommand extends Command {
 
         @Override
         public void accept(BetterMessageEvent event) {
-            //TODO Scanning
-            //Scan for banned word
-            //Check thresholds
-            //Act
-            //  Warn user
-            //  Kick/sban/ban
+            if (dead) return;
+            String content = event.toString();
+            Set<Map.Entry<String, List<Long>>> bwords = this.bannedWords.entrySet();
+            //TODO for banned word
+            for (Map.Entry<String, List<Long>> entry : bwords) {
+                if (content.replace(" ", "").contains(entry.getKey())) {
+                    if(entry.getValue().isEmpty() || entry.getValue().contains(
+                            event.getTextChannel().getIdLong())) {
+
+                        UserRecord rec = userRecords.get(event.getAuthor().getIdLong());
+                        if(rec == null) {
+                            rec = new UserRecord(event.getAuthor());
+                            userRecords.put(event.getAuthor().getIdLong(), rec);
+                        }
+
+                        rec.addWordInfraction(event.getMessage());
+
+                        //Check thresholds TODO
+                        //Act
+                        //  Warn user
+                        //  Kick/sban/ban
+
+                        event.privateReply((infractionEmbed(event, entry.getKey())));
+                        event.deleteMessage();
+                        break;
+                    }
+                }
+            }
+
         }
 
         /**
@@ -132,7 +158,8 @@ public class AutoAdminCommand extends Command {
          */
         private void banWords(String...words) {
             for (String word : words) {
-                this.bannedWords.putIfAbsent(word, null);
+                if (word == null) continue;
+                this.bannedWords.putIfAbsent(word.toLowerCase(), new ArrayList<>());
             }
         }
 
@@ -153,11 +180,12 @@ public class AutoAdminCommand extends Command {
             }
             //Add the banned words
             for (String w : words) {
-                List<Long> ch = this.bannedWords.get(w);
+                if (w == null) continue;
+                List<Long> ch = this.bannedWords.get(w.toLowerCase());
                 if (ch != null) {
                     ch.addAll(chIDs);
                 } else {
-                    this.bannedWords.put(w, chIDs);
+                    this.bannedWords.put(w.toLowerCase(), chIDs);
                 }
             }
         }
@@ -196,10 +224,27 @@ public class AutoAdminCommand extends Command {
             return eb.build();
         }
 
+        private MessageEmbed infractionEmbed(BetterMessageEvent event, Object inf) {
+            EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
+
+            eb.setTitle("AutoAdmin Caught an Infraction!");
+            StringBuilder sb = new StringBuilder()
+                    .append("In Server: ")
+                    .append(event.getGuild().getName()).append("\nIn Channel:  ")
+                    .append(event.getTextChannel().getName()).append("\nAt ")
+                    .append(event.getCreationTime()
+                                 .format(DateTimeFormatter.ofPattern("d-M-y hh:mm:ss")));
+            eb.setDescription(sb.toString());
+            sb.setLength(0);
+            eb.addField("Infraction: " + inf.toString(), event.toString(), false);
+            return eb.build();
+        }
+
         @Override
         public boolean dead() {
             return this.dead;
         }
+
     }
 
     public AutoAdminCommand() {
@@ -277,7 +322,7 @@ public class AutoAdminCommand extends Command {
                 break;
             case DISABLE:
                 if (admin != null) {
-                    bot.setAutoAdmin(null);
+                    admin.dead = true;
                     event.reply("I will no longer moderate text channels.");
                 } else {
                     event.reply(NO_AA_FOUND);
@@ -294,9 +339,13 @@ public class AutoAdminCommand extends Command {
                         words[i - 2] = args[i];
                     }
                     admin.banWords(words, event.getMessage().getMentionedChannels());
-                    event.reply("Words have been added to the banlist",
-                                m -> event.deleteMessage()
-                    );
+                    event.reply("Words have been added to the banlist", m -> {
+                        event.deleteMessage();
+                        try {
+                            Thread.sleep(10 * 1000);
+                        } catch (InterruptedException e) {}
+                        m.delete().queue();
+                    });
                 } else {
                     event.reply(NO_AA_FOUND);
                 }
@@ -318,6 +367,7 @@ public class AutoAdminCommand extends Command {
             case SEERECORD:
                 //See user records
                 //aac ir <@member> [@member2]...
+
                 break;
             case CLEARRECORD:
                 //Clear user records

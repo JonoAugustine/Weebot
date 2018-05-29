@@ -2,33 +2,8 @@
   "SUGGESTIONS": {},
   "GLOBAL_WEEBOT": {
     "USER_PASSIVES": {
-      "451005806222245889": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.miscellaneous.OutHouseCommand$OutHouse",
-          "DATA": {
-            "userID": 451005806222245889,
-            "remainingHours": 1,
-            "startTime": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 5,
-                  "day": 29
-                },
-                "time": {
-                  "hour": 10,
-                  "minute": 5,
-                  "second": 3,
-                  "nano": 521000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -14400
-              }
-            }
-          }
-        }
-      ]
+      "451005806222245889": [],
+      "139167730237571072": []
     },
     "PASSIVE_LIMIT": 1000,
     "GUILD_ID": 0,
@@ -121,7 +96,26 @@
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
       "CUSTOM_CAH_DECKS": {},
-      "passives": [],
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.management.AutoAdminCommand$AutoAdmin",
+          "DATA": {
+            "dead": false,
+            "guildID": 139168039634468865,
+            "bannedWords": {
+              "arctan": [
+                439522471369244683
+              ]
+            },
+            "userRecords": {},
+            "exemptUsers": [],
+            "exemptRoles": [],
+            "kickThresh": 0,
+            "sofThresh": 0,
+            "hardThresh": 0
+          }
+        }
+      ],
       "NOTES": [],
       "spamLimit": 5
     },
