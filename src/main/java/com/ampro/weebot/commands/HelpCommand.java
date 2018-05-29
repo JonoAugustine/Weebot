@@ -1,12 +1,12 @@
 package com.ampro.weebot.commands;
 
 import com.ampro.weebot.Launcher;
+import com.ampro.weebot.commands.management.ManageSettingsCommand;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 
-import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 

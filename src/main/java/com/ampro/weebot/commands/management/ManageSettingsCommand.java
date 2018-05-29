@@ -1,6 +1,7 @@
-package com.ampro.weebot.commands;
+package com.ampro.weebot.commands.management;
 
 import com.ampro.weebot.Launcher;
+import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.database.DatabaseManager;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
@@ -104,7 +105,7 @@ public class ManageSettingsCommand extends Command {
                 , false
                 , false
         );
-        this.userPermissions = new Permission[]{Permission.MANAGE_SERVER};
+        this.userPermissions = new Permission[]{Permission.MANAGE_CHANNEL};
     }
 
     /**

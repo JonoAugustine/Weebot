@@ -7,26 +7,25 @@
           "CLASSNAME": "com.ampro.weebot.commands.miscellaneous.OutHouseCommand$OutHouse",
           "DATA": {
             "userID": 139167730237571072,
-            "remainingHours": 4,
+            "remainingHours": 1,
             "startTime": {
               "dateTime": {
                 "date": {
                   "year": 2018,
                   "month": 5,
-                  "day": 28
+                  "day": 29
                 },
                 "time": {
-                  "hour": 4,
-                  "minute": 23,
-                  "second": 56,
-                  "nano": 468000000
+                  "hour": 9,
+                  "minute": 8,
+                  "second": 4,
+                  "nano": 323000000
                 }
               },
               "offset": {
                 "totalSeconds": -14400
               }
-            },
-            "message": "hello"
+            }
           }
         }
       ]
@@ -54,7 +53,6 @@
     "nickname": "Weebot",
     "callsign": "",
     "explicit": false,
-    "BANNED_WORDS": [],
     "NSFW": false,
     "ACTIVE_PARTICIPATE": false,
     "COMMANDS_DISABLED": {},
@@ -87,7 +85,6 @@
       "nickname": "Weebot",
       "callsign": "",
       "explicit": false,
-      "BANNED_WORDS": [],
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
@@ -119,10 +116,6 @@
       "nickname": "Weebot",
       "callsign": "\u003c\u003e",
       "explicit": false,
-      "BANNED_WORDS": [],
-      "AUTO_ADMIN": {
-        "name": "NAME"
-      },
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
@@ -155,9 +148,14 @@
       "nickname": "Weebot",
       "callsign": "\u003c\u003e",
       "explicit": false,
-      "BANNED_WORDS": [],
       "AUTO_ADMIN": {
-        "name": "NAME"
+        "bannedWords": {},
+        "userRecords": {},
+        "exemptUsers": [],
+        "exemptRoles": [],
+        "kickThresh": 0,
+        "sofThresh": 0,
+        "hardThresh": 0
       },
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
