@@ -105,13 +105,11 @@ public class DatabaseManager {
             out = GSON.fromJson(reader, Database.class);
         } catch (FileNotFoundException e) {
             System.err.println(
-                    "Unable to locate database.wbot."
-                    + "\n\tAttempting to load backup file..."
+                    "Unable to locate database.wbot.\n\tAttempting to load backup file..."
             );
         } catch (IOException e) {
             System.err.println("IOException while reading gson from file.");
             e.printStackTrace();
-            return null;
         }
         try (Reader bKreader = new FileReader(new File(DIR, "databaseBK.wbot"))) {
              bk = GSON.fromJson(bKreader, Database.class);
@@ -119,15 +117,14 @@ public class DatabaseManager {
             System.err.println("\tUnable to locate databseBK.wbot.");
             //e.printStackTrace();
             //e2.printStackTrace();
-            return null;
         } catch (IOException e) {
             System.err.println("IOException while reading gson from backup file.");
             e.printStackTrace();
             e.printStackTrace();
-            return null;
         }
-        out = out != null ? out : bk;
-        return out == bk ? out : bk;
+
+        return out == bk ? out : (bk == null ? out : bk);
+
     }
 
     /**
