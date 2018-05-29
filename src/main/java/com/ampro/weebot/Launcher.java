@@ -247,8 +247,7 @@ public class Launcher {
 	 * Begin the shutdown sequence. Backup and save database.
 	 */
 	public static void shutdown() {
-		for (Object o : Launcher.JDA_CLIENT.getRegisteredListeners())
-		    JDA_CLIENT.removeEventListener(o);
+		JDA_CLIENT.getRegisteredListeners().clear();
 
 		Launcher.saveTimer.interrupt();
 		System.err.println("Shutdown signal received.");
