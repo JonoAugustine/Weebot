@@ -14,7 +14,6 @@
 package com.ampro.weebot.entities.bot;
 
 import com.ampro.weebot.Launcher;
-import com.ampro.weebot.commands.AutoAdminCommand;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.commands.NotePadCommand.NotePad;
@@ -22,6 +21,7 @@ import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
 import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
         .CardsAgainstHumanity.CAHDeck;
+import com.ampro.weebot.commands.management.AutoAdminCommand.AutoAdmin;
 import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.JDA;
@@ -30,7 +30,9 @@ import net.dv8tion.jda.core.entities.TextChannel;
 import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.TreeMap;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
@@ -69,10 +71,8 @@ public class Weebot implements Comparable<Weebot> {
     private String callsign;
     /** Whether the bot is able to use explicit language */
     private boolean explicit;
-    /** Words banned on the server */
-    private final List<String> BANNED_WORDS;
-
-    private final AutoAdminCommand.AutoAdmin AUTO_ADMIN;
+    /** Bot's passive admin capabilities */
+    private AutoAdmin AUTO_ADMIN;
     /** Whether the bot is able to be NSFW */
     private boolean NSFW;
     /** Whether the bot is able to respond to actions not directed to it */
@@ -109,7 +109,6 @@ public class Weebot implements Comparable<Weebot> {
         this.callsign = "<>";
         this.explicit = false;
         this.NSFW = false;
-        this.BANNED_WORDS = new ArrayList<>();
         this.ACTIVE_PARTICIPATE = false;
         this.COMMANDS_DISABLED = new ConcurrentHashMap<>();
         this.GAMES_RUNNING = new ArrayList<>();
@@ -117,7 +116,6 @@ public class Weebot implements Comparable<Weebot> {
         this.spamLimit = 5;
         this.PASSIVES = new ArrayList<>();
         this.CUSTOM_CAH_DECKS = new ConcurrentHashMap<>();
-        AUTO_ADMIN = new AutoAdminCommand.AutoAdmin();
     }
 
     /**
@@ -133,7 +131,6 @@ public class Weebot implements Comparable<Weebot> {
         this.callsign = "";
         this.explicit = false;
         this.NSFW = false;
-        this.BANNED_WORDS = new ArrayList<>();
         this.ACTIVE_PARTICIPATE = false;
         this.COMMANDS_DISABLED = new ConcurrentHashMap<>();
         this.GAMES_RUNNING = null;
@@ -141,7 +138,6 @@ public class Weebot implements Comparable<Weebot> {
         this.spamLimit = 5;
         PASSIVES = new ArrayList<>();
         CUSTOM_CAH_DECKS = null;
-        AUTO_ADMIN = null;
     }
 
     /**
@@ -300,12 +296,12 @@ public class Weebot implements Comparable<Weebot> {
         return this.BOT_ID;
     }
 
-    public final String getNickname() {
-        return this.nickname;
-    }
-
     public final OffsetDateTime getBirthday() {
         return this.BIRTHDAY;
+    }
+
+    public final synchronized String getNickname() {
+        return this.nickname;
     }
 
     /**
@@ -313,14 +309,14 @@ public class Weebot implements Comparable<Weebot> {
      * @param newName The new {@link Weebot#nickname} for the bot.
      * @return The previous value of {@link Weebot#nickname}.
      */
-    public final String setNickname(String newName) {
+    public final synchronized String setNickname(String newName) {
         String old = this.nickname;
         this.nickname = newName;
         return old;
     }
 
     /** @return The String to call the bot. */
-    public final String getCallsign() {
+    public final synchronized String getCallsign() {
         return this.callsign;
     }
 
@@ -329,14 +325,14 @@ public class Weebot implements Comparable<Weebot> {
      * @param newPrefix The new String used to call the bot.
      * @return The previous value of {@link Weebot#callsign}.
      */
-    public final String setCallsign(String newPrefix) {
+    public final synchronized String setCallsign(String newPrefix) {
         String old = this.callsign;
         this.callsign = newPrefix;
         return old;
     }
 
     /** @return {@code true} if the bot is set to be explicit. */
-    public final boolean isExplicit() {
+    public final synchronized boolean isExplicit() {
         return this.explicit;
     }
 
@@ -345,32 +341,23 @@ public class Weebot implements Comparable<Weebot> {
      * @param explicit Is the bot allowed to be explicit.
      * @return The previous value of {@link Weebot#explicit}.
      */
-    public final boolean setExplicit(boolean explicit) {
+    public final synchronized boolean setExplicit(boolean explicit) {
         boolean old = this.explicit;
         this.explicit = explicit;
         return old;
     }
 
-    /** @return A List of the Guild's banned words */
-    public final List<String> getBannedWords() {
-        return this.BANNED_WORDS;
+    /** Set the bot's AutoAdmin */
+    public final synchronized void setAutoAdmin(AutoAdmin autoAdmin) {
+        for (IPassive p : this.PASSIVES) if (p instanceof AutoAdmin) {
+            this.PASSIVES.remove(p);
+        }
+        this.AUTO_ADMIN = autoAdmin;
+        this.PASSIVES.add(this.AUTO_ADMIN);
     }
 
-    /**
-     * Add words to the bot's banned word list.
-     * @param words Words to ban.
-     */
-    public final void addBannedWords(String... words) {
-        this.BANNED_WORDS.addAll(Arrays.asList(words));
-    }
-
-    /**
-     * Add words to the bot's banned word list.
-     * @param words Words to ban.
-     */
-    public final void addBannedWords(Collection<String> words) {
-        this.BANNED_WORDS.addAll(words);
-    }
+    /** Get the bot's AutoAdmin */
+    public final synchronized AutoAdmin getAutoAdmin() { return this.AUTO_ADMIN; }
 
     /** @return {@code true} if the bot is allowed to be not-safe-for-work.*/
     public boolean isNSFW() {

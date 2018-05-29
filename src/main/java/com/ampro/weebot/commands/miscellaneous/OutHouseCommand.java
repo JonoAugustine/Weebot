@@ -50,6 +50,12 @@ public class OutHouseCommand extends Command {
             User user = Launcher.getJda().getUserById(userID);
             this.remainingHours -=
                     ChronoUnit.HOURS.between(startTime, OffsetDateTime.now());
+            if (this.remainingHours <= 0) {
+                synchronized (Launcher.GLOBAL_WEEBOT) {
+                    Launcher.GLOBAL_WEEBOT.getPassives().remove(this);
+                }
+                return;
+            }
             if (!event.isPrivate()) {
                 if(event.getType() == BetterMessageEvent.TYPE.RECIVED && event
                         .getAuthor() == user) {
@@ -72,10 +78,6 @@ public class OutHouseCommand extends Command {
                       .append(" hours. Thank you.*");
                     event.reply(sb.toString());
                     return;
-                } else if (this.remainingHours <= 0) {
-                    synchronized (Launcher.GLOBAL_WEEBOT) {
-                        Launcher.GLOBAL_WEEBOT.getPassives().remove(this);
-                    }
                 }
             }
         }
