@@ -80,6 +80,7 @@ public class AutoAdminCommand extends Command {
 
         }
 
+        private boolean dead;
         private final Long guildID;
 
         /** Banned words
@@ -111,6 +112,7 @@ public class AutoAdminCommand extends Command {
             this.userRecords = new ConcurrentHashMap<>();
             this.bannedWords = new ConcurrentHashMap<>();
             this.guildID     = guild.getIdLong();
+            this.dead        = false;
         }
 
         @Override
@@ -194,6 +196,10 @@ public class AutoAdminCommand extends Command {
             return eb.build();
         }
 
+        @Override
+        public boolean dead() {
+            return this.dead;
+        }
     }
 
     public AutoAdminCommand() {

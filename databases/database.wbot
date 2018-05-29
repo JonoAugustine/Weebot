@@ -1,35 +1,8 @@
 {
   "SUGGESTIONS": {},
   "GLOBAL_WEEBOT": {
-    "USER_PASSIVES": {
-      "139167730237571072": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.miscellaneous.OutHouseCommand$OutHouse",
-          "DATA": {
-            "userID": 139167730237571072,
-            "remainingHours": 1,
-            "startTime": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 5,
-                  "day": 29
-                },
-                "time": {
-                  "hour": 9,
-                  "minute": 8,
-                  "second": 4,
-                  "nano": 323000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -14400
-              }
-            }
-          }
-        }
-      ]
-    },
+    "USER_PASSIVES": {},
+    "PASSIVE_LIMIT": 1000,
     "GUILD_ID": 0,
     "BOT_ID": "0W",
     "BIRTHDAY": {
@@ -56,7 +29,7 @@
     "NSFW": false,
     "ACTIVE_PARTICIPATE": false,
     "COMMANDS_DISABLED": {},
-    "PASSIVES": [],
+    "passives": [],
     "NOTES": [],
     "spamLimit": 5
   },
@@ -88,7 +61,7 @@
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
-      "PASSIVES": [],
+      "passives": [],
       "NOTES": [],
       "spamLimit": 5
     },
@@ -120,7 +93,7 @@
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
       "CUSTOM_CAH_DECKS": {},
-      "PASSIVES": [],
+      "passives": [],
       "NOTES": [],
       "spamLimit": 5
     },
@@ -149,6 +122,7 @@
       "callsign": "\u003c\u003e",
       "explicit": false,
       "AUTO_ADMIN": {
+        "dead": false,
         "bannedWords": {},
         "userRecords": {},
         "exemptUsers": [],
@@ -161,7 +135,7 @@
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
       "CUSTOM_CAH_DECKS": {},
-      "PASSIVES": [],
+      "passives": [],
       "NOTES": [],
       "spamLimit": 5
     }

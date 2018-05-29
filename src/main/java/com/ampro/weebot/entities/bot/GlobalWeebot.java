@@ -8,11 +8,10 @@ import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.EventListener;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
+import org.apache.commons.collections4.iterators.EntrySetMapIterator;
 
 import java.lang.management.LockInfo;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class GlobalWeebot extends Weebot implements EventListener {
@@ -20,6 +19,7 @@ public class GlobalWeebot extends Weebot implements EventListener {
     /** A Map of {@link IPassive} objects mapped to user IDs */
     private final ConcurrentHashMap<Long, List<IPassive>> USER_PASSIVES
             = new ConcurrentHashMap<>();
+    private final int PASSIVE_LIMIT = 1000;
 
     /**
      * Create a Weebot with no guild or call sign.
@@ -34,23 +34,38 @@ public class GlobalWeebot extends Weebot implements EventListener {
      */
     @Override
     public void onEvent(Event event) {
-        if (event instanceof MessageReceivedEvent) {
+        if(event instanceof MessageReceivedEvent) {
             if(((MessageReceivedEvent) event).getAuthor().isBot()) {
                 return;
             }
-            this.USER_PASSIVES.forEach( (ID, passiveList) ->
-                passiveList.forEach( p -> {
+            this.USER_PASSIVES.forEach((ID, passiveList) -> {
+                passiveList.forEach(p -> {
                     try {
                         p.accept(new BetterMessageEvent(
                                 (MessageReceivedEvent) event,
                                 ((MessageReceivedEvent) event).getAuthor()
                         ));
                     } catch (BetterEvent.InvalidEventException e) {
-                        e.printStackTrace();
                         System.err.println(
                                 "Err in GlobalWeebot BetterMessageEvent wrapper");
+                        e.printStackTrace();
                     }
-                }));
+                });
+                passiveList.removeIf( IPassive::dead );
+            });
+            if (this.USER_PASSIVES.size() > PASSIVE_LIMIT)
+                this.cleanUserPassives();
+        }
+    }
+
+    /** Remove keys with null or empty lists from {@link GlobalWeebot#USER_PASSIVES}*/
+    private synchronized void cleanUserPassives() {
+        Iterator<Map.Entry<Long, List<IPassive>>> it
+                = this.USER_PASSIVES.entrySet().iterator();
+        while (it.hasNext()) {
+            List o = it.next().getValue();
+            if (o == null || o.isEmpty())
+                it.remove();
         }
     }
 
@@ -100,6 +115,18 @@ public class GlobalWeebot extends Weebot implements EventListener {
         } catch (NullPointerException e) {
             return false;
         }
+    }
+
+    /**
+     * Remove the {@link IPassive} from the User's registry.
+     * @param user The user
+     * @param passive The passive
+     * @return {@code false} if the user has no passives or the item was not removed
+     */
+    public final synchronized boolean removeUserPassive(User user, IPassive passive) {
+        List<IPassive> list = this.USER_PASSIVES.get(user.getIdLong());
+        if (list == null) return false;
+        return list.remove(passive);
     }
 
 }

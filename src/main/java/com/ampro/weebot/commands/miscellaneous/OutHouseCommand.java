@@ -50,36 +50,36 @@ public class OutHouseCommand extends Command {
             User user = Launcher.getJda().getUserById(userID);
             this.remainingHours -=
                     ChronoUnit.HOURS.between(startTime, OffsetDateTime.now());
-            if (this.remainingHours <= 0) {
-                synchronized (Launcher.GLOBAL_WEEBOT) {
-                    Launcher.GLOBAL_WEEBOT.getPassives().remove(this);
-                }
-                return;
-            }
+            if (this.remainingHours <= 0) return;
+
             if (!event.isPrivate()) {
-                if(event.getType() == BetterMessageEvent.TYPE.RECIVED && event
-                        .getAuthor() == user) {
-                    synchronized (Launcher.GLOBAL_WEEBOT) {
-                        Launcher.GLOBAL_WEEBOT.getPassives().remove(this);
-                    }
+                if(event.getType() == BetterMessageEvent.TYPE.RECIVED
+                        && event.getAuthor() == user) {
                     Member mem = event.getGuild().getMember(user);
                     event.reply("*Welcome back " + mem.getEffectiveName() + "*");
+                    this.remainingHours = 0;
                     return;
                 } else if(event.mentions(user)) {
                     StringBuilder sb = new StringBuilder();
                     sb.append("*Sorry, ")
                       .append(event.getGuild().getMember(user).getEffectiveName());
                     if (this.message != null)
-                        sb.append(" is out ").append(this.message);
+                        sb.append(" is out  ").append(this.message).append(".");
                       else
                         sb.append(" is currently unavailable. ");
-                      sb.append("Please try mentioning them again ")
-                      .append("in ").append(this.remainingHours)
-                      .append(" hours. Thank you.*");
+                      sb.append(" Please try mentioning them again ")
+                        .append("in about ").append(Math.round(this.remainingHours))
+                        .append(" hour").append(this.remainingHours > 1 ? "s" : "")
+                        .append(". Thank you.*");
                     event.reply(sb.toString());
                     return;
                 }
             }
+        }
+
+        @Override
+        public boolean dead() {
+            return this.remainingHours <= 0;
         }
 
     }

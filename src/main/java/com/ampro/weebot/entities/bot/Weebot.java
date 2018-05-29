@@ -88,7 +88,7 @@ public class Weebot implements Comparable<Weebot> {
     private final ConcurrentHashMap<String, CAHDeck> CUSTOM_CAH_DECKS;
 
     /** {@link IPassive} objects, cleared on exit */
-    protected List<IPassive> PASSIVES;
+    protected List<IPassive> passives;
 
     /** Map of "NotePads" */
     private final ArrayList<NotePad> NOTES;
@@ -114,7 +114,7 @@ public class Weebot implements Comparable<Weebot> {
         this.GAMES_RUNNING = new ArrayList<>();
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
-        this.PASSIVES = new ArrayList<>();
+        this.passives = new ArrayList<>();
         this.CUSTOM_CAH_DECKS = new ConcurrentHashMap<>();
     }
 
@@ -136,7 +136,7 @@ public class Weebot implements Comparable<Weebot> {
         this.GAMES_RUNNING = null;
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
-        PASSIVES = new ArrayList<>();
+        passives = new ArrayList<>();
         CUSTOM_CAH_DECKS = null;
     }
 
@@ -232,9 +232,8 @@ public class Weebot implements Comparable<Weebot> {
      * @param event The event to distribute.
      */
     private void submitToPassives(BetterMessageEvent event) {
-        for (IPassive p : this.PASSIVES) {
-            p.accept(event);
-        }
+        this.passives.forEach( p -> p.accept(event));
+        this.passives.removeIf( IPassive::dead );
     }
 
     /**
@@ -248,8 +247,8 @@ public class Weebot implements Comparable<Weebot> {
                                     .getEffectiveName();
         if (this.GAMES_RUNNING == null)
             this.GAMES_RUNNING = new ArrayList<>();
-        if (this.PASSIVES == null) {
-            this.PASSIVES = new ArrayList<>();
+        if (this.passives == null) {
+            this.passives = new ArrayList<>();
         }
     }
 
@@ -349,11 +348,11 @@ public class Weebot implements Comparable<Weebot> {
 
     /** Set the bot's AutoAdmin */
     public final synchronized void setAutoAdmin(AutoAdmin autoAdmin) {
-        for (IPassive p : this.PASSIVES) if (p instanceof AutoAdmin) {
-            this.PASSIVES.remove(p);
+        for (IPassive p : this.passives) if (p instanceof AutoAdmin) {
+            this.passives.remove(p);
         }
         this.AUTO_ADMIN = autoAdmin;
-        this.PASSIVES.add(this.AUTO_ADMIN);
+        this.passives.add(this.AUTO_ADMIN);
     }
 
     /** Get the bot's AutoAdmin */
@@ -442,11 +441,11 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     public final boolean addPassive(IPassive passive) {
-        return this.PASSIVES.add(passive);
+        return this.passives.add(passive);
     }
 
     public final synchronized List<IPassive> getPassives() {
-        return this.PASSIVES;
+        return this.passives;
     }
 
     /** @return {@link TreeMap TreeMap<String,NotePad>} */

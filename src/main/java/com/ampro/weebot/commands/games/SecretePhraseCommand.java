@@ -177,6 +177,11 @@ public class SecretePhraseCommand extends Command {
             return out;
         }
 
+        @Override
+        public boolean dead() {
+            return this.RUNNING;
+        }
+
     }
 
     public SecretePhraseCommand() {
