@@ -103,6 +103,13 @@ public class HelpCommand extends Command {
         eb.setDescription(sb.toString());
         sb.setLength(0);
 
+        sb.append("Custom textChannel moderation with server-wide and channel-specific")
+          .append(" word banning, auto-kick and auto-ban at custom infraction limits")
+          .append(" (X-strikes your out), exempt roles or members from all rules, ")
+          .append("and see member infraction records.");
+        eb.addField("AutoAdmin (aac)", sb.toString(), false);
+          sb.setLength(0);
+
         sb.append("Write and edit server Note Pads\n")
           .append("Note Pads can be locked to specific")
           .append("roles, members, and text channels.");
