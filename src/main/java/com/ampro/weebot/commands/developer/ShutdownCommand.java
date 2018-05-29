@@ -32,6 +32,17 @@ public class ShutdownCommand extends Command {
         );
     }
 
+    /**
+     * Begins global shutdown process.
+     * @param bot The bot that called this event.
+     * @param event {@link BetterMessageEvent}
+     */
+    @Override
+    public void run(Weebot bot, BetterMessageEvent event) {
+        if (this.check(event))
+            this.execute(bot, event);
+    }
+
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
         event.reply("Shutting down all Weebots...");
