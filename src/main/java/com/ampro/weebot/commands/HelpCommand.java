@@ -127,13 +127,16 @@ public class HelpCommand extends Command {
 
         sb.append("Delete the message after a given amount of seconds")
           .append(" (30 sec by default)");
-        eb.addField("Self-destruct messages (sdc)", sb.toString(), false)
+        eb.addField("Self-destruct messages (sdc)", sb.toString(), true)
           .addField("Have me respond to your Mentions while AFK (ohc)",
                     "I will respond to any user who mentions you on your behalf.",
-                    false)
+                    true)
           .addField("List all guilds hosting a Weebot (listguilds)",
-                    "See everywhere I live...that's not creepy at all...", false)
-          .addField("Ping (ping)", "pong", false);
+                    "See everywhere I live...that's not creepy at all...", true)
+          .addField("Weebot Development Suggestions (sugg)",
+                    "Submit feature suggestions for Weebot directly from Discord",
+                    true)
+          .addField("Ping (ping)", "pong", true);
 
         event.privateReply(eb.build());
 

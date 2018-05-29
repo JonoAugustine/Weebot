@@ -5,7 +5,9 @@ import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
+import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;
@@ -154,5 +156,19 @@ public class WeebotSuggestionCommand extends Command {
 
     private boolean isDev(User user) {
         return Launcher.checkDevID(user.getIdLong());
+    }
+
+    @Override
+    public MessageEmbed getEmbedHelp() {
+        EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
+
+        eb.setTitle("Weebot Suggestions")
+          .setDescription("Submit suggestions to the Weebot dev team.");
+
+        eb.addField("Submit Suggestion with this command",
+                    "sugg <Your Suggestion>\n*Aliases: suggest, suggestion*",
+                    false);
+
+        return eb.build();
     }
 }
