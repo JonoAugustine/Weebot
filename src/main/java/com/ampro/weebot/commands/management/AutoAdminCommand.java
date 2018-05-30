@@ -499,6 +499,20 @@ public class AutoAdminCommand extends Command {
                 //Clear user records
                 //aac pardon <@member> [@member2]...
                 break;
+            case SEEADMIN:
+                break;
+            case SETKICKTHRESH:
+                break;
+            case SETBANTHRESH:
+                break;
+            case ADDEXEMPT:
+                break;
+            case REMOVEEXEMPT:
+                break;
+            case CLEANCHANNEL:
+                break;
+            case CLEANGUILD:
+                break;
         }
 
     }
@@ -538,6 +552,32 @@ public class AutoAdminCommand extends Command {
             case "clrec":
             case "pardon":
                 return ACTION.CLEARRECORD;
+            case "status":
+            case "sitch":
+                return ACTION.SEEADMIN;
+            case "setkick":
+            case "kickthresh":
+            case "sk":
+                    return ACTION.SETKICKTHRESH;
+            case "setban":
+            case "setbanthresh":
+            case "sb":
+                    return ACTION.SETBANTHRESH;
+            case "immune":
+            case "exempt":
+            case "ex":
+                return ACTION.ADDEXEMPT;
+            case "removeexempt":
+            case "rmex":
+            return ACTION.REMOVEEXEMPT;
+            case "cleanse":
+            case "clean":
+            case "clch":
+                return ACTION.CLEANCHANNEL;
+            case "guildclean":
+            case "gclean":
+            case "fullclean":
+                    return ACTION.CLEANGUILD;
             default:
                 return null;
         }
@@ -551,7 +591,9 @@ public class AutoAdminCommand extends Command {
 
         eb.setTitle("AutoAdmin");
         sb.append("Use the bot to moderate text channels, warn, kick, and ban members")
-          .append(" who violate the rules.\n*Required Permissions: Kick & Ban Member*");
+          .append(" who violate the rules.")
+          .append("\n*Required User Permissions: Kick & Ban Member, Manage Messages*")
+          .append("\n*Required Bot  Permissions: Kick & Ban Member, Manage Messages*");
         eb.setDescription(sb.toString());
         sb.setLength(0);
 
@@ -563,21 +605,41 @@ public class AutoAdminCommand extends Command {
           .append("aac rmwrd <word_num> [word2_num]...")
           .append("[#textCahnnel] [#textChannel_2]...\n")
           .append("*Aliases:unbanword*");
-        eb.addField("Ban Word",
+        eb.addField("Ban Word(s) Globally or Channel-Specific",
                     "aac banword <word> [word2]...[#textChannel] [#textChannel_2]..." +
                             "\n*Alias: addword*",
                     false)
           .addField("Unban word", sb.toString(), false)
           .addField("See Banned Words (in Private Message)",
                     "aac bwords\n*Aliases: bannedwords, seebannedwords, bwrds, words",
-                    false);
+                    false).addBlankField(false);
         sb.setLength(0);
+
+        eb.addField("Set Number of Infractions to Kick",
+                    "aac sk <number>\n*Aliases: setkickthresh, setkick*", true)
+          .addField("Set Number of Infractions to Ban",
+                    "aac sb <number>\n*Aliases: setbanthresh, setban*", true);
 
         eb.addField("See Member(s) Infraction Record(s)",
                     "aac ir <@Member> [@member2]...\n*Aliases: userrecord, record*",
-                    false)
+                    true)
           .addField("Clear Member(s) Infraction Record(s)",
-                    "aac pardon <@member> [@member2]...\n*Alias: clrrec*", false)
+                    "aac pardon <@member> [@member2]...\n*Alias: clrrec*", true);
+
+        eb.addField("Exempt Member(s) from AutoAdmin",
+                    "aac ex <@Member> [@member2]...\n*Aliases: exempt, immune*", true)
+          .addField("Remove Member Exemption(s)",
+                    "aac rmex <@Member> [@Member2]...\n*Aliases: removeexempt*", true);
+
+        eb.addField("Clean TextChannel(s) of Banned Words",
+                    "aac clean <#TextChannel> [#TextChannel_2]...\n*Alias: cleanse*",
+                    false);
+
+        eb.addField("Clean All TextChannels of Banned Words",
+                    "aac fullclean\n*Aliases guildclean, gclean*", false);
+
+        eb.addBlankField(false).addField("See AutoAdmin Status & Stats",
+                    "aac status\n*Aliases: sitch*", true)
           .addBlankField(false);
 
         return eb.build();
