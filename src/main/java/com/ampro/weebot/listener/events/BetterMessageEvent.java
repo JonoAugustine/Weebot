@@ -24,6 +24,7 @@ import net.dv8tion.jda.core.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent;
+import net.dv8tion.jda.core.exceptions.ContextException;
 
 import java.io.File;
 import java.time.OffsetDateTime;
@@ -295,8 +296,7 @@ public class BetterMessageEvent extends BetterEvent {
 
     /** Delete the message. */
     public void deleteMessage() {
-        this.messageEvent.getChannel().getMessageById(this.messageEvent.getMessageIdLong())
-                .queue(m -> m.delete().queue());
+        this.message.delete().queue();
     }
 
     /**

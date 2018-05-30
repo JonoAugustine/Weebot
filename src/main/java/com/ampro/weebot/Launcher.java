@@ -7,12 +7,15 @@ package com.ampro.weebot;
 
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.HelpCommand;
-import com.ampro.weebot.commands.management.AutoAdminCommand;
-import com.ampro.weebot.commands.management.ManageSettingsCommand;
 import com.ampro.weebot.commands.NotePadCommand;
-import com.ampro.weebot.commands.developer.*;
+import com.ampro.weebot.commands.developer.DatabaseFileCommand;
+import com.ampro.weebot.commands.developer.ListGuildsCommand;
+import com.ampro.weebot.commands.developer.ShutdownCommand;
+import com.ampro.weebot.commands.developer.WeebotSuggestionCommand;
 import com.ampro.weebot.commands.games.SecretePhraseCommand;
 import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand;
+import com.ampro.weebot.commands.management.AutoAdminCommand;
+import com.ampro.weebot.commands.management.ManageSettingsCommand;
 import com.ampro.weebot.commands.management.ManageSettingsCommand.ShowSettingsCommand;
 import com.ampro.weebot.commands.miscellaneous.OutHouseCommand;
 import com.ampro.weebot.commands.miscellaneous.PingCommand;
@@ -30,14 +33,17 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDA.Status;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
+import net.dv8tion.jda.core.exceptions.ContextException;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
+import net.dv8tion.jda.core.requests.RestAction;
 import org.apache.commons.io.FileUtils;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
 import java.io.File;
 import java.io.IOException;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -79,23 +85,17 @@ public class Launcher {
 	 * @throws InterruptedException
 	 */
    public static void main(final String[] args) {
-		Launcher.jdaLogIn();
-		//Launcher.jdaDevLogIn();
-		Launcher.setUpDatabase();
-		Launcher.setUpTempDir();
-		Launcher.updateWeebots();
-
-		Collection c = DATABASE.getWeebots().values();
-		Iterator it = c.iterator();
-		System.out.println("Printing bots from database---------");
-		while(it.hasNext()) {
-			System.out.println(it.next());
-		}
-		System.out.println("-------------------------------DONE");
-
-		Launcher.startSaveTimer(.5);
-		Launcher.addListeners();
-	}
+       //Debug
+       //RestAction.setPassContext(true); // enable context by default
+       //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace;
+       Launcher.jdaLogIn();
+       //Launcher.jdaDevLogIn();
+       Launcher.setUpDatabase();
+       Launcher.setUpTempDir();
+       Launcher.updateWeebots();
+       Launcher.startSaveTimer(.5);
+       Launcher.addListeners();
+   }
 
    /**
     * Initiates {@code Launcher} data and connects to Weebot API.
@@ -252,6 +252,7 @@ public class Launcher {
 
 		Launcher.saveTimer.interrupt();
 		System.err.println("Shutdown signal received.");
+		DatabaseManager.backUp(Launcher.DATABASE);
 		switch (DatabaseManager.save(Launcher.DATABASE)) {
             case -1:
                 System.err.println("\tCould not save backup due to file exception.");
