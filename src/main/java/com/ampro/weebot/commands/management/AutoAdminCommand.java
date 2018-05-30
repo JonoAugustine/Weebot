@@ -64,7 +64,7 @@ public class AutoAdminCommand extends Command {
             void addWordInfraction(Collection<String> infs) {
                 for (String inf : infs) {
                     Integer n = wordInfractions.get(inf);
-                    wordInfractions.put(inf, n == null ? 1 : n++);
+                    wordInfractions.put(inf, n == null ? 1 : n + 1);
                 }
             }
 
