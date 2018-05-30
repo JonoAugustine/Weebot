@@ -1,11 +1,7 @@
 {
   "SUGGESTIONS": {},
   "GLOBAL_WEEBOT": {
-    "USER_PASSIVES": {
-      "451005806222245889": [],
-      "139167730237571072": []
-    },
-    "PASSIVE_LIMIT": 1000,
+    "USER_PASSIVES": {},
     "GUILD_ID": 0,
     "BOT_ID": "0W",
     "BIRTHDAY": {
@@ -13,13 +9,13 @@
         "date": {
           "year": 2018,
           "month": 5,
-          "day": 28
+          "day": 29
         },
         "time": {
-          "hour": 4,
-          "minute": 22,
-          "second": 10,
-          "nano": 928000000
+          "hour": 17,
+          "minute": 18,
+          "second": 40,
+          "nano": 693000000
         }
       },
       "offset": {
@@ -45,13 +41,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 28
+            "day": 29
           },
           "time": {
-            "hour": 4,
-            "minute": 22,
-            "second": 10,
-            "nano": 928000000
+            "hour": 17,
+            "minute": 18,
+            "second": 40,
+            "nano": 693000000
           }
         },
         "offset": {
@@ -76,13 +72,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 28
+            "day": 29
           },
           "time": {
-            "hour": 4,
-            "minute": 22,
-            "second": 10,
-            "nano": 928000000
+            "hour": 17,
+            "minute": 18,
+            "second": 40,
+            "nano": 693000000
           }
         },
         "offset": {
@@ -103,8 +99,9 @@
             "dead": false,
             "guildID": 139168039634468865,
             "bannedWords": {
-              "arctan": [
-                439522471369244683
+              "arctan": [],
+              "glopping": [
+                139168039634468865
               ]
             },
             "userRecords": {},
@@ -127,13 +124,13 @@
           "date": {
             "year": 2018,
             "month": 5,
-            "day": 28
+            "day": 29
           },
           "time": {
-            "hour": 4,
-            "minute": 22,
-            "second": 10,
-            "nano": 929000000
+            "hour": 17,
+            "minute": 18,
+            "second": 40,
+            "nano": 693000000
           }
         },
         "offset": {
@@ -143,16 +140,6 @@
       "nickname": "Weebot",
       "callsign": "\u003c\u003e",
       "explicit": false,
-      "AUTO_ADMIN": {
-        "dead": false,
-        "bannedWords": {},
-        "userRecords": {},
-        "exemptUsers": [],
-        "exemptRoles": [],
-        "kickThresh": 0,
-        "sofThresh": 0,
-        "hardThresh": 0
-      },
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},

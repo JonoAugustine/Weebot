@@ -16,10 +16,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class GlobalWeebot extends Weebot implements EventListener {
 
+    private static final int PASSIVE_LIMIT = 1000;
+
     /** A Map of {@link IPassive} objects mapped to user IDs */
     private final ConcurrentHashMap<Long, List<IPassive>> USER_PASSIVES
             = new ConcurrentHashMap<>();
-    private final int PASSIVE_LIMIT = 1000;
 
     /**
      * Create a Weebot with no guild or call sign.

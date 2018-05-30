@@ -3,8 +3,8 @@ package com.ampro.weebot.database;
 import com.ampro.weebot.commands.IPassive;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
+import net.dv8tion.jda.core.entities.Message;
 
 import java.io.*;
 
@@ -119,7 +119,6 @@ public class DatabaseManager {
             //e2.printStackTrace();
         } catch (IOException e) {
             System.err.println("IOException while reading gson from backup file.");
-            e.printStackTrace();
             e.printStackTrace();
         }
 

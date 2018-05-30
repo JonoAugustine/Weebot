@@ -26,28 +26,46 @@ public class AutoAdminCommand extends Command {
     /**
      * The administrative settings held by the Weebot, e.g. :<br>
      *     Channel-Banned words, infraction limits,
-     *     banning or kicking threshold, exempted Roles (IDs)
+     *     banning or kicking threshold, exempted Roles (IDs),
+     *     cleaning channels of banned words
      */
     public static final class AutoAdmin implements IPassive {
 
-        /** A detailed record of user infractions in string. */
-        private final class UserRecord {
+        /** A detailed record of user infractions */
+        private static final class UserRecord {
 
             final long userID;
+            final long guildID;
 
-            final List<Message> wordInfractions;
+            /** Map of banned word usages mapped to the number of times used */
+            final Map<String, Integer> wordInfractions;
 
-            UserRecord(User user) {
-                this.userID = user.getIdLong();
-                this.wordInfractions = new ArrayList<>();
+            UserRecord(User user, Guild guild) {
+                this.userID  = user.getIdLong();
+                this.guildID = guild.getIdLong();
+                this.wordInfractions = new ConcurrentHashMap<>();
             }
 
             /**
              * Add a word infraction to the User's record.
-             * @param message The message containing the banned word
+             * @param infs The word infractions to add
              */
-            void addWordInfraction(Message message) {
-                this.wordInfractions.add(message);
+            void addWordInfractions(String...infs) {
+                for (String inf : infs) {
+                    Integer n = wordInfractions.get(inf);
+                    wordInfractions.put(inf, n == null ? 1 : n++);
+                }
+            }
+
+            /**
+             * Add a word infraction to the User's record.
+             * @param infs The word infractions to add
+             */
+            void addWordInfraction(Collection<String> infs) {
+                for (String inf : infs) {
+                    Integer n = wordInfractions.get(inf);
+                    wordInfractions.put(inf, n == null ? 1 : n++);
+                }
             }
 
             /** @return The user infractions as an embed */
@@ -55,9 +73,11 @@ public class AutoAdminCommand extends Command {
                 EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
                 eb.setColor(new Color(0xFB1800));
                 StringBuilder sb = new StringBuilder();
-                Guild guild = Launcher.getGuild(AutoAdmin.this.guildID);
+                Guild guild = Launcher.getGuild(guildID);
+                if (guild == null) return null;
                 sb.append(guild.getName()).append(" ")
-                  .append(guild.getMemberById(userID)).append(" Infraction Record.");
+                  .append(guild.getMemberById(userID).getEffectiveName())
+                  .append(" Infraction Record.");
                 eb.setTitle(sb.toString());
                 sb.setLength(0);
 
@@ -65,10 +85,11 @@ public class AutoAdminCommand extends Command {
 
                 if (!wordInfractions.isEmpty()) {
                     sb.setLength(0);
-                    for (int i = 0; i < wordInfractions.size(); i++) {
-                        sb.append((i + 1) + ".) ")
-                          .append(wordInfractions.get(i).getContentStripped())
-                          .append("\n");
+                    int i = 0;
+                    for (Map.Entry<String, Integer> e : wordInfractions.entrySet()) {
+                        sb.append((i + 1) + ".) \"")
+                          .append(wordInfractions.get(e.getKey())).append("\" : used ")
+                          .append(e.getValue()).append(" times.").append("\n");
                     }
                     eb.addField("Banned Word Usages", sb.toString(), false);
                 }
@@ -77,20 +98,15 @@ public class AutoAdminCommand extends Command {
             }
 
             String memberName() {
-                return Launcher.getGuild(AutoAdmin.this.guildID)
+                return Launcher.getGuild(guildID)
                                .getMemberById(userID).getEffectiveName();
             }
 
         }
 
         private boolean dead;
-        private final Long guildID;
 
-        /** Banned words
-        Should be Channel or global
-        Should a word-ban class be created?
-         or just map the words to channel IDs or null?
-        */
+        private final Long guildID;
 
         /** Map of String keys to Channel ID list values */
         final ConcurrentHashMap<String, List<Long>> bannedWords;
@@ -98,15 +114,15 @@ public class AutoAdminCommand extends Command {
         /* User records */
         private final ConcurrentHashMap<Long, UserRecord> userRecords;
 
-        /* Exempted Roles & users */
+        /* Exempted Roles & users TODO*/
         private final List<Long> exemptUsers;
         private final List<Long> exemptRoles;
 
-        /* Kick threshold */
+        /** Kick threshold TODO*/
         int kickThresh;
-        /* Soft-ban threshold */
+        /** Soft-ban threshold TODO*/
         int sofThresh;
-        /* Hard-ban threshold */
+        /** Hard-ban threshold TODO*/
         int hardThresh;
 
         public AutoAdmin(Guild guild) {
@@ -121,34 +137,122 @@ public class AutoAdminCommand extends Command {
         @Override
         public void accept(BetterMessageEvent event) {
             if (dead) return;
+            if (event.getMember().isOwner()
+                    || event.getMember().hasPermission(Permission.ADMINISTRATOR)) return;
             String content = event.toString();
+            List<String> b = checkWords(content, event.getTextChannel());
+            //Respond to word infractions
+            if (!b.isEmpty()) {
+                event.deleteMessage();
+                UserRecord rec = userRecords.get(event.getAuthor().getIdLong());
+                if(rec == null) {
+                    rec = new UserRecord(event.getAuthor(), event.getGuild());
+                    userRecords.put(event.getAuthor().getIdLong(), rec);
+                }
+
+                rec.addWordInfraction(b);
+
+                //Check thresholds TODO
+                //Act
+                //  Warn user
+                //  Kick/sban/ban
+
+                event.privateReply((infractionEmbed(event, b.toString())));
+            }
+        }
+
+        /**
+         * Clean an entire {@link TextChannel#getHistory()} on banned words.
+         * @param channel The TextChannel to clean
+         * @return -1 if the bot cannot view channel history <br>
+         *         -2 if the bot cannot manage messages      <br>
+         *          1 otherwise <br>
+         */
+        private boolean clean(TextChannel channel) {
+            //TODO
+            return false;
+        }
+
+        /**
+         * Clean an entire {@link Guild Guild's} {@link TextChannel TextChannels} of
+         * banned words.
+         * @param guild The guild to clean
+         * @return A {@link Map} of uncleaned TextChannels linked to an err code <br>
+         *     -1 if the bot cannot view channel history <br>
+         *     -2 if the bot cannot manage messages      <br>
+         */
+        private Map<TextChannel, Integer> cleanGuild(Guild guild) {
+            Map<TextChannel, Integer> out = new TreeMap<>();
+            //TODO
+            return out;
+        }
+
+        /**
+         * Scan for banned words in the input string. Will catch words using symbols as
+         * well. <br>
+         *     Modified from
+         * <a href="https://gist.github.com/PimDeWitte/c04cc17bc5fa9d7e3aee6670d4105941#file-efficient-bad-word-filter">
+         *     PimDeWitte#Efficient Bad Word Filter
+         *     </a>
+         * @param input The string to scan
+         * @param channel The Channel received in
+         * @return A non-null {@link List} containing all banned words found in the
+         *          string. Can be empty.
+         */
+        private List<String> checkWords(String input, TextChannel channel) {
+            // remove leetspeak
+            input = input.replaceAll("1","i")
+                         .replaceAll("!","i")
+                         .replaceAll("3","e")
+                         .replaceAll("4","a")
+                         .replaceAll("@","a")
+                         .replaceAll("5","s")
+                         .replaceAll("7","t")
+                         .replaceAll("0","o")
+                         .replaceAll("9","g")
+                         .toLowerCase().replaceAll("[^a-zA-Z]", "");
+
+            ArrayList<String> badWords = new ArrayList<>();
+
             Set<Map.Entry<String, List<Long>>> bwords = this.bannedWords.entrySet();
-            //TODO for banned word
+            //Scan for banned word
             for (Map.Entry<String, List<Long>> entry : bwords) {
-                if (content.replace(" ", "").contains(entry.getKey())) {
-                    if(entry.getValue().isEmpty() || entry.getValue().contains(
-                            event.getTextChannel().getIdLong())) {
+                if (input.contains(entry.getKey())) {
+                    if(entry.getValue().isEmpty()
+                            || entry.getValue().contains(channel.getIdLong())) {
 
-                        UserRecord rec = userRecords.get(event.getAuthor().getIdLong());
-                        if(rec == null) {
-                            rec = new UserRecord(event.getAuthor());
-                            userRecords.put(event.getAuthor().getIdLong(), rec);
-                        }
-
-                        rec.addWordInfraction(event.getMessage());
-
-                        //Check thresholds TODO
-                        //Act
-                        //  Warn user
-                        //  Kick/sban/ban
-
-                        event.privateReply((infractionEmbed(event, entry.getKey())));
-                        event.deleteMessage();
-                        break;
+                        badWords.add(input.substring(input.indexOf(entry.getKey()),
+                                                     entry.getKey().length())
+                        );
                     }
                 }
             }
 
+            /* TODO iterate over each letter in the word
+            for(int start = 0; start < input.length(); start++) {
+                // from each letter, keep going to find bad words until either
+                // the end of the sentence is reached, or the max word length is reached.
+                for(int offset = 1; offset < (input.length()+1 - start); offset++)  {
+                    String wordToCheck = input.substring(start, start + offset);
+                    if(this.bannedWords.containsKey(wordToCheck)) {
+                        // for example, if you want to say the word bass,
+                        // that should be possible.
+                        List<Long> ignoreCheck = this.bannedWords.get(wordToCheck);
+                        boolean ignore = false;
+                        for(int s = 0; s < ignoreCheck.length; s++ ) {
+                            if(input.contains(ignoreCheck.get(s))) {
+                                ignore = true;
+                                break;
+                            }
+                        }
+                        if(!ignore) {
+                            badWords.add(wordToCheck);
+                        }
+                    }
+                }
+            }*/
+
+            return badWords;
         }
 
         /**
@@ -225,7 +329,8 @@ public class AutoAdminCommand extends Command {
         }
 
         private MessageEmbed infractionEmbed(BetterMessageEvent event, Object inf) {
-            EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
+            EmbedBuilder eb = Launcher.getStandardEmbedBuilder()
+                                      .setColor(new Color(0xFB1800));
 
             eb.setTitle("AutoAdmin Caught an Infraction!");
             StringBuilder sb = new StringBuilder()
@@ -274,7 +379,9 @@ public class AutoAdminCommand extends Command {
         SETKICKTHRESH,
         SETBANTHRESH,
         ADDEXEMPT,
-        REMOVEEXEMPT
+        REMOVEEXEMPT,
+        CLEANCHANNEL,
+        CLEANGUILD
     }
 
     /** {@value} */
@@ -367,7 +474,26 @@ public class AutoAdminCommand extends Command {
             case SEERECORD:
                 //See user records
                 //aac ir <@member> [@member2]...
-
+                if (admin != null) {
+                    Collection<Member> ment = event.getMessage().getMentionedMembers();
+                    if (ment == null || ment.isEmpty()) {
+                        sb.append("You must mention one or more members as such")
+                          .append("```aac ir <@member> [@member2]...```");
+                        event.reply(sb.toString());
+                        return;
+                    }
+                    for (Member m : ment) {
+                        AutoAdmin.UserRecord rec
+                                = admin.userRecords.get(m.getUser().getIdLong());
+                        if (rec == null) {
+                            event.privateReply(m.getEffectiveName() + " has no record.");
+                            continue;
+                        }
+                        event.privateReply(rec.toEmbed());
+                    }
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
             case CLEARRECORD:
                 //Clear user records
@@ -456,4 +582,5 @@ public class AutoAdminCommand extends Command {
 
         return eb.build();
     }
+
 }
