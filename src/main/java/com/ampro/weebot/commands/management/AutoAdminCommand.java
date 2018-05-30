@@ -260,10 +260,12 @@ public class AutoAdminCommand extends Command {
          * @param words The words
          *
          */
-        private void banWords(String...words) {
+        private void globalBanWords(String...words) {
             for (String word : words) {
                 if (word == null) continue;
-                this.bannedWords.putIfAbsent(word.toLowerCase(), new ArrayList<>());
+                List<Long> ids = this.bannedWords.putIfAbsent(word.toLowerCase(),
+                                                              new ArrayList<>());
+                if (!ids.isEmpty()) ids.clear();
             }
         }
 
@@ -274,7 +276,7 @@ public class AutoAdminCommand extends Command {
          */
         private void banWords(String[] words, Collection<TextChannel> channels) {
             if (channels.isEmpty()) {
-                this.banWords(words);
+                this.globalBanWords(words);
                 return;
             }
             //Convert channels to IDs
@@ -294,12 +296,51 @@ public class AutoAdminCommand extends Command {
             }
         }
 
+        /**
+         * Remove words from {@link AutoAdmin#bannedWords}.
+         * @param words The words to unban
+         */
+        private void unBanWords(String...words) {
+            for (String word : words) {
+                if (word != null) this.bannedWords.remove(word);
+            }
+        }
+
+        /**
+         * Remove word bans from specific channels.
+         * @param words The words to unban
+         * @param channles The channels to remove the ban from
+         */
+        private void unBanWords(String[] words, Collection<TextChannel> channles) {
+            if (channles == null || channles.isEmpty()) {
+                unBanWords(words);
+                return;
+            }
+
+            List<Long> inIds = new ArrayList<>();
+            channles.forEach( c -> inIds.add(c.getIdLong()));
+
+            for (String w : words) {
+                if (w == null) continue;
+                List<Long> chs = this.bannedWords.get(w);
+                //Check if the word is banned at all
+                if(chs == null) continue;
+                chs.removeIf( (Long l) -> inIds.contains(l));
+            }
+
+        }
+
         /** @return The status of the autoadmin as an Embed */
         private MessageEmbed toEmbed() {
             EmbedBuilder eb = Launcher.makeEmbedBuilder(
                     Launcher.getGuild(guildID).getName() + " AutoAdmin", null,
                     "The Weebot AutoAdmin moderator settings and status.");
             //TODO
+            //Kick and ban threshold
+            //Exempted Roles
+            //Members with records
+            //Banned words
+
             return eb.build();
         }
 
@@ -450,7 +491,7 @@ public class AutoAdminCommand extends Command {
                         event.deleteMessage();
                         try {
                             Thread.sleep(10 * 1000);
-                        } catch (InterruptedException e) {}
+                        } catch (InterruptedException ignored) {}
                         m.delete().queue();
                     });
                 } else {
@@ -458,9 +499,28 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case REMOVEWORD:
-                //remove banned words
+                //remove banned words TODO
                 //aaac rmwrd <word> [word2]... [#textCahnnel] [#textChannel_2]...
-                //aac rmwrd <word_num> [word2_num]...[#textCahnnel] [#textChannel_2]...
+                //Parse words, stop if channel is found
+                if (admin != null) {
+                    String[] words = new String[args.length];
+                    for (int i = 2; i < args.length; i++) {
+                        if(args[i].startsWith("#"))
+                            break;
+                        words[i - 2] = args[i];
+                    }
+                    admin.unBanWords(words, event.getMessage().getMentionedChannels());
+                    event.reply("Words have been removed or edited", m -> {
+                        event.deleteMessage();
+                        try {
+                            Thread.sleep(10 * 1000);
+                        } catch (InterruptedException ignored) {
+                        }
+                        m.delete().queue();
+                    });
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
             case SEEWORDS:
                 //see banned words (private)
@@ -496,22 +556,34 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case CLEARRECORD:
-                //Clear user records
+                //Clear user records TODO
                 //aac pardon <@member> [@member2]...
                 break;
             case SEEADMIN:
+                //aac status
+                if (admin != null) {
+                    event.privateReply(admin.toEmbed());
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
             case SETKICKTHRESH:
+                //aac sk <#> TODO
                 break;
             case SETBANTHRESH:
+                //aac bk <#> TODO
                 break;
             case ADDEXEMPT:
+                //aac ex <@> [@2]... TODO
                 break;
             case REMOVEEXEMPT:
+                //aac rmex <@> [@2]... TODO
                 break;
             case CLEANCHANNEL:
+                //aac clean <#> [#2]... TODO
                 break;
             case CLEANGUILD:
+                //aac fc
                 break;
         }
 
@@ -577,6 +649,7 @@ public class AutoAdminCommand extends Command {
             case "guildclean":
             case "gclean":
             case "fullclean":
+            case "fc":
                     return ACTION.CLEANGUILD;
             default:
                 return null;
@@ -597,46 +670,54 @@ public class AutoAdminCommand extends Command {
         eb.setDescription(sb.toString());
         sb.setLength(0);
 
+        //INIT/Disable
         eb.addField("Initialize AutoAdmin", "aac init", true)
           .addField("Disable AutoAdmin", "aac disable\n*Aliases: stop, dis*", true)
           .addBlankField(true);
 
+        //Banned Words
         sb.append("aac rmwrd <word> [word2]... [#textCahnnel] [#textChannel_2]...\n")
-          .append("aac rmwrd <word_num> [word2_num]...")
-          .append("[#textCahnnel] [#textChannel_2]...\n")
-          .append("*Aliases:unbanword*");
+          .append("*Aliases: unbanword*\n")
+          .append("**NOTE**: To globally unban a word with non-global bans")
+          .append(", do not include a #TextChannel.");
         eb.addField("Ban Word(s) Globally or Channel-Specific",
                     "aac banword <word> [word2]...[#textChannel] [#textChannel_2]..." +
                             "\n*Alias: addword*",
                     false)
           .addField("Unban word", sb.toString(), false)
           .addField("See Banned Words (in Private Message)",
-                    "aac bwords\n*Aliases: bannedwords, seebannedwords, bwrds, words",
-                    false).addBlankField(false);
+                    "aac bwords\n*Aliases: bannedwords, seebannedwords, bwrds, words*",
+                    false);
         sb.setLength(0);
 
+        eb.addField("Clean TextChannels of Banned Words",
+                    "aac clean <#TextChannel> [#TextChannel_2]...\n*Alias: cleanse*",
+                    false)
+          .addField("Clean All TextChannels of Banned Words",
+                    "aac fc\n*Aliases: fullclean, guildclean, gclean*", false)
+          .addBlankField(false);
+
+        //Infractions
         eb.addField("Set Number of Infractions to Kick",
                     "aac sk <number>\n*Aliases: setkickthresh, setkick*", true)
           .addField("Set Number of Infractions to Ban",
                     "aac sb <number>\n*Aliases: setbanthresh, setban*", true);
 
-        eb.addField("See Member(s) Infraction Record(s)",
+        eb.addField("See Member Infraction Record(s)",
                     "aac ir <@Member> [@member2]...\n*Aliases: userrecord, record*",
                     true)
-          .addField("Clear Member(s) Infraction Record(s)",
+          .addField("Clear Member Infraction Record(s)",
                     "aac pardon <@member> [@member2]...\n*Alias: clrrec*", true);
 
-        eb.addField("Exempt Member(s) from AutoAdmin",
-                    "aac ex <@Member> [@member2]...\n*Aliases: exempt, immune*", true)
-          .addField("Remove Member Exemption(s)",
-                    "aac rmex <@Member> [@Member2]...\n*Aliases: removeexempt*", true);
+        sb.append("aac ex <@Member> [@member2]...").append("\naac ex <@Role> [@Role2]...")
+          .append("\n*Aliases: exempt, immune*");
+        eb.addField("Exempt Members & Roles", sb.toString(), true);
+        sb.setLength(0);
 
-        eb.addField("Clean TextChannel(s) of Banned Words",
-                    "aac clean <#TextChannel> [#TextChannel_2]...\n*Alias: cleanse*",
-                    false);
-
-        eb.addField("Clean All TextChannels of Banned Words",
-                    "aac fullclean\n*Aliases guildclean, gclean*", false);
+        sb.append("aac rmex <@Member> [@Member2]...")
+          .append("\naac rmex <@Role> [@Role2]...").append("\n*Aliases: removeexempt*");
+        eb.addField("Remove Exemption(s)", sb.toString(), true);
+        sb.setLength(0);
 
         eb.addBlankField(false).addField("See AutoAdmin Status & Stats",
                     "aac status\n*Aliases: sitch*", true)

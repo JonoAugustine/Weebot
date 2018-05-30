@@ -99,9 +99,8 @@
             "dead": false,
             "guildID": 139168039634468865,
             "bannedWords": {
-              "arctan": [],
-              "glopping": [
-                139168039634468865
+              "arctan": [
+                439522471369244683
               ]
             },
             "userRecords": {},
