@@ -165,16 +165,16 @@ public class Weebot implements Comparable<Weebot> {
     public void readEvent(BetterEvent event) {
         if(event instanceof BetterMessageEvent) {
             BetterMessageEvent messageEvent = (BetterMessageEvent) event;
+            this.submitToPassives(messageEvent);
             switch (this.validateCallsign(messageEvent.getArgs())) {
                 case 1:
                     this.runCommand(messageEvent, 0);
-                    return;
+                    break;
                 case 2:
                     this.runCommand(messageEvent, 1);
-                    return;
+                    break;
                 default:
-                    this.submitToPassives(messageEvent);
-                    break; //To allow for active participate later
+                    break;
             }
         }
     }
