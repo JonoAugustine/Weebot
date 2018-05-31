@@ -76,6 +76,7 @@ public class HelpCommand extends Command {
                     } else {
                         event.privateReply(c.getEmbedHelp());
                     }
+                    event.deleteMessage();
                     return;
                 }
             }
@@ -99,7 +100,7 @@ public class HelpCommand extends Command {
 
         eb.setTitle("Weeb(B)ot Features");
         sb.append("Use ' help <feature_command> ' for a list of commands\n")
-          .append("(*The feature's command is shown as 'Feature (command)').");
+          .append("(*The feature's command is shown as 'Feature (command)'*).");
         eb.setDescription(sb.toString());
         sb.setLength(0);
 

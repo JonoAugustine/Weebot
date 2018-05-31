@@ -81,14 +81,16 @@ public class AutoAdminCommand extends Command {
                 eb.setTitle(sb.toString());
                 sb.setLength(0);
 
-                eb.setDescription("A history of this member's rule infractions.");
+                sb.append("A history of this member's rule infractions.")
+                  .append("\n\n*Total number of Infractions*: ")
+                  .append(this.wordInfractions.size());
+                eb.setDescription(sb.toString());
+                sb.setLength(0);
 
                 if (!wordInfractions.isEmpty()) {
                     sb.setLength(0);
-                    int i = 0;
                     for (Map.Entry<String, Integer> e : wordInfractions.entrySet()) {
-                        sb.append((i + 1) + ".) \"")
-                          .append(wordInfractions.get(e.getKey())).append("\" : used ")
+                        sb.append("\"").append(e.getKey()).append("\" : used ")
                           .append(e.getValue()).append(" times.").append("\n");
                     }
                     eb.addField("Banned Word Usages", sb.toString(), false);
@@ -137,17 +139,20 @@ public class AutoAdminCommand extends Command {
         @Override
         public void accept(BetterMessageEvent event) {
             if (dead) return;
-            if (event.getMember().isOwner()
-                    || event.getMember().hasPermission(Permission.ADMINISTRATOR)) return;
+            Member member = event.getMember();
+            if (member.isOwner()
+                || member.hasPermission(Permission.ADMINISTRATOR)) return;
+            if (exempt(event.getMember())) return;
+
             String content = event.toString();
             List<String> b = checkWords(content, event.getTextChannel());
             //Respond to word infractions
             if (!b.isEmpty()) {
                 event.deleteMessage();
-                UserRecord rec = userRecords.get(event.getAuthor().getIdLong());
+                UserRecord rec = userRecords.get(member.getUser().getIdLong());
                 if(rec == null) {
-                    rec = new UserRecord(event.getAuthor(), event.getGuild());
-                    userRecords.put(event.getAuthor().getIdLong(), rec);
+                    rec = new UserRecord(member.getUser(), event.getGuild());
+                    userRecords.put(member.getUser().getIdLong(), rec);
                 }
 
                 rec.addWordInfraction(b);
@@ -159,6 +164,20 @@ public class AutoAdminCommand extends Command {
 
                 event.privateReply((infractionEmbed(event, b.toString())));
             }
+        }
+
+        /**
+         * Check if a Member has been exempted from AutoAdmin tracking.
+         * @param member The member to check
+         * @return {@code false} if the Member is not in
+         *          {@link AutoAdmin#exemptUsers} or {@link AutoAdmin#exemptRoles}.
+         */
+        private boolean exempt(Member member) {
+            for (Role r : member.getRoles()) {
+                if (exemptRoles.contains(r.getIdLong()))
+                    return true;
+            }
+            return exemptUsers.contains(member.getUser().getIdLong());
         }
 
         /**
@@ -330,20 +349,6 @@ public class AutoAdminCommand extends Command {
 
         }
 
-        /** @return The status of the autoadmin as an Embed */
-        private MessageEmbed toEmbed() {
-            EmbedBuilder eb = Launcher.makeEmbedBuilder(
-                    Launcher.getGuild(guildID).getName() + " AutoAdmin", null,
-                    "The Weebot AutoAdmin moderator settings and status.");
-            //TODO
-            //Kick and ban threshold
-            //Exempted Roles
-            //Members with records
-            //Banned words
-
-            return eb.build();
-        }
-
         private MessageEmbed wordsToEmbed() {
             Guild guild = Launcher.getGuild(guildID);
             EmbedBuilder eb = Launcher.makeEmbedBuilder(
@@ -383,6 +388,20 @@ public class AutoAdminCommand extends Command {
             eb.setDescription(sb.toString());
             sb.setLength(0);
             eb.addField("Infraction: " + inf.toString(), event.toString(), false);
+            return eb.build();
+        }
+
+        /** @return The status of the autoadmin as an Embed */
+        private MessageEmbed toEmbed() {
+            EmbedBuilder eb = Launcher.makeEmbedBuilder(
+                    Launcher.getGuild(guildID).getName() + " AutoAdmin", null,
+                    "The Weebot AutoAdmin moderator settings and status.");
+            //TODO
+            //Kick and ban threshold
+            //Exempted Roles
+            //Members with records
+            //Banned words
+
             return eb.build();
         }
 
@@ -499,7 +518,6 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case REMOVEWORD:
-                //remove banned words TODO
                 //aaac rmwrd <word> [word2]... [#textCahnnel] [#textChannel_2]...
                 //Parse words, stop if channel is found
                 if (admin != null) {
@@ -550,14 +568,32 @@ public class AutoAdminCommand extends Command {
                             continue;
                         }
                         event.privateReply(rec.toEmbed());
+                        event.deleteMessage();
                     }
                 } else {
                     event.reply(NO_AA_FOUND);
                 }
                 break;
             case CLEARRECORD:
-                //Clear user records TODO
                 //aac pardon <@member> [@member2]...
+                if (admin != null) {
+                    event.getMessage().getMentionedMembers().forEach(m -> {
+                        if (admin.userRecords.remove(m.getUser().getIdLong()) != null)
+                        m.getUser().openPrivateChannel().queue( c -> {
+                            sb.append("*You have been pardoned by* **")
+                              .append(event.getMember().getEffectiveName())
+                              .append("** *in the* **")
+                              .append(event.getGuild().getName())
+                              .append("** *server. All previous rule infractions have")
+                              .append(" been deleted*");
+                            c.sendMessage(sb.toString()).queue();
+                            sb.setLength(0);
+                        });
+                    });
+                    event.reply("User records have been cleared.");
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
             case SEEADMIN:
                 //aac status
@@ -575,15 +611,63 @@ public class AutoAdminCommand extends Command {
                 break;
             case ADDEXEMPT:
                 //aac ex <@> [@2]... TODO
+                if (admin != null) {
+                    if (event.getMessage().getMentionedMembers().isEmpty()
+                            && event.getMessage().getMentionedRoles().isEmpty()) {
+                        sb.append("*You must mention roles or members like this*")
+                          .append("```aac ex @Memeber @Role```");
+                        event.reply(sb.toString());
+                        return;
+                    }
+                    event.getMessage().getMentionedMembers().forEach(
+                            m -> admin.exemptUsers.add(m.getUser().getIdLong())
+                    );
+                    event.getMessage().getMentionedRoles().forEach(
+                            r -> admin.exemptRoles.add(r.getIdLong())
+                    );
+                    event.reply("The Members and|or Roles are now exempt from AutoAdmin.");
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
             case REMOVEEXEMPT:
                 //aac rmex <@> [@2]... TODO
+                if (admin != null) {
+                    if (event.getMessage().getMentionedMembers().isEmpty()
+                            && event.getMessage().getMentionedRoles().isEmpty()) {
+                        sb.append("*You must mention roles or members like this*")
+                          .append("```aac rmex @Memeber @Role```");
+                        event.reply(sb.toString());
+                        return;
+                    }
+                    event.getMessage().getMentionedMembers().forEach(
+                            m -> admin.exemptUsers.remove(m.getUser().getIdLong())
+                    );
+                    event.getMessage().getMentionedRoles().forEach(
+                            r -> admin.exemptRoles.remove(r.getIdLong())
+                    );
+                    sb.append("The Members and|or Roles are no longer exempt ")
+                      .append("from AutoAdmin.");
+                    event.reply(sb.toString());
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
             case CLEANCHANNEL:
                 //aac clean <#> [#2]... TODO
+                if (admin != null) {
+
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
             case CLEANGUILD:
                 //aac fc
+                if (admin != null) {
+
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
         }
 

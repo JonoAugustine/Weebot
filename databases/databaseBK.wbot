@@ -103,9 +103,19 @@
                 439522471369244683
               ]
             },
-            "userRecords": {},
+            "userRecords": {
+              "451005806222245889": {
+                "userID": 451005806222245889,
+                "guildID": 139168039634468865,
+                "wordInfractions": {
+                  "arctan": 1
+                }
+              }
+            },
             "exemptUsers": [],
-            "exemptRoles": [],
+            "exemptRoles": [
+              197428072910159872
+            ],
             "kickThresh": 0,
             "sofThresh": 0,
             "hardThresh": 0
