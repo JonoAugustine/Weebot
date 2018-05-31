@@ -42,8 +42,6 @@ import java.util.concurrent.ConcurrentHashMap;
  *     Each Weebot is assigned an ID String consisting of the
  *     hosting Guild's unique ID + "W" (e.g. "1234W") <br><br>
  *
- * TODO: Scanning for banned words
- *
  * <br><br>
  * Development Questions TODO: <br>
  * ? Should User relation to Weebot be gloabal or local? This would likelly

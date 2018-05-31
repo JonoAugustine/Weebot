@@ -3,7 +3,6 @@ package com.ampro.weebot.commands.management;
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
-import com.ampro.weebot.database.Database;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
@@ -53,17 +52,6 @@ public class AutoAdminCommand extends Command {
              * Add a word infraction to the User's record.
              * @param infs The word infractions to add
              */
-            void addWordInfractions(String...infs) {
-                for (String inf : infs) {
-                    Integer n = wordInfractions.get(inf);
-                    wordInfractions.put(inf, n == null ? 1 : n++);
-                }
-            }
-
-            /**
-             * Add a word infraction to the User's record.
-             * @param infs The word infractions to add
-             */
             void addWordInfraction(Collection<String> infs) {
                 for (String inf : infs) {
                     Integer n = wordInfractions.get(inf);
@@ -102,11 +90,6 @@ public class AutoAdminCommand extends Command {
                 return eb.build();
             }
 
-            String memberName() {
-                return Launcher.getGuild(guildID)
-                               .getMemberById(userID).getEffectiveName();
-            }
-
         }
 
         private boolean dead;
@@ -138,7 +121,7 @@ public class AutoAdminCommand extends Command {
         private int numBanned;
         private int infCaught;
 
-        public AutoAdmin(Guild guild) {
+        AutoAdmin(Guild guild) {
             this.exemptRoles = new ArrayList<>();
             this.exemptUsers = new ArrayList<>();
             this.userRecords = new ConcurrentHashMap<>();
@@ -194,9 +177,9 @@ public class AutoAdminCommand extends Command {
         }
 
         /** @return {@code true} if the 2 week clean cooldown has ended */
-        private boolean lastCleanCheck() {
-            if (lastClean == null) return true;
-            return ChronoUnit.WEEKS.between(lastClean, OffsetDateTime.now()) > 2;
+        private boolean cleanOnCooldown() {
+            if (lastClean == null) return false;
+            return ChronoUnit.WEEKS.between(lastClean, OffsetDateTime.now()) <= 2;
         }
 
         /**
@@ -223,7 +206,7 @@ public class AutoAdminCommand extends Command {
                 List<String> b = checkWords(m.getContentStripped(), m.getTextChannel());
                 //Respond to word infractions
                 if(!b.isEmpty()) {
-                    m.delete().queue(k -> messages.remove(k));
+                    m.delete().queue(messages::remove);
                     UserRecord rec = userRecords.get(m.getAuthor().getIdLong());
                     if(rec == null) {
                         rec = new UserRecord(m.getAuthor(), m.getGuild());
@@ -302,7 +285,7 @@ public class AutoAdminCommand extends Command {
                             badWords.add(input.substring(input.indexOf(entry.getKey()),
                                                          entry.getKey().length()
                             ));
-                        } catch (Exception ingored){}
+                        } catch (Exception ignored){}
                     }
                 }
             }
@@ -344,6 +327,7 @@ public class AutoAdminCommand extends Command {
                 if (word == null) continue;
                 List<Long> ids = this.bannedWords.putIfAbsent(word.toLowerCase(),
                                                               new ArrayList<>());
+                //noinspection ConstantConditions
                 if (!ids.isEmpty()) ids.clear();
             }
         }
@@ -404,7 +388,7 @@ public class AutoAdminCommand extends Command {
                 List<Long> chs = this.bannedWords.get(w);
                 //Check if the word is banned at all
                 if(chs == null) continue;
-                chs.removeIf( (Long l) -> inIds.contains(l));
+                chs.removeIf(inIds::contains);
             }
 
         }
@@ -516,10 +500,8 @@ public class AutoAdminCommand extends Command {
                     sb.append("\"").append(word).append("\"");
                     if (!cIdList.isEmpty()) {
                         sb.append(" ; Banned in :");
-                        cIdList.forEach( cId -> {
-                            sb.append(guild.getTextChannelById(cId).getName())
-                              .append(", ");
-                        });
+                        cIdList.forEach( cId -> sb.append(guild.getTextChannelById(cId).getName())
+                                              .append(", "));
                         sb.setLength(sb.length() - 2);
                     }
                     sb.append("\n");
@@ -620,7 +602,6 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case ADDWORD:
-                //Add banned word
                 //aac banword <word> [word2]...[#textChannel] [#textChannel_2]...
                 if (admin != null) {
                     //Parse words, stop if channel is found
@@ -643,7 +624,6 @@ public class AutoAdminCommand extends Command {
                 break;
             case REMOVEWORD:
                 //aaac rmwrd <word> [word2]... [#textCahnnel] [#textChannel_2]...
-                //Parse words, stop if channel is found
                 if (admin != null) {
                     String[] words = new String[args.length];
                     for (int i = 2; i < args.length; i++) {
@@ -665,7 +645,6 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case SEEWORDS:
-                //see banned words (private)
                 //aac bwrds
                 if (admin != null) {
                     event.privateReply(admin.wordsToEmbed());
@@ -674,7 +653,6 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case SEERECORD:
-                //See user records
                 //aac ir <@member> [@member2]...
                 if (admin != null) {
                     Collection<Member> ment = event.getMessage().getMentionedMembers();
@@ -809,7 +787,7 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case CLEANCHANNEL:
-                //aac clean <#> [#2]... TODO
+                //aac clean <#> [#2]...
                 if (admin != null) {
                     if(event.getMessage().getMentionedChannels().isEmpty()) {
                         sb.append("*Please mention one or more TextChannels to")
@@ -818,7 +796,7 @@ public class AutoAdminCommand extends Command {
                         event.reply(sb.toString());
                         return;
                     }
-                    if (!admin.lastCleanCheck()) {
+                    if (admin.cleanOnCooldown()) {
                         String lc = null;
                         if (admin.lastClean != null)
                             lc = admin.lastClean
@@ -874,9 +852,9 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case CLEANGUILD:
-                //aac fc TODO
+                //aac fc
                 if (admin != null) {
-                    if (!admin.lastCleanCheck()) {
+                    if (admin.cleanOnCooldown()) {
                         String lc = null;
                         if (admin.lastClean != null)
                             lc = admin.lastClean
