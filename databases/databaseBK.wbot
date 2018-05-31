@@ -99,16 +99,35 @@
             "dead": false,
             "guildID": 139168039634468865,
             "bannedWords": {
-              "arctan": [
-                439522471369244683
-              ]
+              "arctan": []
             },
             "userRecords": {
               "451005806222245889": {
                 "userID": 451005806222245889,
                 "guildID": 139168039634468865,
                 "wordInfractions": {
+                  "arctan": 2
+                }
+              },
+              "139188528012722176": {
+                "userID": 139188528012722176,
+                "guildID": 139168039634468865,
+                "wordInfractions": {
+                  "arctan": 3
+                }
+              },
+              "186130584693637131": {
+                "userID": 186130584693637131,
+                "guildID": 139168039634468865,
+                "wordInfractions": {
                   "arctan": 1
+                }
+              },
+              "139167730237571072": {
+                "userID": 139167730237571072,
+                "guildID": 139168039634468865,
+                "wordInfractions": {
+                  "arctan": 3
                 }
               }
             },
@@ -116,9 +135,30 @@
             "exemptRoles": [
               197428072910159872
             ],
+            "lastClean": {
+              "dateTime": {
+                "date": {
+                  "year": 2018,
+                  "month": 5,
+                  "day": 31
+                },
+                "time": {
+                  "hour": 2,
+                  "minute": 44,
+                  "second": 32,
+                  "nano": 750000000
+                }
+              },
+              "offset": {
+                "totalSeconds": -14400
+              }
+            },
             "kickThresh": 0,
             "sofThresh": 0,
-            "hardThresh": 0
+            "hardThresh": 0,
+            "numKicked": 0,
+            "numBanned": 0,
+            "infCaught": 8
           }
         }
       ],

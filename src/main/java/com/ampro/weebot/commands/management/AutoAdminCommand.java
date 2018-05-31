@@ -3,21 +3,24 @@ package com.ampro.weebot.commands.management;
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
+import com.ampro.weebot.database.Database;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 
 import java.awt.*;
+import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A Managemnet interface for changing the bot's admin rules and capabilities
- * TODO Exempted IDs
  * TODO Kick/ban thresh
  */
 public class AutoAdminCommand extends Command {
@@ -111,21 +114,29 @@ public class AutoAdminCommand extends Command {
         private final Long guildID;
 
         /** Map of String keys to Channel ID list values */
-        final ConcurrentHashMap<String, List<Long>> bannedWords;
+        private final ConcurrentHashMap<String, List<Long>> bannedWords;
 
         /* User records */
         private final ConcurrentHashMap<Long, UserRecord> userRecords;
 
-        /* Exempted Roles & users TODO*/
+        /* Exempted Roles & users */
         private final List<Long> exemptUsers;
         private final List<Long> exemptRoles;
 
-        /** Kick threshold TODO*/
-        int kickThresh;
-        /** Soft-ban threshold TODO*/
-        int sofThresh;
-        /** Hard-ban threshold TODO*/
-        int hardThresh;
+        /* Time of last clean call */
+        private OffsetDateTime lastClean;
+
+        /** Kick threshold */
+        private int kickThresh;
+        /** Soft-ban threshold */
+        private int sofThresh;
+        /** Hard-ban threshold */
+        private int hardThresh;
+
+        //STATS
+        private int numKicked;
+        private int numBanned;
+        private int infCaught;
 
         public AutoAdmin(Guild guild) {
             this.exemptRoles = new ArrayList<>();
@@ -156,8 +167,10 @@ public class AutoAdminCommand extends Command {
                 }
 
                 rec.addWordInfraction(b);
+                infCaught++;
 
                 //Check thresholds TODO
+
                 //Act
                 //  Warn user
                 //  Kick/sban/ban
@@ -180,29 +193,75 @@ public class AutoAdminCommand extends Command {
             return exemptUsers.contains(member.getUser().getIdLong());
         }
 
+        /** @return {@code true} if the 2 week clean cooldown has ended */
+        private boolean lastCleanCheck() {
+            if (lastClean == null) return true;
+            return ChronoUnit.WEEKS.between(lastClean, OffsetDateTime.now()) > 2;
+        }
+
         /**
-         * Clean an entire {@link TextChannel#getHistory()} on banned words.
+         * Clean an last 2,000 messages in  {@link TextChannel#getHistory()} on banned
+         * words.
          * @param channel The TextChannel to clean
          * @return -1 if the bot cannot view channel history <br>
          *         -2 if the bot cannot manage messages      <br>
          *          1 otherwise <br>
          */
-        private boolean clean(TextChannel channel) {
-            //TODO
-            return false;
+        private int clean(TextChannel channel) {
+            List<Message> messages = new ArrayList<>(2000);
+            int i = 2000;
+            try {
+                for (Message message : channel.getIterableHistory().cache(false)) {
+                    messages.add(message);
+                    if (--i <= 0) break;
+                }
+            } catch (InsufficientPermissionException e) {
+                return -1;
+            }
+
+            for (Message m : messages) {
+                List<String> b = checkWords(m.getContentStripped(), m.getTextChannel());
+                //Respond to word infractions
+                if(!b.isEmpty()) {
+                    m.delete().queue(k -> messages.remove(k));
+                    UserRecord rec = userRecords.get(m.getAuthor().getIdLong());
+                    if(rec == null) {
+                        rec = new UserRecord(m.getAuthor(), m.getGuild());
+                        userRecords.put(m.getAuthor().getIdLong(), rec);
+                    }
+
+                    rec.addWordInfraction(b);
+                    infCaught++;
+
+                    //Check thresholds TODO
+
+                    //Act
+                    //  Warn user
+                    //  Kick/sban/ban
+
+                    m.getAuthor().openPrivateChannel()
+                     .queue(c -> infractionEmbed(m, b.toString()));
+                }
+            }
+            this.lastClean = OffsetDateTime.now();
+            if (messages.size() == 2000)
+                return -2;
+            return 1;
         }
 
         /**
-         * Clean an entire {@link Guild Guild's} {@link TextChannel TextChannels} of
+         * Clean last 2,000 messages in each {@link TextChannel} of {@link Guild Guild's}
          * banned words.
          * @param guild The guild to clean
          * @return A {@link Map} of uncleaned TextChannels linked to an err code <br>
          *     -1 if the bot cannot view channel history <br>
          *     -2 if the bot cannot manage messages      <br>
          */
-        private Map<TextChannel, Integer> cleanGuild(Guild guild) {
-            Map<TextChannel, Integer> out = new TreeMap<>();
-            //TODO
+        private Map<String, Integer> cleanGuild(Guild guild) {
+            Map<String, Integer> out = new TreeMap<>();
+            for (TextChannel c : guild.getTextChannels()) {
+                out.put(c.getName(), clean(c));
+            }
             return out;
         }
 
@@ -239,10 +298,11 @@ public class AutoAdminCommand extends Command {
                 if (input.contains(entry.getKey())) {
                     if(entry.getValue().isEmpty()
                             || entry.getValue().contains(channel.getIdLong())) {
-
-                        badWords.add(input.substring(input.indexOf(entry.getKey()),
-                                                     entry.getKey().length())
-                        );
+                        try {
+                            badWords.add(input.substring(input.indexOf(entry.getKey()),
+                                                         entry.getKey().length()
+                            ));
+                        } catch (Exception ingored){}
                     }
                 }
             }
@@ -375,33 +435,97 @@ public class AutoAdminCommand extends Command {
         }
 
         private MessageEmbed infractionEmbed(BetterMessageEvent event, Object inf) {
+            return infractionEmbed(event.getMessage(), inf);
+        }
+
+        private MessageEmbed infractionEmbed(Message message, Object inf) {
             EmbedBuilder eb = Launcher.getStandardEmbedBuilder()
                                       .setColor(new Color(0xFB1800));
 
             eb.setTitle("AutoAdmin Caught an Infraction!");
             StringBuilder sb = new StringBuilder()
                     .append("In Server: ")
-                    .append(event.getGuild().getName()).append("\nIn Channel:  ")
-                    .append(event.getTextChannel().getName()).append("\nAt ")
-                    .append(event.getCreationTime()
+                    .append(message.getGuild().getName()).append("\nIn Channel:  ")
+                    .append(message.getTextChannel().getName()).append("\nAt ")
+                    .append(message.getCreationTime()
                                  .format(DateTimeFormatter.ofPattern("d-M-y hh:mm:ss")));
             eb.setDescription(sb.toString());
             sb.setLength(0);
-            eb.addField("Infraction: " + inf.toString(), event.toString(), false);
+            eb.addField("Infraction: " + inf.toString(), message.getContentStripped(),
+                        false);
             return eb.build();
         }
 
         /** @return The status of the autoadmin as an Embed */
         private MessageEmbed toEmbed() {
+            StringBuilder sb = new StringBuilder();
             EmbedBuilder eb = Launcher.makeEmbedBuilder(
                     Launcher.getGuild(guildID).getName() + " AutoAdmin", null,
-                    "The Weebot AutoAdmin moderator settings and status.");
-            //TODO
-            //Kick and ban threshold
-            //Exempted Roles
-            //Members with records
-            //Banned words
+                    "The Weebot AutoAdmin moderator settings, status, and stats.");
 
+            //Stats//
+            sb.append("Infractions Caught: ").append(infCaught).append("\n")
+              .append("Members Kicked: ").append(numKicked).append("\n")
+              .append("Members Banned: ").append(numBanned);
+            eb.addField("Stats", sb.toString(), true);
+            sb.setLength(0);
+
+            //Settings//
+            //Kick and ban threshold
+            if (kickThresh > 0)
+                eb.addField("Infractions to Auto-Kick", kickThresh+"", true);
+            if (hardThresh > 0)
+                eb.addField("Infractions to Auto-Ban", hardThresh+"", true);
+
+            //Exempted
+            Guild guild = Launcher.getGuild(guildID);
+            if (!exemptUsers.isEmpty()) {
+                exemptUsers.forEach( id -> {
+                    try {
+                        sb.append(guild.getMemberById(id).getEffectiveName()).append(", ");
+                    } catch (IndexOutOfBoundsException ignored) {}
+                });
+                sb.setLength(sb.length() - 2);
+                eb.addField("Exempted Members", sb.toString(), true);
+                sb.setLength(0);
+            }
+            if (!exemptRoles.isEmpty()) {
+                exemptRoles.forEach( id -> {
+                    try {
+                        sb.append(guild.getRoleById(id).getName()).append(", ");
+                    } catch (IndexOutOfBoundsException ignored) {}
+                });
+                sb.setLength(sb.length() - 2);
+                eb.addField("Exempted Roles", sb.toString(), true);
+                sb.setLength(0);
+            }
+            //Members with records
+            if (!userRecords.isEmpty()) {
+                userRecords.forEach( (id, rec) -> {
+                    try {
+                        sb.append(guild.getMemberById(id).getEffectiveName()).append
+                                ("\n");
+                    } catch (IndexOutOfBoundsException ignored) {}
+                });
+                eb.addField("Members With Infraction Records", sb.toString(), true);
+                sb.setLength(0);
+            }
+            //Banned words
+            if (!bannedWords.isEmpty()) {
+                bannedWords.forEach( (word, cIdList) -> {
+                    sb.append("\"").append(word).append("\"");
+                    if (!cIdList.isEmpty()) {
+                        sb.append(" ; Banned in :");
+                        cIdList.forEach( cId -> {
+                            sb.append(guild.getTextChannelById(cId).getName())
+                              .append(", ");
+                        });
+                        sb.setLength(sb.length() - 2);
+                    }
+                    sb.append("\n");
+                });
+                eb.addField("Banned Words", sb.toString(), true);
+            }
             return eb.build();
         }
 
@@ -604,13 +728,44 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case SETKICKTHRESH:
-                //aac sk <#> TODO
+                //aac sk <#>
+                if (admin != null) {
+                    int i;
+                    try {
+                        i = Integer.parseInt(args[2]);
+                        if (i < 0) throw new NumberFormatException();
+                    } catch (NumberFormatException e) {
+                        event.reply("*Please use a number between 0 and 2,147,483,647.*");
+                        return;
+                    }
+                    admin.kickThresh = i;
+                    event.reply(
+                            "The number of infractions to auto-kick a member is now "+i);
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
             case SETBANTHRESH:
-                //aac bk <#> TODO
+                //aac bk <#>
+                if (admin != null) {
+                    int i;
+                    try {
+                        i = Integer.parseInt(args[2]);
+                        if(i < 0)
+                            throw new NumberFormatException();
+                    } catch (NumberFormatException e) {
+                        event.reply("*Please use a number between 0 and 2,147,483,647.*");
+                        return;
+                    }
+                    admin.kickThresh = i;
+                    event.reply(
+                            "The number of infractions to auto-ban a member is now " + i);
+                } else {
+                    event.reply(NO_AA_FOUND);
+                }
                 break;
             case ADDEXEMPT:
-                //aac ex <@> [@2]... TODO
+                //aac ex <@> [@2]...
                 if (admin != null) {
                     if (event.getMessage().getMentionedMembers().isEmpty()
                             && event.getMessage().getMentionedRoles().isEmpty()) {
@@ -631,7 +786,7 @@ public class AutoAdminCommand extends Command {
                 }
                 break;
             case REMOVEEXEMPT:
-                //aac rmex <@> [@2]... TODO
+                //aac rmex <@> [@2]...
                 if (admin != null) {
                     if (event.getMessage().getMentionedMembers().isEmpty()
                             && event.getMessage().getMentionedRoles().isEmpty()) {
@@ -656,15 +811,119 @@ public class AutoAdminCommand extends Command {
             case CLEANCHANNEL:
                 //aac clean <#> [#2]... TODO
                 if (admin != null) {
-
+                    if(event.getMessage().getMentionedChannels().isEmpty()) {
+                        sb.append("*Please mention one or more TextChannels to")
+                          .append(" clean, like this:```")
+                          .append("aac clean #TextChannel #TextChannel_2...```");
+                        event.reply(sb.toString());
+                        return;
+                    }
+                    if (!admin.lastCleanCheck()) {
+                        String lc = null;
+                        if (admin.lastClean != null)
+                            lc = admin.lastClean
+                                    .format(DateTimeFormatter.ofPattern("d-M-y"));
+                        sb.append("*The last time you used any ``aac clean`` ")
+                          .append("command was under 2 weeks ago, please wait")
+                          .append(" until the 2 week cooldown has ended. ")
+                          .append(lc != null ? "(Last used " + lc + ")*" : "*");
+                        event.reply(sb.toString());
+                        return;
+                    }
+                    bot.lock();
+                    List<String> manage = new ArrayList<>();
+                    List<String> history = new ArrayList<>();
+                    List<String> clean = new ArrayList<>();
+                    event.getMessage().getMentionedChannels().forEach(c -> {
+                        switch (admin.clean(c)) {
+                            case -1:
+                                history.add(c.getName());
+                                break;
+                            case -2:
+                                manage.add(c.getName());
+                                break;
+                            default:
+                                clean.add(c.getName());
+                                break;
+                        }
+                    });
+                    if(!clean.isEmpty()) {
+                        sb.append("*The following TextChannels have been ").append
+                                ("cleaned of banned words*: ```")
+                          .append(clean.toString()).append("```");
+                    }
+                    if(!manage.isEmpty()) {
+                        sb.append("\n\n*The following TextChannels could ").append
+                                ("clean because I do not have permission")
+                          .append(" to manage messages*```:")
+                          .append(manage.toString()).append("```");
+                    }
+                    if(!history.isEmpty()) {
+                        sb.append("\n\n*The following TextChannels could ")
+                          .append("clean because I do not have permission")
+                          .append(" to view their message history*```:")
+                          .append(history.toString()).append("```");
+                    }
+                    if (sb.length() == 0) {
+                        sb.append("*No channels were cleaned.*");
+                    }
+                    event.reply(sb.toString());
+                    bot.unlock();
                 } else {
                     event.reply(NO_AA_FOUND);
                 }
                 break;
             case CLEANGUILD:
-                //aac fc
+                //aac fc TODO
                 if (admin != null) {
-
+                    if (!admin.lastCleanCheck()) {
+                        String lc = null;
+                        if (admin.lastClean != null)
+                            lc = admin.lastClean
+                                    .format(DateTimeFormatter.ofPattern("d-M-y"));
+                        sb.append("*The last time you used any ``aac clean`` ")
+                          .append("command was under 2 weeks ago, please wait")
+                          .append(" until the 2 week cooldown has ended. ")
+                          .append(lc != null ? "(Last used " + lc + ")*" : "*");
+                        event.reply(sb.toString());
+                        return;
+                    }
+                    bot.lock();
+                    List<String> manage = new ArrayList<>();
+                    List<String> history = new ArrayList<>();
+                    List<String> clean = new ArrayList<>();
+                    admin.cleanGuild(event.getGuild()).forEach((name, err) -> {
+                        switch (err) {
+                            case -1:
+                                history.add(name);
+                                break;
+                            case -2:
+                                manage.add(name);
+                                break;
+                            default:
+                                clean.add(name);
+                                break;
+                        }
+                    });
+                    if(!clean.isEmpty()) {
+                        sb.append("*The following TextChannels have been ")
+                          .append("cleaned of banned words*: ```")
+                          .append(clean.toString()).append("```");
+                    }
+                    if(!manage.isEmpty()) {
+                        sb.append("\n\n*The following TextChannels could ")
+                          .append("clean because I do not have permission")
+                          .append(" to manage messages*```:")
+                          .append(manage.toString()).append("```");
+                    }
+                    if(!history.isEmpty()) {
+                        sb.append("\n\n*The following TextChannels could ")
+                          .append("clean because I do not have permission")
+                          .append(" to view their message history*```:")
+                          .append(history.toString()).append("```");
+                    }
+                    event.reply(sb.toString());
+                    bot.unlock();
                 } else {
                     event.reply(NO_AA_FOUND);
                 }
@@ -774,11 +1033,20 @@ public class AutoAdminCommand extends Command {
                     false);
         sb.setLength(0);
 
-        eb.addField("Clean TextChannels of Banned Words",
+        eb.addField("Clean TextChannels of Banned Words (Past 2,000 Messages)",
                     "aac clean <#TextChannel> [#TextChannel_2]...\n*Alias: cleanse*",
                     false)
-          .addField("Clean All TextChannels of Banned Words",
+          .addField("Clean All TextChannels of Banned Words (Past 2,000 Messages)",
                     "aac fc\n*Aliases: fullclean, guildclean, gclean*", false)
+          .addField("NOTE: THIS WILL LOCK THE WEEBOT |",
+                    "**While cleaning text channels, the bot will be locked to prevent " +
+                            "any confusion. It is best to use these commands while " +
+                            "most members are offline (asleep, at school/work, etc)**",
+                    true)
+          .addField("NOTE: CLEAN CAN BE USED ONCE PER 2 WEEKS",
+                    "**These command is a heavy tax on the Weebot system (and Discord " +
+                            "API gets pissy), so it can be used only once per week**",
+                    true)
           .addBlankField(false);
 
         //Infractions
