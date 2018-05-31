@@ -76,6 +76,8 @@ public class Weebot implements Comparable<Weebot> {
     /** Whether the bot is able to respond to actions not directed to it */
     private boolean ACTIVE_PARTICIPATE;
 
+    private transient boolean locked;
+
     /** Commands not allowed on the server channels.*/
     private final ConcurrentHashMap<TextChannel, ArrayList<Class<? extends Command>>>
             COMMANDS_DISABLED;
@@ -166,15 +168,17 @@ public class Weebot implements Comparable<Weebot> {
         if(event instanceof BetterMessageEvent) {
             BetterMessageEvent messageEvent = (BetterMessageEvent) event;
             this.submitToPassives(messageEvent);
-            switch (this.validateCallsign(messageEvent.getArgs())) {
-                case 1:
-                    this.runCommand(messageEvent, 0);
-                    break;
-                case 2:
-                    this.runCommand(messageEvent, 1);
-                    break;
-                default:
-                    break;
+            if (!locked) {
+                switch (this.validateCallsign(messageEvent.getArgs())) {
+                    case 1:
+                        this.runCommand(messageEvent, 0);
+                        break;
+                    case 2:
+                        this.runCommand(messageEvent, 1);
+                        break;
+                    default:
+                        break;
+                }
             }
         }
     }
@@ -274,6 +278,11 @@ public class Weebot implements Comparable<Weebot> {
     public int compareTo(Weebot w2) {
         return (int) (this.getGuildID() - w2.getGuildID());
     }
+
+    /** Lock access to the Weebot from the Discord */
+    public void lock() { this.locked = true; }
+    /** Unlock access to the Weebot from the Discord */
+    public void unlock() { this.locked = false; }
 
     /** @return The ID of the guild the bot is linked to.*/
     public final long getGuildID() {
