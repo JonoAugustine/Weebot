@@ -1,10 +1,12 @@
 package com.ampro.weebot.commands.miscellaneous;
 
 
+import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
+import net.dv8tion.jda.core.entities.MessageEmbed;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,7 +17,10 @@ import java.util.Arrays;
 public class SpamCommand extends Command {
 
     public SpamCommand() {
-        super("Spam", new ArrayList<>(Arrays.asList("spamthis", "spamattack")), "Spam the chat", "<spam> [number_of_spams] [message]", false, false, 0, false,
+        super("Spam",
+              new ArrayList<>(Arrays.asList("spamthis", "spamattack", "spamlimit")),
+              "Spam the chat", "<spam> [number_of_spams] [message]",
+              false, false, 0, false,
               false
         );
         this.setUserPermissions(new Permission[]{Permission.MESSAGE_WRITE, Permission.MESSAGE_MANAGE});
@@ -48,12 +53,13 @@ public class SpamCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
-        int limit;
-        synchronized (bot) {
-            limit = bot.getSpamLimit();
-        }
+        int limit = bot.getSpamLimit();
         String[] args = this.cleanArgs(bot, event);
         int loop = 5;
+        if (args[0].equalsIgnoreCase("spamlimit")) {
+            setSpamLimit(bot, event);
+            return;
+        }
         switch (args.length) {
             case 1:
                 event.reply(this.getHelp() + " with ``" + this.getArgFormat() + "``");
@@ -81,4 +87,52 @@ public class SpamCommand extends Command {
         }
     }
 
+    /**
+     * Set or get the limit on bot spam.
+     * @param bot The {@link Weebot} to view or modify.
+     * @param event The {@link BetterMessageEvent} that invoked this command.
+     */
+    private void setSpamLimit(Weebot bot, BetterMessageEvent event) {
+        synchronized (bot) {
+            String[] args = this.cleanArgsLowerCase(bot, event);
+            switch (args.length) {
+                case 1:
+                    event.reply(
+                            "The spam limit is currently set to "
+                                    + bot.getSpamLimit()
+                    );
+                    return;
+                case 2:
+                    try {
+                        int limit = Math.abs(Integer.parseInt(args[1]));
+                        bot.setSpamLimit(limit);
+                        event.reply("The spam limit is now " + limit);
+                    } catch (NumberFormatException e) {
+                        event.reply("Sorry, I couldn't read that number." +
+                                            " Try using a smaller number and make sure " +
+                                            "there are no letters, symbols, or decimals."
+                        );
+                    }
+                    return;
+                default:
+                    event.reply("Sorry, " + String.join(" ", args)
+                                                  .substring(args[0].length())
+                                        + " is not an option. Please use the command:```"
+                                        + bot.getCallsign() + "<spamlimit> <new_limit>```"
+                                        + "\n Where <new_limit> is an integer."
+                    );
+                    break;
+            }
+        }
+    }
+
+    @Override
+    public MessageEmbed getEmbedHelp() {
+        return Launcher.makeEmbedBuilder(
+                "Spam the Chat", null,
+                "<spam> [number_of_spams] [message]\n*Aliases: spamthis, spamattack*"
+        ).addField("Set Spam Limit",
+                   "spamlimit <number>\n*Required Permissions: Administrator*", false)
+                       .build();
+    }
 }
