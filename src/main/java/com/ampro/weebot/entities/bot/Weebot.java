@@ -365,7 +365,7 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     /** @return {@code true} if the bot is allowed to be not-safe-for-work.*/
-    public boolean isNSFW() {
+    public final synchronized boolean isNSFW() {
         return this.NSFW;
     }
 
@@ -384,18 +384,18 @@ public class Weebot implements Comparable<Weebot> {
      * @return {@code true} if the bot is able to respond to messages not
      *              directed to it
      */
-    public final boolean canParticipate() {
+    public final synchronized  boolean canParticipate() {
         return this.ACTIVE_PARTICIPATE;
     }
 
     /**
      *
-     * @param ACTIVE_PARTICIPATE {@code true} if the bot can join conversations.
+     * @param activeParticipate {@code true} if the bot can join conversations.
      * @return The previous value of {@link Weebot#ACTIVE_PARTICIPATE}
      */
-    public final boolean setACTIVE_PARTICIPATE(boolean ACTIVE_PARTICIPATE) {
+    public final synchronized boolean setActiveParticipate(boolean activeParticipate) {
         boolean old = this.ACTIVE_PARTICIPATE;
-        this.ACTIVE_PARTICIPATE = ACTIVE_PARTICIPATE;
+        this.ACTIVE_PARTICIPATE = activeParticipate;
         return old;
     }
 
@@ -411,7 +411,7 @@ public class Weebot implements Comparable<Weebot> {
      * Add a running {@link Game} to the bot.
      * @param game The {@link Game} to add.
      */
-    public final void addRunningGame(Game<? extends Player> game) {
+    public final synchronized void addRunningGame(Game<? extends Player> game) {
         this.GAMES_RUNNING.add(game);
     }
 
@@ -442,11 +442,11 @@ public class Weebot implements Comparable<Weebot> {
      * @param deckname The name of the deck.
      * @return false if the deck does not exist.
      */
-    public final boolean removeCustomCahDeck(String deckname) {
+    public final synchronized  boolean removeCustomCahDeck(String deckname) {
         return this.CUSTOM_CAH_DECKS.remove(deckname) == null;
     }
 
-    public final boolean addPassive(IPassive passive) {
+    public final synchronized  boolean addPassive(IPassive passive) {
         return this.passives.add(passive);
     }
 
@@ -455,19 +455,19 @@ public class Weebot implements Comparable<Weebot> {
     }
 
     /** @return {@link TreeMap TreeMap<String,NotePad>} */
-    public ArrayList<NotePad> getNotePads() {
+    public synchronized  ArrayList<NotePad> getNotePads() {
         return NOTES;
     }
 
     /** @return The number of messages the bot can spam at once. */
-    public int getSpamLimit() { return this.spamLimit; }
+    public synchronized  int getSpamLimit() { return this.spamLimit; }
 
     /**
      * Set the number of time the bot can spam at once.
      * @param limit The new limit
      * @return The old limit.
      */
-    public int setSpamLimit(int limit) {
+    public synchronized  int setSpamLimit(int limit) {
         int old = this.spamLimit;
         this.spamLimit = limit;
         return old;
