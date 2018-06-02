@@ -123,6 +123,9 @@ public class WeebotSuggestionCommand extends Command {
             default:
                 String sugg = String.join(" ",Arrays.copyOfRange(args,1,args.length))
                         .trim();
+                if (sugg.length() < 2) {
+                    return;
+                }
                 Launcher.getDatabase()
                         .addSuggestion(new Suggestion(sugg, event.getAuthor(),
                                 event.getGuild()));
