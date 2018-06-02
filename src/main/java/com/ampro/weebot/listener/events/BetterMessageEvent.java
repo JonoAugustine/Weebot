@@ -296,7 +296,8 @@ public class BetterMessageEvent extends BetterEvent {
 
     /** Delete the message. */
     public void deleteMessage() {
-        this.message.delete().queue();
+        if (!isPrivate())
+            this.message.delete().queue();
     }
 
     /**
