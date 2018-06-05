@@ -4,6 +4,7 @@
     "USER_PASSIVES": {
       "139167730237571072": []
     },
+    "USER_REMINDERS": {},
     "GUILD_ID": 0,
     "BOT_ID": "0W",
     "BIRTHDAY": {
@@ -106,7 +107,7 @@
             "userRecords": {},
             "exemptUsers": [],
             "exemptRoles": [],
-            "kickThresh": 0,
+            "kickThresh": 5,
             "sofThresh": 0,
             "hardThresh": 0,
             "numKicked": 0,

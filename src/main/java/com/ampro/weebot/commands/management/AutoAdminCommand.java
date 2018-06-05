@@ -9,6 +9,7 @@ import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.*;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
+import net.dv8tion.jda.core.managers.GuildController;
 
 import java.awt.*;
 import java.time.OffsetDateTime;
@@ -20,7 +21,6 @@ import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A Managemnet interface for changing the bot's admin rules and capabilities
- * TODO Kick/ban thresh
  */
 public class AutoAdminCommand extends Command {
 
@@ -41,6 +41,13 @@ public class AutoAdminCommand extends Command {
             /** Map of banned word usages mapped to the number of times used */
             final Map<String, Integer> wordInfractions;
 
+            /** The number of all infractions */
+            private int infractions;
+            /** The number of times the user has been kicked */
+            private int kicks;
+            /** The number of times the user has been banned */
+            public int bans;
+
             UserRecord(User user, Guild guild) {
                 this.userID  = user.getIdLong();
                 this.guildID = guild.getIdLong();
@@ -55,6 +62,7 @@ public class AutoAdminCommand extends Command {
                 for (String inf : infs) {
                     Integer n = wordInfractions.get(inf);
                     wordInfractions.put(inf, n == null ? 1 : n + 1);
+                    infractions++;
                 }
             }
 
@@ -73,7 +81,7 @@ public class AutoAdminCommand extends Command {
 
                 sb.append("A history of this member's rule infractions.")
                   .append("\n\n*Total number of Infractions*: ")
-                  .append(this.wordInfractions.size());
+                  .append(this.infractions);
                 eb.setDescription(sb.toString());
                 sb.setLength(0);
 
@@ -84,6 +92,7 @@ public class AutoAdminCommand extends Command {
                           .append(e.getValue()).append(" times.").append("\n");
                     }
                     eb.addField("Banned Word Usages", sb.toString(), false);
+                    sb.setLength(0);
                 }
 
                 return eb.build();
@@ -135,29 +144,57 @@ public class AutoAdminCommand extends Command {
             Member member = event.getMember();
             if (member.isOwner()
                 || member.hasPermission(Permission.ADMINISTRATOR)) return;
-            if (exempt(event.getMember())) return;
+            if (isExempt(event.getMember())) return;
+
+            boolean infracted = false;
+            UserRecord rec = userRecords.get(member.getUser().getIdLong());
 
             String content = event.toString();
-            List<String> b = checkWords(content, event.getTextChannel());
             //Respond to word infractions
+            List<String> b = checkWords(content, event.getTextChannel());
             if (!b.isEmpty()) {
-                event.deleteMessage();
-                UserRecord rec = userRecords.get(member.getUser().getIdLong());
+
                 if(rec == null) {
                     rec = new UserRecord(member.getUser(), event.getGuild());
                     userRecords.put(member.getUser().getIdLong(), rec);
                 }
 
                 rec.addWordInfraction(b);
-                infCaught++;
+                infCaught++; //Stat track
 
-                //Check thresholds TODO
+                b.forEach(
+                        s -> event.privateReply((infractionEmbed(event, s)))
+                );
+                infracted = true;
+            }
 
-                //Act
-                //  Warn user
-                //  Kick/sban/ban
+            //Check thresholds
+            if (infracted) {
+                event.deleteMessage();
+                GuildController controller = Launcher.getGuild(guildID)
+                                                     .getController();
+                //We use .complete() instead of event.reply() because we need
+                //to send the message before we kick/ban them in order to send
+                //the message at all
+                if (kickThresh > 0 && rec.infractions % kickThresh == 0) {
+                    PrivateChannel c = event.getAuthor().openPrivateChannel().complete();
+                    rec.kicks++;
+                    numKicked++;
+                    if (hardThresh > 0 && rec.kicks >= hardThresh) {
+                        rec.bans++;
+                        numBanned++;
+                        c.sendMessage(banEmbed(event.getMember())).complete();
+                        controller.ban(event.getMember(), 7,
+                                       "You have been kicked too many times.")
+                                  .complete();
+                    } else {
+                        c.sendMessage(kickEmbed(event.getMember())).complete();
+                        controller.kick(event.getMember(),
+                                        "You have broken the rules too many times."
+                        ).complete();
+                    }
+                }
 
-                event.privateReply((infractionEmbed(event, b.toString())));
             }
         }
 
@@ -167,7 +204,7 @@ public class AutoAdminCommand extends Command {
          * @return {@code false} if the Member is not in
          *          {@link AutoAdmin#exemptUsers} or {@link AutoAdmin#exemptRoles}.
          */
-        private boolean exempt(Member member) {
+        private boolean isExempt(Member member) {
             for (Role r : member.getRoles()) {
                 if (exemptRoles.contains(r.getIdLong()))
                     return true;
@@ -276,6 +313,7 @@ public class AutoAdminCommand extends Command {
 
             Set<Map.Entry<String, List<Long>>> bwords = this.bannedWords.entrySet();
             //Scan for banned word
+            //TODO Not adding each instance of the word, only that it conatins it
             for (Map.Entry<String, List<Long>> entry : bwords) {
                 if (input.contains(entry.getKey())) {
                     if(entry.getValue().isEmpty()
@@ -327,7 +365,7 @@ public class AutoAdminCommand extends Command {
                 List<Long> ids = this.bannedWords.putIfAbsent(word.toLowerCase(),
                                                               new ArrayList<>());
                 //noinspection ConstantConditions
-                if (!ids.isEmpty()) ids.clear();
+                if (ids != null && !ids.isEmpty()) ids.clear();
             }
         }
 
@@ -439,6 +477,113 @@ public class AutoAdminCommand extends Command {
             return eb.build();
         }
 
+        /**
+         * Delete one or more members' record and unban them if banned.
+         * @param members The members to pardon.
+         */
+        private void pardon(List<Member> members) {
+            members.forEach( m -> pardon(m.getUser()));
+        }
+
+        /**
+         * Delete one or more members' record and unban them if banned.
+         * @param users The members to pardon.
+         */
+        private void pardon(Collection<User> users) {
+            users.forEach( m -> pardon(m));
+        }
+
+        /**
+         * Delete a member's record and unban them if banned.
+         * Then notify them of their pardon.
+         * @param user The member to pardon
+         */
+        private void pardon(User user) {
+            GuildController controller = Launcher.getGuild(guildID).getController();
+            String pardon = "*You have been pardoned in* **"
+                    + controller.getGuild().getName()
+                    + "**. *All records have been cleared and any bans uplifted.*";
+            userRecords.remove(user.getIdLong());
+            controller.unban(user).queue();
+            user.openPrivateChannel().queue( c -> c.sendMessage(pardon).queue() );
+        }
+
+        /**
+         * A User's private post-kicked message embed.
+         * @param member The member to build the embed around.
+         * @return A User's private post-kicked message embed.
+         */
+        private MessageEmbed kickEmbed(Member member) {
+            UserRecord rec = userRecords.get(member.getUser().getIdLong());
+            StringBuilder sb = new StringBuilder();
+            EmbedBuilder eb = Launcher.getStandardEmbedBuilder()
+                                      .setColor(new Color(0xFB1800));
+            eb.setTitle("You have been kicked by AutoAdmin!");
+            sb.append("You have been kicked from **")
+              .append(member.getGuild().getName())
+              .append("** after breaking too many rules.\n");
+
+            eb.setDescription(sb.toString());
+            sb.setLength(0);
+
+            if (!rec.wordInfractions.isEmpty()) {
+                sb.setLength(0);
+                for (Map.Entry<String, Integer> e : rec.wordInfractions.entrySet()) {
+                    sb.append("\"").append(e.getKey()).append("\" : used ")
+                      .append(e.getValue()).append(" times.").append("\n");
+                }
+                eb.addField("Banned Word Usages", sb.toString(), false);
+                sb.setLength(0);
+            }
+
+            sb.append("You have a total record of ").append(rec.infractions)
+              .append(" infractions and ").append(rec.kicks).append(" kick(s).");
+            if (hardThresh > 0)
+                sb.append("\n***If you are kicked ")
+                  .append(hardThresh - rec.kicks)
+                  .append(" more times, you will be banned from the server.***");
+            eb.addField("YOUR RECORD", sb.toString(), false);
+
+            return eb.build();
+
+        }
+
+        /**
+         * A User's private post-banned message embed.
+         * @param member The member to build the embed around.
+         * @return A User's private post-banned message embed.
+         */
+        private MessageEmbed banEmbed(Member member) {
+            UserRecord rec = userRecords.get(member.getUser().getIdLong());
+            StringBuilder sb = new StringBuilder();
+            EmbedBuilder eb = Launcher.getStandardEmbedBuilder()
+                                      .setColor(new Color(0xFB1800));;
+            eb.setTitle("You have been banned by AutoAdmin!");
+            sb.append("You have been ***banned*** from **")
+              .append(member.getGuild().getName())
+              .append("** after breaking too many rules.\n");
+
+            eb.setDescription(sb.toString());
+            sb.setLength(0);
+
+            if (!rec.wordInfractions.isEmpty()) {
+                sb.setLength(0);
+                for (Map.Entry<String, Integer> e : rec.wordInfractions.entrySet()) {
+                    sb.append("\"").append(e.getKey()).append("\" : used ")
+                      .append(e.getValue()).append(" times.").append("\n");
+                }
+                eb.addField("Banned Word Usages", sb.toString(), false);
+                sb.setLength(0);
+            }
+
+            sb.append("You have a total record of ").append(rec.infractions)
+              .append(" infractions, ").append(rec.kicks).append(" kicks")
+              .append(", and ").append(rec.bans).append(" bans.");
+            eb.addField("YOUR RECORD", sb.toString(), false);
+
+            return eb.build();
+        }
+
         /** @return The status of the autoadmin as an Embed */
         private MessageEmbed toEmbed() {
             StringBuilder sb = new StringBuilder();
@@ -458,7 +603,7 @@ public class AutoAdminCommand extends Command {
             if (kickThresh > 0)
                 eb.addField("Infractions to Auto-Kick", kickThresh+"", true);
             if (hardThresh > 0)
-                eb.addField("Infractions to Auto-Ban", hardThresh+"", true);
+                eb.addField("Kicks to Auto-Ban", hardThresh+"", true);
 
             //Exempted
             Guild guild = Launcher.getGuild(guildID);
@@ -559,11 +704,7 @@ public class AutoAdminCommand extends Command {
         StringBuilder sb = new StringBuilder();
         String[] args = this.cleanArgs(bot, event);
         if (args.length < 2) {
-            sb.append("Please use one of these commands").append("```")
-              .append("aac banword <word>\n")
-              .append("aac rmwrd <word_index> or aac rmwrd <word>")
-              .append("aac seebanned\n").append("aac record <@member> [@member2]\n")
-              .append("aac pardon <@member> [@member2]...").append("```");
+            sb.append("Please use ``help aac`` for a list of commands");
             event.reply(sb.toString());
             return;
         }
@@ -678,20 +819,9 @@ public class AutoAdminCommand extends Command {
             case CLEARRECORD:
                 //aac pardon <@member> [@member2]...
                 if (admin != null) {
-                    event.getMessage().getMentionedMembers().forEach(m -> {
-                        if (admin.userRecords.remove(m.getUser().getIdLong()) != null)
-                        m.getUser().openPrivateChannel().queue( c -> {
-                            sb.append("*You have been pardoned by* **")
-                              .append(event.getMember().getEffectiveName())
-                              .append("** *in the* **")
-                              .append(event.getGuild().getName())
-                              .append("** *server. All previous rule infractions have")
-                              .append(" been deleted*");
-                            c.sendMessage(sb.toString()).queue();
-                            sb.setLength(0);
-                        });
-                    });
-                    event.reply("User records have been cleared.");
+                    admin.pardon(event.getMessage().getMentionedUsers());
+                    admin.pardon(event.getMessage().getMentionedMembers());
+                    event.reply("*User records have been cleared*.");
                 } else {
                     event.reply(NO_AA_FOUND);
                 }
@@ -734,7 +864,7 @@ public class AutoAdminCommand extends Command {
                         event.reply("*Please use a number between 0 and 2,147,483,647.*");
                         return;
                     }
-                    admin.kickThresh = i;
+                    admin.hardThresh = i;
                     event.reply(
                             "The number of infractions to auto-ban a member is now " + i);
                 } else {
@@ -757,7 +887,7 @@ public class AutoAdminCommand extends Command {
                     event.getMessage().getMentionedRoles().forEach(
                             r -> admin.exemptRoles.add(r.getIdLong())
                     );
-                    event.reply("The Members and|or Roles are now exempt from AutoAdmin.");
+                    event.reply("The Members and|or Roles are now isExempt from AutoAdmin.");
                 } else {
                     event.reply(NO_AA_FOUND);
                 }
@@ -778,7 +908,7 @@ public class AutoAdminCommand extends Command {
                     event.getMessage().getMentionedRoles().forEach(
                             r -> admin.exemptRoles.remove(r.getIdLong())
                     );
-                    sb.append("The Members and|or Roles are no longer exempt ")
+                    sb.append("The Members and|or Roles are no longer isExempt ")
                       .append("from AutoAdmin.");
                     event.reply(sb.toString());
                 } else {
@@ -956,7 +1086,7 @@ public class AutoAdminCommand extends Command {
             case "sb":
                     return ACTION.SETBANTHRESH;
             case "immune":
-            case "exempt":
+            case "isExempt":
             case "ex":
                 return ACTION.ADDEXEMPT;
             case "removeexempt":
@@ -1029,8 +1159,9 @@ public class AutoAdminCommand extends Command {
         //Infractions
         eb.addField("Set Number of Infractions to Kick",
                     "aac sk <number>\n*Aliases: setkickthresh, setkick*", true)
-          .addField("Set Number of Infractions to Ban",
-                    "aac sb <number>\n*Aliases: setbanthresh, setban*", true);
+          .addField("Set Number of Kicks to Ban",
+                    "aac sb <number>\n*Aliases: setban*\n*Set to 0 to disable*",
+                    true);
 
         eb.addField("See Member Infraction Record(s)",
                     "aac ir <@Member> [@member2]...\n*Aliases: userrecord, record*",
@@ -1039,7 +1170,7 @@ public class AutoAdminCommand extends Command {
                     "aac pardon <@member> [@member2]...\n*Alias: clrrec*", true);
 
         sb.append("aac ex <@Member> [@member2]...").append("\naac ex <@Role> [@Role2]...")
-          .append("\n*Aliases: exempt, immune*");
+          .append("\n*Aliases: isExempt, immune*");
         eb.addField("Exempt Members & Roles", sb.toString(), true);
         sb.setLength(0);
 
