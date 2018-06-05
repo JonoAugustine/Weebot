@@ -43,7 +43,7 @@ public abstract class Command {
      * The aliases of the command, when calling a command these function identically to calling the
      * {@link com.jagrosh.jdautilities.command.Command#name Command.name}.
      */
-    protected final List<String> aliases;
+    protected final String[] aliases;
 
     /** A small help String that summarizes the function of the command. */
     protected final String help;
@@ -134,8 +134,8 @@ public abstract class Command {
 *                  {@link HelpCommand}?
      * @param nsfw
      */
-    protected Command(String name, List<String> aliases, String help,
-            /*String helpLong,*/ String argFormat, boolean guildOnly, boolean ownerOnly,
+    protected Command(String name, String[] aliases, String help,
+                      String argFormat, boolean guildOnly, boolean ownerOnly,
                       int cooldown, boolean hidden, boolean nsfw) {
 
         this.name       = name;
@@ -433,7 +433,7 @@ public abstract class Command {
      *
      * @return The aliases for the Command
      */
-    public List<String> getAliases() {
+    public String[] getAliases() {
         return aliases;
     }
 

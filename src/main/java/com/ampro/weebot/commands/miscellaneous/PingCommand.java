@@ -15,7 +15,7 @@ public class PingCommand extends Command {
 
     public PingCommand() {
         super("Ping"
-                , new ArrayList<>()
+                , new String[0]
                 , "Check my response time"
                 ,""
                 , false

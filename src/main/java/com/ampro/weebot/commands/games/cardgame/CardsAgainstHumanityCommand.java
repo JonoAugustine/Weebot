@@ -1026,9 +1026,10 @@ public class CardsAgainstHumanityCommand extends Command {
     }
 
     public CardsAgainstHumanityCommand() {
-        super("CardsAgainstHumanity", new ArrayList<>(Arrays.asList("cah")),
+        super("CardsAgainstHumanity", new String[]{"cah"},
               "Start a game of CardsAgainstHumanity or make custom cards.",
-              "cah <command> [arguments]", true, false, 0, false, false
+              "cah <command> [arguments]", true, false,
+              0, false, false
         );
     }
 

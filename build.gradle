@@ -54,6 +54,7 @@ dependencies {
     compile 'net.dv8tion:JDA:3.6.0_354'
     compile 'com.jagrosh:jda-utilities:2.1'
     compile 'com.google.code.gson:gson:2.8.1'
+    compile 'ca.pjer:chatter-bot-api:1.4.7'
 }
 
 // holds classes included into client.jar and util.jar, so they are to be excluded from server.jar

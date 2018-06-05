@@ -18,7 +18,7 @@ public class SpamCommand extends Command {
 
     public SpamCommand() {
         super("Spam",
-              new ArrayList<>(Arrays.asList("spamthis", "spamattack", "spamlimit")),
+              new String[]{"spamthis", "spamattack", "spamlimit"},
               "Spam the chat", "<spam> [number_of_spams] [message]",
               false, false, 0, false,
               false

@@ -24,7 +24,6 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public class AutoAdminCommand extends Command {
 
-
     /**
      * The administrative settings held by the Weebot, e.g. :<br>
      *     Channel-Banned words, infraction limits,
@@ -131,7 +130,7 @@ public class AutoAdminCommand extends Command {
         }
 
         @Override
-        public void accept(BetterMessageEvent event) {
+        public void accept(Weebot bot, BetterMessageEvent event) {
             if (dead) return;
             Member member = event.getMember();
             if (member.isOwner()
@@ -521,7 +520,7 @@ public class AutoAdminCommand extends Command {
     public AutoAdminCommand() {
         super(
                 "AutoAdmin",
-                new ArrayList<>(Arrays.asList("aac", "adminbot", "botadmin")),
+                new String[]{"aac", "adminbot", "botadmin"},
                 "Control the Bot's admin capabilities and rules.",
                 null,
                 true,
@@ -1054,6 +1053,7 @@ public class AutoAdminCommand extends Command {
           .addBlankField(false);
 
         return eb.build();
+
     }
 
 }

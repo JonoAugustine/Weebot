@@ -1,33 +1,54 @@
 package com.ampro.weebot.entities.bot;
 
 import com.ampro.weebot.commands.IPassive;
+import com.ampro.weebot.commands.miscellaneous.ReminderCommand.Reminder;
 import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.Event;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.hooks.EventListener;
-import net.dv8tion.jda.core.hooks.ListenerAdapter;
-import org.apache.commons.collections4.iterators.EntrySetMapIterator;
 
-import java.lang.management.LockInfo;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+/**
+ * A Weebot that serves to link the relationship of the user and the Weebot net
+ * across servers and private chat.
+ */
 public class GlobalWeebot extends Weebot implements EventListener {
 
-    private static final int PASSIVE_LIMIT = 1000;
+    private static final int GLOBAL_PASSIVE_LIMIT = 1000;
 
-    /** A Map of {@link IPassive} objects mapped to user IDs */
-    private final ConcurrentHashMap<Long, List<IPassive>> USER_PASSIVES
-            = new ConcurrentHashMap<>();
+    /** The number of concurrent personal {@link IPassive} a user can have */
+    private static final int USER_PASSIVE_LIMIT = 10;
+
+    /** A list of {@link IPassive} objects mapped to user IDs */
+    private final ConcurrentHashMap<Long, List<IPassive>> USER_PASSIVES;
+
+    public static final int GLOBAL_REMINDER_LIMIT = 1000;
+
+    /** The number of concurrent {@link Reminder Reminders} a user can have: {@value} */
+    private static final int USER_REMINDER_LIMIT = 5;
+
+    private static final int PREMIUM_REMINDER_LIMIT = 15; //For expansion
+
+    /** A list of {@link Reminder Reminders} mapped to the user ID */
+    private final ConcurrentHashMap<Long, List<Reminder>> USER_REMINDERS;
 
     /**
      * Create a Weebot with no guild or call sign.
      * <b>This is only called for the private-chat instance Weebot created
      * when a new Database is created.</b>
      */
-    public GlobalWeebot() { super(); }
+    public GlobalWeebot() {
+        super();
+        USER_PASSIVES  = new ConcurrentHashMap<>();
+        USER_REMINDERS = new ConcurrentHashMap<>();
+    }
 
     /**
      * Distribute each event to all the Global Weebot's {@link IPassive} objects.
@@ -39,10 +60,11 @@ public class GlobalWeebot extends Weebot implements EventListener {
             if(((MessageReceivedEvent) event).getAuthor().isBot()) {
                 return;
             }
+            //Hand the message to each passive then clean any dead passives
             this.USER_PASSIVES.forEach((ID, passiveList) -> {
                 passiveList.forEach(p -> {
                     try {
-                        p.accept(new BetterMessageEvent(
+                        p.accept(this, new BetterMessageEvent(
                                 (MessageReceivedEvent) event,
                                 ((MessageReceivedEvent) event).getAuthor()
                         ));
@@ -54,18 +76,23 @@ public class GlobalWeebot extends Weebot implements EventListener {
                 });
                 passiveList.removeIf( IPassive::dead );
             });
-            if (this.USER_PASSIVES.size() > PASSIVE_LIMIT)
+            //Clear any key that is unused past the GLOBAL_PASSIVE_LIMIT
+            if (this.USER_PASSIVES.size() > GLOBAL_PASSIVE_LIMIT)
                 this.cleanUserPassives();
         }
     }
 
-    /** Remove keys with null or empty lists from {@link GlobalWeebot#USER_PASSIVES}*/
+    /**
+     * Remove keys with null, empty or dead, lists from
+     * {@link GlobalWeebot#USER_PASSIVES}.
+     */
     private synchronized void cleanUserPassives() {
-        Iterator<Map.Entry<Long, List<IPassive>>> it
-                = this.USER_PASSIVES.entrySet().iterator();
+        Iterator<Map.Entry<Long, List<IPassive>>> it;
+        it = this.USER_PASSIVES.entrySet().iterator();
         while (it.hasNext()) {
-            List o = it.next().getValue();
-            if (o == null || o.isEmpty())
+            List<IPassive> list = it.next().getValue();
+            list.removeIf( IPassive::dead );
+            if (list == null || list.isEmpty())
                 it.remove();
         }
     }
@@ -92,16 +119,19 @@ public class GlobalWeebot extends Weebot implements EventListener {
      *
      * @param user The user
      * @param passive The passive to map to the User
-     * @return {@code false} if the {@link IPassive} already exists in the
-     * {@link User user's} list of {@link IPassive passives}.
+     * @return {@code false} if the user has already reached the maximum number of
+     *          passives
      */
     public final synchronized boolean addUserPassive(User user, IPassive passive) {
         List<IPassive> pasList = USER_PASSIVES.get(user);
         if (pasList == null) {
             pasList = new ArrayList<>();
             USER_PASSIVES.put(user.getIdLong(), pasList);
+        } else if (pasList.size() == USER_PASSIVE_LIMIT) {
+            return false;
         }
-        return pasList.add(passive);
+        pasList.add(passive);
+        return true;
     }
 
     /**
@@ -128,6 +158,34 @@ public class GlobalWeebot extends Weebot implements EventListener {
         List<IPassive> list = this.USER_PASSIVES.get(user.getIdLong());
         if (list == null) return false;
         return list.remove(passive);
+    }
+
+    /**
+     * Adds a Reminder to the user's list of reminders. Does not add the
+     * reminder if the user already has the maximum number of reminders running
+     * @param user The user to add a reminder to.
+     * @param reminder The Reminder
+     * @return {@code false} if the user already has the maximum number of reminders.
+     */
+    public final synchronized boolean addUserReminder(User user, Reminder reminder) {
+        List<Reminder> list = USER_REMINDERS.get(user.getIdLong());
+        if (list == null) {
+            list = new ArrayList<>();
+            USER_REMINDERS.put(user.getIdLong(), list);
+        } else if (list.size() == USER_REMINDER_LIMIT)
+            return false;
+        list.add(reminder);
+        return true;
+    }
+
+    /**
+     * Remove a reminder from the user's list.
+     * @param user The user
+     * @param reminder The reminder
+     * @return The reminder removed, null if it was not found.
+     */
+    public final synchronized Reminder removeUserReminder(User user, Reminder reminder) {
+        return USER_REMINDERS.get(user.getIdLong()).remove(reminder) ? reminder : null;
     }
 
 }

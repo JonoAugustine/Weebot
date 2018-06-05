@@ -22,8 +22,6 @@ import java.util.Arrays;
  * <p>Contains all commands relating to any {@link Weebot} settings, as such,
  * takes commands leading with the name of any setting.</p>
  *
- * TODO Seperate into subclasses
- *
  * @author Jonathan Augustine
  */
 public class ManageSettingsCommand extends Command {
@@ -33,7 +31,7 @@ public class ManageSettingsCommand extends Command {
 
         public ShowSettingsCommand() {
             super("Settings"
-                    , new ArrayList<>(Arrays.asList("seesettings", "setting", "ssc"))
+                    , new String[]{"seesettings", "setting", "ssc"}
                     , "See my settings."
                     ,""
                     , true
@@ -89,7 +87,7 @@ public class ManageSettingsCommand extends Command {
         ChangeNameCommand() {
             super(
                     "ChangeName",
-                    new ArrayList<>(Arrays.asList("nickname", "setname", "cnc")),
+                    new String[]{"nickname", "setname", "cnc"},
                     "Change my Server Nickname",
                     "<new nickname>",
                     true,
@@ -145,8 +143,7 @@ public class ManageSettingsCommand extends Command {
         ChangeCallsignCommand() {
             super(
                     "ChangeCallsign",
-                    new ArrayList<>(
-                            Arrays.asList("callsign", "callwith", "callw", "prefix")),
+                    new String[]{"callsign", "callwith", "callw", "prefix"},
                     "Change the Prefix used to call me (Under 4 characters)",
                     "<prefix>",
                     true,
@@ -209,8 +206,7 @@ public class ManageSettingsCommand extends Command {
         SetExplicitCommand() {
             super(
                     "setexplicit",
-                    new ArrayList<>(
-                            Arrays.asList("explicit", "expl", "vulgar", "pottymouth")),
+                    new String[]{"explicit", "expl", "vulgar", "pottymouth"},
                     "(Dis)allow explicit commands.",
                     "<expl> <on/off>",
                     true,
@@ -288,8 +284,7 @@ public class ManageSettingsCommand extends Command {
         SetNSFWCommand() {
             super(
                     "SetNSWF",
-                    new ArrayList<>(
-                            Arrays.asList("nsfw", "naughty")),
+                    new String[]{"nsfw", "naughty"},
                     "(Dis)allow NSFW commands.",
                     "<nsfw> <on/off>",
                     true,
@@ -360,8 +355,7 @@ public class ManageSettingsCommand extends Command {
         SetParticipateCommand() {
             super(
                 "SetParticipate",
-                new ArrayList<>(
-                        Arrays.asList("participate", "interrupt", "parti", "livebot")),
+                new String[]{"participate", "interrupt", "parti", "livebot"},
                 "(Dis)allow Active Participation.",
                 "<parti> <on/off>",
                 true,
@@ -433,10 +427,7 @@ public class ManageSettingsCommand extends Command {
 
     public ManageSettingsCommand() {
         super("Settings"
-                , new ArrayList<>(Arrays.asList(
-                        "managesettings", "changesettings", "setting",
-                        "msc"
-                ))
+                , new String[]{ "managesettings", "changesettings", "setting", "msc"}
                 , "See and change my settings."
                 ,"[true/false/on/off]"
                 , true

@@ -17,7 +17,7 @@ public class RestartCommand  extends Command {
     public RestartCommand() {
         super(
                 "Restart",
-                new ArrayList<>(Arrays.asList("reload")),
+                new String[]{"reload"},
                 "Restart the bot, compiling any new code.",
                 "",
                 false,

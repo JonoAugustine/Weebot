@@ -83,7 +83,7 @@ public class SecretePhraseCommand extends Command {
         }
 
         @Override
-        public void accept(BetterMessageEvent event) {
+        public void accept(Weebot bot, BetterMessageEvent event) {
             if (event.getType() != BetterMessageEvent.TYPE.RECIVED) return;
             User member = event.getAuthor();
             SPPlayer memberPlayer = this.PLAYERS.get(member.getIdLong());
@@ -187,7 +187,7 @@ public class SecretePhraseCommand extends Command {
     public SecretePhraseCommand() {
         super(
                 "SecretePhrase",
-                new ArrayList<>(Arrays.asList("sphrase")),
+                new String[]{"sphrase"},
                 "A game designed by Dernst",
                 "", //TODO argformat
                 true,
@@ -234,7 +234,7 @@ public class SecretePhraseCommand extends Command {
         //Save the args
         String[] args = this.cleanArgs(bot, event.getArgs());
         if (args.length < 2) {
-            event.reply("Please usen\n```start, join, callout, or end```\nto interact " +
+            event.reply("Please use\n```start, join, callout, or end```\nto interact " +
                     "with Secrete Phrase games.");
             return;
         }

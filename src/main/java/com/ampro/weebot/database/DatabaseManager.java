@@ -117,8 +117,8 @@ public class DatabaseManager {
             System.err.println("\tUnable to locate databseBK.wbot.");
             //e.printStackTrace();
             //e2.printStackTrace();
-        } catch (IOException e) {
-            System.err.println("IOException while reading gson from backup file.");
+        } catch (Exception e) {
+            System.err.println("\tException while reading gson from backup file.");
             e.printStackTrace();
         }
 

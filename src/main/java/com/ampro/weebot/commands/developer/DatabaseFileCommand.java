@@ -19,7 +19,7 @@ public class DatabaseFileCommand extends Command {
     public DatabaseFileCommand() {
         super(
             "DatabaseFile",
-            new ArrayList<>(Arrays.asList("dbf", "wbotfile", "wbotdb")),
+            new String[]{"dbf", "wbotfile", "wbotdb"},
             "Get the latest wbot Database backup.",
             "dbf",
             false,

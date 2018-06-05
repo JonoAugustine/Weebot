@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * A database for storing all the information about the Weebot program
  * between downtime.
+ * TODO: add error log
  */
 public class Database {
 

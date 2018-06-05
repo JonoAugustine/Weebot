@@ -5,6 +5,7 @@
 
 package com.ampro.weebot;
 
+import com.ampro.weebot.commands.ChatbotCommand;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.HelpCommand;
 import com.ampro.weebot.commands.NotePadCommand;
@@ -23,6 +24,7 @@ import com.ampro.weebot.commands.miscellaneous.SelfDestructMessageCommand;
 import com.ampro.weebot.commands.miscellaneous.SpamCommand;
 import com.ampro.weebot.database.Database;
 import com.ampro.weebot.database.DatabaseManager;
+import com.ampro.weebot.entities.bot.Chatbot;
 import com.ampro.weebot.entities.bot.GlobalWeebot;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.jda.JDABuilder;
@@ -70,7 +72,8 @@ public class Launcher {
 					new ListGuildsCommand(), new PingCommand(), new SpamCommand(),
 					new NotePadCommand(), new SelfDestructMessageCommand(),
 					new SecretePhraseCommand(), new WeebotSuggestionCommand(),
-					new CardsAgainstHumanityCommand(), new OutHouseCommand()
+					new CardsAgainstHumanityCommand(), new OutHouseCommand(),
+                    new ChatbotCommand()
 			));
 
 	/** The database */
@@ -94,6 +97,7 @@ public class Launcher {
        Launcher.updateWeebots();
        Launcher.startSaveTimer(.5);
        Launcher.addListeners();
+
    }
 
    /**

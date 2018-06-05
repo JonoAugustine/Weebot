@@ -70,8 +70,7 @@ public class WeebotSuggestionCommand extends Command {
     public WeebotSuggestionCommand() {
         super(
                 "Suggest",
-                new ArrayList<>(Arrays.asList("suggestion", "sugg", "loadsuggs",
-                        "seesuggs", "allsuggs")),
+                new String[]{"suggestion", "sugg", "loadsuggs", "seesuggs", "allsuggs"},
                 "Submit a suggestion to the Weebot developers right from Discord!",
                 "<suggest/suggestion/sugg> <Your Suggestion>",
                 false,

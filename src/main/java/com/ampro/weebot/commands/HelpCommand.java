@@ -20,9 +20,7 @@ public class HelpCommand extends Command {
     public HelpCommand() {
         super(
                 "Help"
-                , new ArrayList<>(
-                        Arrays.asList("helpme", "showhelp")
-                )
+                , new String[]{"helpme", "showhelp"}
                 , "Show how to interact with me."
                 , "<help> [command]"
                 , false

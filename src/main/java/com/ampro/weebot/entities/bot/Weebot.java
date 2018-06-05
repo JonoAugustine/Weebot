@@ -145,7 +145,7 @@ public class Weebot implements Comparable<Weebot> {
      * 			<br> {@code 2} if the message begins with the right {@code nickname} <br>
      * 			{@code 0} otherwise
      */
-    private int validateCallsign(String... args) {
+    public int validateCallsign(String... args) {
         if(args.length == 0) return -1;
         //Don't take commands with a space between the call sign and the command
         //It would just make life less easy
@@ -165,7 +165,6 @@ public class Weebot implements Comparable<Weebot> {
     public void readEvent(BetterEvent event) {
         if(event instanceof BetterMessageEvent) {
             BetterMessageEvent messageEvent = (BetterMessageEvent) event;
-            this.submitToPassives(messageEvent);
             if (!locked) {
                 switch (this.validateCallsign(messageEvent.getArgs())) {
                     case 1:
@@ -177,6 +176,7 @@ public class Weebot implements Comparable<Weebot> {
                     default:
                         break;
                 }
+                this.submitToPassives(messageEvent);
             }
         }
     }
@@ -232,7 +232,7 @@ public class Weebot implements Comparable<Weebot> {
      * @param event The event to distribute.
      */
     private void submitToPassives(BetterMessageEvent event) {
-        this.passives.forEach( p -> p.accept(event));
+        this.passives.forEach( p -> p.accept(this, event));
         this.passives.removeIf( IPassive::dead );
     }
 

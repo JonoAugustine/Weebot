@@ -19,9 +19,7 @@ public class ShutdownCommand extends Command {
     public ShutdownCommand() {
         super(
                 "ShutDown"
-                , new ArrayList<>(Arrays.asList(
-                        "killbots", "devkill", "tite", "ohbuggeroff"
-                ))
+                , new String[]{"killbots", "devkill", "tite", "ohbuggeroff"}
                 , "Safely shutdown the Weebots."
                 , ""
                 , false

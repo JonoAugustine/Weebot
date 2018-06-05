@@ -46,7 +46,7 @@ public class OutHouseCommand extends Command {
         }
 
         @Override
-        public void accept(BetterMessageEvent event) {
+        public void accept(Weebot bot, BetterMessageEvent event) {
             User user = Launcher.getJda().getUserById(userID);
             this.remainingHours -=
                     ChronoUnit.HOURS.between(startTime, OffsetDateTime.now());
@@ -87,7 +87,7 @@ public class OutHouseCommand extends Command {
     public OutHouseCommand() {
         super(
                 "OutHouse",
-                new ArrayList<>(Arrays.asList("ohc")),
+                new String[]{"ohc"},
                 "Have the bot respond to anyone who mentions you for the given time.",
                 "outhouse [time]",
                 false,
@@ -150,7 +150,7 @@ public class OutHouseCommand extends Command {
         if (Launcher.GLOBAL_WEEBOT.addUserPassive(event.getAuthor(), oh))
             event.reply("I will hold down the fort while you're away! :guardsman: ");
         else
-            event.reply("Sorry, something went wrong :cry:. Please try again later.");
+            event.reply("Sorry, You have already reached the maximum number of Passives");
 
     }
 

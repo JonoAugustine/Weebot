@@ -20,10 +20,8 @@ public class ListGuildsCommand extends Command {
 
     public ListGuildsCommand() {
         super("ListGuilds"
-                , new ArrayList<>(Arrays.asList(
-                        "showguilds", "showhosts", "listhosts", "allguilds"
-                        , "allhosts", "listhomes", "distrobution"
-                ))
+                , new String[]{"showguilds", "showhosts", "listhosts", "allguilds",
+                        "allhosts", "listhomes", "distrobution"}
                 , "List all the guilds hosting a Weebot."
                 ,""
                 , false
