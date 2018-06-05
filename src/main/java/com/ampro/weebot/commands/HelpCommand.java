@@ -112,17 +112,18 @@ public class HelpCommand extends Command {
         sb.append("Write and edit server Note Pads\n")
           .append("Note Pads can be locked to specific")
           .append("roles, members, and text channels.");
-        eb.addField("Note Pads (notes)", sb.toString(), false);
+        eb.addField("Note Pads (notes)", sb.toString(), true);
         sb.setLength(0);
 
         sb.append("Play a game of Cards Against Humanity and ")
           .append("make custom decks with user-made cards.\n")
           .append("(*Official decks up to Expansion 3*)");
-        eb.addField("Cards Against Humanity (cah)", sb.toString(), false);
+        eb.addField("Cards Against Humanity (cah)", sb.toString(), true);
         sb.setLength(0);
 
-        eb.addField("Secrete Phrase Game", "(*Under construction*)", false)
-          .addField("Reminders (rem)","(*Under construction*)", false);
+        eb.addField("Secrete Phrase Game", "(*Under construction*)", true)
+          .addField("Reminders (rem)","(*Under construction*)", true)
+          .addField("Calculator (calc)", "(*Under Construction*)", true);
 
         sb.append("Delete the message after a given amount of seconds")
           .append(" (30 sec by default)");

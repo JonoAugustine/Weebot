@@ -7,19 +7,29 @@ import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 
+import java.time.OffsetDateTime;
+
 /**
  * Start or stop a {@link Reminder}.
+ * TODO: Instead of each reminder being its own thread & timer, store a number of
+ * reminders and check each reminder every min.
  */
 public class ReminderCommand extends Command {
 
     /**
      * A Reminder that can last up to 1 month.
      */
-    public static final class Reminder implements Runnable {
+    public static final class Reminder {
 
-        @Override
-        public void run() {
+        private final OffsetDateTime startTime;
+                Reminder(/* Somehow */) {
+            startTime = OffsetDateTime.now();
 
+        }
+
+        /** @return {@code true} if the time remaining is 0 */
+        public boolean check() {
+            return false;
         }
 
     }

@@ -18,10 +18,7 @@ import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand;
 import com.ampro.weebot.commands.management.AutoAdminCommand;
 import com.ampro.weebot.commands.management.ManageSettingsCommand;
 import com.ampro.weebot.commands.management.ManageSettingsCommand.ShowSettingsCommand;
-import com.ampro.weebot.commands.miscellaneous.OutHouseCommand;
-import com.ampro.weebot.commands.miscellaneous.PingCommand;
-import com.ampro.weebot.commands.miscellaneous.SelfDestructMessageCommand;
-import com.ampro.weebot.commands.miscellaneous.SpamCommand;
+import com.ampro.weebot.commands.miscellaneous.*;
 import com.ampro.weebot.database.Database;
 import com.ampro.weebot.database.DatabaseManager;
 import com.ampro.weebot.entities.bot.Chatbot;
@@ -73,7 +70,7 @@ public class Launcher {
 					new NotePadCommand(), new SelfDestructMessageCommand(),
 					new SecretePhraseCommand(), new WeebotSuggestionCommand(),
 					new CardsAgainstHumanityCommand(), new OutHouseCommand(),
-                    new ChatbotCommand()
+                    new ChatbotCommand(), new CalculatorCommand()
 			));
 
 	/** The database */

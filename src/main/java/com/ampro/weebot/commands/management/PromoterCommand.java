@@ -13,6 +13,7 @@ import java.util.List;
 
 /**
  * Initialize, edit or disable a {@link Promoter} passive.
+ * TODO
  */
 public class PromoterCommand extends Command {
 

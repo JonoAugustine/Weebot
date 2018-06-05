@@ -89,7 +89,7 @@
         }
       },
       "nickname": "Weebot",
-      "callsign": "\\",
+      "callsign": "]",
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": true,
@@ -141,7 +141,7 @@
         }
       },
       "nickname": "Weebot",
-      "callsign": "\u003c\u003e",
+      "callsign": "\\",
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
