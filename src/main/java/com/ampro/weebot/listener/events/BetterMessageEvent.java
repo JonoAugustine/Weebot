@@ -111,8 +111,7 @@ public class BetterMessageEvent extends BetterEvent {
 
         this.messageEvent = event;
 
-        this.arguments = message.getContentStripped().trim()
-                                .replace("\\", "").split("\\s+", -1);
+        this.arguments = message.getContentStripped().trim().split("\\s+", -1);
 
         if (event instanceof MessageDeleteEvent) {
             this.type = TYPE.DELETED;

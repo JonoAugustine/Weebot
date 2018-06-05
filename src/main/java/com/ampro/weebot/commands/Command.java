@@ -311,6 +311,16 @@ public abstract class Command {
     }
 
     /**
+     * @param bot
+     * @param event
+     * @return the Message String without the command or prefix.
+     */
+    protected final String clipCommand(Weebot bot, BetterMessageEvent event) {
+        return event.toString().substring(bot.getCallsign().length()
+                                                  + event.getArgs()[0].length());
+    }
+
+    /**
      * Checks whether a command is allowed in a {@link net.dv8tion.jda.core.entities.TextChannel TextChannel}
      * by searching the channel topic for topic tags relating to the command.
      *

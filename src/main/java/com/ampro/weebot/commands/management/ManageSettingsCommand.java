@@ -171,8 +171,6 @@ public class ManageSettingsCommand extends Command {
                         event.reply("Please keep the callsign under 4 characters.");
                         return;
                     } else {
-                        if (args[1] == "\\")
-                            event.reply("*Sorry, `\\` cannot be used as a prefix.**");
                         bot.setCallsign(args[1]);
                         event.reply("You can now call me with ```" + args[1] +
                                             "<command> ```or```@" + bot

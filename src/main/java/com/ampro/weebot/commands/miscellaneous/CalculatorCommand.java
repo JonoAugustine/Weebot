@@ -32,9 +32,7 @@ public class CalculatorCommand extends Command {
 
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
-        //TODO
-        String[] args = cleanArgs(bot, event);
-        String expression = String.join(" ",Arrays.copyOfRange(args, 1, args.length));
+        String expression = clipCommand(bot, event);
 
         Expression e = new Expression(expression);
 

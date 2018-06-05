@@ -89,7 +89,7 @@
         }
       },
       "nickname": "Weebot",
-      "callsign": "]",
+      "callsign": "\\",
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": true,
