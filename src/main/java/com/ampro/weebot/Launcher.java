@@ -176,11 +176,6 @@ public class Launcher {
                         ? new GlobalWeebot() : DATABASE.getGlobalWeebot();
 	}
 
-	private static void setUpTempDir() {
-        new File("temp/out").mkdirs();
-        new File("temp/in").mkdirs();
-    }
-
 	/**
 	 * Calls the update method for each Weebot to setup NickNames
 	 * changed during downtime and initialize transient variables.
@@ -232,6 +227,13 @@ public class Launcher {
 	   Launcher.saveTimer.start();
    }
 
+	private static void setUpTempDir() {
+		if (!TEMP_OUT.exists())
+			TEMP_OUT.mkdirs();
+		if (!TEMP_IN.exists())
+			TEMP_IN.mkdirs();
+	}
+
 	/**
 	 * Clears the temp folders.
 	 */
@@ -240,7 +242,8 @@ public class Launcher {
 			FileUtils.cleanDirectory(new File("temp"));
 		} catch (IOException e) {
 			System.err.println("Failed clear temp dir.");
-		}
+            e.printStackTrace();
+        }
 	}
 
 	/**

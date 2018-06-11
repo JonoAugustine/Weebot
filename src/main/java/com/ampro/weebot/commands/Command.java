@@ -157,9 +157,7 @@ public abstract class Command {
      */
     public void run(Weebot bot, BetterMessageEvent event) {
         if(this.check(event)) {
-            Thread thread = new Thread(() -> this.execute(bot, event));
-            thread.setName(bot.getBotId() + " : " + this.name);
-            thread.start();
+            this.execute(bot, event);
         }
     }
 

@@ -89,7 +89,7 @@
         }
       },
       "nickname": "Weebot",
-      "callsign": "w]",
+      "callsign": "\\",
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": true,
@@ -113,6 +113,14 @@
             "numKicked": 0,
             "numBanned": 0,
             "infCaught": 0
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.entities.bot.Chatbot",
+          "DATA": {
+            "guildID": 139168039634468865,
+            "dead": false,
+            "TALKLIM": 30
           }
         }
       ],

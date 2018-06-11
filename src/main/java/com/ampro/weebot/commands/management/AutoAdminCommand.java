@@ -176,26 +176,10 @@ public class AutoAdminCommand extends Command {
                 //We use .complete() instead of event.reply() because we need
                 //to send the message before we kick/ban them in order to send
                 //the message at all
-                if (kickThresh > 0 && rec.infractions % kickThresh == 0) {
-                    PrivateChannel c = event.getAuthor().openPrivateChannel().complete();
-                    rec.kicks++;
-                    numKicked++;
-                    if (hardThresh > 0 && rec.kicks >= hardThresh) {
-                        rec.bans++;
-                        numBanned++;
-                        c.sendMessage(banEmbed(event.getMember())).complete();
-                        controller.ban(event.getMember(), 7,
-                                       "You have been kicked too many times.")
-                                  .complete();
-                    } else {
-                        c.sendMessage(kickEmbed(event.getMember())).complete();
-                        controller.kick(event.getMember(),
-                                        "You have broken the rules too many times."
-                        ).complete();
-                    }
-                }
-
+                threshCheck(rec, controller, event.getAuthor(), event.getMember(),
+                            event.getMessage());
             }
+
         }
 
         /**
@@ -252,11 +236,12 @@ public class AutoAdminCommand extends Command {
                     rec.addWordInfraction(b);
                     infCaught++;
 
-                    //Check thresholds TODO
-
-                    //Act
-                    //  Warn user
-                    //  Kick/sban/ban
+                    GuildController controller = Launcher.getGuild(guildID)
+                                                         .getController();
+                    //We use .complete() instead of event.reply() because we need
+                    //to send the message before we kick/ban them in order to send
+                    //the message at all
+                    threshCheck(rec, controller, m.getAuthor(), m.getMember(), m);
 
                     m.getAuthor().openPrivateChannel()
                      .queue(c -> infractionEmbed(m, b.toString()));
@@ -266,6 +251,28 @@ public class AutoAdminCommand extends Command {
             if (messages.size() == 2000)
                 return -2;
             return 1;
+        }
+
+        private void threshCheck(UserRecord rec, GuildController controller, User author,
+                                 Member member, Message m) {
+            if (kickThresh > 0 && rec.infractions % kickThresh == 0) {
+                PrivateChannel c = author.openPrivateChannel().complete();
+                rec.kicks++;
+                numKicked++;
+                if (hardThresh > 0 && rec.kicks >= hardThresh) {
+                    rec.bans++;
+                    numBanned++;
+                    c.sendMessage(banEmbed(member)).complete();
+                    controller.ban(member, 7,
+                                   "You have been kicked too many times.")
+                              .complete();
+                } else {
+                    c.sendMessage(kickEmbed(member)).complete();
+                    controller.kick(member,
+                                    "You have broken the rules too many times."
+                    ).complete();
+                }
+            }
         }
 
         /**
