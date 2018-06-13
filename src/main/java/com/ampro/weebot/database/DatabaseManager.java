@@ -1,22 +1,28 @@
 package com.ampro.weebot.database;
 
 import com.ampro.weebot.commands.IPassive;
+import com.ampro.weebot.util.Logger;
+import com.ampro.weebot.util.io.FileManager;
+import com.ampro.weebot.util.io.InterfaceAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import net.dv8tion.jda.core.entities.Message;
 
 import java.io.*;
 
 /**
  * Holds a database and reads & writes {@code Database} it from/to file
  * using GSON (JSON).
- * //TODO Add another redundancy to the databases
  * @author Jonathan Augustine
  */
-public class DatabaseManager {
+public class DatabaseManager extends FileManager {
 
-    public static final File DIR = new File("databases");
+    /** Database Directory */
+    public static final File DIR_DBS = new File(FileManager.DIR_HOME, "databases");
+
+    private static final File SAVE = new File(DIR_DBS, "database.wbot");
+    private static final File BKUP = new File(DIR_DBS, "dbsBK.wbot");
+    private static final File BKBK = new File(TEMP, "dbstemp.wbot");
 
     private static final Gson GSON
             = new GsonBuilder().enableComplexMapKeySerialization()
@@ -34,13 +40,12 @@ public class DatabaseManager {
      *
      */
     public static synchronized int save(Database database) {
-        if (!corruptBackupCheck()) return -2;
-        File file = new File(DIR, "database.wbot");
+        if (!corruptBackupReadCheck()) return -2;
         try {
-            if (!DIR.mkdir()) {
+            if (!DIR_DBS.mkdir()) {
                 //System.err.println("\tDirectory not created.");
             }
-            if (!file.createNewFile()) {
+            if (!SAVE.createNewFile()) {
                 //System.err.println("\tFile not created");
             }
         } catch (IOException e) {
@@ -48,9 +53,8 @@ public class DatabaseManager {
             e.printStackTrace();
             return -1;
         }
-        try (Writer writer = new FileWriter(file)) {
+        try (Writer writer = new FileWriter(SAVE)) {
             GSON.toJson(database, writer);
-            System.out.println("Database saved.");
         } catch (FileNotFoundException e) {
             System.err.println("File not found while writing gson to file.");
             e.printStackTrace();
@@ -63,30 +67,36 @@ public class DatabaseManager {
         return 1;
     }
 
-
+    /**
+     * Save a backup of the database.
+     * @param database
+     * @return -1 if any error prevented the database to be backed up.
+     */
     public static synchronized int backUp(Database database) {
-        File file = new File(DIR, "databaseBK.wbot");
         try {
-            if (!DIR.mkdir()) {
-                //System.err.println("\tDirectory not created.");
+            if (!DIR_DBS.exists() && DIR_DBS.mkdirs()) {
+                Logger.derr("[Database Manager] Failed to generate database dir!");
+                return -1;
             }
-            if (!file.createNewFile()) {
-                //System.err.println("\tFile not created");
+            else if (!BKUP.exists() && !BKUP.createNewFile()) {
+                Logger.derr("[Database Manager] Failed to generate database backup!");
+                return -1;
             }
         } catch (IOException e) {
-            System.err.println("IOException while creating Database backup file.");
+            Logger.derr("IOException while creating Database backup file.");
             e.printStackTrace();
             return -1;
         }
-        try (Writer writer = new FileWriter(file)) {
+        if (!corruptBackupWriteCheck(database)) return -1;
+        try (Writer writer = new FileWriter(BKUP)) {
             GSON.toJson(database, writer);
             return 1;
         } catch (FileNotFoundException e) {
-            System.err.println("File not found while writing gson backup to file.");
+            Logger.derr("File not found while writing gson backup to file.");
             e.printStackTrace();
             return -1;
         } catch (IOException e) {
-            System.err.println("IOException while writing gson backup to file.");
+            Logger.derr("IOException while writing gson backup to file.");
             e.printStackTrace();
             return -1;
         }
@@ -99,29 +109,29 @@ public class DatabaseManager {
      *             null if database not found.
      */
     public static synchronized Database load() {
+        String f = "[Database Manager]";
         Database out = null;
         Database bk = null;
-        try (Reader reader = new FileReader(new File(DIR, "database.wbot"))) {
+        try (Reader reader = new FileReader(SAVE)) {
             out = GSON.fromJson(reader, Database.class);
         } catch (FileNotFoundException e) {
-            System.err.println(
+            System.err.println( f +
                     "Unable to locate database.wbot.\n\tAttempting to load backup file..."
             );
         } catch (IOException e) {
-            System.err.println("IOException while reading gson from file.");
+            System.err.println(f + "IOException while reading gson from file.");
             e.printStackTrace();
         }
-        try (Reader bKreader = new FileReader(new File(DIR, "databaseBK.wbot"))) {
+        try (Reader bKreader = new FileReader(BKUP)) {
              bk = GSON.fromJson(bKreader, Database.class);
         } catch (FileNotFoundException e) {
-            System.err.println("\tUnable to locate databseBK.wbot.");
+            System.err.println(f + "\t\tUnable to locate databseBK.wbot.");
             //e.printStackTrace();
             //e2.printStackTrace();
         } catch (Exception e) {
-            System.err.println("\tException while reading gson from backup file.");
+            System.err.println( f + "\tException while reading gson from backup file.");
             e.printStackTrace();
         }
-
         return out == bk ? out : (bk == null ? out : bk);
 
     }
@@ -132,16 +142,32 @@ public class DatabaseManager {
      *
      * @return {@code false} if gson fails to load the backup.
      */
-    private static synchronized boolean corruptBackupCheck() {
-        try (Reader reader = new FileReader(new File(DIR, "databaseBK.wbot"))) {
-            Database test = GSON.fromJson(reader, Database.class);
+    private static synchronized boolean corruptBackupReadCheck() {
+        try (Reader reader = new FileReader(BKBK)) {
+            GSON.fromJson(reader, Database.class);
         } catch (JsonSyntaxException e) {
             e.printStackTrace();
             return false;
-        } catch (FileNotFoundException e) {
-            return true;
         } catch (IOException e) {
             return true;
+        }
+        return true;
+    }
+
+    /**
+     * Attempt to load the backup file. If any {@link Gson} exceptions are thrown
+     * while the file is found, return false.
+     *
+     * @return {@code false} if gson fails to load the backup.
+     */
+    private static synchronized boolean corruptBackupWriteCheck(Database db) {
+        try (Writer writer = new FileWriter(BKBK)) {
+            GSON.toJson(db, writer);
+        } catch (JsonSyntaxException e) {
+            e.printStackTrace();
+            return false;
+        } catch (IOException e) {
+            BKBK.delete();
         }
         return true;
     }

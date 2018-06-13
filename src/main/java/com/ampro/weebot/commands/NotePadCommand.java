@@ -17,6 +17,8 @@ import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+import static com.ampro.weebot.util.io.FileManager.TEMP_OUT;
+
 /**
  * View and modify {@link NotePad Note Pads}.
  * TODO: Add separate view and edit permissions.
@@ -808,7 +810,7 @@ public class NotePadCommand extends Command {
      * @return A file of the notepad. Null if an err occurrs.
      */
     private static File makeNotePadFile(NotePad pad) {
-        File file = new File(Launcher.TEMP_OUT, pad.name + " NotePad.txt");
+        File file = new File(TEMP_OUT, pad.name + " NotePad.txt");
         try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
             String out = pad.name + "\n\n";
             int i = 1;

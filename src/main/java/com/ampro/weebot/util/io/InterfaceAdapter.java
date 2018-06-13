@@ -1,4 +1,4 @@
-package com.ampro.weebot.database;
+package com.ampro.weebot.util.io;
 
 import com.google.gson.*;
 

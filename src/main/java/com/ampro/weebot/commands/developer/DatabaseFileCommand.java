@@ -55,7 +55,7 @@ public class DatabaseFileCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
-        File out = new File(DatabaseManager.DIR, "databaseBK.wbot");
+        File out = new File(DatabaseManager.DIR_DBS, "databaseBK.wbot");
         if (!out.exists()) {
             event.privateReply("There is no backup file.");
             return;

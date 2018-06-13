@@ -156,8 +156,6 @@ public abstract class Command {
      * @param event The {@link BetterMessageEvent} that called the command.
      */
     public void run(Weebot bot, BetterMessageEvent event) {
-        //TODO return boolean and duplicate isCommandFor inside this to allow to
-        //child commands
         for (Command c : children)
             if (c.isCommandFor(event.getArgs()[0])) {
                 c.run(bot, event);

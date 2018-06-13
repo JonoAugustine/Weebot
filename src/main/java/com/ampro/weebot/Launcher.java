@@ -24,6 +24,8 @@ import com.ampro.weebot.entities.bot.GlobalWeebot;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.jda.JDABuilder;
 import com.ampro.weebot.listener.EventDispatcher;
+import com.ampro.weebot.util.Logger;
+import com.ampro.weebot.util.io.FileManager;
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.JDA;
@@ -31,15 +33,17 @@ import net.dv8tion.jda.core.JDA.Status;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import org.apache.commons.io.FileUtils;
+import sun.rmi.runtime.Log;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import static com.ampro.weebot.database.DatabaseManager.DIR_DBS;
+import static com.ampro.weebot.util.Logger.LOGS;
+import static com.ampro.weebot.util.io.FileManager.*;
 
 /**
  * Runner/Main class of the Weebot network.
@@ -50,8 +54,10 @@ import java.util.List;
  */
 public class Launcher {
 
-	public static final File TEMP_OUT = new File("temp/out");
-	public static final File TEMP_IN = new File("temp/in");
+	private static final String TOKEN_WBT
+			= "NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA.Etf9Q9wuk1YCUnUox0IbIon1dUk";
+	private static final String TOKEN_TEST
+            = "NDQ0MzIzNzMyMDEwMzAzNDg4.DdaQyQ.ztloAQmeuUffaC-DC9zE-LFwPq4";
 
 	private static JDA JDA_CLIENT;
 	private static Thread saveTimer;
@@ -79,19 +85,47 @@ public class Launcher {
 	 * @throws RateLimitedException
 	 * @throws InterruptedException
 	 */
-   public static void main(final String[] args) {
+   public static void main(final String[] args)
+   throws LoginException, InterruptedException {
+       System.err.println("[Launcher] Building Directories...");
+       if(!Launcher.buildDirs()) {
+           System.err.println("[Launcher]\tFAILED!");
+           System.exit(-1);
+       }
+       System.err.println("[Launcher] Initializing Logger...");
+       if(!Logger.init()) {
+           System.err.println("[Launcher]\tLogger failed to initialize!");
+       }
        //Debug
        //RestAction.setPassContext(true); // enable context by default
        //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace;
        Launcher.jdaLogIn();
        //Launcher.jdaDevLogIn();
        Launcher.setUpDatabase();
-       Launcher.setUpTempDir();
        Launcher.updateWeebots();
        Launcher.startSaveTimer(.5);
        Launcher.addListeners();
 
+       Logger.derr("[Launcher] Initialization Complete!\n\n");
    }
+
+    /**
+     * Build the all file directories used by Weebot.
+     * @return {@code false} if any directory is not created (and did not already exist)
+     */
+    private static boolean buildDirs() {
+        if (!DIR_DBS.exists())
+            DIR_DBS.mkdirs();
+        if (!LOGS.exists())
+            LOGS.mkdirs();
+        if (!TEMP_OUT.exists())
+            TEMP_OUT.mkdirs();
+        if (!TEMP_IN.exists())
+            TEMP_IN.mkdirs();
+        if (!DIR_HOME.exists() || !TEMP_OUT.exists() || !TEMP_IN.exists()
+                || !DIR_DBS.exists() || !LOGS.exists()) return false;
+        else return true;
+    }
 
    /**
     * Initiates {@code Launcher} data and connects to Weebot API.
@@ -100,19 +134,13 @@ public class Launcher {
     * @throws LoginException
     * @throws InterruptedException
     */
-   private static void jdaLogIn() {
-	   try {
-		   //Connect to API
-		   JDABuilder builder = new JDABuilder(AccountType.BOT)
-				   .setToken("NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA" +
-						             ".Etf9Q9wuk1YCUnUox0IbIon1dUk")
-				   .setGame(Game.playing("@Weebot help"));
-		   JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
-	   } catch (LoginException e) {
-           e.printStackTrace();
-       } catch (InterruptedException e) {
-	       e.printStackTrace();
-       }
+   private static void jdaLogIn()
+   throws LoginException, InterruptedException {
+       //Connect to API
+       Logger.derr("[Launcher] Logging in to Weebot JDA client...");
+       JDABuilder builder = new JDABuilder(AccountType.BOT)
+                   .setToken(TOKEN_WBT).setGame(Game.playing("@Weebot help"));
+       JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
    }
 
 	/**
@@ -122,23 +150,19 @@ public class Launcher {
 	 * @throws LoginException
 	 * @throws InterruptedException
 	 */
-	private static void jdaDevLogIn() {
-		try {
-			//Connect to API
-			JDABuilder builder = new JDABuilder(AccountType.BOT)
-					.setToken("NDQ0MzIzNzMyMDEwMzAzNDg4.DdaQyQ.ztloAQmeuUffaC-DC9zE-LFwPq4");
-			Launcher.JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
-		} catch (LoginException e) {
-			e.printStackTrace();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
+	private static void jdaDevLogIn()
+    throws LoginException, InterruptedException {
+        //Connect to API
+        Logger.derr("[Launcher] Logging in to TestBot JDA client...");
+        JDABuilder builder = new JDABuilder(AccountType.BOT).setToken(TOKEN_TEST);
+        Launcher.JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
 	}
 
 	/**
 	 * Adds event listeners to the JDA.
 	 */
 	private static void addListeners() {
+        Logger.derr("[Launcher] Adding Listeners to JDA Client...");
    		Launcher.JDA_CLIENT.addEventListener(new EventDispatcher(), GLOBAL_WEEBOT);
    }
 
@@ -148,49 +172,49 @@ public class Launcher {
 	 * Is called only once during setup.
 	 */
 	private static void setUpDatabase() {
-		System.err.println("[Launcher-setUpDatabase]\n\tSetting up Database.");
+	    String f = "[Launcher#setUpDatabase]";
+        Logger.derr(f + " Setting up Database...");
+		Logger.derr(f + "\tLoading database...");
 		Database db = DatabaseManager.load();
 		Launcher.DATABASE = db == null ? new Database() : db;
 		if (db == null) {
-			System.err.println("\tDatabase not found, creating new database.");
-			System.err.println("\tLoading known Guilds");
+            Logger.derr(f + "\t\tUnable to load database, creating new database.");
+			Logger.derr(f + "\t\tLoading known Guilds");
 			List<Guild> guilds = Launcher.JDA_CLIENT.getGuilds();
 			for (Guild g : guilds) {
 				Launcher.DATABASE.addBot(new Weebot(g));
 			}
 			DatabaseManager.save(Launcher.DATABASE);
-			System.err.println("\tDatabase created and saved to file.");
-			return;
+			Logger.derr(f + "\tDatabase created and saved to file.");
 		} else {
-			System.err.println("\tDatabase located.");
-			System.err.println("\tUpdating registered Guilds.");
+			Logger.derr(f + "\tDatabase located.");
+            Logger.derr(f + "\tUpdating registered Guilds.");
 			Launcher.updateGuilds();
 		}
-		System.err.println("\tBacking up database.");
+		Logger.derr(f + "\tBacking up database.");
 		DatabaseManager.backUp(Launcher.DATABASE);
-		GLOBAL_WEEBOT = DATABASE.getGlobalWeebot() == null
+		Launcher.GLOBAL_WEEBOT = DATABASE.getGlobalWeebot() == null
                         ? new GlobalWeebot() : DATABASE.getGlobalWeebot();
 	}
+
+    /**
+     * Update the Weebots in the database after downtime.
+     * <b>This is only called once on startup</b>
+     */
+    private static void updateGuilds() {
+        List<Guild> guilds = Launcher.JDA_CLIENT.getGuilds();
+        guilds.forEach(g -> Launcher.DATABASE.addBot(new Weebot(g)));
+    }
 
 	/**
 	 * Calls the update method for each Weebot to setup NickNames
 	 * changed during downtime and initialize transient variables.
 	 */
 	private static void updateWeebots() {
+        Logger.derr("[Launcher] Updating Weebots...");
 	    DATABASE.getWeebots().forEach( (id, bot) -> bot.startup() );
 		DATABASE.getGlobalWeebot().startup();
     }
-
-	/**
-	 * Update the Weebots in the database after downtime.
-	 * <b>This is only called once on startup</b>
-	 */
-	private static void updateGuilds() {
-		List<Guild> guilds = Launcher.JDA_CLIENT.getGuilds();
-		for (Guild g : guilds) {
-			Launcher.DATABASE.addBot(new Weebot(g));
-		}
-	}
 
 	/**
 	 * Starts a thread that saves a database backup each interval.
@@ -222,61 +246,46 @@ public class Launcher {
 	   Launcher.saveTimer.start();
    }
 
-	private static void setUpTempDir() {
-		if (!TEMP_OUT.exists())
-			TEMP_OUT.mkdirs();
-		if (!TEMP_IN.exists())
-			TEMP_IN.mkdirs();
-	}
-
-	/**
-	 * Clears the temp folders.
-	 */
-	private static void clearTempDirs() {
-		try {
-			FileUtils.cleanDirectory(new File("temp"));
-		} catch (IOException e) {
-			System.err.println("Failed clear temp dir.");
-            e.printStackTrace();
-        }
-	}
-
-	/**
-	 * Begin the shutdown sequence. Backup and save database.
-	 */
+	/** Begin the shutdown sequence. Backup and save database. */
 	public static void shutdown() {
-		for (Object o : Launcher.JDA_CLIENT.getRegisteredListeners())
+	    String f = "[Launcher#shutdown]";
+        Logger.derr(f + " Shutdown signal received.");
+        Logger.derr(f + "\tClearing registered event listeners...");
+        for (Object o : Launcher.JDA_CLIENT.getRegisteredListeners())
 		    JDA_CLIENT.removeEventListener(o);
-
-		Launcher.saveTimer.interrupt();
-		System.err.println("Shutdown signal received.");
+        Logger.derr(f + "\tStopping save timer thread...");
+        Launcher.saveTimer.interrupt();
+        Logger.derr(f + "\tShutting down Global Weebot Reminder pools...");
 		DATABASE.getGlobalWeebot().getReminderPools().forEach(
 		        (id, pool) -> pool.shutdown()
         );
-		DatabaseManager.backUp(Launcher.DATABASE);
-		switch (DatabaseManager.save(Launcher.DATABASE)) {
-            case -1:
-                System.err.println("\tCould not save backup due to file exception.");
-                break;
-            case -2:
-                System.err.println("\tCould not save backup due to corrupt Json.");
-                break;
-            default:
-                System.out.println("\tDatabase saved.");
-		}
+        Logger.derr(f + "\tBacking up database...");
+		if (DatabaseManager.backUp(Launcher.DATABASE) < 1)
+            Logger.derr(f + "\t\tFailed to backup database!");
+		else {
+            Logger.derr(f + "\tSaving Database...");
+            switch (DatabaseManager.save(Launcher.DATABASE)) {
+                case -1:
+                    Logger.derr(f + "\t\tCould not save backup due to file exception.");
+                    break;
+                case -2:
+                    Logger.derr(f + "\t\tCould not save backup due to corrupt Json.");
+                    break;
+                default:
+                    Logger.derr(f + "\t\tDatabase saved.");
+            }
+        }
 
-		System.err.println("\tClearing temp directories.");
-		Launcher.clearTempDirs();
+		Logger.derr(f + "\tClearing temp directories...");
+		FileManager.clearTempDirs();
 
-		System.out.println("\tSuccessfully shutdown.");
+        Logger.derr(f + "Successfully shutdown.");
 
-		JDA_CLIENT.shutdown();
+        JDA_CLIENT.shutdown();
 
 	}
 
-	/**
-	 * @return The database.
-	 */
+	/** @return The acting database. */
 	public static Database getDatabase() {
 		synchronized (Launcher.DATABASE) {
 			return Launcher.DATABASE;

@@ -23,6 +23,8 @@ import java.util.*;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static com.ampro.weebot.util.io.FileManager.TEMP_OUT;
+
 
 /**
  * Run Cards Against Humanity games, and make custom cards. <br> Users can:<br> start a
@@ -214,7 +216,7 @@ public class CardsAgainstHumanityCommand extends Command {
 
             /** @return A File of the Deck's black and white cards. */
             private File toFile() {
-                File file = new File(Launcher.TEMP_OUT,
+                File file = new File(TEMP_OUT,
                                      this.name.replace("_", " ") + " Deck.txt"
                 );
                 try (BufferedWriter bw = new BufferedWriter(new FileWriter(file))) {
