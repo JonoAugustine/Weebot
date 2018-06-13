@@ -1,7 +1,7 @@
 package com.ampro.weebot.entities.bot;
 
 import com.ampro.weebot.commands.IPassive;
-import com.ampro.weebot.commands.miscellaneous.ReminderCommand.Reminder;
+import com.ampro.weebot.commands.miscellaneous.ReminderCommand.ReminderPool;
 import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.User;
@@ -22,7 +22,6 @@ import java.util.concurrent.ConcurrentHashMap;
 public class GlobalWeebot extends Weebot implements EventListener {
 
     private static final int GLOBAL_PASSIVE_LIMIT = 1000;
-
     /** The number of concurrent personal {@link IPassive} a user can have */
     private static final int USER_PASSIVE_LIMIT = 10;
 
@@ -30,14 +29,8 @@ public class GlobalWeebot extends Weebot implements EventListener {
     private final ConcurrentHashMap<Long, List<IPassive>> USER_PASSIVES;
 
     public static final int GLOBAL_REMINDER_LIMIT = 1000;
-
-    /** The number of concurrent {@link Reminder Reminders} a user can have: {@value} */
-    private static final int USER_REMINDER_LIMIT = 5;
-
-    private static final int PREMIUM_REMINDER_LIMIT = 15; //For expansion
-
-    /** A list of {@link Reminder Reminders} mapped to the user ID */
-    private final ConcurrentHashMap<Long, List<Reminder>> USER_REMINDERS;
+    /** A list of {@link ReminderPool} mapped to the user ID */
+    private final ConcurrentHashMap<Long, ReminderPool> USER_REMINDERS;
 
     /**
      * Create a Weebot with no guild or call sign.
@@ -48,6 +41,12 @@ public class GlobalWeebot extends Weebot implements EventListener {
         super();
         USER_PASSIVES  = new ConcurrentHashMap<>();
         USER_REMINDERS = new ConcurrentHashMap<>();
+    }
+
+    @Override
+    public void startup() {
+        super.startup();
+        USER_REMINDERS.forEach( (id, pool) -> pool.startup() );
     }
 
     /**
@@ -160,32 +159,20 @@ public class GlobalWeebot extends Weebot implements EventListener {
         return list.remove(passive);
     }
 
-    /**
-     * Adds a Reminder to the user's list of reminders. Does not add the
-     * reminder if the user already has the maximum number of reminders running
-     * @param user The user to add a reminder to.
-     * @param reminder The Reminder
-     * @return {@code false} if the user already has the maximum number of reminders.
-     */
-    public final synchronized boolean addUserReminder(User user, Reminder reminder) {
-        List<Reminder> list = USER_REMINDERS.get(user.getIdLong());
-        if (list == null) {
-            list = new ArrayList<>();
-            USER_REMINDERS.put(user.getIdLong(), list);
-        } else if (list.size() == USER_REMINDER_LIMIT)
-            return false;
-        list.add(reminder);
-        return true;
+    public final synchronized ReminderPool getReminderPool(User user) {
+        return USER_REMINDERS.get(user.getIdLong());
     }
 
-    /**
-     * Remove a reminder from the user's list.
-     * @param user The user
-     * @param reminder The reminder
-     * @return The reminder removed, null if it was not found.
-     */
-    public final synchronized Reminder removeUserReminder(User user, Reminder reminder) {
-        return USER_REMINDERS.get(user.getIdLong()).remove(reminder) ? reminder : null;
+    public final synchronized ReminderPool getReminderPool(Long userId) {
+        return USER_REMINDERS.get(userId);
+    }
+
+    public final synchronized ConcurrentHashMap<Long, ReminderPool> getReminderPools() {
+        return USER_REMINDERS;
+    }
+
+    public void addUserReminder(User author, ReminderPool pool) {
+        USER_REMINDERS.put(author.getIdLong(), pool);
     }
 
 }

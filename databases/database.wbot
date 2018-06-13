@@ -4,7 +4,68 @@
     "USER_PASSIVES": {
       "139167730237571072": []
     },
-    "USER_REMINDERS": {},
+    "USER_REMINDERS": {
+      "139167730237571072": {
+        "authorId": 139167730237571072,
+        "pool": [
+          {
+            "guildId": 139168039634468865,
+            "channelId": 439522471369244683,
+            "message": "",
+            "startTime": {
+              "dateTime": {
+                "date": {
+                  "year": 2018,
+                  "month": 6,
+                  "day": 11
+                },
+                "time": {
+                  "hour": 15,
+                  "minute": 17,
+                  "second": 56,
+                  "nano": 496000000
+                }
+              },
+              "offset": {
+                "totalSeconds": -14400
+              }
+            },
+            "lifeSpan": 77185,
+            "bug": false,
+            "inGuild": false
+          },
+          {
+            "guildId": 139168039634468865,
+            "channelId": 439522471369244683,
+            "message": "",
+            "startTime": {
+              "dateTime": {
+                "date": {
+                  "year": 2018,
+                  "month": 6,
+                  "day": 11
+                },
+                "time": {
+                  "hour": 15,
+                  "minute": 18,
+                  "second": 3,
+                  "nano": 682000000
+                }
+              },
+              "offset": {
+                "totalSeconds": -14400
+              }
+            },
+            "lifeSpan": 0,
+            "bug": false,
+            "inGuild": false
+          },
+          null,
+          null,
+          null
+        ]
+      }
+    },
     "GUILD_ID": 0,
     "BOT_ID": "0W",
     "BIRTHDAY": {
@@ -114,14 +175,6 @@
             "numBanned": 0,
             "infCaught": 0
           }
-        },
-        {
-          "CLASSNAME": "com.ampro.weebot.entities.bot.Chatbot",
-          "DATA": {
-            "guildID": 139168039634468865,
-            "dead": false,
-            "TALKLIM": 30
-          }
         }
       ],
       "NOTES": [],
@@ -159,5 +212,6 @@
       "NOTES": [],
       "spamLimit": 5
     }
-  }
+  },
+  "PREMIUM_USERS": []
 }

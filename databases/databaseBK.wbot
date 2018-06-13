@@ -114,14 +114,6 @@
             "numBanned": 0,
             "infCaught": 0
           }
-        },
-        {
-          "CLASSNAME": "com.ampro.weebot.entities.bot.Chatbot",
-          "DATA": {
-            "guildID": 139168039634468865,
-            "dead": false,
-            "TALKLIM": 30
-          }
         }
       ],
       "NOTES": [],
@@ -159,5 +151,6 @@
       "NOTES": [],
       "spamLimit": 5
     }
-  }
+  },
+  "PREMIUM_USERS": []
 }

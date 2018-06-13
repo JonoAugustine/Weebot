@@ -188,12 +188,9 @@ public class Weebot implements Comparable<Weebot> {
      */
     private void runCommand(BetterMessageEvent event, int startIndex) {
         //get the arg string without the callsign
-        String command;
-        if(startIndex == 0) command = event.getArgs()[0].substring(this.callsign.length());
-        else command = event.getArgs()[1];
-
+        String call = Command.cleanArgs(this, event)[0];
         for (Command c : Launcher.getCommands()) {
-            if(c.isCommandFor(command)) {
+            if(c.isCommandFor(call)) {
                 if(this.commandIsAllowed(c, event)) {
                     c.run(this, event);
                 } else {
@@ -240,7 +237,7 @@ public class Weebot implements Comparable<Weebot> {
      * Update the bot's mutable settings that may have changed during downtime like
      * NickName. And initialize transient variables.
      */
-    public void updateBotOnStartup() {
+    public void startup() {
         if (this.getGuildID() > 0) //Ignores the private bot
             this.nickname = Launcher.getGuild(this.GUILD_ID)
                                     .getMember(Launcher.getJda().getSelfUser())

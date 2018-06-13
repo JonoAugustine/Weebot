@@ -17,11 +17,9 @@ import com.ampro.weebot.commands.games.SecretePhraseCommand;
 import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand;
 import com.ampro.weebot.commands.management.AutoAdminCommand;
 import com.ampro.weebot.commands.management.ManageSettingsCommand;
-import com.ampro.weebot.commands.management.ManageSettingsCommand.ShowSettingsCommand;
 import com.ampro.weebot.commands.miscellaneous.*;
 import com.ampro.weebot.database.Database;
 import com.ampro.weebot.database.DatabaseManager;
-import com.ampro.weebot.entities.bot.Chatbot;
 import com.ampro.weebot.entities.bot.GlobalWeebot;
 import com.ampro.weebot.entities.bot.Weebot;
 import com.ampro.weebot.jda.JDABuilder;
@@ -32,9 +30,7 @@ import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDA.Status;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.exceptions.ContextException;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import net.dv8tion.jda.core.requests.RestAction;
 import org.apache.commons.io.FileUtils;
 
 import javax.security.auth.login.LoginException;
@@ -70,7 +66,7 @@ public class Launcher {
 					new NotePadCommand(), new SelfDestructMessageCommand(),
 					new SecretePhraseCommand(), new WeebotSuggestionCommand(),
 					new CardsAgainstHumanityCommand(), new OutHouseCommand(),
-                    new ChatbotCommand(), new CalculatorCommand()
+                    new ChatbotCommand(), new CalculatorCommand(), new ReminderCommand()
 			));
 
 	/** The database */
@@ -181,9 +177,8 @@ public class Launcher {
 	 * changed during downtime and initialize transient variables.
 	 */
 	private static void updateWeebots() {
-		for (Weebot bot : DATABASE.getWeebots().values()) {
-			bot.updateBotOnStartup();
-		}
+	    DATABASE.getWeebots().forEach( (id, bot) -> bot.startup() );
+		DATABASE.getGlobalWeebot().startup();
     }
 
 	/**
@@ -255,6 +250,9 @@ public class Launcher {
 
 		Launcher.saveTimer.interrupt();
 		System.err.println("Shutdown signal received.");
+		DATABASE.getGlobalWeebot().getReminderPools().forEach(
+		        (id, pool) -> pool.shutdown()
+        );
 		DatabaseManager.backUp(Launcher.DATABASE);
 		switch (DatabaseManager.save(Launcher.DATABASE)) {
             case -1:

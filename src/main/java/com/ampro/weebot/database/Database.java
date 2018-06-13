@@ -37,12 +37,15 @@ public class Database {
     /** All Weebots currently in circulation, mapped to their Guild's ID */
     private final ConcurrentHashMap<Long, Weebot> WEEBOTS;
 
+    private final List<Long> PREMIUM_USERS;
+
     /** Build an empty {@code Database}.*/
     public Database() {
         GLOBAL_WEEBOT = new GlobalWeebot();
         WEEBOTS = new ConcurrentHashMap<>();
         WEEBOTS.putIfAbsent(0L, new Weebot());
         SUGGESTIONS = new ConcurrentHashMap<>();
+        PREMIUM_USERS = new ArrayList<>();
     }
 
     /**
@@ -115,6 +118,26 @@ public class Database {
      */
     public synchronized long removeDeveloper(long id) {
         return this.DEV_IDS.remove(DEV_IDS.indexOf(id));
+    }
+
+    public synchronized boolean isPremium(User user) {
+        return PREMIUM_USERS.contains(user.getIdLong());
+    }
+
+    public synchronized boolean isPremium(Long userId) {
+        return PREMIUM_USERS.contains(userId);
+    }
+
+    public synchronized List<Long> premiumUsers() {
+        return Collections.unmodifiableList(PREMIUM_USERS);
+    }
+
+    public synchronized boolean addPremiumUser(User user) {
+        return PREMIUM_USERS.add(user.getIdLong());
+    }
+
+    public synchronized boolean removePremiumUser(User user) {
+        return PREMIUM_USERS.remove(user.getIdLong());
     }
 
     public synchronized void addSuggestion(Suggestion suggestion) {

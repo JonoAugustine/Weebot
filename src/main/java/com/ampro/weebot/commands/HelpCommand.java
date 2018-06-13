@@ -122,8 +122,8 @@ public class HelpCommand extends Command {
         sb.setLength(0);
 
         eb.addField("Secrete Phrase Game", "(*Under construction*)", true)
-          .addField("Reminders (rem)","(*Under construction*)", true)
-          .addField("Calculator (calc)", "(*Under Construction*)", true);
+          .addField("Reminders (rem)","Set a reminder for up to 30 days.", true)
+          .addField("Calculator (calc)", "do...math *and stuff*", false);
 
         sb.append("Delete the message after a given amount of seconds")
           .append(" (30 sec by default)");

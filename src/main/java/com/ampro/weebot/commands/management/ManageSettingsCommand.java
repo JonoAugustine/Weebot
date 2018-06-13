@@ -444,25 +444,6 @@ public class ManageSettingsCommand extends Command {
     }
 
     /**
-     * Check if the event is one of the {@link Command#children} of the Settings Command.
-     * @param bot The {@link Weebot} that called the command.
-     * @param event The {@link BetterMessageEvent} that called the command.
-     */
-    @Override
-    public void run(Weebot bot, BetterMessageEvent event) {
-        if (this.check(event)) {
-            String name = cleanArgsLowerCase(bot, event)[0];
-            for (Command c : this.children) {
-                if(c.isCommandFor(name)) {
-                    c.run(bot, event);
-                    return;
-                }
-            }
-            this.execute(bot, event);
-        }
-    }
-
-    /**
      * Show Settings Command
      * @param bot The {@link Weebot} which called this command.
      * @param event The {@link BetterMessageEvent} that called the command.

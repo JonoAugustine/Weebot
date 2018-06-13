@@ -156,6 +156,13 @@ public abstract class Command {
      * @param event The {@link BetterMessageEvent} that called the command.
      */
     public void run(Weebot bot, BetterMessageEvent event) {
+        //TODO return boolean and duplicate isCommandFor inside this to allow to
+        //child commands
+        for (Command c : children)
+            if (c.isCommandFor(event.getArgs()[0])) {
+                c.run(bot, event);
+                return;
+            }
         if(this.check(event)) {
             this.execute(bot, event);
         }
@@ -250,7 +257,7 @@ public abstract class Command {
      * @param args String array to clean.
      * @return new string array with the command call at index {@code [0]}.
      */
-    protected String[] cleanArgs(Weebot bot, String[] args) {
+    protected static String[] cleanArgs(Weebot bot, String[] args) {
         //Make it an ArrayList b/c easy to work with
         ArrayList<String> temp = new ArrayList<>(Arrays.asList(args));
         if (args[0].startsWith(bot.getCallsign())) {
@@ -280,8 +287,8 @@ public abstract class Command {
      * @param args String array to clean.
      * @return new string array with the command call at index {@code [0]}.
      */
-    protected String[] cleanArgsLowerCase(Weebot bot, String[] args) {
-        args = this.cleanArgs(bot, args);
+    protected static String[] cleanArgsLowerCase(Weebot bot, String[] args) {
+        args = cleanArgs(bot, args);
         for (int i = 0; i < args.length; i++) {
             args[i] = args[i].toLowerCase();
         }
@@ -294,8 +301,8 @@ public abstract class Command {
      * @param event {@link BetterMessageEvent} to clean the arguments of.
      * @return new string array with the command call at index {@code [0]}.
      */
-    protected String[] cleanArgs(Weebot bot, BetterMessageEvent event) {
-        return this.cleanArgs(bot, event.getArgs());
+    public static String[] cleanArgs(Weebot bot, BetterMessageEvent event) {
+        return cleanArgs(bot, event.getArgs());
     }
 
     /**
@@ -304,8 +311,8 @@ public abstract class Command {
      * @param event {@link BetterMessageEvent} to clean the arguments of.
      * @return new string array with the command call at index {@code [0]}.
      */
-    protected final String[] cleanArgsLowerCase(Weebot bot, BetterMessageEvent event) {
-        return this.cleanArgsLowerCase(bot, event.getArgs());
+    public static final String[] cleanArgsLowerCase(Weebot bot, BetterMessageEvent event) {
+        return cleanArgsLowerCase(bot, event.getArgs());
     }
 
     /**

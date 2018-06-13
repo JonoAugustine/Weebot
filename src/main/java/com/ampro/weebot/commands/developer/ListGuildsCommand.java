@@ -72,7 +72,8 @@ public class ListGuildsCommand extends Command {
 
             for (Weebot w : botIterable) {
                 out = out.concat(w.getGuildName() + "\n\t" + w.getNickname() + "\n\t"
-                        + w.getBirthday().toString() + "\n\n");
+                        + w.getBirthday().format(DateTimeFormatter.ofPattern
+                        ("dd/MM/yy HH:mm:ss")) + "\n\n");
             }
             out += "```";
             event.reply(out);
@@ -87,8 +88,8 @@ public class ListGuildsCommand extends Command {
                        + w.getBotId() + "\n\t"
                        + w.getNickname() + "\n\t"
                        + w.getCallsign() + "\n\t"
-                       + w.getBirthday().format(DateTimeFormatter.ofPattern(
-                               "dd-MM-yy HH:mm:ss")) + "\n\t\t"
+                       + w.getBirthday().format(DateTimeFormatter.ofPattern
+                               ("dd/MM/yy HH:mm:ss")) + "\n\t\t"
                        + "\n"
                );
            }
