@@ -61,7 +61,7 @@ public class SelfDestructMessageCommand extends Command {
     protected void execute(Weebot bot, BetterMessageEvent event) {
         String[] args;
         synchronized (bot) {
-            args = this.cleanArgs(bot, event);
+            args = cleanArgs(bot, event);
         }
         int sec = 1000;
         int time;

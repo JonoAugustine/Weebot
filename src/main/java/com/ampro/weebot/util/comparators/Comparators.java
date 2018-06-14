@@ -1,4 +1,4 @@
-package com.ampro.weebot.comparators;
+package com.ampro.weebot.util.comparators;
 
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.User;

@@ -101,7 +101,7 @@ public class ManageSettingsCommand extends Command {
 
         @Override
         protected void execute(Weebot bot, BetterMessageEvent event) {
-            String[] args = this.cleanArgs(bot, event);
+            String[] args = cleanArgs(bot, event);
             if(args.length < 2) {
                 event.reply("Please provide a new name.```" + bot.getCallsign()
                                     + args[0] + " <new name>```");
@@ -157,7 +157,7 @@ public class ManageSettingsCommand extends Command {
 
         @Override
         protected void execute(Weebot bot, BetterMessageEvent event) {
-            String[] args = this.cleanArgsLowerCase(bot, event);
+            String[] args = cleanArgsLowerCase(bot, event);
             switch (args.length) {
                 case 1:
                     //Send back the current callsign
@@ -220,7 +220,7 @@ public class ManageSettingsCommand extends Command {
 
         @Override
         protected void execute(Weebot bot, BetterMessageEvent event) {
-            String[] args = this.cleanArgsLowerCase(bot, event);
+            String[] args = cleanArgsLowerCase(bot, event);
             //Only respond to commands with the appropriate number of args
             switch (args.length) {
                 case 1:
@@ -298,7 +298,7 @@ public class ManageSettingsCommand extends Command {
 
         @Override
         protected void execute(Weebot bot, BetterMessageEvent event) {
-            String[] args = this.cleanArgsLowerCase(bot, event);
+            String[] args = cleanArgsLowerCase(bot, event);
             switch (args.length) {
                 case 1:
                     event.reply("*I am " + (bot.isNSFW() ? "" : "not ") + "NSFW*");
@@ -369,7 +369,7 @@ public class ManageSettingsCommand extends Command {
 
         @Override
         protected void execute(Weebot bot, BetterMessageEvent event) {
-            String[] args = this.cleanArgsLowerCase(bot, event);
+            String[] args = cleanArgsLowerCase(bot, event);
             //Only respond to commands with the appropriate number of args
             switch (args.length) {
                 case 1:

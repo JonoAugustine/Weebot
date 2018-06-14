@@ -1,6 +1,5 @@
 package com.ampro.weebot.commands.games;
 
-
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.entities.bot.Weebot;
@@ -169,7 +168,7 @@ public class SecretePhraseCommand extends Command {
          *
          * @return An {@link String string} array of the param size filled with phrases.
          */
-        private final Phrase[] generatePhrases(int phrases) {
+        private Phrase[] generatePhrases(int phrases) {
             Phrase[] out = new Phrase[phrases];
             for (int i = 0; i < phrases; i++) {
                 out[i] = new Phrase("Test Phrase");
@@ -232,7 +231,7 @@ public class SecretePhraseCommand extends Command {
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
         //Save the args
-        String[] args = this.cleanArgs(bot, event.getArgs());
+        String[] args = cleanArgs(bot, event.getArgs());
         if (args.length < 2) {
             event.reply("Please use\n```start, join, callout, or end```\nto interact " +
                     "with Secrete Phrase games.");
@@ -343,12 +342,9 @@ public class SecretePhraseCommand extends Command {
                 List<Permission> denied = override.getDenied();
                 if (denied.isEmpty()) {
                     return true;
-                } else if (denied.contains(Permission.MESSAGE_READ)
-                            && denied.contains(Permission.MESSAGE_WRITE)) {
-                    return false;
-                } else {
-                    return true;
-                }
+                } else
+                    return !denied.contains(Permission.MESSAGE_READ) || !denied
+                            .contains(Permission.MESSAGE_WRITE);
             } else {
                 return true;
             }
@@ -363,7 +359,7 @@ public class SecretePhraseCommand extends Command {
      * @return The action connected to the given string.
      *          null if no action could be parsed.
      */
-    private static final ACTION parseAction(String action) {
+    private static ACTION parseAction(String action) {
         switch (action.toLowerCase()) {
             case "start":
                 return ACTION.START;

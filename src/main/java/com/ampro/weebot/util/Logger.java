@@ -47,7 +47,7 @@ public class Logger {
      * Print to {@link System#err} and log to file.
      * @param obj The object to log
      */
-    public static final void dout(Object obj) {
+    public static void dout(Object obj) {
         System.out.println(obj);
         if (log != null) log(obj, true);
     }
@@ -56,7 +56,7 @@ public class Logger {
      * Print to {@link System#out} and log to file.
      * @param obj The object to log
      */
-    public static final void derr(Object obj) {
+    public static void derr(Object obj) {
         System.err.println(obj);
         if (log != null) log(obj, true);
     }
@@ -65,7 +65,7 @@ public class Logger {
      * Log to file.
      * @param obj The object to log
      */
-    public static final synchronized void log(Object obj, boolean newLine) {
+    public static synchronized void log(Object obj, boolean newLine) {
         try {
             if (!log.exists()) {
                 log.createNewFile();

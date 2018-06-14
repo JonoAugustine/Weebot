@@ -106,7 +106,7 @@ public class WeebotSuggestionCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = cleanArgs(bot, event);
         switch (args[0]) {
             case "loadsuggs":
             case "seesuggs":

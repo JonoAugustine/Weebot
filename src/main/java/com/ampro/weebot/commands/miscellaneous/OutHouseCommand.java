@@ -124,7 +124,7 @@ public class OutHouseCommand extends Command {
                 }
         }
 
-        String[] args = this.cleanArgs(bot, event.getArgs());
+        String[] args = cleanArgs(bot, event.getArgs());
         long hours;
         int messageIndex;
         try {

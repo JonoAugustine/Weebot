@@ -8,10 +8,8 @@ import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.developer.WeebotSuggestionCommand.Suggestion;
 import com.ampro.weebot.entities.bot.GlobalWeebot;
 import com.ampro.weebot.entities.bot.Weebot;
-import com.ampro.weebot.util.io.FileManager;
 import net.dv8tion.jda.core.entities.User;
 
-import java.io.File;
 import java.time.OffsetDateTime;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
@@ -19,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
 /**
  * A database for storing all the information about the Weebot program
  * between downtime.
- * TODO: add error log
  */
 public class Database {
 
@@ -110,7 +107,7 @@ public class Database {
      * @param id long user ID
      */
     public synchronized void addDeveloper(long id) {
-        this.DEV_IDS.add(id);
+        DEV_IDS.add(id);
     }
 
     /**
@@ -119,7 +116,7 @@ public class Database {
      * @return The removed id
      */
     public synchronized long removeDeveloper(long id) {
-        return this.DEV_IDS.remove(DEV_IDS.indexOf(id));
+        return DEV_IDS.remove(DEV_IDS.indexOf(id));
     }
 
     public synchronized boolean isPremium(User user) {

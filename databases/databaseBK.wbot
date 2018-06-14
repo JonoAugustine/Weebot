@@ -1,9 +1,7 @@
 {
   "SUGGESTIONS": {},
   "GLOBAL_WEEBOT": {
-    "USER_PASSIVES": {
-      "139167730237571072": []
-    },
+    "USER_PASSIVES": {},
     "USER_REMINDERS": {},
     "GUILD_ID": 0,
     "BOT_ID": "0W",
@@ -12,13 +10,13 @@
         "date": {
           "year": 2018,
           "month": 6,
-          "day": 1
+          "day": 13
         },
         "time": {
-          "hour": 20,
-          "minute": 44,
-          "second": 2,
-          "nano": 926000000
+          "hour": 22,
+          "minute": 13,
+          "second": 27,
+          "nano": 824000000
         }
       },
       "offset": {
@@ -44,13 +42,13 @@
           "date": {
             "year": 2018,
             "month": 6,
-            "day": 1
+            "day": 13
           },
           "time": {
-            "hour": 20,
-            "minute": 44,
-            "second": 2,
-            "nano": 929000000
+            "hour": 22,
+            "minute": 13,
+            "second": 27,
+            "nano": 826000000
           }
         },
         "offset": {
@@ -75,13 +73,13 @@
           "date": {
             "year": 2018,
             "month": 6,
-            "day": 1
+            "day": 13
           },
           "time": {
-            "hour": 20,
-            "minute": 44,
-            "second": 2,
-            "nano": 929000000
+            "hour": 22,
+            "minute": 13,
+            "second": 27,
+            "nano": 826000000
           }
         },
         "offset": {
@@ -89,33 +87,13 @@
         }
       },
       "nickname": "Weebot",
-      "callsign": "\\",
+      "callsign": "\u003c\u003e",
       "explicit": false,
       "NSFW": false,
-      "ACTIVE_PARTICIPATE": true,
+      "ACTIVE_PARTICIPATE": false,
       "COMMANDS_DISABLED": {},
       "CUSTOM_CAH_DECKS": {},
-      "passives": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.management.AutoAdminCommand$AutoAdmin",
-          "DATA": {
-            "dead": false,
-            "guildID": 139168039634468865,
-            "bannedWords": {
-              "arctan": []
-            },
-            "userRecords": {},
-            "exemptUsers": [],
-            "exemptRoles": [],
-            "kickThresh": 5,
-            "sofThresh": 0,
-            "hardThresh": 0,
-            "numKicked": 0,
-            "numBanned": 0,
-            "infCaught": 0
-          }
-        }
-      ],
+      "passives": [],
       "NOTES": [],
       "spamLimit": 5
     },
@@ -127,13 +105,13 @@
           "date": {
             "year": 2018,
             "month": 6,
-            "day": 1
+            "day": 13
           },
           "time": {
-            "hour": 20,
-            "minute": 44,
-            "second": 2,
-            "nano": 929000000
+            "hour": 22,
+            "minute": 13,
+            "second": 27,
+            "nano": 827000000
           }
         },
         "offset": {
@@ -141,7 +119,7 @@
         }
       },
       "nickname": "Weebot",
-      "callsign": "\\",
+      "callsign": "\u003c\u003e",
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,

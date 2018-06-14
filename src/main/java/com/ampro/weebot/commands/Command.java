@@ -309,7 +309,7 @@ public abstract class Command {
      * @param event {@link BetterMessageEvent} to clean the arguments of.
      * @return new string array with the command call at index {@code [0]}.
      */
-    public static final String[] cleanArgsLowerCase(Weebot bot, BetterMessageEvent event) {
+    public static String[] cleanArgsLowerCase(Weebot bot, BetterMessageEvent event) {
         return cleanArgsLowerCase(bot, event.getArgs());
     }
 

@@ -54,7 +54,7 @@ public class SpamCommand extends Command {
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
         int limit = bot.getSpamLimit();
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = cleanArgs(bot, event);
         int loop = 5;
         if (args[0].equalsIgnoreCase("spamlimit")) {
             setSpamLimit(bot, event);
@@ -94,7 +94,7 @@ public class SpamCommand extends Command {
      */
     private void setSpamLimit(Weebot bot, BetterMessageEvent event) {
         synchronized (bot) {
-            String[] args = this.cleanArgsLowerCase(bot, event);
+            String[] args = cleanArgsLowerCase(bot, event);
             switch (args.length) {
                 case 1:
                     event.reply(

@@ -46,7 +46,7 @@ public class AutoAdminCommand extends Command {
             /** The number of times the user has been kicked */
             private int kicks;
             /** The number of times the user has been banned */
-            public int bans;
+            int bans;
 
             UserRecord(User user, Guild guild) {
                 this.userID  = user.getIdLong();
@@ -564,7 +564,7 @@ public class AutoAdminCommand extends Command {
             UserRecord rec = userRecords.get(member.getUser().getIdLong());
             StringBuilder sb = new StringBuilder();
             EmbedBuilder eb = Launcher.getStandardEmbedBuilder()
-                                      .setColor(new Color(0xFB1800));;
+                                      .setColor(new Color(0xFB1800));
             eb.setTitle("You have been banned by AutoAdmin!");
             sb.append("You have been ***banned*** from **")
               .append(member.getGuild().getName())
@@ -709,7 +709,7 @@ public class AutoAdminCommand extends Command {
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
         StringBuilder sb = new StringBuilder();
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = cleanArgs(bot, event);
         if (args.length < 2) {
             sb.append("Please use ``help aac`` for a list of commands");
             event.reply(sb.toString());

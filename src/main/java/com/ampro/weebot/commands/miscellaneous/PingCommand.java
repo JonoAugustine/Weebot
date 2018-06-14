@@ -53,7 +53,7 @@ public class PingCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
-        if (this.cleanArgs(bot, event).length > 1) {
+        if (cleanArgs(bot, event).length > 1) {
             return;
         }
         event.reply("Pong...", m -> {

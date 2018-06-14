@@ -60,7 +60,7 @@ public class HelpCommand extends Command {
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
         /** Message arguments cleansed of the callsign or bot mention */
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = cleanArgs(bot, event);
 
         //If the only argument is the command invoke
         if (args.length == 1) {

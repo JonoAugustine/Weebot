@@ -15,7 +15,7 @@ public class FileManager {
     public static final File DIR_HOME = new File("wbot");
     public static final File TEMP     = new File(DIR_HOME, "temp");
     public static final File TEMP_OUT = new File(TEMP, "out");
-    public static final File TEMP_IN = new File(TEMP,"in");
+    public static final File TEMP_IN  = new File(TEMP,"in");
 
     private static final Gson GSON
             = new GsonBuilder().enableComplexMapKeySerialization()

@@ -33,7 +33,6 @@ import net.dv8tion.jda.core.JDA.Status;
 import net.dv8tion.jda.core.entities.Game;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.exceptions.RateLimitedException;
-import sun.rmi.runtime.Log;
 
 import javax.security.auth.login.LoginException;
 import java.awt.*;
@@ -122,9 +121,8 @@ public class Launcher {
             TEMP_OUT.mkdirs();
         if (!TEMP_IN.exists())
             TEMP_IN.mkdirs();
-        if (!DIR_HOME.exists() || !TEMP_OUT.exists() || !TEMP_IN.exists()
-                || !DIR_DBS.exists() || !LOGS.exists()) return false;
-        else return true;
+        return DIR_HOME.exists() && TEMP_OUT.exists() && TEMP_IN.exists() && DIR_DBS
+                .exists() && LOGS.exists();
     }
 
    /**
@@ -298,7 +296,7 @@ public class Launcher {
 	 * @return true if the user ID is a dev.
 	 */
 	public static boolean checkDevID(long id) {
-		return Launcher.DATABASE.getDevelopers().contains(id);
+		return Database.getDevelopers().contains(id);
 	}
 
 	/**
@@ -340,7 +338,7 @@ public class Launcher {
 	}
 
 	/**@return EmbedBuilder with the standard green, Author set to "Weebot", and footer */
-	public static final EmbedBuilder getStandardEmbedBuilder() {
+	public static EmbedBuilder getStandardEmbedBuilder() {
 		return new EmbedBuilder()
 				.setColor(new Color(0x31FF00))
 				.setAuthor("Weebot", null, JDA_CLIENT.getSelfUser().getAvatarUrl())
@@ -355,9 +353,9 @@ public class Launcher {
 	 * @param description The description that appears under the title
 	 * @return A Weebot-standard EmbedBuilder
 	 */
-	public static final EmbedBuilder makeEmbedBuilder(String title,
-	                                                  String titleLink,
-	                                                  String description) {
+	public static EmbedBuilder makeEmbedBuilder(String title,
+                                                String titleLink,
+                                                String description) {
 		return getStandardEmbedBuilder()
 				.setTitle(title, titleLink)
 				.setDescription(description);
@@ -372,8 +370,8 @@ public class Launcher {
 	 * @param description The description that appears under the title
 	 * @return A Weebot-standard EmbedBuilder
 	 */
-	public static final EmbedBuilder makeEmbedBuilder(String title, String titleURL,
-	                                                  StringBuilder description) {
+	public static EmbedBuilder makeEmbedBuilder(String title, String titleURL,
+                                                StringBuilder description) {
 		return makeEmbedBuilder(title, titleURL, description.toString());
 	}
 

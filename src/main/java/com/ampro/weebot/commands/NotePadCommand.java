@@ -170,7 +170,7 @@ public class NotePadCommand extends Command {
             }
 
 
-            if (!!blockedChannelIDs.isEmpty()) {
+            if (blockedChannelIDs.isEmpty()) {
                 if (blockedChannelIDs.contains(id)) {
                     return false;
                 }
@@ -192,9 +192,7 @@ public class NotePadCommand extends Command {
             }
 
             if (!blockedUserIDs.isEmpty()) {
-                if (blockedUserIDs.contains(id)) {
-                    return false;
-                }
+                return !blockedUserIDs.contains(id);
             }
 
             return true;
@@ -515,7 +513,7 @@ public class NotePadCommand extends Command {
      */
     @Override
     protected synchronized void execute(Weebot bot, BetterMessageEvent event) {
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = cleanArgs(bot, event);
         ArrayList<NotePad> notes = bot.getNotePads();
         NotePad pad;
         String out;

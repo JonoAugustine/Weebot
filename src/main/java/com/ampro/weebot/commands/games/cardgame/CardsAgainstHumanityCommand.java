@@ -155,7 +155,7 @@ public class CardsAgainstHumanityCommand extends Command {
              *
              * @return The deck with the loaded cards.
              */
-            private final CAHDeck loadFrom(CAHDeck... decks) {
+            private CAHDeck loadFrom(CAHDeck... decks) {
                 for (CAHDeck d : decks) {
                     for (WhiteCard wc : d.whiteCards) {
                         this.addWhiteCard(wc);
@@ -175,7 +175,7 @@ public class CardsAgainstHumanityCommand extends Command {
              *
              * @return The deck with the loaded cards.
              */
-            private final CAHDeck loadFrom(List<CAHDeck> decks) {
+            private CAHDeck loadFrom(List<CAHDeck> decks) {
                 return this.loadFrom(decks.toArray(new CAHDeck[decks.size()]));
             }
 
@@ -719,7 +719,7 @@ public class CardsAgainstHumanityCommand extends Command {
          * Check if any player has the given whiteCard
          * @param card The card to check
          */
-        private final boolean playerHasCard(WhiteCard card) {
+        private boolean playerHasCard(WhiteCard card) {
             for (CAHPlayer p : this.playerList) {
                 for (WhiteCard wc : p.hand) {
                     if (wc != null) if (wc.equals(card)) return true;
@@ -734,7 +734,7 @@ public class CardsAgainstHumanityCommand extends Command {
          *
          * @return true if all players have played their cards.
          */
-        private final boolean allCardsPlayed() {
+        private boolean allCardsPlayed() {
             for (CAHPlayer p : this.PLAYERS.values()) {
                 if(p.playedCards == null && p != czar) {
                     return false;
@@ -747,7 +747,7 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         /** @return An embed of the black card and the played cards */
-        private final MessageEmbed playedCardsEmbed() {
+        private MessageEmbed playedCardsEmbed() {
             if(this.STATE != GAME_STATE.READING) {
                 return null;
             }
@@ -1017,7 +1017,7 @@ public class CardsAgainstHumanityCommand extends Command {
         }
 
         /** @return true if the game has a dev as a player */
-        private final boolean hasDev() {
+        private boolean hasDev() {
             for (CAHPlayer p : this.playerList) {
                 if(Launcher.checkDevID(p.getUser().getIdLong()))
                     return true;
@@ -1093,7 +1093,7 @@ public class CardsAgainstHumanityCommand extends Command {
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
         StringBuilder sb = new StringBuilder();
-        String[] args = this.cleanArgs(bot, event);
+        String[] args = cleanArgs(bot, event);
         if(args.length < 2) {
             event.reply(
                     "What do you want me to do? ```help cah``` for a list of commands");
@@ -1916,7 +1916,7 @@ public class CardsAgainstHumanityCommand extends Command {
      *
      * @return The Standard deck of CAH cards.<br>null if an err occurs
      */
-    private static final CAHDeck loadStandardDeck() {
+    private static CAHDeck loadStandardDeck() {
         CAHDeck deck = new CAHDeck();
 
         //Load white cards
