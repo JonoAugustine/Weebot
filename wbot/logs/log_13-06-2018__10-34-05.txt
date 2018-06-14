@@ -1,0 +1,17 @@
+
+## Aquatic Mastery Productions ##
+		 # Weebot Log #
+	 13/06/2018 @ 22:34:05
+
+
+
+[Launcher] Logging in to Weebot JDA client...
+[Launcher#setUpDatabase] Setting up Database...
+[Launcher#setUpDatabase]	Loading database...
+[Launcher#setUpDatabase]	Database located.
+[Launcher#setUpDatabase]	Updating registered Guilds.
+[Launcher#setUpDatabase]	Backing up database.
+[Launcher] Updating Weebots...
+[Launcher] Adding Listeners to JDA Client...
+[Launcher] Initialization Complete!
+
