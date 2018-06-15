@@ -39,6 +39,7 @@ import java.awt.*;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Scanner;
 
 import static com.ampro.weebot.database.DatabaseManager.DIR_DBS;
 import static com.ampro.weebot.util.Logger.LOGS;
@@ -52,6 +53,18 @@ import static com.ampro.weebot.util.io.FileManager.*;
  * @author Jonathan Augustine
  */
 public class Launcher {
+
+    private static final Thread console = new Thread(() -> {
+        Logger.derr("[Launcher#console] Starting console listener...");
+        Scanner scanner = new Scanner(System.in);
+        ShutdownCommand c = (ShutdownCommand) getCommand(ShutdownCommand.class);
+        while (true) {
+            if (scanner.hasNext())
+                if (c.isCommandFor(scanner.nextLine())) {
+                    shutdown();
+                }
+        }
+    });
 
 	private static final String TOKEN_WBT
 			= "NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA.Etf9Q9wuk1YCUnUox0IbIon1dUk";
@@ -71,7 +84,8 @@ public class Launcher {
 					new NotePadCommand(), new SelfDestructMessageCommand(),
 					new SecretePhraseCommand(), new WeebotSuggestionCommand(),
 					new CardsAgainstHumanityCommand(), new OutHouseCommand(),
-                    new ChatbotCommand(), new CalculatorCommand(), new ReminderCommand()
+                    new ChatbotCommand(), new CalculatorCommand(),
+                    new ReminderCommand(), new InviteLinkCommand()
 			));
 
 	/** The database */
@@ -104,8 +118,9 @@ public class Launcher {
        Launcher.updateWeebots();
        Launcher.startSaveTimer(.5);
        Launcher.addListeners();
-
+       console.start();
        Logger.derr("[Launcher] Initialization Complete!\n\n");
+
    }
 
     /**
@@ -277,9 +292,11 @@ public class Launcher {
 		Logger.derr(f + "\tClearing temp directories...");
 		FileManager.clearTempDirs();
 
-        Logger.derr(f + "Successfully shutdown.");
+        Logger.derr(f + "Safely shutdown.");
 
         JDA_CLIENT.shutdown();
+        while (JDA_CLIENT.getStatus() == Status.SHUTTING_DOWN) {}
+        System.exit(0);
 
 	}
 
