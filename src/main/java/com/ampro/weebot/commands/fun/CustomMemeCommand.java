@@ -14,6 +14,8 @@ import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.entities.Role;
 
 import javax.annotation.Nonnull;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -75,7 +77,7 @@ public class CustomMemeCommand extends Command {
             EmbedBuilder toEmbedBuilder() {
                 return Launcher.getStandardEmbedBuilder()
                                           .setTitle("Weebot Memer: " + name, url)
-                                          .setImage(url);
+                                          .setThumbnail(url);
             }
 
         }
@@ -133,11 +135,12 @@ public class CustomMemeCommand extends Command {
          * @throws DuplicateNameException If a meme with the same name
          *              already exists
          */
-        void addMeme(@Nonnull String url, @Nonnull String name,
+        Meme addMeme(@Nonnull String url, @Nonnull String name,
                      Collection<Role> allowedRoles)
         throws DuplicateNameException {
             Meme meme = new Meme(url, name, allowedRoles);
-            this.memeList.put(name, meme);
+            this.memeList.put(meme.name, meme);
+            return meme;
         }
 
         /**
@@ -166,6 +169,10 @@ public class CustomMemeCommand extends Command {
                                    member.getUser().getAvatarUrl())
                         .build()
             );
+            //Delete calls to the meme that are just calls to the meme
+            if (content.equals(callSymbol + meme.name + callSymbol)) {
+                event.deleteMessage();
+            }
         }
 
         /** @return {@code false} if the passive is no longer active */
@@ -190,7 +197,7 @@ public class CustomMemeCommand extends Command {
         );
     }
 
-    private enum Action {INIT, ADD, REMOVE, SEEALL}
+    private enum Action {INIT, ADD, REMOVE, SEEALL, DISABLE}
 
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
@@ -236,36 +243,82 @@ public class CustomMemeCommand extends Command {
                 }
                 break;
             case ADD:
+                if (memeReader == null) {
+                    memeReader = new MemeReader();
+                    bot.addPassive(memeReader);
+                    StringBuilder sb = new StringBuilder()
+                            .append("*The MemeReader has been initialized!")
+                            .append(" You can use your memes like this*:```")
+                            .append(memeReader.callSymbol).append("meme_Name")
+                            .append(memeReader.callSymbol).append("```");
+                    event.reply(sb.toString());
+                }
                 //cmc add <name> <url> [@Role]...
-                if (memeReader != null) {
-                    if (args.length == 4) {
-                        MemeReader.Meme meme = null;
-                        try {
-                            memeReader.addMeme(
-                                    args[3], args[2], message.getMentionedRoles()
-                            );
-                        } catch (DuplicateNameException e) {
-                            StringBuilder sb = new StringBuilder()
-                                    .append("*A meme with the same name")
-                                    .append(" already exists.*");
-                            event.reply(sb.toString());
-                            break;
-                        }
-                        event.reply("*The meme* \"" + meme.name + "\" *was added*.");
-                    } else {
-                        StringBuilder sb = new StringBuilder()
-                                .append("*Please use the correct format to")
-                                .append(" add a meme.*")
-                                .append("```cmc add <name> <url>```");
-                        event.reply(sb.toString());
+                //cmc add <name> <attachment>
+                MemeReader.Meme meme = null;
+                String url = null;
+                if (args.length == 4) {
+                    url = args[3];
+                    try {
+                        new URL(url);
+                    } catch (MalformedURLException e) {
+                        event.reply("*Names cannot have spaces.*");
                     }
+                } else if (message.getAttachments().get(0).isImage()) {
+                    url = message.getAttachments().get(0).getUrl();
+                } if (url != null) {
+                    try {
+                        meme = memeReader.addMeme(
+                                url,
+                                args[2].replace("\\", ""),//Get rid of Discord's dumbness
+                                message.getMentionedRoles()
+                        );
+                    } catch (DuplicateNameException e) {
+                        StringBuilder sb = new StringBuilder()
+                                .append("*A meme with the same name")
+                                .append(" already exists.*");
+                        event.reply(sb.toString());
+                        break;
+                    }
+                    event.reply("*The meme* \"" + meme.name + "\" *was added*.");
                 } else {
-                    event.reply("*Please initialize the meme reader.*```help cmc```");
+                    StringBuilder sb = new StringBuilder()
+                            .append("*Please use the correct format to")
+                            .append(" add a meme.*")
+                            .append("```cmc add <name> <url or file>```");
+                    event.reply(sb.toString());
                 }
                 break;
             case REMOVE:
+                //cmc rm <name>
+                if (memeReader != null) {
+                    if (args.length == 3) {
+                        name = args[2].toLowerCase().replace(" ", "_");
+                        if (memeReader.memeList.remove(name) != null) {
+                            event.reply("*The meme was removed.*");
+                        } else {
+                            event.reply("*No meme found by that name.*");
+                        }
+                    } else {
+                        event.reply(
+                                "*Please use the correct format.*```cmc rm <name>```"
+                        );
+                    }
+                } else {
+                    event.reply("*There is no MemeReader running*.");
+                }
+                break;
+            case DISABLE:
+                if (memeReader != null) {
+                    if (bot.getPassives().remove(memeReader)) {
+                        event.reply("*The MemeReader has been disabled*.");
+                    }
+                } else {
+                    event.reply("*There is no MemeReader running*.");
+                }
                 break;
             case SEEALL:
+                //TODO See all memes
                 break;
         }
 
@@ -299,4 +352,5 @@ public class CustomMemeCommand extends Command {
         //TODO embed help
         return eb.build();
     }
+
 }

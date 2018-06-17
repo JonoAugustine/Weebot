@@ -58,7 +58,7 @@
               }
             },
             "lifeSpan": 86460,
-            "timeRemaining": 84496,
+            "timeRemaining": 80601,
             "bug": false,
             "inGuild": false
           },
@@ -85,7 +85,7 @@
               }
             },
             "lifeSpan": 86460,
-            "timeRemaining": 84497,
+            "timeRemaining": 80603,
             "bug": false,
             "inGuild": false
           },
@@ -112,7 +112,7 @@
               }
             },
             "lifeSpan": 86460,
-            "timeRemaining": 84499,
+            "timeRemaining": 80604,
             "bug": false,
             "inGuild": false
           },
@@ -139,7 +139,7 @@
               }
             },
             "lifeSpan": 86460,
-            "timeRemaining": 84500,
+            "timeRemaining": 80605,
             "bug": false,
             "inGuild": false
           }
@@ -260,11 +260,11 @@
           "CLASSNAME": "com.ampro.weebot.commands.fun.CustomMemeCommand$MemeReader",
           "DATA": {
             "dead": false,
-            "callSymbol": "[",
+            "callSymbol": ";",
             "memeList": {
-              "bae": {
-                "url": "https://cdn.discordapp.com/attachments/417176543903744001/457024624295673856/absqoc8hjh311.png",
-                "name": "bae",
+              "super_weeb": {
+                "url": "https://cdn.discordapp.com/attachments/439522471369244683/457894795319181312/10092886.jpg",
+                "name": "super_weeb",
                 "allowedRoles": []
               }
             }
