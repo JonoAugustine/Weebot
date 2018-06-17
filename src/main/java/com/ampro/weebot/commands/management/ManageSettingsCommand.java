@@ -2,9 +2,7 @@ package com.ampro.weebot.commands.management;
 
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
-import com.ampro.weebot.commands.miscellaneous.SpamCommand;
-import com.ampro.weebot.database.DatabaseManager;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
@@ -13,9 +11,6 @@ import net.dv8tion.jda.core.entities.Member;
 import net.dv8tion.jda.core.entities.MessageEmbed;
 import net.dv8tion.jda.core.exceptions.InsufficientPermissionException;
 import net.dv8tion.jda.core.managers.GuildController;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A {@link Command} that manages the settings for the {@link Weebot}.
@@ -483,18 +478,15 @@ public class ManageSettingsCommand extends Command {
 
         eb.addField("Change My in-Sever NickName",
                     "setname <new nickname>\n*Aliases*: nickname, changename",
-                    false);
+                    true);
         sb.append("callw <new_callsign>\n")
           .append("*Aliases*: callsign, callwith, prefix\n")
-          .append("*Note*: The prefix must be under 4 characters long");
-        eb.addField("Change my Callsign/Prefix", sb.toString(), false);
+          .append("*Note*: The prefix must be under\n4 characters long");
+        eb.addField("Change my Callsign/Prefix", sb.toString(), true);
         sb.setLength(0);
-        eb.addField("(Dis)Allow Bot to Use Explicit Language",
-                    "expl on/off\n*Aliases:*explicit, vulgar, pottymouth",
-                    false)
-          .addField("(Dis)Allow the bot to use NSFW commands",
-                    "nsfw on/off\n*Alias*: naughty",
-                    false)
+        eb.addField("Bot uses Explicit Language",
+                    "expl on/off\n*Aliases:* explicit, vulgar,\npottymouth", true)
+          .addField("NSFW commands", "nsfw on/off\n*Alias*: naughty", true)
           .addField("(Dis)Allow the bot to respond to actions not directed to it",
                     "(*Under construction*)", false);
 

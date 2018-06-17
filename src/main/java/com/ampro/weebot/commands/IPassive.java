@@ -1,13 +1,15 @@
 package com.ampro.weebot.commands;
 
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 
 /**
- * An interface defining a IPassive entity, which accepts events without direct
- * invocation.
+ * An interface defining an entity which accepts
+ * events without direct invocation. <br>
+ * This is best used for any entity that needs to read lots of commands,
+ * or pay attention to messages while the bot is not directly called.
  *
- //TODO Introduce Passives into public Weebot data in help
+ * TODO Introduce Passives into public Weebot data in help
  */
 public interface IPassive {
 

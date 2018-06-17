@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.commands.games;
 
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import net.dv8tion.jda.core.entities.User;
 
 import java.util.ArrayList;

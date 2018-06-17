@@ -3,7 +3,7 @@ package com.ampro.weebot.commands.developer;
 
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Guild;
@@ -12,7 +12,6 @@ import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 

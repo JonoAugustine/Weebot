@@ -6,7 +6,7 @@ import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
 import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand
         .CardsAgainstHumanity.*;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;

@@ -8,7 +8,7 @@ package com.ampro.weebot;
 import com.ampro.weebot.commands.ChatbotCommand;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.HelpCommand;
-import com.ampro.weebot.commands.NotePadCommand;
+import com.ampro.weebot.commands.util.NotePadCommand;
 import com.ampro.weebot.commands.developer.DatabaseFileCommand;
 import com.ampro.weebot.commands.developer.ListGuildsCommand;
 import com.ampro.weebot.commands.developer.ShutdownCommand;
@@ -18,10 +18,14 @@ import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand;
 import com.ampro.weebot.commands.management.AutoAdminCommand;
 import com.ampro.weebot.commands.management.ManageSettingsCommand;
 import com.ampro.weebot.commands.miscellaneous.*;
+import com.ampro.weebot.commands.util.CalculatorCommand;
+import com.ampro.weebot.commands.util.OutHouseCommand;
+import com.ampro.weebot.commands.util.ReminderCommand;
+import com.ampro.weebot.commands.util.SelfDestructMessageCommand;
 import com.ampro.weebot.database.Database;
 import com.ampro.weebot.database.DatabaseManager;
-import com.ampro.weebot.entities.bot.GlobalWeebot;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.GlobalWeebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.jda.JDABuilder;
 import com.ampro.weebot.listener.EventDispatcher;
 import com.ampro.weebot.util.Logger;
@@ -78,12 +82,12 @@ public class Launcher {
 
 	private static final ArrayList<Command> COMMANDS =
 			new ArrayList<>(Arrays.asList(
-					new HelpCommand(), new ShutdownCommand(), new DatabaseFileCommand(),
-					new AutoAdminCommand(),new ManageSettingsCommand(),
-					new ListGuildsCommand(), new PingCommand(), new SpamCommand(),
-					new NotePadCommand(), new SelfDestructMessageCommand(),
-					new SecretePhraseCommand(), new WeebotSuggestionCommand(),
-					new CardsAgainstHumanityCommand(), new OutHouseCommand(),
+                    new HelpCommand(), new ShutdownCommand(), new DatabaseFileCommand(),
+                    new AutoAdminCommand(), new ManageSettingsCommand(),
+                    new ListGuildsCommand(), new PingCommand(), new SpamCommand(),
+                    new NotePadCommand(), new SelfDestructMessageCommand(),
+                    new SecretePhraseCommand(), new WeebotSuggestionCommand(),
+                    new CardsAgainstHumanityCommand(), new OutHouseCommand(),
                     new ChatbotCommand(), new CalculatorCommand(),
                     new ReminderCommand(), new InviteLinkCommand()
 			));

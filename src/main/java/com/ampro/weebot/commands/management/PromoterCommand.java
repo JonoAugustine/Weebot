@@ -2,7 +2,7 @@ package com.ampro.weebot.commands.management;
 
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Role;
