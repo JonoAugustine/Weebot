@@ -133,7 +133,7 @@ public class ReminderCommand extends Command {
         public void startup() {
             poolExecutor = Executors.newCachedThreadPool();
             for (Reminder reminder : pool) {
-                if (reminder == null || reminder.lifeSpan < 0) continue;
+                if (reminder == null || reminder.timeRemaining <= 0) continue;
                 reminder.startup();
                 poolExecutor.submit(reminder);
             }

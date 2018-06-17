@@ -31,6 +31,8 @@ import static com.ampro.weebot.util.io.FileManager.TEMP_OUT;
  * game of CAH <br> make custom Card Decks <br> make custom White Cards <br> make custom
  * Black Cards <br> play against the bot
  *
+ * TODO Make cards playable by reacting to the hand-message in private chat
+ *
  */
 public class CardsAgainstHumanityCommand extends Command {
 

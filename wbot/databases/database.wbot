@@ -9,60 +9,140 @@
         "authorId": 139167730237571072,
         "pool": [
           {
-            "guildId": 139168039634468865,
-            "channelId": 439522471369244683,
+            "guildId": -1,
+            "channelId": -1,
             "message": "",
-            "startTime": {
+            "startDate": {
               "dateTime": {
                 "date": {
                   "year": 2018,
                   "month": 6,
-                  "day": 11
+                  "day": 17
                 },
                 "time": {
-                  "hour": 15,
-                  "minute": 17,
-                  "second": 56,
-                  "nano": 496000000
+                  "hour": 7,
+                  "minute": 59,
+                  "second": 58,
+                  "nano": 51000000
                 }
               },
               "offset": {
                 "totalSeconds": -14400
               }
             },
-            "lifeSpan": 474823,
+            "lifeSpan": 60,
+            "timeRemaining": -529,
             "bug": false,
             "inGuild": false
           },
           {
-            "guildId": 139168039634468865,
-            "channelId": 439522471369244683,
+            "guildId": -1,
+            "channelId": -1,
             "message": "",
-            "startTime": {
+            "startDate": {
               "dateTime": {
                 "date": {
                   "year": 2018,
                   "month": 6,
-                  "day": 11
+                  "day": 17
                 },
                 "time": {
-                  "hour": 15,
-                  "minute": 18,
-                  "second": 3,
-                  "nano": 682000000
+                  "hour": 8,
+                  "minute": 0,
+                  "second": 8,
+                  "nano": 743000000
                 }
               },
               "offset": {
                 "totalSeconds": -14400
               }
             },
-            "lifeSpan": 474816,
+            "lifeSpan": 86460,
+            "timeRemaining": 85042,
             "bug": false,
             "inGuild": false
           },
-          null,
-          null,
-          null
+          {
+            "guildId": -1,
+            "channelId": -1,
+            "message": "",
+            "startDate": {
+              "dateTime": {
+                "date": {
+                  "year": 2018,
+                  "month": 6,
+                  "day": 17
+                },
+                "time": {
+                  "hour": 8,
+                  "minute": 0,
+                  "second": 10,
+                  "nano": 66000000
+                }
+              },
+              "offset": {
+                "totalSeconds": -14400
+              }
+            },
+            "lifeSpan": 86460,
+            "timeRemaining": 85044,
+            "bug": false,
+            "inGuild": false
+          },
+          {
+            "guildId": -1,
+            "channelId": -1,
+            "message": "",
+            "startDate": {
+              "dateTime": {
+                "date": {
+                  "year": 2018,
+                  "month": 6,
+                  "day": 17
+                },
+                "time": {
+                  "hour": 8,
+                  "minute": 0,
+                  "second": 11,
+                  "nano": 210000000
+                }
+              },
+              "offset": {
+                "totalSeconds": -14400
+              }
+            },
+            "lifeSpan": 86460,
+            "timeRemaining": 85045,
+            "bug": false,
+            "inGuild": false
+          },
+          {
+            "guildId": -1,
+            "channelId": -1,
+            "message": "",
+            "startDate": {
+              "dateTime": {
+                "date": {
+                  "year": 2018,
+                  "month": 6,
+                  "day": 17
+                },
+                "time": {
+                  "hour": 8,
+                  "minute": 0,
+                  "second": 12,
+                  "nano": 158000000
+                }
+              },
+              "offset": {
+                "totalSeconds": -14400
+              }
+            },
+            "lifeSpan": 86460,
+            "timeRemaining": 85046,
+            "bug": false,
+            "inGuild": false
+          }
         ]
       }
     },
@@ -174,6 +254,20 @@
             "numKicked": 0,
             "numBanned": 0,
             "infCaught": 0
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.CustomMemeCommand$MemeReader",
+          "DATA": {
+            "dead": false,
+            "callSymbol": "[",
+            "memeList": {
+              "bae": {
+                "url": "https://cdn.discordapp.com/attachments/417176543903744001/457024624295673856/absqoc8hjh311.png",
+                "name": "bae",
+                "allowedRoles": []
+              }
+            }
           }
         }
       ],

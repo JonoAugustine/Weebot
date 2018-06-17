@@ -8,6 +8,7 @@ package com.ampro.weebot;
 import com.ampro.weebot.commands.ChatbotCommand;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.HelpCommand;
+import com.ampro.weebot.commands.fun.CustomMemeCommand;
 import com.ampro.weebot.commands.util.NotePadCommand;
 import com.ampro.weebot.commands.developer.DatabaseFileCommand;
 import com.ampro.weebot.commands.developer.ListGuildsCommand;
@@ -89,7 +90,8 @@ public class Launcher {
                     new SecretePhraseCommand(), new WeebotSuggestionCommand(),
                     new CardsAgainstHumanityCommand(), new OutHouseCommand(),
                     new ChatbotCommand(), new CalculatorCommand(),
-                    new ReminderCommand(), new InviteLinkCommand()
+                    new ReminderCommand(), new InviteLinkCommand(),
+                    new CustomMemeCommand()
 			));
 
 	/** The database */
@@ -156,7 +158,8 @@ public class Launcher {
        //Connect to API
        Logger.derr("[Launcher] Logging in to Weebot JDA client...");
        JDABuilder builder = new JDABuilder(AccountType.BOT)
-                   .setToken(TOKEN_WBT).setGame(Game.playing("@Weebot help"));
+                   .setToken(TOKEN_WBT).setGame(Game.playing("@Weebot help"))
+                   .setCorePoolSize(8);
        JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
    }
 

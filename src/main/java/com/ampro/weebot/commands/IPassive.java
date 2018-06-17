@@ -15,6 +15,7 @@ public interface IPassive {
 
     /**
      * Take in a {@link BetterMessageEvent} to interact with.
+     * @param bot The weebot who called
      * @param event The event to receive.
      */
     void accept(Weebot bot, BetterMessageEvent event);

@@ -360,6 +360,13 @@ public class BetterMessageEvent extends BetterEvent {
     }
 
     /**
+     * @return null if not from private channel
+     */
+    public PrivateChannel getPrivateChannel() {
+        return this.messageEvent.getPrivateChannel();
+    }
+
+    /**
      * @return {@link OffsetDateTime} of the message.
      */
     public final OffsetDateTime getCreationTime() {
