@@ -16,6 +16,7 @@ package com.ampro.weebot.bot;
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
+import com.ampro.weebot.commands.properties.Restriction;
 import com.ampro.weebot.commands.util.NotePadCommand.NotePad;
 import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
@@ -26,7 +27,7 @@ import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.entities.Guild;
-import net.dv8tion.jda.core.entities.TextChannel;
+import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
 
 import java.time.OffsetDateTime;
@@ -67,9 +68,9 @@ public class Weebot implements Comparable<Weebot> {
 
     private transient boolean locked;
 
-    /** Commands not allowed on the server channels.*/
-    private final ConcurrentHashMap<TextChannel, ArrayList<Class<? extends Command>>>
-            COMMANDS_DISABLED;
+    /** Commands mapped to s {@link Restriction} */
+    private final ConcurrentHashMap<Class<? extends Command>, Restriction> commandRestrictions;
+
     /** List of {@code Game}s currently Running */
     private transient List<Game<? extends Player>> GAMES_RUNNING;
 
@@ -99,7 +100,7 @@ public class Weebot implements Comparable<Weebot> {
         this.explicit = false;
         this.NSFW = false;
         this.ACTIVE_PARTICIPATE = false;
-        this.COMMANDS_DISABLED = new ConcurrentHashMap<>();
+        this.commandRestrictions = new ConcurrentHashMap<>();
         this.GAMES_RUNNING = new ArrayList<>();
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
@@ -121,7 +122,7 @@ public class Weebot implements Comparable<Weebot> {
         this.explicit = false;
         this.NSFW = false;
         this.ACTIVE_PARTICIPATE = false;
-        this.COMMANDS_DISABLED = new ConcurrentHashMap<>();
+        this.commandRestrictions = new ConcurrentHashMap<>();
         this.GAMES_RUNNING = null;
         this.NOTES  = new ArrayList<>();
         this.spamLimit = 5;
@@ -194,25 +195,24 @@ public class Weebot implements Comparable<Weebot> {
 
     /**
      * Checks if a command has been banned from a channel.
-     * @param c The {@link Command} to check
-     * @param e The {@link BetterMessageEvent} that called it.
+     * @param cmd The {@link Command} to check
+     * @param event The {@link BetterMessageEvent} that called it.
      * @return {@code true} if the command is not banned in the event's chat.
      */
-    private boolean commandIsAllowed(Command c, BetterMessageEvent e) {
-        try {
-            //Get the channel the message was sent in
-            ArrayList<Class<? extends Command>> commands = this.COMMANDS_DISABLED.get(e.getTextChannel());
+    private boolean commandIsAllowed(Command cmd, BetterMessageEvent event) {
+        Restriction restriction = commandRestrictions.get(cmd.getClass());
+        //If there is no restriction data mapped, then it's allowed
+        if (restriction == null || !restriction.restricted()) return true;
+        //If the channel isn't allowed then immediately return false
+        if (!restriction.isAllowed(event.getTextChannel())) return false;
 
-            for (Class com : commands) {
-                if(c.getClass().equals(com)) {
-                    return false;
-                }
-            }
-        } catch (NullPointerException exc) {
-            //If no list of banned commands was found
-            return true;
+        if (restriction.isAllowed(event.getAuthor())) return true;
+        //For the roles, if any role is allowed, we will consider it an override
+        //of any blocked role.
+        for (Role role : event.getMember().getRoles()) {
+            if (restriction.isAllowed(role)) return true;
         }
-        return true;
+        return false;
     }
 
     /**
