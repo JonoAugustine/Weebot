@@ -2,13 +2,11 @@ package com.ampro.weebot.commands.developer;
 
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.ChannelType;
 
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A {@link Runnable} {@link Command} implementation that sends a list of all
@@ -21,7 +19,7 @@ public class ListGuildsCommand extends Command {
     public ListGuildsCommand() {
         super("ListGuilds"
                 , new String[]{"showguilds", "showhosts", "listhosts", "allguilds",
-                        "allhosts", "listhomes", "distrobution"}
+                        "allhosts", "listhomes", "distrobution", "lgc"}
                 , "List all the guilds hosting a Weebot."
                 ,""
                 , false
@@ -32,20 +30,6 @@ public class ListGuildsCommand extends Command {
         );
     }
 
-    /**
-     * Runs checks then runs the {@link ListGuildsCommand} in a new
-     * {@link Thread}.
-     * @param bot The {@link Weebot} that called the command.
-     * @param event The {@link BetterMessageEvent} that called the command.
-     */
-    @Override
-    public void run(Weebot bot, BetterMessageEvent event) {
-        if (this.check(event)) {
-            Thread thread = new Thread(() -> this.execute(bot, event));
-            thread.setName(bot.getBotId() + " : ListGuildCommand");
-            thread.start();
-        }
-    }
 
     /**
      * If the event author is not a Weebot developer, reply in the same channel

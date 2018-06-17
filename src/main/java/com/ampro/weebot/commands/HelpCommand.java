@@ -2,13 +2,10 @@ package com.ampro.weebot.commands;
 
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.management.ManageSettingsCommand;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.MessageEmbed;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * A {@link Command} to send information and help to the use requesting it.

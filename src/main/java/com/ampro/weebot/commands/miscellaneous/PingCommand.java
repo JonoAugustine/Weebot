@@ -2,11 +2,10 @@ package com.ampro.weebot.commands.miscellaneous;
 
 
 import com.ampro.weebot.commands.Command;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 
 /**
  * Check the response time of the bot.

@@ -2,15 +2,9 @@ package com.ampro.weebot.commands.developer;
 
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import updater.Updater;
-
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 public class RestartCommand  extends Command {
 

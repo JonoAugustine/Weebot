@@ -17,14 +17,13 @@
 package com.ampro.weebot.listener;
 
 import com.ampro.weebot.Launcher;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.User;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
-import net.dv8tion.jda.core.events.message.MessageDeleteEvent;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.MessageUpdateEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;

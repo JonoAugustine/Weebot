@@ -6,7 +6,7 @@ package com.ampro.weebot.commands.games.cardgame;
 
 import com.ampro.weebot.commands.games.Game;
 import com.ampro.weebot.commands.games.Player;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import net.dv8tion.jda.core.entities.User;
 
 /**

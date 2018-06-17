@@ -2,11 +2,8 @@ package com.ampro.weebot.commands.developer;
 
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
-import com.ampro.weebot.entities.bot.Weebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
-
-import java.util.ArrayList;
-import java.util.Arrays;
 
 /**
  * Safely shuts down all the bots, initiating proper database saving in
