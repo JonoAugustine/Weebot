@@ -684,7 +684,7 @@ public class AutoAdminCommand extends Command {
         this.userPermissions = new Permission[]{Permission.KICK_MEMBERS};
     }
 
-    private enum ACTION {
+    private enum Action {
         INIT,
         DISABLE,
         ADDWORD,
@@ -715,7 +715,7 @@ public class AutoAdminCommand extends Command {
             event.reply(sb.toString());
             return;
         }
-        ACTION action = this.parseAction(args[1]);
+        Action action = this.parseAction(args[1]);
         if (action == null) {
             sb.append("Please use one of these commands").append("```")
               .append("aac banword <word>\n")
@@ -1047,67 +1047,67 @@ public class AutoAdminCommand extends Command {
     }
 
     /**
-     * Parse an {@link ACTION action} from a string.
+     * Parse an {@link Action action} from a string.
      *
      * @param arg
      *         The string to parse from.
      *
      * @return The action parsed or null if no action was found.
      */
-    private ACTION parseAction(String arg) {
+    private Action parseAction(String arg) {
         switch (arg.toLowerCase()) {
             case "init":
-                return ACTION.INIT;
+                return Action.INIT;
             case "disable":
             case "stop":
             case "dis":
-                return ACTION.DISABLE;
+                return Action.DISABLE;
             case "banword":
             case "addword":
-                return ACTION.ADDWORD;
+                return Action.ADDWORD;
             case "unbanword":
             case "rmwrd":
-                return ACTION.REMOVEWORD;
+                return Action.REMOVEWORD;
             case "bannedwords":
             case "seebannedwords":
             case "bwrds":
             case "words":
-                return ACTION.SEEWORDS;
+                return Action.SEEWORDS;
             case "userrecord":
             case "record":
             case "ir":
-                return ACTION.SEERECORD;
+                return Action.SEERECORD;
             case "clrrec":
             case "clrec":
             case "pardon":
-                return ACTION.CLEARRECORD;
+                return Action.CLEARRECORD;
             case "status":
             case "sitch":
-                return ACTION.SEEADMIN;
+                return Action.SEEADMIN;
             case "setkick":
             case "kickthresh":
             case "sk":
-                    return ACTION.SETKICKTHRESH;
+                    return Action.SETKICKTHRESH;
             case "setban":
             case "setbanthresh":
             case "sb":
-                    return ACTION.SETBANTHRESH;
+                    return Action.SETBANTHRESH;
             case "immune":
             case "isExempt":
             case "ex":
-                return ACTION.ADDEXEMPT;
+                return Action.ADDEXEMPT;
             case "removeexempt":
             case "rmex":
-            return ACTION.REMOVEEXEMPT;
+            return Action.REMOVEEXEMPT;
             case "cleanse":
             case "clean":
             case "clch":
-                return ACTION.CLEANCHANNEL;
+                return Action.CLEANCHANNEL;
             case "guildclean":
             case "gclean":
             case "fullclean":
             case "fc":
-                    return ACTION.CLEANGUILD;
+                    return Action.CLEANGUILD;
             default:
                 return null;
         }

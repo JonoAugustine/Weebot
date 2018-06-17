@@ -30,7 +30,7 @@
                 "totalSeconds": -14400
               }
             },
-            "lifeSpan": 314106,
+            "lifeSpan": 474823,
             "bug": false,
             "inGuild": false
           },
@@ -56,7 +56,7 @@
                 "totalSeconds": -14400
               }
             },
-            "lifeSpan": 314099,
+            "lifeSpan": 474816,
             "bug": false,
             "inGuild": false
           },
@@ -91,7 +91,7 @@
     "explicit": false,
     "NSFW": false,
     "ACTIVE_PARTICIPATE": false,
-    "COMMANDS_DISABLED": {},
+    "commandRestrictions": {},
     "passives": [],
     "NOTES": [],
     "spamLimit": 5
@@ -123,7 +123,7 @@
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
-      "COMMANDS_DISABLED": {},
+      "commandRestrictions": {},
       "passives": [],
       "NOTES": [],
       "spamLimit": 5
@@ -154,7 +154,7 @@
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": true,
-      "COMMANDS_DISABLED": {},
+      "commandRestrictions": {},
       "CUSTOM_CAH_DECKS": {},
       "passives": [
         {
@@ -206,7 +206,7 @@
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
-      "COMMANDS_DISABLED": {},
+      "commandRestrictions": {},
       "CUSTOM_CAH_DECKS": {},
       "passives": [],
       "NOTES": [],
