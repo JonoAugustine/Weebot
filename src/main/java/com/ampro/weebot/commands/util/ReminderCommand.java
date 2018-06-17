@@ -38,29 +38,45 @@ public class ReminderCommand extends Command {
 
             private final String message;
 
-            private final OffsetDateTime startTime;
+            private final OffsetDateTime startDate;
             /** How many seconds will this last */
             private long lifeSpan;
+            /** How many seconds are left */
+            private long timeRemaining;
             /** Should this reminder be a lil annoying? */
             private final boolean bug;
             /** Should the reminder be sent to the channel recieved or private channel */
             private final boolean inGuild;
 
+            /**
+             * Make a Reminder.
+             * @param event The Event that called this.
+             * @param minutes How many minuets will this last
+             * @param bugMe TODO
+             * @param inGuild Whether this is inGuild (or in private)
+             * @param message A message to display in the reminder
+             */
             Reminder(BetterMessageEvent event, int minutes, boolean bugMe,
                      boolean inGuild, String message) {
-                startTime = OffsetDateTime.now();
+                this.startDate = OffsetDateTime.now();
                 this.lifeSpan = minutes * 60;
-                bug = bugMe;
+                this.timeRemaining = lifeSpan;
+                this.bug = bugMe;
                 this.inGuild = inGuild;
-                this.channelId = event.getTextChannel().getIdLong();
-                if (!event.isPrivate()) guildId = event.getGuild().getIdLong();
-                else guildId = -1;
+                if (!event.isPrivate()){
+                    this.guildId = event.getGuild().getIdLong();
+                    this.channelId = event.getTextChannel().getIdLong();
+                }
+                else {
+                    this.guildId = -1;
+                    this.channelId = -1;
+                }
                 this.message = message;
             }
 
             @Override
             public void run() {
-                for (; lifeSpan > 0; lifeSpan--) {
+                for (; timeRemaining > 0; timeRemaining--) {
                     try {
                         Thread.sleep(1000); //Wait 1 second
                     } catch (InterruptedException e) {
@@ -86,7 +102,9 @@ public class ReminderCommand extends Command {
 
             /** Update the lifeSpan after a load from file */
             void startup() {
-                lifeSpan = ChronoUnit.SECONDS.between(startTime, OffsetDateTime.now());
+                long timeSince = ChronoUnit.SECONDS
+                        .between(startDate, OffsetDateTime.now());
+                timeRemaining = lifeSpan - timeSince;
             }
 
         }
@@ -97,7 +115,7 @@ public class ReminderCommand extends Command {
 
         private final long authorId;
 
-        private transient ExecutorService poolExecutor;
+        private static transient ExecutorService poolExecutor;
 
         private Reminder[] pool;
 
@@ -113,9 +131,9 @@ public class ReminderCommand extends Command {
          * Re-add the Reminders to the threadpool on load from file startup.
          */
         public void startup() {
-            poolExecutor = Executors.newFixedThreadPool(PREMIUM_REMINDER_LIMIT);
+            poolExecutor = Executors.newCachedThreadPool();
             for (Reminder reminder : pool) {
-                if (reminder == null) continue;
+                if (reminder == null || reminder.lifeSpan < 0) continue;
                 reminder.startup();
                 poolExecutor.submit(reminder);
             }
@@ -151,7 +169,7 @@ public class ReminderCommand extends Command {
          */
         private int openIndex() {
             for (int i = 0; i < pool.length; i++) {
-                if (pool[i] == null || pool[i].lifeSpan <= 0)
+                if (pool[i] == null || pool[i].timeRemaining <= 0)
                     return i;
             }
             return -1;
@@ -190,13 +208,18 @@ public class ReminderCommand extends Command {
             eb.setTitle("Your Set Reminders");
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < pool.length; i++) {
-                if (pool[i] == null || pool[i].lifeSpan <= 0) continue;
+                if (pool[i] == null || pool[i].timeRemaining <= 0) continue;
                 Reminder r = pool[i];
                 sb.append((i + 1) + ".) ")
-                  .append(r.startTime.plusSeconds(r.lifeSpan)
+                  .append(r.startDate.plusSeconds(r.lifeSpan)
                                      .format(DateTimeFormatter.ofPattern
                                              ("dd/MM/yy HH:mm:ss")))
                   .append("\n\n");
+            }
+            if (sb.length() == 0) {
+                sb.append("*You have no reminders. Use*\n")
+                  .append("rc [here] [loudAlert] [Xm] [Yh] [Zd] [Reminder Message]")
+                  .append("\n*to set a new reminder.*");
             }
             eb.setDescription(sb.toString());
             return eb.build();
