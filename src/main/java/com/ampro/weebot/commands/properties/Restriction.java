@@ -1,10 +1,13 @@
 package com.ampro.weebot.commands.properties;
 
-import net.dv8tion.jda.core.entities.Role;
-import net.dv8tion.jda.core.entities.TextChannel;
-import net.dv8tion.jda.core.entities.User;
+import com.ampro.weebot.Launcher;
+import net.dv8tion.jda.core.EmbedBuilder;
+import net.dv8tion.jda.core.entities.*;
+import net.dv8tion.jda.core.managers.GuildController;
 
+import javax.annotation.Nonnull;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
@@ -48,6 +51,62 @@ public class Restriction {
         this.blockedRoles = new ArrayList<>();
         this.allowedTextChannels = new ArrayList<>();
         this.blockedTextChannels = new ArrayList<>();
+    }
+
+    /**
+     * Add allowed {@link User users}, {@link Role roles}, or
+     * {@link TextChannel TextChannels}.
+     * Will remove any from the "blocked" list if present.
+     * @param iSnowflakes The iSnowflakes to allow
+     */
+    public void allow(@Nonnull List<? extends ISnowflake> iSnowflakes) {
+        if (iSnowflakes.isEmpty()) {
+            return;
+        }
+        if (iSnowflakes.get(0) instanceof User) {
+            iSnowflakes.forEach( user -> {
+                this.blockedUsers.remove(user.getIdLong());
+                this.allowedUsers.add(user.getIdLong());
+            });
+        } else if (iSnowflakes.get(0) instanceof Role) {
+            iSnowflakes.forEach( role -> {
+                this.blockedRoles.remove(role.getIdLong());
+                this.allowedRoles.add(role.getIdLong());
+            });
+        } else if (iSnowflakes.get(0) instanceof TextChannel) {
+            iSnowflakes.forEach( channel -> {
+                this.blockedTextChannels.remove(channel.getIdLong());
+                this.allowedTextChannels.add(channel.getIdLong());
+            });
+        }
+    }
+
+    /**
+     * Add blocked {@link User users}, {@link Role roles}, or
+     * {@link TextChannel TextChannels}.
+     * Will remove any from the "allowed" list if present.
+     * @param iSnowflakes The iSnowflakes to block
+     */
+    public void block(@Nonnull List<? extends ISnowflake> iSnowflakes) {
+        if (iSnowflakes.isEmpty()) {
+            return;
+        }
+        if (iSnowflakes.get(0) instanceof User) {
+            iSnowflakes.forEach( user -> {
+                this.allowedUsers.remove(user.getIdLong());
+                this.blockedUsers.add(user.getIdLong());
+            });
+        } else if (iSnowflakes.get(0) instanceof Role) {
+            iSnowflakes.forEach( role -> {
+                this.allowedRoles.remove(role.getIdLong());
+                this.blockedRoles.add(role.getIdLong());
+            });
+        } else if (iSnowflakes.get(0) instanceof TextChannel) {
+            iSnowflakes.forEach( channel -> {
+                this.allowedTextChannels.remove(channel.getIdLong());
+                this.blockedTextChannels.add(channel.getIdLong());
+            });
+        }
     }
 
     /** @return An {@link Collections#unmodifiableList(List)} of allowed users. */
@@ -191,6 +250,73 @@ public class Restriction {
         return allowedUsers.isEmpty() || blockedUsers.isEmpty()
                 || allowedRoles.isEmpty() || blockedRoles.isEmpty()
                 || allowedTextChannels.isEmpty() || blockedTextChannels .isEmpty();
+    }
+
+    /**
+     * Get an {@link EmbedBuilder} with each allow or block list as it's own
+     * field. The EmbedBuilder is in standard Weebot form, untitled with no
+     * description.
+     * @param guild The guild the restriction is housed in.
+     * @return
+     */
+    public EmbedBuilder toEmbedBuilder(Guild guild) {
+        StringBuilder sb = new StringBuilder();
+        EmbedBuilder eb = Launcher.getStandardEmbedBuilder();
+        if (!this.getAllowedUsers().isEmpty()) {
+            this.getAllowedUsers().forEach(u -> {
+                sb.append("*")
+                  .append(guild.getMemberById(u).getEffectiveName())
+                  .append("*\n");
+            });
+            eb.addField("Allowed Members", sb.toString(), true);
+            sb.setLength(0);
+        }
+        if (!this.getAllowedRoles().isEmpty()) {
+            this.getAllowedRoles().forEach(r -> {
+                sb.append("*")
+                  .append(guild.getRoleById(r).getName())
+                  .append("*\n");
+            });
+            eb.addField("Allowed Roles", sb.toString(), true);
+            sb.setLength(0);
+        }
+        if (!this.getAllowedTextChannels().isEmpty()) {
+            this.getAllowedTextChannels().forEach(tc -> {
+                sb.append("*")
+                  .append(guild.getTextChannelById(tc).getName())
+                  .append("*\n");
+            });
+            eb.addField("Allowed TextChannels", sb.toString(), true);
+            sb.setLength(0);
+        }
+        if (!this.getBlockedUsers().isEmpty()) {
+            this.getBlockedUsers().forEach(u -> {
+                sb.append("*")
+                  .append(guild.getMemberById(u).getEffectiveName())
+                  .append("*\n");
+            });
+            eb.addField("Blocked Members", sb.toString(), true);
+            sb.setLength(0);
+        }
+        if (!this.getBlockedRoles().isEmpty()) {
+            this.getBlockedRoles().forEach(r -> {
+                sb.append("*")
+                  .append(guild.getRoleById(r).getName())
+                  .append("*\n");
+            });
+            eb.addField("BlockedRoles", sb.toString(), true);
+            sb.setLength(0);
+        }
+        if (!this.getBlockedTextChannels().isEmpty()) {
+            this.getBlockedTextChannels().forEach(tc -> {
+                sb.append("*")
+                  .append(guild.getTextChannelById(tc).getName())
+                  .append("*\n");
+            });
+            eb.addField("Blocked TextChannels", sb.toString(), true);
+            sb.setLength(0);
+        }
+        return eb;
     }
 
 }

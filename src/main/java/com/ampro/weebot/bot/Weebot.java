@@ -26,6 +26,7 @@ import com.ampro.weebot.commands.management.AutoAdminCommand.AutoAdmin;
 import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.JDA;
+import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.Role;
 import net.dv8tion.jda.core.entities.User;
@@ -200,6 +201,8 @@ public class Weebot implements Comparable<Weebot> {
      * @return {@code true} if the command is not banned in the event's chat.
      */
     private boolean commandIsAllowed(Command cmd, BetterMessageEvent event) {
+        //Admin is admin
+        if (event.getMember().hasPermission(Permission.ADMINISTRATOR)) return true;
         Restriction restriction = commandRestrictions.get(cmd.getClass());
         //If there is no restriction data mapped, then it's allowed
         if (restriction == null || !restriction.restricted()) return true;
@@ -385,6 +388,37 @@ public class Weebot implements Comparable<Weebot> {
         boolean old = this.ACTIVE_PARTICIPATE;
         this.ACTIVE_PARTICIPATE = activeParticipate;
         return old;
+    }
+
+    /**
+     * Get the {@link Restriction} mapped to the Command. This will never
+     * return null, if a Command has no restriction mapped, one is added then
+     * returned.
+     * @param cmd The command's class
+     * @return A non-null Restriction mapped to the Command class.
+     */
+    public final synchronized Restriction getCmdRestriction(Command cmd) {
+        Restriction r = commandRestrictions.putIfAbsent(cmd.getClass(), new Restriction());
+        return r == null ? new Restriction() : r;
+    }
+
+    /**
+     * Get the {@link Restriction} mapped to the Command. This will never
+     * return null, if a Command has no restriction mapped, one is added then
+     * returned.
+     * @param cmd The command's class
+     * @return A non-null Restriction mapped to the Command class.
+     */
+    public final synchronized Restriction
+    getCmdRestriction(Class<? extends Command> cmd) {
+        Restriction r = commandRestrictions.putIfAbsent(cmd, new Restriction());
+        return r == null ? new Restriction() : r;
+    }
+
+    /** @return {@link Command} classes mapped to {@link Restriction restrictions}. */
+    public ConcurrentHashMap<Class<? extends Command>, Restriction>
+    getCommandRestrictions() {
+        return commandRestrictions;
     }
 
     /**

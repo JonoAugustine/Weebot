@@ -1,7 +1,9 @@
 package com.ampro.weebot.database;
 
+import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.util.Logger;
+import com.ampro.weebot.util.io.CommandClassAdapter;
 import com.ampro.weebot.util.io.FileManager;
 import com.ampro.weebot.util.io.InterfaceAdapter;
 import com.google.gson.Gson;
@@ -29,6 +31,8 @@ public class DatabaseManager extends FileManager {
                                .setExclusionStrategies().setPrettyPrinting()
                                .registerTypeAdapter(IPassive.class,
                                                     new InterfaceAdapter<>())
+                               .registerTypeAdapter(Class.class,
+                                                    new CommandClassAdapter())
                                .create();
 
     /**

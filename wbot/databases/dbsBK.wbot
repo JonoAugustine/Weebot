@@ -1,151 +1,8 @@
 {
   "SUGGESTIONS": {},
   "GLOBAL_WEEBOT": {
-    "USER_PASSIVES": {
-      "139167730237571072": []
-    },
-    "USER_REMINDERS": {
-      "139167730237571072": {
-        "authorId": 139167730237571072,
-        "pool": [
-          {
-            "guildId": -1,
-            "channelId": -1,
-            "message": "",
-            "startDate": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 6,
-                  "day": 17
-                },
-                "time": {
-                  "hour": 7,
-                  "minute": 59,
-                  "second": 58,
-                  "nano": 51000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -14400
-              }
-            },
-            "lifeSpan": 60,
-            "timeRemaining": -529,
-            "bug": false,
-            "inGuild": false
-          },
-          {
-            "guildId": -1,
-            "channelId": -1,
-            "message": "",
-            "startDate": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 6,
-                  "day": 17
-                },
-                "time": {
-                  "hour": 8,
-                  "minute": 0,
-                  "second": 8,
-                  "nano": 743000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -14400
-              }
-            },
-            "lifeSpan": 86460,
-            "timeRemaining": 80601,
-            "bug": false,
-            "inGuild": false
-          },
-          {
-            "guildId": -1,
-            "channelId": -1,
-            "message": "",
-            "startDate": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 6,
-                  "day": 17
-                },
-                "time": {
-                  "hour": 8,
-                  "minute": 0,
-                  "second": 10,
-                  "nano": 66000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -14400
-              }
-            },
-            "lifeSpan": 86460,
-            "timeRemaining": 80603,
-            "bug": false,
-            "inGuild": false
-          },
-          {
-            "guildId": -1,
-            "channelId": -1,
-            "message": "",
-            "startDate": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 6,
-                  "day": 17
-                },
-                "time": {
-                  "hour": 8,
-                  "minute": 0,
-                  "second": 11,
-                  "nano": 210000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -14400
-              }
-            },
-            "lifeSpan": 86460,
-            "timeRemaining": 80604,
-            "bug": false,
-            "inGuild": false
-          },
-          {
-            "guildId": -1,
-            "channelId": -1,
-            "message": "",
-            "startDate": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 6,
-                  "day": 17
-                },
-                "time": {
-                  "hour": 8,
-                  "minute": 0,
-                  "second": 12,
-                  "nano": 158000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -14400
-              }
-            },
-            "lifeSpan": 86460,
-            "timeRemaining": 80605,
-            "bug": false,
-            "inGuild": false
-          }
-        ]
-      }
-    },
+    "USER_PASSIVES": {},
+    "USER_REMINDERS": {},
     "GUILD_ID": 0,
     "BOT_ID": "0W",
     "BIRTHDAY": {
@@ -153,13 +10,13 @@
         "date": {
           "year": 2018,
           "month": 6,
-          "day": 1
+          "day": 21
         },
         "time": {
-          "hour": 20,
-          "minute": 44,
-          "second": 2,
-          "nano": 926000000
+          "hour": 17,
+          "minute": 23,
+          "second": 54,
+          "nano": 322000000
         }
       },
       "offset": {
@@ -185,13 +42,13 @@
           "date": {
             "year": 2018,
             "month": 6,
-            "day": 1
+            "day": 21
           },
           "time": {
-            "hour": 20,
-            "minute": 44,
-            "second": 2,
-            "nano": 929000000
+            "hour": 17,
+            "minute": 23,
+            "second": 54,
+            "nano": 322000000
           }
         },
         "offset": {
@@ -216,61 +73,45 @@
           "date": {
             "year": 2018,
             "month": 6,
-            "day": 1
+            "day": 21
           },
           "time": {
-            "hour": 20,
-            "minute": 44,
-            "second": 2,
-            "nano": 929000000
+            "hour": 17,
+            "minute": 26,
+            "second": 42,
+            "nano": 165000000
           }
         },
         "offset": {
           "totalSeconds": -14400
         }
       },
-      "nickname": "Weebot",
-      "callsign": "\\",
+      "nickname": "Tobeew",
+      "callsign": "tw\\",
       "explicit": false,
       "NSFW": false,
-      "ACTIVE_PARTICIPATE": true,
-      "commandRestrictions": {},
-      "CUSTOM_CAH_DECKS": {},
-      "passives": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.management.AutoAdminCommand$AutoAdmin",
-          "DATA": {
-            "dead": false,
-            "guildID": 139168039634468865,
-            "bannedWords": {
-              "arctan": []
-            },
-            "userRecords": {},
-            "exemptUsers": [],
-            "exemptRoles": [],
-            "kickThresh": 5,
-            "sofThresh": 0,
-            "hardThresh": 0,
-            "numKicked": 0,
-            "numBanned": 0,
-            "infCaught": 0
+      "ACTIVE_PARTICIPATE": false,
+      "commandRestrictions": [
+        [
+          {
+            "CLASSNAME": "com.ampro.weebot.commands.management.AutoAdminCommand"
+          },
+          {
+            "allowedUsers": [],
+            "blockedUsers": [
+              195244363339530240
+            ],
+            "allowedRoles": [],
+            "blockedRoles": [],
+            "allowedTextChannels": [],
+            "blockedTextChannels": [
+              267114722304720896
+            ]
           }
-        },
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.fun.CustomMemeCommand$MemeReader",
-          "DATA": {
-            "dead": false,
-            "callSymbol": ";",
-            "memeList": {
-              "super_weeb": {
-                "url": "https://cdn.discordapp.com/attachments/439522471369244683/457894795319181312/10092886.jpg",
-                "name": "super_weeb",
-                "allowedRoles": []
-              }
-            }
-          }
-        }
+        ]
       ],
+      "CUSTOM_CAH_DECKS": {},
+      "passives": [],
       "NOTES": [],
       "spamLimit": 5
     },
@@ -282,21 +123,21 @@
           "date": {
             "year": 2018,
             "month": 6,
-            "day": 1
+            "day": 21
           },
           "time": {
-            "hour": 20,
-            "minute": 44,
-            "second": 2,
-            "nano": 929000000
+            "hour": 17,
+            "minute": 26,
+            "second": 3,
+            "nano": 438000000
           }
         },
         "offset": {
           "totalSeconds": -14400
         }
       },
-      "nickname": "Weebot",
-      "callsign": "\\",
+      "nickname": "Weebot (DevTest)",
+      "callsign": "\u003c\u003e",
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,

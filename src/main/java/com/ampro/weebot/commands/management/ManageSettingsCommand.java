@@ -104,7 +104,6 @@ public class ManageSettingsCommand extends Command {
             }
             try {
                 String newName = String.join(" ", args).substring(args[0].length()).trim();
-                System.out.println(newName);
                 //Change name on server
                 Guild g = Launcher.getGuild(bot.getGuildID());
                 Member self = g.getSelfMember();
@@ -434,7 +433,8 @@ public class ManageSettingsCommand extends Command {
         this.children = new Command[]{
                 new ShowSettingsCommand(), new ChangeNameCommand(),
                 new ChangeCallsignCommand(), new SetExplicitCommand(),
-                new SetNSFWCommand(), new SetParticipateCommand()};
+                new SetNSFWCommand(), new SetParticipateCommand()
+        };
 
     }
 

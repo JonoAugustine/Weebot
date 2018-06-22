@@ -319,7 +319,7 @@ public abstract class Command {
      */
     public void run(Weebot bot, BetterMessageEvent event) {
         for (Command c : children)
-            if (c.isCommandFor(event.getArgs()[0])) {
+            if (c.isCommandFor(cleanArgsLowerCase(bot, event)[0])) {
                 c.run(bot, event);
                 return;
             }

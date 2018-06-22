@@ -9,6 +9,7 @@ import com.ampro.weebot.commands.ChatbotCommand;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.HelpCommand;
 import com.ampro.weebot.commands.fun.CustomMemeCommand;
+import com.ampro.weebot.commands.management.RestrictCmdCommand;
 import com.ampro.weebot.commands.util.NotePadCommand;
 import com.ampro.weebot.commands.developer.DatabaseFileCommand;
 import com.ampro.weebot.commands.developer.ListGuildsCommand;
@@ -91,7 +92,7 @@ public class Launcher {
                     new CardsAgainstHumanityCommand(), new OutHouseCommand(),
                     new ChatbotCommand(), new CalculatorCommand(),
                     new ReminderCommand(), new InviteLinkCommand(),
-                    new CustomMemeCommand()
+                    new CustomMemeCommand(), new RestrictCmdCommand()
 			));
 
 	/** The database */
@@ -118,8 +119,8 @@ public class Launcher {
        //Debug
        //RestAction.setPassContext(true); // enable context by default
        //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace;
-       Launcher.jdaLogIn();
-       //Launcher.jdaDevLogIn();
+       //Launcher.jdaLogIn();
+       Launcher.jdaDevLogIn();
        Launcher.setUpDatabase();
        Launcher.updateWeebots();
        Launcher.startSaveTimer(.5);
