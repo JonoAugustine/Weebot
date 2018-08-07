@@ -17,7 +17,6 @@
 package com.ampro.weebot.jda;
 
 import com.neovisionaries.ws.client.WebSocketFactory;
-
 import net.dv8tion.jda.core.AccountType;
 import net.dv8tion.jda.core.JDA;
 import net.dv8tion.jda.core.JDA.Status;
@@ -43,7 +42,7 @@ import java.util.concurrent.ConcurrentMap;
 /**
  * Used to create new {@link net.dv8tion.jda.core.JDA} instances. This is also useful for making sure all of
  * your {@link net.dv8tion.jda.core.hooks.EventListener EventListeners} are registered
- * before {@link net.dv8tion.jda.core.JDA} attempts to log in.
+ * before {@link net.dv8tion.jda.core.JDA} attempts to flog in.
  *
  * <p>A single JDABuilder can be reused multiple times. Each call to
  * {@link net.dv8tion.jda.core.JDABuilder#buildAsync() buildAsync()} or
@@ -181,7 +180,7 @@ public class JDABuilder
     }
 
     /**
-     * Sets the token that will be used by the {@link net.dv8tion.jda.core.JDA} instance to log in when
+     * Sets the token that will be used by the {@link net.dv8tion.jda.core.JDA} instance to flog in when
      * {@link net.dv8tion.jda.core.JDABuilder#buildAsync() buildAsync()}
      * or {@link net.dv8tion.jda.core.JDABuilder#buildBlocking() buildBlocking()}
      * is called.

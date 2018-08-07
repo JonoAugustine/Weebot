@@ -1,9 +1,9 @@
 package com.ampro.weebot.commands.util;
 
 import com.ampro.weebot.Launcher;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.database.Database;
-import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.MessageEmbed;
@@ -12,7 +12,9 @@ import net.dv8tion.jda.core.entities.User;
 import java.time.OffsetDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Consumer;
@@ -100,7 +102,7 @@ public class ReminderCommand extends Command {
 
             }
 
-            /** Update the lifeSpan after a load from file */
+            /** Update the lifeSpan after a loadDao from file */
             void startup() {
                 long timeSince = ChronoUnit.SECONDS
                         .between(startDate, OffsetDateTime.now());
@@ -128,7 +130,7 @@ public class ReminderCommand extends Command {
         }
 
         /**
-         * Re-add the Reminders to the threadpool on load from file startup.
+         * Re-add the Reminders to the threadpool on loadDao from file startup.
          */
         public void startup() {
             poolExecutor = Executors.newCachedThreadPool();

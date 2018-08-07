@@ -5,29 +5,27 @@
 
 package com.ampro.weebot;
 
+import com.ampro.weebot.bot.GlobalWeebot;
+import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.commands.ChatbotCommand;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.HelpCommand;
-import com.ampro.weebot.commands.fun.CustomMemeCommand;
-import com.ampro.weebot.commands.management.RestrictCmdCommand;
-import com.ampro.weebot.commands.util.NotePadCommand;
 import com.ampro.weebot.commands.developer.DatabaseFileCommand;
 import com.ampro.weebot.commands.developer.ListGuildsCommand;
 import com.ampro.weebot.commands.developer.ShutdownCommand;
 import com.ampro.weebot.commands.developer.WeebotSuggestionCommand;
+import com.ampro.weebot.commands.fun.CustomMemeCommand;
 import com.ampro.weebot.commands.games.SecretePhraseCommand;
 import com.ampro.weebot.commands.games.cardgame.CardsAgainstHumanityCommand;
 import com.ampro.weebot.commands.management.AutoAdminCommand;
 import com.ampro.weebot.commands.management.ManageSettingsCommand;
-import com.ampro.weebot.commands.miscellaneous.*;
-import com.ampro.weebot.commands.util.CalculatorCommand;
-import com.ampro.weebot.commands.util.OutHouseCommand;
-import com.ampro.weebot.commands.util.ReminderCommand;
-import com.ampro.weebot.commands.util.SelfDestructMessageCommand;
+import com.ampro.weebot.commands.management.RestrictCmdCommand;
+import com.ampro.weebot.commands.miscellaneous.InviteLinkCommand;
+import com.ampro.weebot.commands.miscellaneous.PingCommand;
+import com.ampro.weebot.commands.miscellaneous.SpamCommand;
+import com.ampro.weebot.commands.util.*;
 import com.ampro.weebot.database.Database;
 import com.ampro.weebot.database.DatabaseManager;
-import com.ampro.weebot.bot.GlobalWeebot;
-import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.jda.JDABuilder;
 import com.ampro.weebot.listener.EventDispatcher;
 import com.ampro.weebot.util.Logger;
@@ -188,7 +186,7 @@ public class Launcher {
    }
 
 	/**
-	 * Attempts to load a database from file. <br>
+	 * Attempts to loadDao a database from file. <br>
 	 * If a database could not be loaded, a new one is created. <br>
 	 * Is called only once during setup.
 	 */
@@ -199,7 +197,7 @@ public class Launcher {
 		Database db = DatabaseManager.load();
 		Launcher.DATABASE = db == null ? new Database() : db;
 		if (db == null) {
-            Logger.derr(f + "\t\tUnable to load database, creating new database.");
+            Logger.derr(f + "\t\tUnable to loadDao database, creating new database.");
 			Logger.derr(f + "\t\tLoading known Guilds");
 			List<Guild> guilds = Launcher.JDA_CLIENT.getGuilds();
 			for (Guild g : guilds) {

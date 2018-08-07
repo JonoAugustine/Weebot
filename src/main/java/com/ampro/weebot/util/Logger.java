@@ -23,7 +23,7 @@ public class Logger {
     private static transient File log;
 
     /**
-     * Initiallizes the session's log file.
+     * Initiallizes the session's flog file.
      * @return false if the logger fails to initialize
      */
     public static boolean init() {
@@ -44,8 +44,8 @@ public class Logger {
     }
 
     /**
-     * Print to {@link System#err} and log to file.
-     * @param obj The object to log
+     * Print to {@link System#err} and flog to file.
+     * @param obj The object to flog
      */
     public static void dout(Object obj) {
         System.out.println(obj);
@@ -53,8 +53,8 @@ public class Logger {
     }
 
     /**
-     * Print to {@link System#out} and log to file.
-     * @param obj The object to log
+     * Print to {@link System#out} and flog to file.
+     * @param obj The object to flog
      */
     public static void derr(Object obj) {
         System.err.println(obj);
@@ -63,7 +63,7 @@ public class Logger {
 
     /**
      * Log to file.
-     * @param obj The object to log
+     * @param obj The object to flog
      */
     public static synchronized void log(Object obj, boolean newLine) {
         try {

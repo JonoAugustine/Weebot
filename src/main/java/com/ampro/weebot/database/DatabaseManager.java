@@ -1,6 +1,5 @@
 package com.ampro.weebot.database;
 
-import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.util.Logger;
 import com.ampro.weebot.util.io.CommandClassAdapter;
