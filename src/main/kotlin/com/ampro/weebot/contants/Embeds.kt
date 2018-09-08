@@ -25,15 +25,3 @@ val standardEmbedBuilder: EmbedBuilder
 fun makeEmbedBuilder(title: String, titleLink: String, description: String)
         = standardEmbedBuilder.setTitle(title, titleLink)
             .setDescription(description)!!
-
-/**
- * Makes a standard format EmbedBuilder with standard color and author
- * , the given title, title URL, and description.
- * @param title The title of the Embed
- * @param titleURL The site to link to in the Title
- * @param description The description that appears under the title
- * @return A Weebot-standard EmbedBuilder
- */
-fun makeEmbedBuilder(title: String, titleURL: String, description: StringBuilder)
-        = makeEmbedBuilder(title, titleURL, description.toString())
-

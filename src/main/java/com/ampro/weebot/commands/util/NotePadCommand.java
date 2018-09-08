@@ -47,7 +47,6 @@ public class NotePadCommand extends Command {
          * A note has a {@link String} note and a creation time & date.
          */
         static final class Note {
-
             String note;
             private final OffsetDateTime creationTime;
             private OffsetDateTime lastEditTime;

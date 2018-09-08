@@ -33,6 +33,7 @@ import static com.ampro.weebot.util.io.FileManager.TEMP_OUT;
  *
  * TODO Make cards playable by reacting to the hand-message in private chat
  *
+ * @author Jonathan Augustine
  */
 public class CardsAgainstHumanityCommand extends Command {
 
@@ -1879,6 +1880,7 @@ public class CardsAgainstHumanityCommand extends Command {
             case "alldecks":
                 return ACTION.VIEWALLDECKS;
             case "viewdeck":
+            case "view":
             case "seedeck":
             case "see":
                 return ACTION.VIEWDECK;
@@ -2034,15 +2036,15 @@ public class CardsAgainstHumanityCommand extends Command {
 					+ "makeblackcard, makebc", false)
           .addField("View all Custom Decks", "cah alldecks", false)
           .addField("View a Custom Deck's Cards",
-                    "cah viewdeck <deck_name>\n*Alias*: seedeck", false)
+                    "cah view <deck_name>\n*Alias*: seedeck", false)
           .addField("Lock a Custom Deck to One or More Roles", "cah lock <deck_name>",
                     false)
           .addField("Get a Custom Deck as a Text File", "cah deckfile <deck_name>",
                     false)
           .addField("Remove Custom Deck **", "cah remove <deck_number>", false)
-          .addField("Remove Custom White Card ","cah rmwc <deck_num> <card_number>",
+          .addField("Remove Custom White Card ","cah rmwc <deck_name> <card_number>",
                     false)
-          .addField("Remove Custom Black Card ","cah rmbc <deck_num> <card_number>",
+          .addField("Remove Custom Black Card ","cah rmbc <deck_name> <card_number>",
                     false)
           .addField("Under Construction ",
                     "Commands marked '**' are still under construction", false)

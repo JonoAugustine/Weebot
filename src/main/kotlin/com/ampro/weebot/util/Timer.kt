@@ -41,9 +41,6 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
         }
     }
 
-    /** @return The current duration of the timer's run time in HH:MMM:SS */
-    fun formattedTime(): String = format(this.getElapsedTime())
-
     companion object {
         fun format(millis: Long) : String {
             var seconds = (millis / 1_000).toDouble()//Math.pow(10.0, 9.0)
@@ -69,7 +66,7 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
     }
 
     /** @return The current duration of the timer's run time in HH:MMM:SS */
-    override fun toString(): String = this.formattedTime()
+    override fun toString(): String = format(this.getElapsedTime())
 
     /** Start the Timer if it is not running */
     fun start() {
@@ -85,7 +82,7 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
     fun stop() : String {
         this.elapsedTime = System.currentTimeMillis()
         this.running = false
-        return this.formattedTime()
+        return this.toString()
     }
 
     /**
@@ -94,7 +91,7 @@ class Timer(private var startTime: Long = System.currentTimeMillis()) {
      * @return the last duration formatted
      */
     fun reset() : String {
-        val lastTime = this.formattedTime()
+        val lastTime = this.toString()
         this.startTime = System.currentTimeMillis()
         return lastTime
     }

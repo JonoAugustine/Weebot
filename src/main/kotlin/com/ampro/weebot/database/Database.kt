@@ -16,18 +16,9 @@ import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
 /** Array of registered developer Discord IDs  */
-internal val DEV_IDS = mutableListOf(
+val DEV_IDS = mutableListOf(
     139167730237571072L /*JONO*/, 186130584693637131L /*DERNST*/
 )
-
-/**
- * Removes a developer by ID.
- *
- * @param id long user ID
- * @return The removed id
- */
-@Synchronized
-fun removeDeveloper(id: Long): Long = DEV_IDS.removeAt(DEV_IDS.indexOf(id))
 
 /**
  * Check if user ID matches a Developer ID.
@@ -35,8 +26,7 @@ fun removeDeveloper(id: Long): Long = DEV_IDS.removeAt(DEV_IDS.indexOf(id))
  * @param id long ID to check
  * @return true if the user ID is a dev.
  */
-fun checkDevID(id: Long): Boolean = Database.getDevelopers().contains(id)
-
+fun isDev(id: Long): Boolean = DEV_IDS.contains(id)
 
 /**
  * TODO
@@ -45,6 +35,10 @@ data class PremiumUser(val ID: Long)
 
 lateinit var DAO : Dao
 
+/**
+ * A database for storing all the information about the Weebot program
+ * between downtime.
+ */
 data class Dao(var initTime: String = NOW_FILE) {
 
     /**
@@ -206,17 +200,11 @@ data class Dao(var initTime: String = NOW_FILE) {
             SUGGESTIONS.remove(user.idLong) ?: listOf()
 
     override fun toString(): String {
-        var out = ""
-        out += "["
-
-        for ((key, bot) in this.WEEBOTS) {
-
-            out + ("[" + key + "," + bot.nickname + "]")
+        val out = StringBuilder("[")
+        this.WEEBOTS.forEach { key, bot ->
+            out.append("[" + key + "," + bot.nickname + "]")
         }
-
-        out += "]"
-
-        return out
+        return out.append("]").toString()
     }
 
 }

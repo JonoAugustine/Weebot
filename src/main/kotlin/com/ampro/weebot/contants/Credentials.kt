@@ -1,9 +1,7 @@
 package com.ampro.weebot.contants
 
 import com.ampro.weebot.MLOG
-import com.ampro.weebot.jda.JDABuilder
-import net.dv8tion.jda.core.AccountType
-import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.*
 import net.dv8tion.jda.core.entities.Game
 import javax.security.auth.login.LoginException
 

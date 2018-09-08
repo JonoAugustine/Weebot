@@ -20,9 +20,9 @@ val DIR_TEMP = File(DIR_HOME, "temp")
 val TEMP_OUT = File(DIR_TEMP, "out")
 val TEMP_IN  = File(DIR_TEMP, "in")
 
-internal val SAVE = File(DIR_DBS, "database.wbot")
-internal val BKUP = File(DIR_DBS, "dbsBK.wbot")
-internal val BKBK = File(FileManager.TEMP, "dbstemp.wbot")
+val SAVE = File(DIR_DBS, "database.wbot")
+val BKUP = File(DIR_DBS, "dbsBK.wbot")
+val BKBK = File(FileManager.TEMP, "dbstemp.wbot")
 
 val GSON = GsonBuilder().enableComplexMapKeySerialization()
     .setExclusionStrategies().setPrettyPrinting()

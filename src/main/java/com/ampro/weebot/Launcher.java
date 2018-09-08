@@ -174,7 +174,7 @@ public class Launcher {
         //Connect to API
         Logger.derr("[Launcher] Logging in to TestBot JDA client...");
         JDABuilder builder = new JDABuilder(AccountType.BOT).setToken(TOKEN_TEST);
-        Launcher.JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
+        JDA_CLIENT = builder.buildBlocking(Status.CONNECTED);
 	}
 
 	/**
@@ -358,6 +358,11 @@ public class Launcher {
 	/** Get the JDA */
 	public static JDA getJda() {
 		return Launcher.JDA_CLIENT;
+	}
+
+	/** Set the JDA */
+	public static void setJDA(JDA jda) {
+		JDA_CLIENT = jda;
 	}
 
 	/**@return EmbedBuilder with the standard green, Author set to "Weebot", and footer */

@@ -4,7 +4,18 @@ package com.ampro.weebot
  * Builds single JDA connection, instances of all Commands, and Database.
  *
  * @author Jonathan Augustine
- * @copyright Aquatic Mastery Productions
+ * @copyright Aquatic Mastery Productions 2018
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the License is distributed on
+ * an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
+ * specific language governing permissions and limitations under the License.
  */
 
 import com.ampro.weebot.bot.GlobalWeebot
@@ -16,8 +27,7 @@ import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.Dao
 import com.ampro.weebot.database.loadDao
 import com.ampro.weebot.listener.EventDispatcher
-import com.ampro.weebot.util.FileLogger
-import com.ampro.weebot.util.buildDirs
+import com.ampro.weebot.util.*
 import com.ampro.weebot.util.io.FileManager
 import kotlinx.coroutines.experimental.asCoroutineDispatcher
 import kotlinx.coroutines.experimental.newFixedThreadPoolContext
@@ -32,12 +42,10 @@ import javax.security.auth.login.LoginException
 internal val console = Thread {
     MLOG.elog("[Launcher#console] Starting console listener...")
     val scanner = Scanner(System.`in`)
-    val c = getCommand(ShutdownCommand::class.java) as ShutdownCommand?
+    val c = getCommand(ShutdownCommand::class) as ShutdownCommand
     while (true) {
         if (scanner.hasNext())
-            if (c!!.isCommandFor(scanner.nextLine())) {
-                shutdown()
-            }
+            if (c.isCommandFor(scanner.nextLine())) { shutdown() }
     }
 }
 
@@ -45,12 +53,20 @@ internal lateinit var saveTimer: Thread
 
 lateinit var JDA_CLIENT: JDA
 
+/**
+ * Get a guild matching the ID given.
+ *
+ * @param id long ID
+ * @return requested Guild <br></br> null if not found.
+ */
+fun getGuild(id: Long): Guild? = JDA_CLIENT.guilds.find { it.idLong == id }
+
 lateinit var GLOBAL_WEEBOT: GlobalWeebot
 
 val CACHED_POOL =  Executors.newCachedThreadPool().asCoroutineDispatcher()
 val FIXED_POOL = newFixedThreadPoolContext(100, "FixedPool")
 
-val MLOG = FileLogger("Launcher")
+val MLOG = FileLogger("Launcher $NOW_FILE")
 
 /**
  * Put bot online, setup listeners, and get full list of servers (Guilds)
@@ -73,6 +89,7 @@ fun main(args: Array<String>) {
 
     //JDA_CLIENT = jdaLogIn()
     JDA_CLIENT = jdaDevLogIn()
+    Launcher.setJDA(JDA_CLIENT)
 
     setUpDatabase()
     startupWeebots()
@@ -80,7 +97,7 @@ fun main(args: Array<String>) {
 
     addListeners()
     console.start()
-    MLOG.elog("[Launcher] Initialization Complete!\n\n")
+    MLOG.elog("Initialization Complete!\n\n")
 
 }
 
@@ -94,28 +111,27 @@ private fun addListeners() {
 }
 
 /**
- * Attempts to loadDao a database from file. <br></br>
- * If a database could not be loaded, a new one is created. <br></br>
+ * Attempts to loadDao a database from file.
+ * If a database could not be loaded, a new one is created.
  * Is called only once during setup.
  */
 private fun setUpDatabase() {
     MLOG.elog("Setting up Database...")
     MLOG.elog("\tLoading database...")
     var tdao = loadDao()
-    DAO = if (tdao == null) {
+    if (tdao == null) {
         MLOG.elog("\t\tUnable to loadDao database, creating new database.")
         tdao = Dao()
         MLOG.elog("\t\tLoading known Guilds")
-        JDA_CLIENT.guilds.forEach {
-            tdao.addBot(Weebot(it))
-        }
+        JDA_CLIENT.guilds.forEach { tdao.addBot(Weebot(it)) }
         tdao.save()
         MLOG.elog("\tDatabase created and saved to file.")
-        tdao
+        DAO = tdao
     } else {
         MLOG.elog("\tDatabase located. Updating registered Guilds.")
+        DAO = Dao()
+        GLOBAL_WEEBOT = DAO.GLOBAL_WEEBOT
         updateGuilds()
-        tdao
     }
     MLOG.elog("\tBacking up database.")
     DAO.backUp()
@@ -132,7 +148,7 @@ private fun updateGuilds() = JDA_CLIENT.guilds.forEach { DAO.addBot(Weebot(it)) 
  * changed during downtime and initialize transient variables.
  */
 private fun startupWeebots() {
-    MLOG.elog("Updating Weebots...")
+    MLOG.elog("Starting Weebots...")
     DAO.WEEBOTS.forEach { _, bot -> bot.startup() }
 }
 
@@ -200,19 +216,4 @@ fun shutdown() {
     FIXED_POOL.close()
     System.exit(0)
 
-}
-
-/**
- * Get a guild matching the ID given.
- *
- * @param id long ID
- * @return requested Guild <br></br> null if not found.
- */
-fun getGuild(id: Long): Guild? {
-    val it = JDA_CLIENT.guilds
-    for (g in it)
-        if (g.idLong == id)
-            return g
-
-    return null
 }

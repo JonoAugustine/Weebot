@@ -232,6 +232,7 @@ public class Weebot implements Comparable<Weebot> {
      * NickName. And initialize transient variables.
      */
     public void startup() {
+        System.out.println(this.BOT_ID + this.nickname);
         if (this.getGuildID() > 0) //Ignores the private bot
             this.nickname = Launcher.getGuild(this.GUILD_ID)
                                     .getMember(Launcher.getJda().getSelfUser())

@@ -9,14 +9,14 @@
       "dateTime": {
         "date": {
           "year": 2018,
-          "month": 6,
-          "day": 21
+          "month": 9,
+          "day": 7
         },
         "time": {
-          "hour": 17,
-          "minute": 23,
-          "second": 54,
-          "nano": 322000000
+          "hour": 18,
+          "minute": 5,
+          "second": 53,
+          "nano": 635000000
         }
       },
       "offset": {
@@ -35,20 +35,22 @@
   },
   "WEEBOTS": {
     "0": {
+      "USER_PASSIVES": {},
+      "USER_REMINDERS": {},
       "GUILD_ID": 0,
       "BOT_ID": "0W",
       "BIRTHDAY": {
         "dateTime": {
           "date": {
             "year": 2018,
-            "month": 6,
-            "day": 21
+            "month": 9,
+            "day": 7
           },
           "time": {
-            "hour": 17,
-            "minute": 23,
-            "second": 54,
-            "nano": 322000000
+            "hour": 18,
+            "minute": 5,
+            "second": 53,
+            "nano": 635000000
           }
         },
         "offset": {
@@ -72,44 +74,26 @@
         "dateTime": {
           "date": {
             "year": 2018,
-            "month": 6,
-            "day": 21
+            "month": 9,
+            "day": 7
           },
           "time": {
-            "hour": 17,
-            "minute": 26,
-            "second": 42,
-            "nano": 165000000
+            "hour": 18,
+            "minute": 5,
+            "second": 53,
+            "nano": 639000000
           }
         },
         "offset": {
           "totalSeconds": -14400
         }
       },
-      "nickname": "Tobeew",
-      "callsign": "tw\\",
+      "nickname": "Weebot",
+      "callsign": "\u003c\u003e",
       "explicit": false,
       "NSFW": false,
       "ACTIVE_PARTICIPATE": false,
-      "commandRestrictions": [
-        [
-          {
-            "CLASSNAME": "com.ampro.weebot.commands.management.AutoAdminCommand"
-          },
-          {
-            "allowedUsers": [],
-            "blockedUsers": [
-              195244363339530240
-            ],
-            "allowedRoles": [],
-            "blockedRoles": [],
-            "allowedTextChannels": [],
-            "blockedTextChannels": [
-              267114722304720896
-            ]
-          }
-        ]
-      ],
+      "commandRestrictions": {},
       "CUSTOM_CAH_DECKS": {},
       "passives": [],
       "NOTES": [],
@@ -122,21 +106,21 @@
         "dateTime": {
           "date": {
             "year": 2018,
-            "month": 6,
-            "day": 21
+            "month": 9,
+            "day": 7
           },
           "time": {
-            "hour": 17,
-            "minute": 26,
-            "second": 3,
-            "nano": 438000000
+            "hour": 18,
+            "minute": 5,
+            "second": 53,
+            "nano": 639000000
           }
         },
         "offset": {
           "totalSeconds": -14400
         }
       },
-      "nickname": "Weebot (DevTest)",
+      "nickname": "Weebot",
       "callsign": "\u003c\u003e",
       "explicit": false,
       "NSFW": false,
@@ -148,5 +132,6 @@
       "spamLimit": 5
     }
   },
-  "PREMIUM_USERS": []
+  "PREMIUM_USERS": {},
+  "initTime": "07-09-2018 18-05-53"
 }
