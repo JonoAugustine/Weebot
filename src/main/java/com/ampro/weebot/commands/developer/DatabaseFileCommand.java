@@ -53,14 +53,13 @@ public class DatabaseFileCommand extends Command {
      */
     @Override
     protected void execute(Weebot bot, BetterMessageEvent event) {
-        File out = new File(DatabaseManager.DIR_DBS, "databaseBK.wbot");
+        File out = new File(DatabaseManager.DIR_DBS, "dbsBK.wbot");
         if (!out.exists()) {
             event.privateReply("There is no backup file.");
             return;
         }
         String now = OffsetDateTime.now()
-                                   .format(DateTimeFormatter
-                                                   .ofPattern("dd-MM-yy hh-mm"));
+                    .format(DateTimeFormatter.ofPattern("dd-MM-yy hh-mm"));
         String name = "Databse  " + now;
         event.privateReply(out, name);
         if (!event.isPrivate())
