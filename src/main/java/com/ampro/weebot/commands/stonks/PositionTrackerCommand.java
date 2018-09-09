@@ -4,10 +4,8 @@ import com.ampro.weebot.bot.Weebot;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.commands.properties.Restriction;
-import com.ampro.weebot.commands.util.NotePadCommand;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import com.ampro.weebot.util.Unicode;
-import javafx.geometry.Pos;
 import net.dv8tion.jda.core.Permission;
 import net.dv8tion.jda.core.entities.Message;
 import net.dv8tion.jda.core.entities.MessageEmbed;
@@ -183,137 +181,148 @@ public class PositionTrackerCommand extends Command {
                 return;
             }
 
-            // in/out
-            BuySell bySl;
-            String bs = args.remove(0);
-            if (bs.matches("i+n*")) {
-                bySl = BUY;
-            } else if (bs.matches("o+u*t*")){
-                bySl = SELL;
-            } else {
-                event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
-                return;
-            }
-
-            // [$]TICKER
-            String tkr = args.remove(0).replaceAll("[^A-Za-z]", "");
-            if (tkr.isEmpty()) {
-                //No ticker, do something about it TODO
-                event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
-                return;
-            }
-
-            // [$]targetPrice
-            String targetPrice = args.remove(0);
-            Security security = null;
-            double targetDouble;
-            if (targetPrice.matches("^\\$?\\d*(\\.\\d*)?(c+(a*l*l*)|p+(u*t*))?$")) {
-                if (targetPrice.matches("p+u*t*")) {
-                    security = PUT;
-                } else if (targetPrice.matches("c+a*l*l*")) {
-                    security = CALL;
-                }
-                targetPrice = targetPrice.replaceAll("[^0-9.]", "");//Clear non-digits
-
-                try { //Attempt to parse the price Double from the string
-                    targetDouble = Double.parseDouble(targetPrice);
-                } catch (NumberFormatException e) {
-                    //TODO could not parse a double
+            boolean[] safe = new boolean[8];
+            for (String arg : args) {
+                // in/out
+                BuySell bySl;
+                if (arg.matches("i+n*")) {
+                    bySl = BUY;
+                    continue;
+                } else if (arg.matches("o+u*t*")){
+                    bySl = SELL;
+                    continue;
+                } else {
                     event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
-                    System.out.println(targetPrice);
                     return;
                 }
-            } else {
-                //Something not good TODO
-                event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
-                return;
-            }
 
-            // call or put
-            if (security == null) { //If the call/put was not found in the last one
-                String sec = args.remove(0);
-                if (sec.matches("p+u*t*")) {
-                    security = PUT;
-                } else if (sec.matches("c+a*l*l*")) {
-                    security = CALL;
+                // [$]TICKER
+                String tkr = args.remove(0).replaceAll("[^A-Za-z]", "");
+                if (tkr.isEmpty()) {
+                    //No ticker, do something about it TODO
+                    event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
+                    return;
+                }
+
+                // [$]targetPrice
+                String targetPrice = args.remove(0);
+                Security security = null;
+                double targetDouble;
+                if (targetPrice.matches("^\\$?\\d*(\\.\\d*)?(c+(a*l*l*)|p+(u*t*))?$")) {
+                    if (targetPrice.matches("p+u*t*")) {
+                        security = PUT;
+                    } else if (targetPrice.matches("c+a*l*l*")) {
+                        security = CALL;
+                    }
+                    targetPrice = targetPrice.replaceAll("[^0-9.]", "");//Clear non-digits
+
+                    try { //Attempt to parse the price Double from the string
+                        targetDouble = Double.parseDouble(targetPrice);
+                    } catch (NumberFormatException e) {
+                        //TODO could not parse a double
+                        event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
+                        System.out.println(targetPrice);
+                        return;
+                    }
                 } else {
                     //Something not good TODO
                     event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
                     return;
                 }
-            }
 
-            // expiration/date
-            int[] exp = new int[3];
-            String expiration = args.remove(0);
-            if (expiration.matches("^(1[0-2]|0*[1-9])[^0-9\\s+](([1-2][0-9])|(3[0-1])" +
-                                           "|(0*[1-9]))([^0-9\\s+]\\d{0,4})?$")) {
-
-                String[] dts = expiration.split("[^0-9\\s+]");
-                if (dts.length > exp.length) {
-                    //Something not good TODO
-                    event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
-                    return;
-                }
-                for (int i = 0; i < dts.length; i++) {
-                    try {
-                        exp[i] = Integer.parseInt(dts[i]);
-                    } catch (NumberFormatException e) {
+                // call or put
+                if (security == null) { //If the call/put was not found in the last one
+                    String sec = args.remove(0);
+                    if (sec.matches("p+u*t*")) {
+                        security = PUT;
+                    } else if (sec.matches("c+a*l*l*")) {
+                        security = CALL;
+                    } else {
                         //Something not good TODO
                         event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
                         return;
                     }
                 }
-            }
 
-            // [at|@][$]entryPrice
-            String at = args.remove(0);
-            // 1st check if it is connected or not
-            if (at.matches("^(a+(t*))|@+$")) { at = args.remove(0); }
-            // Then check the price
-            double entryPrice;
-            if (at.matches(".\\$*\\d*(\\.\\d*)?")) {
-                at = at.replaceAll("[^0-9.]", "");//Clear non-digits
-                try { //Attempt to parse the price Double from the string
-                    entryPrice = Double.parseDouble(at);
-                } catch (NumberFormatException e) {
-                    //TODO could not parse a double
+                // expiration/date
+                int[] exp = new int[3];
+                String expiration = args.remove(0);
+                if (expiration.matches("^(1[0-2]|0*[1-9])[^0-9\\s+](([1-2][0-9])|(3[0-1])" +
+                                               "|(0*[1-9]))([^0-9\\s+]\\d{0,4})?$")) {
+
+                    String[] dts = expiration.split("[^0-9\\s+]");
+                    if (dts.length > exp.length) {
+                        //Something not good TODO
+                        event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
+                        return;
+                    }
+                    for (int i = 0; i < dts.length; i++) {
+                        try {
+                            exp[i] = Integer.parseInt(dts[i]);
+                        } catch (NumberFormatException e) {
+                            //Something not good TODO
+                            event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
+                            return;
+                        }
+                    }
+                }
+
+                // [at|@][$]entryPrice
+                String at = args.remove(0);
+                // 1st check if it is connected or not
+                if (at.matches("^(a+(t*))|@+$")) { at = args.remove(0); }
+                // Then check the price
+                double entryPrice;
+                if (at.matches(".\\$*\\d*(\\.\\d*)?")) {
+                    at = at.replaceAll("[^0-9.]", "");//Clear non-digits
+                    try { //Attempt to parse the price Double from the string
+                        entryPrice = Double.parseDouble(at);
+                    } catch (NumberFormatException e) {
+                        //TODO could not parse a double
+                        event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
+                        System.out.println(at);
+                        return;
+                    }
+                } else {
                     event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
                     System.out.println(at);
                     return;
                 }
-            } else {
-                event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
-                System.out.println(at);
-                return;
-            }
 
-            // [orderSize]
-            double size = 1;
-            String oSze = args.remove(0);
-            String reason;
-            try {
-                size = Double.parseDouble(oSze);
-                if (args.isEmpty()) {
-                    reason = "";
-                } else {
-                    reason = args.remove(0);
+                // [orderSize]
+                double size = 1;
+                String oSze = args.remove(0);
+                String reason;
+                try {
+                    size = Double.parseDouble(oSze);
+                    if (args.isEmpty()) {
+                        reason = "";
+                        continue;
+                    } else {
+                        reason = args.remove(0);
+                        continue;
+                    }
+                } catch (NumberFormatException e) {
+                    // [description]
+                    reason = oSze;
+                    continue;
                 }
-            } catch (NumberFormatException e) {
-                // [description]
-                reason = oSze;
+
+                TimeFrame tf = null;
+                if (reason.matches(".*s+w*i*n*g*.*")) {
+                    tf = SWING;
+                    continue;
+                } else if (reason.matches(".*d+((t+)|(ay(trade)?)).*")) {
+                    tf = DAY_TRADE;
+                    continue;
+                }
+                OptionPosition position = new OptionPosition(tkr, bySl, entryPrice,
+                                                             targetDouble, exp, size,
+                                                             tf, reason);
             }
 
-            TimeFrame tf = null;
-            if (reason.matches(".*s+w*i*n*g*.*")) {
-                tf = SWING;
-            } else if (reason.matches(".*d+((t+)|(ay(trade)?)).*")) {
-                tf = DAY_TRADE;
-            }
 
-            OptionPosition position = new OptionPosition(tkr, bySl, entryPrice,
-                                                         targetDouble, exp, size,
-                                                         tf, reason);
+
 
             event.getMessage().addReaction(Unicode.HEAVY_CHECK.val).queue();
 
