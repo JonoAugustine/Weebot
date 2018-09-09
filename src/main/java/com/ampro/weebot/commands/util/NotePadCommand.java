@@ -693,6 +693,7 @@ public class NotePadCommand extends Command {
 
     /**
      * Try and parse an action from arguments.
+     *
      * @param args The args to parse.
      * @return The {@link Action} parsed or null if no action was found
      */

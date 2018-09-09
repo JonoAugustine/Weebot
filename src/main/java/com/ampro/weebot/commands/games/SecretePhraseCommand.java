@@ -254,6 +254,7 @@ public class SecretePhraseCommand extends Command {
         for (IPassive p : bot.getPassives()) {
             if (p instanceof SecretePhrase) {
                 game = (SecretePhrase) p;
+                break;
             }
         }
 

@@ -10,6 +10,7 @@ import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.HelpCommand;
 import com.ampro.weebot.commands.fun.CustomMemeCommand;
 import com.ampro.weebot.commands.management.RestrictCmdCommand;
+import com.ampro.weebot.commands.stonks.PositionTrackerCommand;
 import com.ampro.weebot.commands.util.NotePadCommand;
 import com.ampro.weebot.commands.developer.DatabaseFileCommand;
 import com.ampro.weebot.commands.developer.ListGuildsCommand;
@@ -92,7 +93,8 @@ public class Launcher {
                     new CardsAgainstHumanityCommand(), new OutHouseCommand(),
                     new ChatbotCommand(), new CalculatorCommand(),
                     new ReminderCommand(), new InviteLinkCommand(),
-                    new CustomMemeCommand(), new RestrictCmdCommand()
+                    new CustomMemeCommand(), new RestrictCmdCommand(),
+                    new PositionTrackerCommand()
 			));
 
 	/** The database */

@@ -1,0 +1,20 @@
+
+## Aquatic Mastery Productions ##
+		 # Weebot Log #
+	 09/09/2018 @ 03:03:07
+
+
+
+[Launcher] Logging in to TestBot JDA client...
+[Launcher#setUpDatabase] Setting up Database...
+[Launcher#setUpDatabase]	Loading database...
+[Launcher#setUpDatabase]		Unable to load database, creating new database.
+[Launcher#setUpDatabase]		Loading known Guilds
+[Launcher#setUpDatabase]	Database created and saved to file.
+[Launcher#setUpDatabase]	Backing up database.
+[Launcher] Updating Weebots...
+[Launcher] Adding Listeners to JDA Client...
+[Launcher] Initialization Complete!
+
+
+[Launcher#console] Starting console listener...

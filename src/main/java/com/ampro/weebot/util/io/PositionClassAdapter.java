@@ -1,14 +1,11 @@
 package com.ampro.weebot.util.io;
 
-import com.ampro.weebot.Launcher;
-import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.stonks.PositionTrackerCommand.PositionTracker.OptionPosition;
 import com.ampro.weebot.commands.stonks.PositionTrackerCommand.PositionTracker.Position;
 import com.ampro.weebot.commands.stonks.PositionTrackerCommand.PositionTracker.StockPostion;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
-import java.util.List;
 
 /**
  * JSON class adapter for {@link Position} subclasses.
@@ -20,23 +17,17 @@ public class PositionClassAdapter implements JsonSerializer<Class<? extends Posi
         JsonDeserializer<Class<? extends Position>> {
 
     private static final String CLASSNAME = "CLASSNAME";
-
-    private static List<Command> commands;
-    static {
-        commands = Launcher.getCommands();
-    }
+    private static final String DATA = "DATA";
 
     @Override
     public Class<? extends Position> deserialize(JsonElement jsonElement, Type type,
                                                  JsonDeserializationContext context)
     throws JsonParseException {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-        JsonPrimitive prim = (JsonPrimitive) jsonObject.get(CLASSNAME);
-        String className = prim.getAsString();
-        if (OptionPosition.class.getName().equals(className)) {
-            return OptionPosition.class;
-        } else if (StockPostion.class.getName().equals(className)) {
-            return StockPostion.class;
+        if (OptionPosition.class.getName().equals(jsonObject.get(CLASSNAME))) {
+            return context.deserialize(jsonObject.get(DATA), OptionPosition.class);
+        } else if (StockPostion.class.getName().equals(jsonObject.get(CLASSNAME))) {
+            return context.deserialize(jsonObject.get(DATA), StockPostion.class);
         }
         return null;
     }
@@ -46,6 +37,7 @@ public class PositionClassAdapter implements JsonSerializer<Class<? extends Posi
                                  JsonSerializationContext context) {
         JsonObject jsonObject = new JsonObject();
         jsonObject.addProperty(CLASSNAME, jsonElement.getName());
+        jsonObject.add(DATA, context.serialize(jsonElement));
         return jsonObject;
     }
 

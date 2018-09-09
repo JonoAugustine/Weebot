@@ -34,8 +34,8 @@ public class DatabaseManager extends FileManager {
                                                     new InterfaceAdapter<>())
                                .registerTypeAdapter(Class.class,
                                                     new CommandClassAdapter())
-                               .registerTypeAdapter(Class.class,
-                                                    new PositionClassAdapter())
+                               //.registerTypeAdapter(Class.class,
+                               //                     new PositionClassAdapter())
                                .create();
 
     /**

@@ -79,7 +79,10 @@ public class Weebot implements Comparable<Weebot> {
     private final ConcurrentHashMap<String, CAHDeck> CUSTOM_CAH_DECKS;
 
     /** {@link IPassive} objects, cleared on exit */
-    protected List<IPassive> passives;
+    protected List<IPassive> passives;//TODO change to map(?)
+
+    protected final ConcurrentHashMap
+            <Class<? extends IPassive>, ArrayList<IPassive>> passiveMap;
 
     /** Map of "NotePads" */
     private final ArrayList<NotePad> NOTES;
@@ -107,6 +110,7 @@ public class Weebot implements Comparable<Weebot> {
         this.spamLimit = 5;
         this.passives = new ArrayList<>();
         this.CUSTOM_CAH_DECKS = new ConcurrentHashMap<>();
+        this.passiveMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -129,6 +133,7 @@ public class Weebot implements Comparable<Weebot> {
         this.spamLimit = 5;
         passives = new ArrayList<>();
         CUSTOM_CAH_DECKS = null;
+        this.passiveMap = new ConcurrentHashMap<>();
     }
 
     /**
@@ -474,6 +479,22 @@ public class Weebot implements Comparable<Weebot> {
 
     public final synchronized List<IPassive> getPassives() {
         return this.passives;
+    }
+
+    public final synchronized <T extends IPassive> ArrayList<T>
+    getPassives(Class<? extends IPassive> klas) {
+        passiveMap.putIfAbsent(klas, new ArrayList<>());
+        return (ArrayList<T>) passiveMap.get(klas);
+    }
+
+    public final synchronized void addPassiveM(IPassive passive) {
+        ArrayList<IPassive> list = new ArrayList<>();
+        ArrayList<IPassive> l2 = passiveMap.putIfAbsent(passive.getClass(), list);
+        if (l2 == null) {
+            list.add(passive);
+        } else {
+            l2.add(passive);
+        }
     }
 
     /** @return {@link TreeMap TreeMap<String,NotePad>} */
