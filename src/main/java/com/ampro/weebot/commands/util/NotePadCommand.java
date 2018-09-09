@@ -405,18 +405,15 @@ public class NotePadCommand extends Command {
                     "```Use ``notes <notepad_number>`` to see the content of a NotePad"
                     + "or ``help notes`` for more help."
             ));
-            new Thread(() -> event.deleteMessage()).start();
+            new Thread(event::deleteMessage).start();
             return;
         }
 
         //Check for the make command, since it is a special abnormality.
         if (parseAction(args[1]) == Action.MAKE) {
             if (notes.size() >= MAX_NOTEPADS) {
-                StringBuilder sb = new StringBuilder()
-                        .append("*There are already ").append(MAX_NOTEPADS)
-                        .append(" in this server. Please remove a NotePad before")
-                        .append("creating a new one.*");
-                event.reply(sb.toString());
+                event.reply("*There are already " + MAX_NOTEPADS + " in this server. "
+                            + "Please remove a NotePad before" + "creating a new one.*");
                 return;
             }
             //If no name was given

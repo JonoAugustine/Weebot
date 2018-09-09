@@ -59,6 +59,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.1'
     compile 'ca.pjer:chatter-bot-api:1.4.7'
     compile 'org.mariuszgromada.math:MathParser.org-mXparser:4.1.1'
+    compile 'com.vdurmont:emoji-java:4.0.0'
 }
 
 // holds classes included into client.jar and util.jar, so they are to be excluded from server.jar

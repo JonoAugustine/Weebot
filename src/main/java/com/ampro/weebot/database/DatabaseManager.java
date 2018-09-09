@@ -6,6 +6,7 @@ import com.ampro.weebot.util.Logger;
 import com.ampro.weebot.util.io.CommandClassAdapter;
 import com.ampro.weebot.util.io.FileManager;
 import com.ampro.weebot.util.io.InterfaceAdapter;
+import com.ampro.weebot.util.io.PositionClassAdapter;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -33,6 +34,8 @@ public class DatabaseManager extends FileManager {
                                                     new InterfaceAdapter<>())
                                .registerTypeAdapter(Class.class,
                                                     new CommandClassAdapter())
+                               .registerTypeAdapter(Class.class,
+                                                    new PositionClassAdapter())
                                .create();
 
     /**
