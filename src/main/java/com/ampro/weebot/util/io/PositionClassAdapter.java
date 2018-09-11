@@ -13,15 +13,16 @@ import java.lang.reflect.Type;
  * @author Jonathan Augustine
  * @since 1.1.0
  */
-public class PositionClassAdapter implements JsonSerializer<Class<? extends Position>>,
-        JsonDeserializer<Class<? extends Position>> {
+public class PositionClassAdapter<T extends Position>
+        implements JsonSerializer<T>,
+        JsonDeserializer<T> {
 
     private static final String CLASSNAME = "CLASSNAME";
     private static final String DATA = "DATA";
 
     @Override
-    public Class<? extends Position> deserialize(JsonElement jsonElement, Type type,
-                                                 JsonDeserializationContext context)
+    public T deserialize(JsonElement jsonElement, Type type,
+                         JsonDeserializationContext context)
     throws JsonParseException {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
         if (OptionPosition.class.getName().equals(jsonObject.get(CLASSNAME))) {
@@ -33,10 +34,10 @@ public class PositionClassAdapter implements JsonSerializer<Class<? extends Posi
     }
 
     @Override
-    public JsonElement serialize(Class<? extends Position> jsonElement, Type type,
+    public JsonElement serialize(T jsonElement, Type type,
                                  JsonSerializationContext context) {
         JsonObject jsonObject = new JsonObject();
-        jsonObject.addProperty(CLASSNAME, jsonElement.getName());
+        jsonObject.addProperty(CLASSNAME, jsonElement.getClass().getName());
         jsonObject.add(DATA, context.serialize(jsonElement));
         return jsonObject;
     }

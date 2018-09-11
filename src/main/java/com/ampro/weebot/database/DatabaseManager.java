@@ -1,7 +1,7 @@
 package com.ampro.weebot.database;
 
-import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
+import com.ampro.weebot.commands.stonks.PositionTrackerCommand.PositionTracker.Position;
 import com.ampro.weebot.util.Logger;
 import com.ampro.weebot.util.io.CommandClassAdapter;
 import com.ampro.weebot.util.io.FileManager;
@@ -34,8 +34,8 @@ public class DatabaseManager extends FileManager {
                                                     new InterfaceAdapter<>())
                                .registerTypeAdapter(Class.class,
                                                     new CommandClassAdapter())
-                               //.registerTypeAdapter(Class.class,
-                               //                     new PositionClassAdapter())
+                               .registerTypeAdapter(Position.class,
+                                                    new PositionClassAdapter())
                                .create();
 
     /**

@@ -414,6 +414,7 @@ public abstract class Command {
     /**
      * Removes the callsigns (@Weebot, or bot's {@link Weebot#callsign}) from
      * the args.
+     *
      * @param args String array to clean.
      * @return new string array with the command call at index {@code [0]}.
      */

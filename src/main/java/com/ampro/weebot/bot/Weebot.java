@@ -81,8 +81,7 @@ public class Weebot implements Comparable<Weebot> {
     /** {@link IPassive} objects, cleared on exit */
     protected List<IPassive> passives;//TODO change to map(?)
 
-    protected final ConcurrentHashMap
-            <Class<? extends IPassive>, ArrayList<IPassive>> passiveMap;
+    protected final ConcurrentHashMap<String, ArrayList<IPassive>> passiveMap;
 
     /** Map of "NotePads" */
     private final ArrayList<NotePad> NOTES;
@@ -186,7 +185,9 @@ public class Weebot implements Comparable<Weebot> {
      */
     private void runCommand(BetterMessageEvent event, int startIndex) {
         //get the arg string without the callsign
-        String call = Command.cleanArgs(this, event)[0];
+        String[] args = Command.cleanArgs(this, event);
+        if (args.length == 0) { return; }
+        String call = args[0];
         for (Command c : Launcher.getCommands()) {
             if(c.isCommandFor(call)) {
                 if(this.commandIsAllowed(c, event)) {
@@ -229,7 +230,9 @@ public class Weebot implements Comparable<Weebot> {
      */
     private void submitToPassives(BetterMessageEvent event) {
         this.passives.forEach( p -> p.accept(this, event));
+        this.passiveMap.forEach( (k,l) -> l.forEach(p -> p.accept(this, event)));
         this.passives.removeIf( IPassive::dead );
+        this.passiveMap.forEach( (k,l) -> l.removeIf(IPassive::dead));
     }
 
     /**
@@ -483,18 +486,16 @@ public class Weebot implements Comparable<Weebot> {
 
     public final synchronized <T extends IPassive> ArrayList<T>
     getPassives(Class<? extends IPassive> klas) {
-        passiveMap.putIfAbsent(klas, new ArrayList<>());
-        return (ArrayList<T>) passiveMap.get(klas);
+        passiveMap.putIfAbsent(klas.getSimpleName(), new ArrayList<>());
+        return (ArrayList<T>) passiveMap.get(klas.getSimpleName());
     }
 
     public final synchronized void addPassiveM(IPassive passive) {
         ArrayList<IPassive> list = new ArrayList<>();
-        ArrayList<IPassive> l2 = passiveMap.putIfAbsent(passive.getClass(), list);
-        if (l2 == null) {
-            list.add(passive);
-        } else {
-            l2.add(passive);
-        }
+        ArrayList<IPassive> l2 = passiveMap.putIfAbsent(passive.getClass()
+                                                               .getSimpleName(),
+                                                        list);
+        (l2 == null ? list : l2).add(passive);
     }
 
     /** @return {@link TreeMap TreeMap<String,NotePad>} */

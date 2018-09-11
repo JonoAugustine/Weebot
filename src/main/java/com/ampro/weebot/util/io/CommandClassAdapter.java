@@ -17,9 +17,7 @@ public class CommandClassAdapter
     private static final String CLASSNAME = "CLASSNAME";
 
     private static List<Command> commands;
-    static {
-        commands = Launcher.getCommands();
-    }
+    static { commands = Launcher.getCommands(); }
 
     @Override
     public Class<? extends Command> deserialize(JsonElement jsonElement, Type type,
