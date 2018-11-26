@@ -2,9 +2,11 @@
  * Copyright Aquatic Mastery Productions (c) 2018.
  */
 
-package com.ampro.weebot.contants
+package com.ampro.weebot.main.constants
 
 import com.ampro.weebot.main.MLOG
+import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
+import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.*
 import net.dv8tion.jda.core.entities.Game
 import javax.security.auth.login.LoginException
@@ -44,4 +46,26 @@ fun jdaDevLogIn() : JDA {
     return JDABuilder(AccountType.BOT).setToken(TOKEN_TEST)
         .setGame(Game.playing("Genocide")).setCorePoolSize(10)
             .build().awaitReady()
+}
+
+/**
+ * Does not build
+ */
+@Throws(LoginException::class, InterruptedException::class)
+fun jdaShardLogIn() : DefaultShardManagerBuilder {
+    MLOG.elog("Logging in to Weebot JDA shards...")
+    return DefaultShardManagerBuilder().setToken(TOKEN_WBT)
+            .setShards(1).setGame(Game.playing("@Weebot help"))
+            .setCorePoolSize(50)
+}
+
+/**
+ * Does not build
+ */
+@Throws(LoginException::class, InterruptedException::class)
+fun jdaDevShardLogIn() : DefaultShardManagerBuilder {
+    MLOG.elog("Logging in to TestBot JDA shards...")
+    return DefaultShardManagerBuilder().setToken(TOKEN_TEST)
+            .setShards(1)
+            .setGame(Game.playing("Genocide")).setCorePoolSize(10)
 }

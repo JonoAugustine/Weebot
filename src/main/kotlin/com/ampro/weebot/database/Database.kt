@@ -1,17 +1,16 @@
+/*
+ * Copyright Aquatic Mastery Productions (c) 2018.
+ */
+
 package com.ampro.weebot.database
 
-import com.ampro.weebot.bot.GlobalWeebot
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.developer.WeebotSuggestionCommand.Suggestion
-import com.ampro.weebot.database.DatabaseManager.DIR_DBS
+import com.ampro.weebot.main.MLOG
 import com.ampro.weebot.util.*
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import net.dv8tion.jda.core.entities.User
-import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.FileWriter
-import java.io.IOException
+import java.io.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -45,9 +44,9 @@ data class Dao(var initTime: String = NOW_FILE) {
      * Map of all suggestions given through
      * [com.ampro.weebot.commands.developer.WeebotSuggestionCommand]
      */
-    val SUGGESTIONS = ConcurrentHashMap<Long, MutableList<Suggestion>>()
+    //val SUGGESTIONS = ConcurrentHashMap<Long, MutableList<Suggestion>>()
 
-    val GLOBAL_WEEBOT = GlobalWeebot()
+    //val GLOBAL_WEEBOT = GlobalWeebot()
 
     /** All Weebots currently in circulation, mapped to their Guild's ID  */
     val WEEBOTS = ConcurrentHashMap<Long, Weebot>()
@@ -56,7 +55,7 @@ data class Dao(var initTime: String = NOW_FILE) {
 
     /** Build an empty `Database`. */
     init {
-        WEEBOTS.putIfAbsent(0L, GLOBAL_WEEBOT)
+        //TODO WEEBOTS.putIfAbsent(0L, GLOBAL_WEEBOT)
     }
 
     /**
@@ -71,10 +70,10 @@ data class Dao(var initTime: String = NOW_FILE) {
     fun save(): Int {
         if (!corruptBackupReadCheck()) return -2
         try {
-            if (!DIR_DBS.mkdir()) {
+            if (!DIR_DAO.mkdir()) {
                 //System.err.println("\tDirectory not created.");
             }
-            if (!SAVE.createNewFile()) {
+            if (!DAO_SAVE.createNewFile()) {
                 //System.err.println("\tFile not created");
             }
         } catch (e: IOException) {
@@ -84,7 +83,7 @@ data class Dao(var initTime: String = NOW_FILE) {
         }
 
         try {
-            FileWriter(SAVE).use { writer -> GSON.toJson(this, writer) }
+            FileWriter(DAO_SAVE).use { writer -> GSON.toJson(this, writer) }
         } catch (e: FileNotFoundException) {
             System.err.println("File not found while writing gson to file.")
             e.printStackTrace()
@@ -106,35 +105,35 @@ data class Dao(var initTime: String = NOW_FILE) {
     @Synchronized
     fun backUp(): Int {
         try {
-            if (!DIR_DBS.exists() && DIR_DBS.mkdirs()) {
-                Logger.derr("[Database Manager] Failed to generate database dir!")
+            if (!DIR_DAO.exists() && DIR_DAO.mkdirs()) {
+                MLOG.elog("[Database Manager] Failed to generate database dir!")
                 return -1
-            } else if (!BKUP.exists() && !BKUP.createNewFile()) {
-                Logger.derr("[Database Manager] Failed to generate database backup!")
+            } else if (!DAO_BKUP.exists() && !DAO_BKUP.createNewFile()) {
+                MLOG.elog("[Database Manager] Failed to generate database backup!")
                 return -1
             }
         } catch (e: IOException) {
-            Logger.derr("IOException while creating Database backup file.")
+            MLOG.elog("IOException while creating Database backup file.")
             e.printStackTrace()
             return -1
         }
 
         if (!corruptBackupWriteCheck(this)) return -1
         try {
-            FileWriter(BKUP).use { writer ->
+            FileWriter(DAO_BKUP).use { writer: FileWriter ->
                 GSON.toJson(this, writer)
-                return 1
+                return@use 1
             }
         } catch (e: FileNotFoundException) {
-            Logger.derr("File not found while writing gson backup to file.")
+            MLOG.elog("File not found while writing gson backup to file.")
             e.printStackTrace()
             return -1
         } catch (e: IOException) {
-            Logger.derr("IOException while writing gson backup to file.")
+            MLOG.elog("IOException while writing gson backup to file.")
             e.printStackTrace()
             return -1
         }
-
+        return 1
     }
 
     /**
@@ -181,6 +180,7 @@ data class Dao(var initTime: String = NOW_FILE) {
     @Synchronized
     fun removePremiumUser(user: User) = PREMIUM_USERS.remove(user.idLong) != null
 
+    /*
     @Synchronized
     fun addSuggestion(suggestion: Suggestion) {
         SUGGESTIONS.putIfAbsent(suggestion.authorID, mutableListOf(suggestion))
@@ -198,11 +198,12 @@ data class Dao(var initTime: String = NOW_FILE) {
     @Synchronized
     fun clearUserSuggestions(user: User): List<Suggestion> =
             SUGGESTIONS.remove(user.idLong) ?: listOf()
+            */
 
     override fun toString(): String {
         val out = StringBuilder("[")
         this.WEEBOTS.forEach { key, bot ->
-            out.append("[" + key + "," + bot.nickname + "]")
+            out.append("[" + key + "," + bot.settings.nickname + "]")
         }
         return out.append("]").toString()
     }
@@ -220,7 +221,7 @@ fun loadDao(): Dao? {
     var out: Dao? = null
     var bk: Dao? = null
     try {
-        FileReader(SAVE).use { reader ->
+        FileReader(DAO_SAVE).use { reader: FileReader ->
             out = GSON.fromJson(reader, Dao::class.java)
         }
     } catch (e: FileNotFoundException) {
@@ -233,7 +234,7 @@ fun loadDao(): Dao? {
     }
 
     try {
-        FileReader(BKUP).use { bKreader ->
+        FileReader(DAO_BKUP).use { bKreader: FileReader ->
             bk = GSON.fromJson(bKreader, Dao::class.java)
         }
     } catch (e: FileNotFoundException) {
@@ -257,8 +258,8 @@ fun loadDao(): Dao? {
  * @return `false` if gson fails to loadDao the backup.
  */
 private fun corruptBackupReadCheck(): Boolean = try {
-    FileReader(BKBK).use { reader ->
-        GSON.fromJson(reader, Database::class.java)
+    FileReader(DAO_BKBK).use { reader: FileReader ->
+        GSON.fromJson(reader, Dao::class.java)
     }
     true
 } catch (e: JsonSyntaxException) {
@@ -275,13 +276,13 @@ private fun corruptBackupReadCheck(): Boolean = try {
  * @return `false` if gson fails to loadDao the backup.
  */
 private fun corruptBackupWriteCheck(dao: Dao): Boolean = try {
-    FileWriter(BKBK).use { writer -> GSON.toJson(dao, writer) }
+    FileWriter(DAO_BKBK).use { writer: FileWriter -> GSON.toJson(dao, writer) }
     true
 } catch (e: JsonSyntaxException) {
     e.printStackTrace()
     false
 } catch (e: IOException) {
-    BKBK.delete()
+    DAO_BKBK.delete()
     true
 }
 

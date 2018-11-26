@@ -1,8 +1,12 @@
-package com.ampro.weebot.contants
+package com.ampro.weebot.main.constants
 
-import com.ampro.weebot.JDA_CLIENT
 import net.dv8tion.jda.core.EmbedBuilder
 import java.awt.Color
+
+
+const val weebotAvatarUrl = "https://images-ext-2.discordapp" +
+        ".net/external/jd498W5p3OMMOdHS2F7HqFm0g0d9Lk0yPjJ0bzsguk0/https/cdn." +
+        "discordapp.com/avatars/437851896263213056/c00b298498bc546de4ad5512f53fc7d6.png"
 
 
 /**
@@ -11,8 +15,8 @@ import java.awt.Color
  */
 val standardEmbedBuilder: EmbedBuilder
     get() = EmbedBuilder().setColor(Color(0x31FF00))
-        .setAuthor("Weebot", null, JDA_CLIENT.selfUser.avatarUrl)
-        .setFooter("Run by Weebot", JDA_CLIENT.selfUser.avatarUrl)
+        .setAuthor("Weebot", null, weebotAvatarUrl)
+        .setFooter("Run by Weebot", weebotAvatarUrl)
 
 /**
  * Makes a standard format EmbedBuilder with standard color and author,

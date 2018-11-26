@@ -1,13 +1,9 @@
 package com.ampro.weebot.util
 
-import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.database.DatabaseManager.DIR_DBS
-import com.ampro.weebot.util.Logger.LOGS
-import com.ampro.weebot.util.io.CommandClassAdapter
-import com.ampro.weebot.util.io.FileManager
-import com.ampro.weebot.util.io.InterfaceAdapter
+import com.ampro.weebot.main.MLOG
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
+import org.apache.commons.io.FileUtils
 import java.io.*
 import java.nio.file.FileAlreadyExistsException
 
@@ -20,14 +16,15 @@ val DIR_TEMP = File(DIR_HOME, "temp")
 val TEMP_OUT = File(DIR_TEMP, "out")
 val TEMP_IN  = File(DIR_TEMP, "in")
 
-val SAVE = File(DIR_DBS, "database.wbot")
-val BKUP = File(DIR_DBS, "dbsBK.wbot")
-val BKBK = File(FileManager.TEMP, "dbstemp.wbot")
+val DIR_DAO = File(DIR_HOME, "dao")
+val DAO_SAVE = File(DIR_DAO, "database.wbot")
+val DAO_BKUP = File(DIR_DAO, "dbsBK.wbot")
+val DAO_BKBK = File(DIR_TEMP, "dbstemp.wbot")
 
 val GSON = GsonBuilder().enableComplexMapKeySerialization()
     .setExclusionStrategies().setPrettyPrinting()
-    .registerTypeAdapter(IPassive::class.java, InterfaceAdapter<Any>())
-    .registerTypeAdapter(Class::class.java,CommandClassAdapter())
+    //.registerTypeAdapter(IPassive::class.java, InterfaceAdapter<Any>())
+    //.registerTypeAdapter(Class::class.java,CommandClassAdapter())
     .create()
 
 
@@ -122,11 +119,23 @@ internal fun corruptJsonTest(file: File, objcClass: Class<*>): Boolean {
 * @return `false` if any directory is not created (and did not already exist)
 */
 fun buildDirs(): Boolean {
-    if (!DIR_DBS.exists()) DIR_DBS.mkdirs()
-    if (!LOGS.exists()) LOGS.mkdirs()
+    if (!DIR_DAO.exists()) DIR_DAO.mkdirs()
+    if (!DIR_LOGS.exists()) DIR_LOGS.mkdirs()
     if (!TEMP_OUT.exists()) TEMP_OUT.mkdirs()
     if (!TEMP_IN.exists()) TEMP_IN.mkdirs()
     if (!DIR_LOGS.exists()) DIR_LOGS.mkdirs()
-    return DIR_HOME.exists() && TEMP_OUT.exists() && TEMP_IN.exists() && DIR_DBS
-        .exists() && LOGS.exists()
+    return DIR_HOME.exists() && TEMP_OUT.exists() && TEMP_IN.exists() && DIR_DAO
+        .exists() && DIR_LOGS.exists()
+}
+
+/** Clears the temp folders.  */
+@Synchronized
+fun clearTempDirs() {
+    try {
+        FileUtils.cleanDirectory(DIR_TEMP)
+    } catch (e: IOException) {
+        MLOG.elog("Failed clear temp dir.")
+        e.printStackTrace()
+    }
+
 }

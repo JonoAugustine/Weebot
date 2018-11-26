@@ -32,6 +32,7 @@ dependencies {
     implementation("com.vdurmont:emoji-java:4.0.0")
 
     implementation("com.github.DV8FromTheWorld:JDA:v3.8.1")
+    implementation("com.github.JDA-Applications.JDA-Utilities:jda-utilities:2.1")
     implementation("com.jagrosh:jda-utilities:2.1")
     implementation("ca.pjer:chatter-bot-api:1.4.7")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:0.23.4")
