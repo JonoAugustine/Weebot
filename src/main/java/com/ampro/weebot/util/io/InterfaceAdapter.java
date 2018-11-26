@@ -1,5 +1,7 @@
 package com.ampro.weebot.util.io;
 
+import com.ampro.weebot.commands.stonks.PositionTrackerCommand.PositionTracker.OptionPosition;
+import com.ampro.weebot.commands.stonks.PositionTrackerCommand.PositionTracker.StockPostion;
 import com.google.gson.*;
 
 import java.lang.reflect.Type;
@@ -11,14 +13,16 @@ public class InterfaceAdapter<T> implements JsonSerializer<T>, JsonDeserializer<
 
     @Override
     public T deserialize(JsonElement jsonElement, Type type,
-                         JsonDeserializationContext jsonDeserializationContext)
+                         JsonDeserializationContext context)
             throws JsonParseException {
-
         JsonObject jsonObject = jsonElement.getAsJsonObject();
+
+        System.out.println("IA: " + jsonObject.get(CLASSNAME));
+
         JsonPrimitive prim = (JsonPrimitive) jsonObject.get(CLASSNAME);
         String className = prim.getAsString();
         Class klass = getObjectClass(className);
-        return jsonDeserializationContext.deserialize(jsonObject.get(DATA), klass);
+        return context.deserialize(jsonObject.get(DATA), klass);
     }
 
     @Override

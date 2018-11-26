@@ -179,9 +179,9 @@ public class PositionTrackerCommand extends Command {
                         + (expiration[2] == 0 ? "" : "/" + expiration[2])
                         + " @$" + entryPrice + (orderSize>1 ? "x"+orderSize :"")
                         + (reason != null ? " " + reason : "")
-                        + (!open ? "(closed @$" + exitPrice + " for "
+                        + (!open ? "\t>>closed @$" + exitPrice + " for "
                         + Math.round(((exitPrice - entryPrice) / entryPrice * 100)
-                                             * 100.0) / 100.0 + "%)" : "");
+                                             * 100.0) / 100.0 + "%" : "");
             }
 
             @Override
@@ -217,7 +217,7 @@ public class PositionTrackerCommand extends Command {
         Security defaultType = CALL;
 
         /** Map of user IDs to {@link ArrayList} of {@link Position} */
-        final ConcurrentHashMap<Long, ArrayList<Position>> userPositionMap;
+        final ConcurrentHashMap<Long, ArrayList<OptionPosition>> userPositionMap;
 
         /** Whether this {@link IPassive} is set to be destroyed on the next scan */
         boolean deathRow = false;
@@ -262,8 +262,8 @@ public class PositionTrackerCommand extends Command {
             OptionPosition position = (OptionPosition) read(args, event);
             if (position == null) {return;}
 
-            ArrayList<Position> list = new ArrayList<>();
-            ArrayList<Position> list1 = userPositionMap
+            ArrayList<OptionPosition> list = new ArrayList<>();
+            ArrayList<OptionPosition> list1 = userPositionMap
                     .putIfAbsent(event.getAuthor().getIdLong(), list);
             if (list1 != null) { list = list1; }
             list.removeIf(Objects::isNull);
@@ -271,12 +271,18 @@ public class PositionTrackerCommand extends Command {
             if (position.buySell == BUY) {
                 list.add(list.size(), position);
             } else {
-                for (Position p : list) {
-                    if (p.ticker.equals(position.ticker)
+                outerloop: for (OptionPosition p : list) {
+                    if (p.ticker.equals(position.ticker) && p.open
                             && p.buySell != position.buySell) {
+                        for (int i = 0; i < p.expiration.length; i++) {
+                            if (p.expiration[i] != position.expiration[i]) {
+                                continue outerloop;
+                            }
+                        }
                         p.open = false;
                         p.exitPrice = position.entryPrice;
-                        Collections.sort(list);
+                        //We don't sort here so that the most recently opened
+                        // position is assumed to be the one being closed
                     }
                 }
             }
@@ -294,9 +300,9 @@ public class PositionTrackerCommand extends Command {
             // in/out
             BuySell bySl;
             String bs = args.remove(0);
-            if (bs.matches("i+n*")) {
+            if (bs.matches("(i+n*)|(b+u*y*)")) {
                 bySl = BUY;
-            } else if (bs.matches("o+u*t*")){
+            } else if (bs.matches("(o+u*t*)|(s+e*l*l*)")){
                 bySl = SELL;
             } else {
                 event.getMessage().addReaction(Unicode.CROSS_MARK.val).queue();
@@ -454,7 +460,7 @@ public class PositionTrackerCommand extends Command {
             ArrayList<Long> killList = new ArrayList<>(userPositionMap.size());
 
             members.forEach( member -> {
-                ArrayList<Position> list = userPositionMap.get(member.getUser()
+                ArrayList<OptionPosition> list = userPositionMap.get(member.getUser()
                                                                      .getIdLong());
                 if (list == null) {
                     killList.add(member.getUser().getIdLong());
@@ -467,16 +473,16 @@ public class PositionTrackerCommand extends Command {
                 for (Position position : list) {
                     if (!position.open) {
                         entries += position.entryPrice;
-                        exits += position.entryPrice; //Add average returns
+                        exits += position.exitPrice; //Add average returns
                     }
-                    sb.append(position.toString()).append("\n");
+                    sb.append(">").append(position.toString()).append("\n");
                 }
                 double up = ((exits - entries) / entries * 100);
                 String tit = member.getEffectiveName() + " " +
                         (up > 0 ? Unicode.UP_BTTON.val
                                 : (int) up < 0 ? Unicode.DOWN_BUTTON.val
                                 : Unicode.PAUSE_BUTTON.val) + " "
-                        + Math.round(up * 100.0) / 100.0 + " %"; //TODO rounding broken
+                        + Math.round(up * 100.0) / 100.0 + "%";
                 eb.addField(tit, sb.toString(), false);
                 sb.setLength(0);
             });
@@ -512,16 +518,16 @@ public class PositionTrackerCommand extends Command {
                 for (Position position : list) {
                     if (!position.open) {
                         entries += position.entryPrice;
-                        exits += position.entryPrice;
+                        exits += position.exitPrice;
                     }
                     sb.append(position.toString()).append("\n");
                 }
-                double up = (entries / (exits - entries) * 100);
+                double up = ((exits - entries) / entries * 100);
                 String tit = member.getEffectiveName() +
                         (up > 0 ? Unicode.UP_BTTON.val
-                                : up == 0 ? Unicode.PAUSE_BUTTON.val
-                                : Unicode.DOWN_BUTTON.val)
-                        + (double) Math.round(up * 100d) / 100d;
+                                : (int) up < 0 ? Unicode.DOWN_BUTTON.val
+                                : Unicode.PAUSE_BUTTON.val) + " "
+                        + Math.round(up * 100.0) / 100.0 + "%";
                 eb.addField(tit, sb.toString(), false);
                 sb.setLength(0);
             });
@@ -608,18 +614,20 @@ public class PositionTrackerCommand extends Command {
                     ArrayList<TextChannel> nons = new ArrayList<>(trackers.size());
                     channels.forEach( ch -> {
                         for (PositionTracker tracker : trackers) {
-                            if (tracker.channelID == channel.getIdLong()) {
+                            if (tracker.channelID == ch.getIdLong()) {
                                 event.reply(tracker.toEmbed(event.getGuild(), members));
                                 return;
                             }
                         }
                         nons.add(ch);
                     });
-                    StringBuffer sb  = new StringBuffer()
-                            .append("The following channels have no Position ")
-                            .append("Tracker enabled: ");
-                    nons.forEach( ch -> sb.append(ch.getAsMention()).append(" "));
-                    event.reply(sb.toString());
+                    if (!nons.isEmpty()) {
+                        StringBuffer sb = new StringBuffer()
+                                .append("The following channels have no Position ")
+                                .append("Tracker enabled: ");
+                        nons.forEach(ch -> sb.append(ch.getAsMention()).append(" "));
+                        event.reply(sb.toString());
+                    }
                 }
                 break;
         }

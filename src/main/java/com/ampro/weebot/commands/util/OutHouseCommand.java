@@ -4,6 +4,7 @@ import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.bot.Weebot;
+import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.entities.Member;
@@ -44,33 +45,30 @@ public class OutHouseCommand extends Command {
         }
 
         @Override
-        public void accept(Weebot bot, BetterMessageEvent event) {
-            User user = Launcher.getJda().getUserById(userID);
-            this.remainingHours -=
-                    ChronoUnit.HOURS.between(startTime, OffsetDateTime.now());
-            if (this.remainingHours <= 0) return;
+        public void accept(Weebot bot, BetterEvent event1) {
+            if (event1 instanceof BetterMessageEvent) {
+                BetterMessageEvent event = (BetterMessageEvent) event1;
+                User user = Launcher.getJda().getUserById(userID);
+                this.remainingHours -= ChronoUnit.HOURS.between(startTime, OffsetDateTime.now());
+                if (this.remainingHours <= 0) return;
 
-            if (!event.isPrivate()) {
-                if(event.getType() == BetterMessageEvent.TYPE.RECIVED
-                        && event.getAuthor() == user) {
-                    Member mem = event.getGuild().getMember(user);
-                    event.reply("*Welcome back " + mem.getEffectiveName() + "*");
-                    this.remainingHours = 0;
-                    return;
-                } else if(event.mentions(user)) {
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("*Sorry, ")
-                      .append(event.getGuild().getMember(user).getEffectiveName());
-                    if (this.message != null)
-                        sb.append(" is out  ").append(this.message).append(".");
-                      else
-                        sb.append(" is currently unavailable. ");
-                      sb.append(" Please try mentioning them again ")
-                        .append("in about ").append(Math.round(this.remainingHours))
-                        .append(" hour").append(this.remainingHours > 1 ? "s" : "")
-                        .append(". Thank you.*");
-                    event.reply(sb.toString());
-                    return;
+                if (!event.isPrivate()) {
+                    if (event.getType() == BetterMessageEvent.TYPE.RECIVED && event.getAuthor() == user) {
+                        Member mem = event.getGuild().getMember(user);
+                        event.reply("*Welcome back " + mem.getEffectiveName() + "*");
+                        this.remainingHours = 0;
+                        return;
+                    } else if (event.mentions(user)) {
+                        StringBuilder sb = new StringBuilder();
+                        sb.append("*Sorry, ").append(event.getGuild().getMember(user).getEffectiveName());
+                        if (this.message != null)
+                            sb.append(" is out  ").append(this.message).append(".");
+                        else sb.append(" is currently unavailable. ");
+                        sb.append(" Please try mentioning them again ").append("in about ").append(Math.round(this.remainingHours))
+                          .append(" hour").append(this.remainingHours > 1 ? "s" : "").append(". Thank you.*");
+                        event.reply(sb.toString());
+                        return;
+                    }
                 }
             }
         }

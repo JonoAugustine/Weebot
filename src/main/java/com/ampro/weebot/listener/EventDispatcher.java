@@ -22,10 +22,16 @@ import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.entities.Guild;
 import net.dv8tion.jda.core.entities.User;
+import net.dv8tion.jda.core.events.channel.voice.VoiceChannelCreateEvent;
+import net.dv8tion.jda.core.events.channel.voice.VoiceChannelDeleteEvent;
+import net.dv8tion.jda.core.events.channel.voice.update.*;
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent;
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent;
+import net.dv8tion.jda.core.events.guild.voice.*;
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent;
 import net.dv8tion.jda.core.events.message.MessageUpdateEvent;
+import net.dv8tion.jda.core.events.role.RoleCreateEvent;
+import net.dv8tion.jda.core.events.role.RoleDeleteEvent;
 import net.dv8tion.jda.core.hooks.ListenerAdapter;
 
 /**
@@ -129,4 +135,108 @@ public class EventDispatcher extends ListenerAdapter {
         Launcher.getDatabase().removeBot(event.getGuild().getIdLong());
     }
 
+    @Override
+    public void onGuildVoiceUpdate(GuildVoiceUpdateEvent event) {
+        super.onGuildVoiceUpdate(event);
+    }
+
+    @Override
+    public void onGuildVoiceJoin(GuildVoiceJoinEvent event) {
+        super.onGuildVoiceJoin(event);
+    }
+
+    @Override
+    public void onGuildVoiceMove(GuildVoiceMoveEvent event) {
+        super.onGuildVoiceMove(event);
+    }
+
+    @Override
+    public void onGuildVoiceLeave(GuildVoiceLeaveEvent event) {
+        super.onGuildVoiceLeave(event);
+    }
+
+    @Override
+    public void onGuildVoiceMute(GuildVoiceMuteEvent event) {
+        super.onGuildVoiceMute(event);
+    }
+
+    @Override
+    public void onGuildVoiceDeafen(GuildVoiceDeafenEvent event) {
+        super.onGuildVoiceDeafen(event);
+    }
+
+    @Override
+    public void onGuildVoiceGuildMute(GuildVoiceGuildMuteEvent event) {
+        super.onGuildVoiceGuildMute(event);
+    }
+
+    @Override
+    public void onGuildVoiceGuildDeafen(GuildVoiceGuildDeafenEvent event) {
+        super.onGuildVoiceGuildDeafen(event);
+    }
+
+    @Override
+    public void onGuildVoiceSelfMute(GuildVoiceSelfMuteEvent event) {
+        super.onGuildVoiceSelfMute(event);
+    }
+
+    @Override
+    public void onGuildVoiceSelfDeafen(GuildVoiceSelfDeafenEvent event) {
+        super.onGuildVoiceSelfDeafen(event);
+    }
+
+    @Override
+    public void onGuildVoiceSuppress(GuildVoiceSuppressEvent event) {
+        super.onGuildVoiceSuppress(event);
+    }
+
+    @Override
+    public void onVoiceChannelDelete(VoiceChannelDeleteEvent event) {
+        super.onVoiceChannelDelete(event);
+    }
+
+    @Override
+    public void onVoiceChannelUpdateName(VoiceChannelUpdateNameEvent event) {
+        super.onVoiceChannelUpdateName(event);
+    }
+
+    @Override
+    public void onVoiceChannelUpdatePosition(VoiceChannelUpdatePositionEvent event) {
+        super.onVoiceChannelUpdatePosition(event);
+    }
+
+    @Override
+    public void onVoiceChannelUpdateUserLimit(VoiceChannelUpdateUserLimitEvent event) {
+        super.onVoiceChannelUpdateUserLimit(event);
+    }
+
+    @Override
+    public void onVoiceChannelUpdateBitrate(VoiceChannelUpdateBitrateEvent event) {
+        super.onVoiceChannelUpdateBitrate(event);
+    }
+
+    @Override
+    public void onVoiceChannelUpdatePermissions(VoiceChannelUpdatePermissionsEvent event) {
+        super.onVoiceChannelUpdatePermissions(event);
+    }
+
+    @Override
+    public void onVoiceChannelUpdateParent(VoiceChannelUpdateParentEvent event) {
+        super.onVoiceChannelUpdateParent(event);
+    }
+
+    @Override
+    public void onVoiceChannelCreate(VoiceChannelCreateEvent event) {
+        super.onVoiceChannelCreate(event);
+    }
+
+    @Override
+    public void onRoleCreate(RoleCreateEvent event) {
+        super.onRoleCreate(event);
+    }
+
+    @Override
+    public void onRoleDelete(RoleDeleteEvent event) {
+        super.onRoleDelete(event);
+    }
 }

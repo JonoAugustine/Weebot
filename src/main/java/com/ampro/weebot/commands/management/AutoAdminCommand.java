@@ -4,6 +4,7 @@ import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.Command;
 import com.ampro.weebot.commands.IPassive;
 import com.ampro.weebot.bot.Weebot;
+import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
 import net.dv8tion.jda.core.EmbedBuilder;
 import net.dv8tion.jda.core.Permission;
@@ -139,47 +140,46 @@ public class AutoAdminCommand extends Command {
         }
 
         @Override
-        public void accept(Weebot bot, BetterMessageEvent event) {
-            if (dead) return;
-            Member member = event.getMember();
-            if (member.isOwner()
-                || member.hasPermission(Permission.ADMINISTRATOR)) return;
-            if (isExempt(event.getMember())) return;
+        public void accept(Weebot bot, BetterEvent event1) {
+            if (event1 instanceof BetterMessageEvent) {
+                BetterMessageEvent event = (BetterMessageEvent) event1;
+                if (dead) return;
+                Member member = event.getMember();
+                if (member.isOwner() || member.hasPermission(Permission.ADMINISTRATOR))
+                    return;
+                if (isExempt(event.getMember())) return;
 
-            boolean infracted = false;
-            UserRecord rec = userRecords.get(member.getUser().getIdLong());
+                boolean infracted = false;
+                UserRecord rec = userRecords.get(member.getUser().getIdLong());
 
-            String content = event.toString();
-            //Respond to word infractions
-            List<String> b = checkWords(content, event.getTextChannel());
-            if (!b.isEmpty()) {
+                String content = event.toString();
+                //Respond to word infractions
+                List<String> b = checkWords(content, event.getTextChannel());
+                if (!b.isEmpty()) {
 
-                if(rec == null) {
-                    rec = new UserRecord(member.getUser(), event.getGuild());
-                    userRecords.put(member.getUser().getIdLong(), rec);
+                    if (rec == null) {
+                        rec = new UserRecord(member.getUser(), event.getGuild());
+                        userRecords.put(member.getUser().getIdLong(), rec);
+                    }
+
+                    rec.addWordInfraction(b);
+                    infCaught++; //Stat track
+
+                    b.forEach(s -> event.privateReply((infractionEmbed(event, s))));
+                    infracted = true;
                 }
 
-                rec.addWordInfraction(b);
-                infCaught++; //Stat track
-
-                b.forEach(
-                        s -> event.privateReply((infractionEmbed(event, s)))
-                );
-                infracted = true;
+                //Check thresholds
+                if (infracted) {
+                    event.deleteMessage();
+                    GuildController controller = Launcher.getGuild(guildID).getController();
+                    //We use .complete() instead of event.reply() because we need
+                    //to send the message before we kick/ban them in order to send
+                    //the message at all
+                    threshCheck(rec, controller, event.getAuthor(), event.getMember(),
+                                event.getMessage());
+                }
             }
-
-            //Check thresholds
-            if (infracted) {
-                event.deleteMessage();
-                GuildController controller = Launcher.getGuild(guildID)
-                                                     .getController();
-                //We use .complete() instead of event.reply() because we need
-                //to send the message before we kick/ban them in order to send
-                //the message at all
-                threshCheck(rec, controller, event.getAuthor(), event.getMember(),
-                            event.getMessage());
-            }
-
         }
 
         /**

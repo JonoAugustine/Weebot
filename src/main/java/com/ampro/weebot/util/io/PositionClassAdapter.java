@@ -25,9 +25,10 @@ public class PositionClassAdapter<T extends Position>
                          JsonDeserializationContext context)
     throws JsonParseException {
         JsonObject jsonObject = jsonElement.getAsJsonObject();
-        if (OptionPosition.class.getName().equals(jsonObject.get(CLASSNAME))) {
+        String klName = jsonObject.get(CLASSNAME).getAsString();
+        if (OptionPosition.class.getName().equals(klName)) {
             return context.deserialize(jsonObject.get(DATA), OptionPosition.class);
-        } else if (StockPostion.class.getName().equals(jsonObject.get(CLASSNAME))) {
+        } else if (StockPostion.class.getName().equals(klName)) {
             return context.deserialize(jsonObject.get(DATA), StockPostion.class);
         }
         return null;

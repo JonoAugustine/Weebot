@@ -29,13 +29,14 @@ public class DatabaseManager extends FileManager {
 
     private static final Gson GSON
             = new GsonBuilder().enableComplexMapKeySerialization()
+                               .serializeNulls()
                                .setExclusionStrategies().setPrettyPrinting()
+                               .registerTypeAdapter(Position.class,
+                                                    new PositionClassAdapter())
                                .registerTypeAdapter(IPassive.class,
                                                     new InterfaceAdapter<>())
                                .registerTypeAdapter(Class.class,
                                                     new CommandClassAdapter())
-                               .registerTypeAdapter(Position.class,
-                                                    new PositionClassAdapter())
                                .create();
 
     /**

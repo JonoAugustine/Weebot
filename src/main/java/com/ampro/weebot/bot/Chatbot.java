@@ -2,8 +2,12 @@ package com.ampro.weebot.bot;
 
 import com.ampro.weebot.Launcher;
 import com.ampro.weebot.commands.IPassive;
+import com.ampro.weebot.listener.events.BetterEvent;
 import com.ampro.weebot.listener.events.BetterMessageEvent;
-import com.google.code.chatterbotapi.*;
+import com.google.code.chatterbotapi.ChatterBot;
+import com.google.code.chatterbotapi.ChatterBotFactory;
+import com.google.code.chatterbotapi.ChatterBotSession;
+import com.google.code.chatterbotapi.ChatterBotType;
 import net.dv8tion.jda.core.entities.Guild;
 
 import java.util.Random;
@@ -34,74 +38,74 @@ public class Chatbot implements IPassive {
     private final int TALKLIM = 30;
 
     @Override
-    public void accept(Weebot bot, BetterMessageEvent event) {
-        if (this.dead) return;
-        if (bot.validateCallsign(event.getArgs()) > 0) return;
-        if (!bot.canParticipate()) {
-            this.dead = true;
-            return;
-        }
-        if (factory == null) {
-            this.factory = new ChatterBotFactory();
-            try {
-                BOT = factory.create(ChatterBotType.PANDORABOTS,"b0dafd24ee35a477");
-            } catch (Exception e) { return; }
-            SESH = BOT.createSession();
-        }
-
-        if (!talking) {
-
-            int chance =
-                    (event.mentions(Launcher.getJda().getSelfUser())
-                            || event.toString().toLowerCase().contains("weebot")) ?
-                    7 : 19;
-
-            //IDK just a placeholder
-            switch (new Random().nextInt() % chance) {
-                case 0:
-                    talking = true;
-                    break;
-                default:
-                    return;
+    public void accept(Weebot bot, BetterEvent event1) {
+        if (event1 instanceof BetterMessageEvent) {
+            BetterMessageEvent event = (BetterMessageEvent) event1;
+            if (this.dead) return;
+            if (bot.validateCallsign(event.getArgs()) > 0) return;
+            if (!bot.canParticipate()) {
+                this.dead = true;
+                return;
             }
-        }
+            if (factory == null) {
+                this.factory = new ChatterBotFactory();
+                try {
+                    BOT = factory.create(ChatterBotType.PANDORABOTS, "b0dafd24ee35a477");
+                } catch (Exception e) { return; }
+                SESH = BOT.createSession();
+            }
 
-        try {
-            SESH.think("Your name is Weebot.");
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
+            if (!talking) {
 
-        String rpl;
-        try {
-            rpl = SESH.think(event.toString());
-        } catch (Exception e) {
-            e.printStackTrace();
-            return;
-        }
+                int chance = (event.mentions(Launcher.getJda().getSelfUser())
+                        || event.toString().toLowerCase().contains("weebot")) ? 7 : 19;
 
-        if (rpl.equalsIgnoreCase(lastThought)) {
-            event.reply("...I don't really wanna chat anymore...");
-            SESH = BOT.createSession();
-            talking = false;
-            return;
-        }
+                //IDK just a placeholder
+                switch (new Random().nextInt() % chance) {
+                    case 0:
+                        talking = true;
+                        break;
+                    default:
+                        return;
+                }
+            }
 
-        if (rpl.isEmpty()) {
-            event.reply("...I don't really wanna chat anymore...");
-            SESH = BOT.createSession();
-            talking = false;
-            return;
-        }
+            try {
+                SESH.think("Your name is Weebot.");
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
 
-        event.reply(rpl);
-        if(talkedFor++ >= TALKLIM) {
-            event.reply("I'm feeling a little tired. I'll talk more later!");
-            talkedFor = 0;
-        }
-        lastThought = rpl;
+            String rpl;
+            try {
+                rpl = SESH.think(event.toString());
+            } catch (Exception e) {
+                e.printStackTrace();
+                return;
+            }
 
+            if (rpl.equalsIgnoreCase(lastThought)) {
+                event.reply("...I don't really wanna chat anymore...");
+                SESH = BOT.createSession();
+                talking = false;
+                return;
+            }
+
+            if (rpl.isEmpty()) {
+                event.reply("...I don't really wanna chat anymore...");
+                SESH = BOT.createSession();
+                talking = false;
+                return;
+            }
+
+            event.reply(rpl);
+            if (talkedFor++ >= TALKLIM) {
+                event.reply("I'm feeling a little tired. I'll talk more later!");
+                talkedFor = 0;
+            }
+            lastThought = rpl;
+        }
     }
 
     public Chatbot(Guild guild) throws Exception {
