@@ -4,9 +4,11 @@
 
 package com.ampro.weebot.bot
 
+import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.main.getGuild
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
 
 /**
@@ -59,6 +61,12 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     /** Whether the bot can accept commands or not */
     @Transient
     private var locked: Boolean = false
+
+    /** [IPassive] objects, cleared on exit  */
+    @get:Synchronized
+    val passives: ArrayList<IPassive> = ArrayList()
+
+    fun feedPassives(event: Event) = passives.forEach{ it.accept(this, event) }
 
     fun startup() {
 

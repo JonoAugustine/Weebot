@@ -58,7 +58,7 @@ fun main(args: Array<String>) {
             .setPrefix("\\").setAlternativePrefix("w!")
             //.setDiscordBotListKey()
             .setGame(Game.of(Game.GameType.LISTENING, "@Weebot help"))
-            .build()
+
 
 
     JDA_SHARD_MNGR = jdaDevShardLogIn().addEventListeners().build()

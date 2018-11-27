@@ -34,6 +34,8 @@ data class PremiumUser(val ID: Long)
 
 lateinit var DAO : Dao
 
+fun getWeebot(guildID: Long) = DAO.WEEBOTS[guildID]
+
 /**
  * A database for storing all the information about the Weebot program
  * between downtime.
