@@ -5,12 +5,10 @@
 package com.ampro.weebot.bot
 
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.getGuild
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
-import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.Guild
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
 
@@ -36,6 +34,8 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
     var nsfw: Boolean = false
     /** Whether the bot is able to respond to actions not directed to it */
     var enablePassives: Boolean = false
+
+    var logchannel: TextChannel? = null
 
     override fun getPrefixes() = prefixs
 }
