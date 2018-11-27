@@ -24,7 +24,11 @@ lateinit var JDA_SHARD_MNGR: ShardManager
 val CACHED_POOL =  Executors.newCachedThreadPool().asCoroutineDispatcher()
 val FIXED_POOL = newFixedThreadPoolContext(100, "FixedPool")
 
+/** Main Logger */
 val MLOG = FileLogger("Launcher $NOW_FILE")
+
+/** The bot's selfuser from */
+val SELF = JDA_SHARD_MNGR.shards[0].selfUser
 
 //TODO lateinit var GLOBAL_WEEBOT: GlobalWeebot
 
@@ -187,7 +191,6 @@ fun shutdown() {
     System.exit(0)
 }
 
-
 /**
  * Get a guild matching the ID given.
  *
@@ -195,3 +198,5 @@ fun shutdown() {
  * @return requested Guild <br></br> null if not found.
  */
 fun getGuild(id: Long): Guild? = JDA_SHARD_MNGR.guilds.find { it.idLong == id }
+
+

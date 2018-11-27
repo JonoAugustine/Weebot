@@ -5,9 +5,12 @@
 package com.ampro.weebot.bot
 
 import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.getGuild
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
+import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
 
@@ -52,15 +55,27 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     constructor(guild: Guild) : this(guild.idLong)
 
+    /*************************************************
+     *                  BackEnd Info                 *
+     *************************************************/
+
     /** The date the bot was added to the Database. */
     val initDate: OffsetDateTime = OffsetDateTime.now()
-
-    /** The [GuildSettingsProvider] for the Weebot */
-    val settings = WeebotSettings(guildID)
 
     /** Whether the bot can accept commands or not */
     @Transient
     private var locked: Boolean = false
+
+    /*************************************************
+     *                  Settings                     *
+     *************************************************/
+
+    /** The [GuildSettingsProvider] for the Weebot */
+    val settings = WeebotSettings(guildID)
+
+    /*************************************************
+     *               State & User Data               *
+     *************************************************/
 
     /** [IPassive] objects, cleared on exit  */
     @get:Synchronized
@@ -68,8 +83,10 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     fun feedPassives(event: Event) = passives.forEach{ it.accept(this, event) }
 
+    /**
+     * Any startup settings or states that must be reloaded before launch.
+     */
     fun startup() {
-
     }
 
     override fun compareTo(other: Weebot): Int {
