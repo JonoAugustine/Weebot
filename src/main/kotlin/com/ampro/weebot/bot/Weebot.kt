@@ -35,7 +35,11 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
     /** Whether the bot is able to respond to actions not directed to it */
     var enablePassives: Boolean = false
 
+    /** The [TextChannel] to send logs to */
     var logchannel: TextChannel? = null
+
+    /** Allows Weebot to track usage for stats */
+    var trackingEnabled: Boolean = false
 
     override fun getPrefixes() = prefixs
 }

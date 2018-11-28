@@ -6,9 +6,13 @@ package com.ampro.weebot.database.constants
 
 import com.ampro.weebot.main.MLOG
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
-import net.dv8tion.jda.core.*
+import net.dv8tion.jda.core.AccountType
+import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.JDABuilder
 import net.dv8tion.jda.core.entities.Game
 import javax.security.auth.login.LoginException
+
+val LINK_INVITEBOT = "https://discordapp.com/api/oauth2/authorize?client_id=437851896263213056&permissions=500296919&scope=bot"
 
 private const val TOKEN_WBT =
         "NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA.Etf9Q9wuk1YCUnUox0IbIon1dUk"

@@ -49,7 +49,7 @@ fun getUser(id: Long): User? = JDA_SHARD_MNGR.getUserById(id)
 fun getWeebot(guildID: Long) = DAO.WEEBOTS[guildID]
 
 /**
- * A class to track the bot's usage
+ * A class to track the bot's usage.
  *
  * @author Jonathan Augustine
  * @since 2.0

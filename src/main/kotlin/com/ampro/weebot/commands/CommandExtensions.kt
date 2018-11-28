@@ -4,6 +4,8 @@
 
 package com.ampro.weebot.commands
 
+import com.ampro.weebot.bot.WeebotSettings
+import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -30,5 +32,11 @@ fun CommandEvent.deleteWithResponse(reason: String, delay: Int = 10) {
             event.message.delete().reason(reason).queue()
             it.delete().reason(reason).queue()
         }
+    }
+}
+
+fun Command.track(weebotSettings: WeebotSettings) {
+    if (weebotSettings.trackingEnabled) {
+        TODO()
     }
 }
