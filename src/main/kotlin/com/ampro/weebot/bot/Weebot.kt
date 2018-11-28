@@ -5,7 +5,7 @@
 package com.ampro.weebot.bot
 
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.main.getGuild
+import com.ampro.weebot.database.getGuild
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.TextChannel

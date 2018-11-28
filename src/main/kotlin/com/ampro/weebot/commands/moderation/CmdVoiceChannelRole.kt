@@ -6,11 +6,12 @@ package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.ALL
-import com.ampro.weebot.main.constants.standardEmbedBuilder
+import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.*
+import com.ampro.weebot.main.constants.strdEmbedBuilder
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.entities.VoiceChannel
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
@@ -20,6 +21,9 @@ import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
  * VoiceChannel roles.
  *
  * TODO: How to regulate which channels get roles when u can't mention voicechannels
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
  */
 class VCRoleManager(var limit: Limit = ALL) : IPassive {
 
@@ -33,11 +37,23 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
         NONE
     }
 
-    /******************************
-     *          Settings          *
-     ******************************/
-
+    /** Whether the [IPassive] is set to be destroyed */
     var dead = false
+    override fun dead() = dead
+
+    /**
+     * Check if the voice channel allows VCRoles.
+     *
+     * @param voiceChannel The [VoiceChannel] to check
+     */
+    fun checkLimit(voiceChannel: VoiceChannel) = when (limit) {
+        ALL -> true
+        NONE -> false
+        PUBLIC -> voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
+                    .allowed.contains(Permission.VOICE_CONNECT)
+                || !voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
+                .denied.contains(Permission.VOICE_CONNECT)
+    }
 
     /**
      * When a user joins a voice channel, assign the Member a role named after
@@ -63,7 +79,7 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
                         controller.addRolesToMember(event.member, it).queue()
                     },{
                         bot.settings.logchannel?.sendMessage(
-                                standardEmbedBuilder.setTitle("Log Message")
+                                strdEmbedBuilder.setTitle("Log Message")
                                     .setDescription(
                                             "Failed to assign VoiceChannel Role: ${channel.name}"
                                     ).build()
@@ -85,12 +101,9 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
         }
     }
 
-    override fun dead(): Boolean {
-        return false
-    }
 }
 
-class VoiceChannelRole : Command() {
+class CmdVoiceChannelRole : Command() {
 
     init {
         name = "voicechannelrole"

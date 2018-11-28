@@ -8,13 +8,14 @@ const val weebotAvatarUrl = "https://images-ext-2.discordapp" +
         ".net/external/jd498W5p3OMMOdHS2F7HqFm0g0d9Lk0yPjJ0bzsguk0/https/cdn." +
         "discordapp.com/avatars/437851896263213056/c00b298498bc546de4ad5512f53fc7d6.png"
 
+val STD_GREEN = Color(0x31FF00)
 
 /**
  * @return EmbedBuilder with the standard green, Author set to "Weebot"
  * and footer
  */
-val standardEmbedBuilder: EmbedBuilder
-    get() = EmbedBuilder().setColor(Color(0x31FF00))
+val strdEmbedBuilder: EmbedBuilder
+    get() = EmbedBuilder().setColor(STD_GREEN)
         .setAuthor("Weebot", null, weebotAvatarUrl)
         .setFooter("Run by Weebot", weebotAvatarUrl)
 
@@ -27,5 +28,5 @@ val standardEmbedBuilder: EmbedBuilder
  * @return A Weebot-standard EmbedBuilder
  */
 fun makeEmbedBuilder(title: String, titleLink: String, description: String)
-        = standardEmbedBuilder.setTitle(title, titleLink)
+        = strdEmbedBuilder.setTitle(title, titleLink)
             .setDescription(description)!!

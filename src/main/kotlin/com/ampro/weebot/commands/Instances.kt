@@ -4,39 +4,29 @@
 
 package com.ampro.weebot.commands
 
-/** A map of all commands by KClass
-val COMMANDS = ConcurrentHashMap<KClass<out Command>, Command>().also {
-    it.putAll(mutableMapOf(
-            HelpCommand::class          to HelpCommand(),
-            ShutdownCommand::class      to ShutdownCommand(),
-            DatabaseFileCommand::class  to DatabaseFileCommand(),
-            AutoAdminCommand::class     to AutoAdminCommand(),
-            ManageSettingsCommand::class    to ManageSettingsCommand(),
-            ListGuildsCommand::class    to ListGuildsCommand(),
-            PingCommand::class          to PingCommand(),
-            SpamCommand::class          to SpamCommand(),
-            NotePadCommand::class       to NotePadCommand(),
-            SelfDestructMessageCommand::class   to SelfDestructMessageCommand(),
-            SecretePhraseCommand::class     to SecretePhraseCommand(),
-            WeebotSuggestionCommand::class  to WeebotSuggestionCommand(),
-            CardsAgainstHumanityCommand::class  to CardsAgainstHumanityCommand(),
-            OutHouseCommand::class      to OutHouseCommand(),
-            ChatbotCommand::class       to ChatbotCommand(),
-            CalculatorCommand::class    to CalculatorCommand(),
-            ReminderCommand::class      to ReminderCommand(),
-            InviteLinkCommand::class    to InviteLinkCommand(),
-            CustomMemeCommand::class    to CustomMemeCommand(),
-            RestrictCmdCommand::class   to RestrictCmdCommand()
-    ))
-}
+import com.ampro.weebot.commands.developer.*
+import com.ampro.weebot.commands.moderation.CmdVoiceChannelRole
+import com.ampro.weebot.main.WAITER
+import com.ampro.weebot.main.constants.STD_GREEN
 
-/**
- * Get a [Command] from the available list of [COMMANDS].
- *
- * @param klass The class of the [Command].
- * @return  The [Command] that was requested.
- */
-fun getCommand(klass: KClass<out Command>): Command = COMMANDS[klass]!!
 
-fun Command.getIntstance() = getCommand(this::class)
-*/
+/* *******************************
+ *       Developer Commands      *
+ ********************************/
+
+val CMD_SHUTDOWN        = CmdShutdown()
+val COM_GUILDLIST       = GuildlistCommand(WAITER)
+val COM_PING            = PingCommand() //Public
+val CMD_SUGG            = CmdSendSuggestion() //Public
+
+
+/* *******************************
+ *       Utility Commands      *
+ ********************************/
+
+val CMD_ABOUT           = AboutCommand(STD_GREEN, "Weebot is a bot", arrayOf(
+        "Voice Channel Roles"
+))
+
+
+val COM_VCR             = CmdVoiceChannelRole()

@@ -128,7 +128,7 @@ class InternalLog(val name: String = "flog", initSize: Int = 100_000,
     }
 
     @Ignore
-    val logThread = newSingleThreadContext("LOG")
+    //val logThread = newSingleThreadContext("LOG")
     val log = ArrayList<Message>(initSize)
 
     /** Add a Message to the flog */

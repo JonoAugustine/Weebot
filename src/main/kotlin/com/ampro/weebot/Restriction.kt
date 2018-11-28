@@ -4,7 +4,7 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.main.constants.standardEmbedBuilder
+import com.ampro.weebot.main.constants.strdEmbedBuilder
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.entities.*
 import java.util.*
@@ -255,7 +255,7 @@ class Restriction {
      */
     fun toEmbedBuilder(guild: Guild): EmbedBuilder {
         val sb = StringBuilder()
-        val eb = standardEmbedBuilder
+        val eb = strdEmbedBuilder
         if (!this.getAllowedUsers().isEmpty()) {
             this.getAllowedUsers().forEach { u ->
                 sb.append("*").append(guild.getMemberById(u).effectiveName).append("*\n")

@@ -5,30 +5,32 @@
 package com.ampro.weebot.main
 
 import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.commands.*
 import com.ampro.weebot.database.*
-import com.ampro.weebot.main.constants.jdaDevShardLogIn
+import com.ampro.weebot.main.constants.*
 import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandClientBuilder
+import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import kotlinx.coroutines.asCoroutineDispatcher
-import kotlinx.coroutines.newFixedThreadPoolContext
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.entities.Game
-import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.*
 import java.util.concurrent.Executors
 import javax.security.auth.login.LoginException
+import kotlin.system.measureTimeMillis
 
 //JDA connection shard Client
 lateinit var JDA_SHARD_MNGR: ShardManager
+val WAITER: EventWaiter = EventWaiter()
 
 val CACHED_POOL =  Executors.newCachedThreadPool().asCoroutineDispatcher()
-val FIXED_POOL = newFixedThreadPoolContext(100, "FixedPool")
+//val FIXED_POOL = newFixedThreadPoolContext(100, "FixedPool")
 
 /** Main Logger */
-val MLOG = FileLogger("Launcher $NOW_FILE")
+lateinit var MLOG: FileLogger
 
 /** The bot's selfuser from */
-val SELF = JDA_SHARD_MNGR.shards[0].selfUser
+lateinit var SELF: SelfUser
 
 //TODO lateinit var GLOBAL_WEEBOT: GlobalWeebot
 
@@ -40,14 +42,18 @@ val SELF = JDA_SHARD_MNGR.shards[0].selfUser
  * @throws RateLimitedException
  * @throws InterruptedException
  */
-fun main(args: Array<String>) {
-    MLOG.slog("Launching...")
-    MLOG.slog("\tBuilding Directories...")
+fun main(args: Array<String>) = run {
+    slog("Launching...")
+    slog("\tBuilding Directories...")
     if (!buildDirs()) {
-        MLOG.elog("\tFAILED: Build Dir | shutting down...")
+        elog("\tFAILED: Build Dir | shutting down...")
         System.exit(-1)
     }
-    MLOG.slog("\t...DONE")
+    slog("\t...DONE")
+    slog("Initializing Main Logger")
+    MLOG = FileLogger("Launcher $NOW_FILE")
+    slog("...DONE\n\n")
+
 
     //Debug
     //RestAction.setPassContext(true) // enable context by default
@@ -56,29 +62,38 @@ fun main(args: Array<String>) {
     //JDA_CLIENT = jdaLogIn()
     //JDA_CLIENT = jdaDevLogIn()
 
-    val cmdClientBuilder = CommandClientBuilder()
-            .setOwnerId(DEV_IDS[0].toString()).setCoOwnerIds(DEV_IDS[1].toString())
-            .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }
-            .setPrefix("\\").setAlternativePrefix("w!")
-            //.setDiscordBotListKey()
-            .setGame(Game.of(Game.GameType.LISTENING, "@Weebot help"))
+    JDA_SHARD_MNGR = jdaDevShardLogIn().build()
 
-
-
-    JDA_SHARD_MNGR = jdaDevShardLogIn().addEventListeners().build()
-
-    JDA_SHARD_MNGR.statuses.forEach {_, status ->
-        while (status != JDA.Status.CONNECTED) {}
-    }
 
     setUpDatabase()
+
+    val cmdClientBuilder = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
+        .setCoOwnerIds(DEV_IDS[1].toString())
+        .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }.setPrefix("\\")
+        .setAlternativePrefix("w!")
+        .setGame(Game.of(Game.GameType.LISTENING, "@Weebot help"))
+        .addCommands(CMD_SHUTDOWN, COM_PING, COM_GUILDLIST, CMD_ABOUT, CMD_SUGG, COM_VCR)
+
+    JDA_SHARD_MNGR.addEventListener(cmdClientBuilder.build())
+
+    MLOG.slog("Shard connected! ${measureTimeMillis {
+        Thread.sleep(1000)
+        while (JDA_SHARD_MNGR.shards[0].status != JDA.Status.CONNECTED) {
+            MLOG.slog("Waiting for shard to connect...")
+            Thread.sleep(5 * 1000)
+        }
+    } / 1_000} seconds")
+
+    SELF = JDA_SHARD_MNGR.shards[0].selfUser
+
     startupWeebots()
     //startSaveTimer(.5)
 
     //console.start()
 
-    MLOG.elog("Launch Complete!\n\n")
+    MLOG.slog("Launch Complete!\n\n")
 
+    JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!").queue()
 }
 
 /**
@@ -87,25 +102,27 @@ fun main(args: Array<String>) {
  * Is called only once during setup.
  */
 private fun setUpDatabase() {
-    MLOG.elog("Setting up Database...")
-    MLOG.elog("\tLoading database...")
+    MLOG.slog("Setting up Database...")
+    MLOG.slog("\tLoading database...")
     var tdao = loadDao()
     if (tdao == null) {
-        MLOG.elog("\t\tUnable to loadDao database, creating new database.")
+        MLOG.slog("\t\tUnable to loadDao database, creating new database.")
         tdao = Dao()
-        MLOG.elog("\t\tLoading known Guilds")
+        MLOG.slog("\t\tLoading known Guilds")
         JDA_SHARD_MNGR.guilds.forEach { tdao.addBot(Weebot(it)) }
         tdao.save()
-        MLOG.elog("\tDatabase created and saved to file.")
+        MLOG.slog("\tDatabase created and saved to file.")
         DAO = tdao
     } else {
-        MLOG.elog("\tDatabase located. Updating registered Guilds.")
+        MLOG.slog("\tDatabase located. Updating registered Guilds.")
         DAO = Dao()
         //GLOBAL_WEEBOT = DAO.GLOBAL_WEEBOT
         updateGuilds()
     }
-    MLOG.elog("\tBacking up database.")
+    MLOG.slog("\tBacking up database.")
     DAO.backUp()
+    MLOG.slog("\t...DONE")
+    MLOG.slog("...DONE")
 }
 
 /**
@@ -119,7 +136,7 @@ private fun updateGuilds() = JDA_SHARD_MNGR.guilds.forEach { DAO.addBot(Weebot(i
  * changed during downtime and initialize transient variables.
  */
 private fun startupWeebots() {
-    MLOG.elog("Starting Weebots...")
+    MLOG.slog("Starting Weebots...")
     DAO.WEEBOTS.forEach { _, bot -> bot.startup() }
 }
 
@@ -156,10 +173,9 @@ private fun startSaveTimer(min: Double) {
 */
 
 /** Begin the shutdown sequence. Backup and save database.  */
-fun shutdown() {
-    MLOG.elog(" Shutdown signal received.")
+fun shutdown(user: User) {
+    MLOG.elog("Shutdown signal received from [${user.name} (${user.id}).")
     MLOG.elog("\tClearing registered event listeners...")
-    JDA_SHARD_MNGR.removeEventListenerProvider {  }
 
     MLOG.elog("\tStopping save timer thread...")
     //saveTimer.interrupt()
@@ -180,23 +196,17 @@ fun shutdown() {
     MLOG.elog("\tClearing temp directories...")
     clearTempDirs()
 
-    MLOG.elog("Safely shutdown.")
-
     JDA_SHARD_MNGR.shutdown()
-    JDA_SHARD_MNGR.statuses.forEach {_, status ->
+    JDA_SHARD_MNGR.statuses.forEach { _, status ->
         while (status != JDA.Status.SHUTDOWN) {}
     }
-    FIXED_POOL.close()
+
+    //FIXED_POOL.close()
     CACHED_POOL.close()
+
+    MLOG.elog("Safely shutdown.")
     System.exit(0)
 }
 
-/**
- * Get a guild matching the ID given.
- *
- * @param id long ID
- * @return requested Guild <br></br> null if not found.
- */
-fun getGuild(id: Long): Guild? = JDA_SHARD_MNGR.guilds.find { it.idLong == id }
 
 

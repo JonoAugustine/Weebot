@@ -6,6 +6,7 @@ package com.ampro.weebot.listeners
 
 import com.ampro.weebot.database.getWeebot
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
+import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
@@ -27,6 +28,10 @@ class EventDispatcher : ListenerAdapter() {
     override fun onGuildJoin(event: GuildJoinEvent) {
         val c = event.guild.systemChannel ?: event.guild.defaultChannel
         c?.sendMessage("*Kicks in door* The Weebot has arrived!")?.queue()
+    }
+
+    override fun onGuildLeave(event: GuildLeaveEvent?) {
+        TODO()
     }
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {

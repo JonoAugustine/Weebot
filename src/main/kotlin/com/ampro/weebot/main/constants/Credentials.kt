@@ -26,7 +26,7 @@ private const val TOKEN_TEST =
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaLogIn() : JDA {
-    MLOG.elog("Logging in to Weebot JDA client...")
+    MLOG.slog("Logging in to Weebot JDA client...")
     return JDABuilder(AccountType.BOT).setToken(TOKEN_WBT)
         .setGame(Game.playing("@Weebot help")).setCorePoolSize(10)
         .build().awaitReady()
@@ -42,7 +42,7 @@ fun jdaLogIn() : JDA {
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaDevLogIn() : JDA {
-    MLOG.elog("Logging in to TestBot JDA client...")
+    MLOG.slog("Logging in to TestBot JDA client...")
     return JDABuilder(AccountType.BOT).setToken(TOKEN_TEST)
         .setGame(Game.playing("Genocide")).setCorePoolSize(10)
             .build().awaitReady()
@@ -53,9 +53,9 @@ fun jdaDevLogIn() : JDA {
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaShardLogIn() : DefaultShardManagerBuilder {
-    MLOG.elog("Logging in to Weebot JDA shards...")
+    MLOG.slog("Logging in to Weebot JDA shards...")
     return DefaultShardManagerBuilder().setToken(TOKEN_WBT)
-            .setShards(1).setGame(Game.playing("@Weebot help"))
+            .setShardsTotal(-1).setGame(Game.playing("@Weebot help"))
             .setCorePoolSize(50)
 }
 
@@ -64,8 +64,8 @@ fun jdaShardLogIn() : DefaultShardManagerBuilder {
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaDevShardLogIn() : DefaultShardManagerBuilder {
-    MLOG.elog("Logging in to TestBot JDA shards...")
+    MLOG.slog("Logging in to TestBot JDA shards...")
     return DefaultShardManagerBuilder().setToken(TOKEN_TEST)
-            .setShards(1)
+            .setShardsTotal(1)
             .setGame(Game.playing("Genocide")).setCorePoolSize(10)
 }

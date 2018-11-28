@@ -5,19 +5,18 @@
 package com.ampro.weebot.database
 
 import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.commands.developer.Suggestion
+import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.MLOG
+import com.ampro.weebot.main.constants.DEV_IDS
 import com.ampro.weebot.util.*
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.User
 import java.io.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-
-/** Array of registered developer Discord IDs  */
-val DEV_IDS = mutableListOf(
-    139167730237571072L /*JONO*/, 186130584693637131L /*DERNST*/
-)
 
 /**
  * Check if user ID matches a Developer ID.
@@ -34,6 +33,16 @@ data class PremiumUser(val ID: Long)
 
 lateinit var DAO : Dao
 
+/**
+ * Get a guild matching the ID given.
+ *
+ * @param id long ID
+ * @return requested Guild <br></br> null if not found.
+ */
+fun getGuild(id: Long): Guild? = JDA_SHARD_MNGR.guilds.find { it.idLong == id }
+
+fun getUser(id: Long): User? = JDA_SHARD_MNGR.getUserById(id)
+
 fun getWeebot(guildID: Long) = DAO.WEEBOTS[guildID]
 
 /**
@@ -43,10 +52,10 @@ fun getWeebot(guildID: Long) = DAO.WEEBOTS[guildID]
 data class Dao(var initTime: String = NOW_FILE) {
 
     /**
-     * Map of all suggestions given through
+     * List of all suggestions given through
      * [com.ampro.weebot.commands.developer.WeebotSuggestionCommand]
      */
-    //val SUGGESTIONS = ConcurrentHashMap<Long, MutableList<Suggestion>>()
+    val suggestions = mutableListOf<Suggestion>()
 
     //val GLOBAL_WEEBOT = GlobalWeebot()
 
@@ -181,26 +190,6 @@ data class Dao(var initTime: String = NOW_FILE) {
 
     @Synchronized
     fun removePremiumUser(user: User) = PREMIUM_USERS.remove(user.idLong) != null
-
-    /*
-    @Synchronized
-    fun addSuggestion(suggestion: Suggestion) {
-        SUGGESTIONS.putIfAbsent(suggestion.authorID, mutableListOf(suggestion))
-            ?.add(suggestion)
-    }
-
-    @Synchronized
-    fun removeSuggestion(suggestion: Suggestion) = SUGGESTIONS.remove(suggestion.authorID)
-
-    /**
-     * Remove all suggestions from the given user
-     *
-     * @return A list of the removed suggestions
-     */
-    @Synchronized
-    fun clearUserSuggestions(user: User): List<Suggestion> =
-            SUGGESTIONS.remove(user.idLong) ?: listOf()
-            */
 
     override fun toString(): String {
         val out = StringBuilder("[")

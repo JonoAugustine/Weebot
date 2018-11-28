@@ -10,6 +10,7 @@ package com.ampro.weebot.util
 import java.time.LocalDateTime
 import java.time.format.DateTimeFormatter
 
+val standardDateTimeFormatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
 
 /** @return The current local date and time. dd-MM-yyyy HH:mm:ss */
 val NOW: String get() = LocalDateTime.now().format(
