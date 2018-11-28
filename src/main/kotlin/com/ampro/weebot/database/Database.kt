@@ -6,15 +6,18 @@ package com.ampro.weebot.database
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.developer.Suggestion
+import com.ampro.weebot.database.constants.DEV_IDS
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.MLOG
-import com.ampro.weebot.database.constants.DEV_IDS
 import com.ampro.weebot.util.*
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.User
-import java.io.*
+import java.io.FileNotFoundException
+import java.io.FileReader
+import java.io.FileWriter
+import java.io.IOException
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -48,6 +51,11 @@ fun getWeebot(guildID: Long) = DAO.WEEBOTS[guildID]
 /**
  * A database for storing all the information about the Weebot program
  * between downtime.
+ *
+ * TODO: Put each Guild/Weebot into it's own file
+ *
+ * @author Jonathan Augustine
+ * @since 1.0
  */
 data class Dao(var initTime: String = NOW_FILE) {
 
@@ -62,7 +70,7 @@ data class Dao(var initTime: String = NOW_FILE) {
     /** All Weebots currently in circulation, mapped to their Guild's ID  */
     val WEEBOTS = ConcurrentHashMap<Long, Weebot>()
 
-    private val PREMIUM_USERS = ConcurrentHashMap<Long, PremiumUser>()
+    val PREMIUM_USERS = ConcurrentHashMap<Long, PremiumUser>()
 
     /** Build an empty `Database`. */
     init {

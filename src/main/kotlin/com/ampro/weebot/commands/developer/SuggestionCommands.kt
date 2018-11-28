@@ -4,9 +4,11 @@
 
 package com.ampro.weebot.commands.developer
 
-import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.CAT_DEV
+import com.ampro.weebot.commands.deleteWithResponse
 import com.ampro.weebot.commands.developer.Suggestion.State
 import com.ampro.weebot.commands.developer.Suggestion.State.UNREVIEWED
+import com.ampro.weebot.commands.splitArgs
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.BOT_DEV_CHAT
 import com.ampro.weebot.database.constants.strdEmbedBuilder
@@ -31,7 +33,7 @@ class CmdSendSuggestion : Command() {
                 " right from Discord!"
         arguments = "<Your Suggestion>"
         guildOnly = false
-        cooldown = 60
+        cooldown = 15
         children = arrayOf(CmdDevSuggestions())
         category = CAT_DEV
     }
@@ -75,6 +77,7 @@ class CmdDevSuggestions : Command() {
         arguments = "sugg dev <args...>\n_ _ see [pageNum]\n_ _ rem <suggNum>\n_ _ state <suggNum> <newState>"
         guildOnly = false
         ownerCommand = true
+        cooldown = 0
     }
 
     override fun isAllowed(channel: TextChannel?): Boolean {
@@ -88,25 +91,20 @@ class CmdDevSuggestions : Command() {
      * @param event The command event
      */
     fun sendSuggestions(page: Int = 0, event: CommandEvent) {
-        val pagenum = (page - 1) * PAGE_LENGTH //TODO
-
         val e = strdEmbedBuilder.setTitle("Weebot Suggestions")
             .setDescription("A list of all user suggestions submitted.")
 
-        //For each User's suggestion list, make a field
-        DAO.suggestions.forEachIndexed { i, sugg ->
-            val s = StringBuilder()
+        val s = StringBuilder()
+        for (i in (page - 1) * PAGE_LENGTH until DAO.suggestions.size) {
+            val sugg = DAO.suggestions[i]
             s.append("${i + 1}) ")
                 .append(sugg.submitTime.format(standardDateTimeFormatter))
                 .append(" | **${sugg.state}** |: $sugg\n")
-            e.addField("Suggestions", s.toString(), false)
         }
+        e.addField("Suggestions:", s.toString(), false)
 
-        if (event.channel.idLong == BOT_DEV_CHAT) {
-            event.reply(e.build())
-        } else {
-            event.replyInDm(e.build())
-        }
+        if (event.channel.idLong == BOT_DEV_CHAT) { event.reply(e.build()) }
+        else { event.replyInDm(e.build()) }
     }
 
     /**
@@ -126,13 +124,14 @@ class CmdDevSuggestions : Command() {
 
         when (args[0].toLowerCase()) {
             "see" -> {
-                val pn = try {
-                    args[1].toInt()
-                } catch (e: NumberFormatException) {
+                val pn = try { args[1].toInt() }
+                catch (e: NumberFormatException) {
                     event.deleteWithResponse("Invalid page number.")
                     return
-                } catch (e: IndexOutOfBoundsException) {
-                    1
+                } catch (e: IndexOutOfBoundsException) { 1 }
+                if (pn > DAO.suggestions.size) {
+                    event.deleteWithResponse("Invalid page number.")
+                    return
                 }
                 sendSuggestions(pn, event)
                 return

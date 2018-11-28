@@ -5,7 +5,10 @@
 package com.ampro.weebot.commands
 
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 
 /** @return the string arguments of the message split into a [List] */
 fun CommandEvent.splitArgs(): List<String> = this.args.split(" ")

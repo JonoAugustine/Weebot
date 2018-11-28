@@ -71,7 +71,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
      *************************************************/
 
     /** The [GuildSettingsProvider] for the Weebot */
-    val settings = WeebotSettings(guildID)
+    val settings: WeebotSettings = WeebotSettings(guildID)
 
     /*************************************************
      *               State & User Data               *

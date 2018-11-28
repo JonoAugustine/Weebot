@@ -6,15 +6,21 @@ package com.ampro.weebot.main
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.*
-import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.Dao
+import com.ampro.weebot.database.constants.BOT_DEV_CHAT
+import com.ampro.weebot.database.constants.DEV_IDS
+import com.ampro.weebot.database.constants.jdaDevShardLogIn
+import com.ampro.weebot.database.loadDao
 import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import kotlinx.coroutines.asCoroutineDispatcher
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.Game
+import net.dv8tion.jda.core.entities.SelfUser
+import net.dv8tion.jda.core.entities.User
 import java.util.concurrent.Executors
 import javax.security.auth.login.LoginException
 import kotlin.system.measureTimeMillis
@@ -174,7 +180,7 @@ private fun startSaveTimer(min: Double) {
 
 /** Begin the shutdown sequence. Backup and save database.  */
 fun shutdown(user: User) {
-    MLOG.elog("Shutdown signal received from [${user.name} (${user.id}).")
+    MLOG.elog("Shutdown signal received from ${user.name} (${user.id}).")
     MLOG.elog("\tClearing registered event listeners...")
 
     MLOG.elog("\tStopping save timer thread...")
