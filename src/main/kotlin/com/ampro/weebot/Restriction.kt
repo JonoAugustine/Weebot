@@ -4,7 +4,7 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.main.constants.strdEmbedBuilder
+import com.ampro.weebot.database.constants.strdEmbedBuilder
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.entities.*
 import java.util.*

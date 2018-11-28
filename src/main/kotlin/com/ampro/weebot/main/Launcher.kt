@@ -7,7 +7,7 @@ package com.ampro.weebot.main
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.database.*
-import com.ampro.weebot.main.constants.*
+import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter

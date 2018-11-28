@@ -2,7 +2,7 @@
  * Copyright Aquatic Mastery Productions (c) 2018.
  */
 
-package com.ampro.weebot.main.constants
+package com.ampro.weebot.database.constants
 
 /** The bot-dev chat in the NL Discord 439522471369244683*/
 const val BOT_DEV_CHAT = 439522471369244683

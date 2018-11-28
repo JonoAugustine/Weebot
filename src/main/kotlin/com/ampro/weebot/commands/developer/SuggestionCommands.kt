@@ -8,8 +8,8 @@ import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.developer.Suggestion.State
 import com.ampro.weebot.commands.developer.Suggestion.State.UNREVIEWED
 import com.ampro.weebot.database.DAO
-import com.ampro.weebot.main.constants.BOT_DEV_CHAT
-import com.ampro.weebot.main.constants.strdEmbedBuilder
+import com.ampro.weebot.database.constants.BOT_DEV_CHAT
+import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.util.standardDateTimeFormatter
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent

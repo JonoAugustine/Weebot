@@ -2,11 +2,10 @@
  * Copyright Aquatic Mastery Productions (c) 2018.
  */
 
-package com.ampro.weebot.main.constants
+package com.ampro.weebot.database.constants
 
 import com.ampro.weebot.main.MLOG
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
-import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.*
 import net.dv8tion.jda.core.entities.Game
 import javax.security.auth.login.LoginException

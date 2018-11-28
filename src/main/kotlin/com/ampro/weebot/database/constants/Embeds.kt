@@ -1,4 +1,4 @@
-package com.ampro.weebot.main.constants
+package com.ampro.weebot.database.constants
 
 import net.dv8tion.jda.core.EmbedBuilder
 import java.awt.Color

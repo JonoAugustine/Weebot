@@ -7,7 +7,7 @@ package com.ampro.weebot.commands.moderation
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.*
-import com.ampro.weebot.main.constants.strdEmbedBuilder
+import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission

@@ -7,7 +7,7 @@ package com.ampro.weebot.commands
 import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.commands.moderation.CmdVoiceChannelRole
 import com.ampro.weebot.main.WAITER
-import com.ampro.weebot.main.constants.STD_GREEN
+import com.ampro.weebot.database.constants.STD_GREEN
 
 
 /* *******************************

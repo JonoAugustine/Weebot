@@ -8,7 +8,7 @@ import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.developer.Suggestion
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.MLOG
-import com.ampro.weebot.main.constants.DEV_IDS
+import com.ampro.weebot.database.constants.DEV_IDS
 import com.ampro.weebot.util.*
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
