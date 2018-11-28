@@ -49,6 +49,21 @@ fun getUser(id: Long): User? = JDA_SHARD_MNGR.getUserById(id)
 fun getWeebot(guildID: Long) = DAO.WEEBOTS[guildID]
 
 /**
+ * A class to track the bot's usage
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+data class Statistics(val initTime: String = NOW_FILE) {
+
+    data class CommandUsage(val cmd: String) {
+
+    }
+
+    val commandUsage: ConcurrentHashMap<String, CommandUsage> = ConcurrentHashMap()
+}
+
+/**
  * A database for storing all the information about the Weebot program
  * between downtime.
  *
@@ -248,7 +263,6 @@ fun loadDao(): Dao? {
     return if (out === bk) out else if (bk == null) out else bk
 
 }
-
 
 /**
  * Attempt to loadDao the backup file. If any [Gson] exceptions are thrown

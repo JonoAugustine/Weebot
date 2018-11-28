@@ -13,6 +13,10 @@ import kotlinx.coroutines.launch
 /** @return the string arguments of the message split into a [List] */
 fun CommandEvent.splitArgs(): List<String> = this.args.split(" ")
 
+/** @return The string used to invoke this command (i.e. the first string of the message */
+fun CommandEvent.getInvocation(): String = this.message.contentStripped
+    .removePrefix("w!").removePrefix("\\").split(" ")[0]
+
 /**
  * Send a response to a [CommandEvent] and then delete both messages.
  *

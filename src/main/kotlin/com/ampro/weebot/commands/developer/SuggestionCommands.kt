@@ -12,7 +12,7 @@ import com.ampro.weebot.commands.splitArgs
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.BOT_DEV_CHAT
 import com.ampro.weebot.database.constants.strdEmbedBuilder
-import com.ampro.weebot.util.standardDateTimeFormatter
+import com.ampro.weebot.util.DD_MM_YYYY_HH_MM
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.TextChannel
@@ -28,7 +28,7 @@ import java.time.OffsetDateTime
 class CmdSendSuggestion : Command() {
     init {
         name = "suggest"
-        aliases = arrayOf("suggestion", "sugg")
+        aliases = arrayOf("suggestion", "sugg", "suggest")
         help = "Submit an anonymous suggestion to the Weebot developers" +
                 " right from Discord!"
         arguments = "<Your Suggestion>"
@@ -95,10 +95,10 @@ class CmdDevSuggestions : Command() {
             .setDescription("A list of all user suggestions submitted.")
 
         val s = StringBuilder()
-        for (i in (page - 1) * PAGE_LENGTH until DAO.suggestions.size) {
+        for (i in page * PAGE_LENGTH until DAO.suggestions.size) {
             val sugg = DAO.suggestions[i]
             s.append("${i + 1}) ")
-                .append(sugg.submitTime.format(standardDateTimeFormatter))
+                .append(sugg.submitTime.format(DD_MM_YYYY_HH_MM))
                 .append(" | **${sugg.state}** |: $sugg\n")
         }
         e.addField("Suggestions:", s.toString(), false)
@@ -124,13 +124,13 @@ class CmdDevSuggestions : Command() {
 
         when (args[0].toLowerCase()) {
             "see" -> {
-                val pn = try { args[1].toInt() }
+                val pn = try { args[1].toInt() - 1 }
                 catch (e: NumberFormatException) {
                     event.deleteWithResponse("Invalid page number.")
                     return
-                } catch (e: IndexOutOfBoundsException) { 1 }
-                if (pn > DAO.suggestions.size) {
-                    event.deleteWithResponse("Invalid page number.")
+                } catch (e: IndexOutOfBoundsException) { 0 }
+                if (pn * PAGE_LENGTH > DAO.suggestions.size) {
+                    event.deleteWithResponse("There are only ${DAO.suggestions.size} pages")
                     return
                 }
                 sendSuggestions(pn, event)

@@ -4,11 +4,11 @@
 package com.ampro.weebot.commands.developer
 
 import com.ampro.weebot.commands.CAT_DEV
+import com.ampro.weebot.commands.getInvocation
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.doc.standard.CommandInfo
 import com.jagrosh.jdautilities.examples.doc.Author
-
 import java.time.temporal.ChronoUnit
 
 /**
@@ -27,11 +27,11 @@ class PingCommand : Command() {
     }
 
     override fun execute(event: CommandEvent) {
-        event.reply("Ping: ...") { m ->
+        val r = if (event.getInvocation().toLowerCase() == "pong") "Ping" else "Pong"
+        event.reply("$r: ...") { m ->
             val ping = event.message.creationTime.until(m.creationTime, ChronoUnit.MILLIS)
-            m.editMessage("Pong! :ping_pong: Ping: " + ping + "ms | Websocket: " +
-                    event.jda.ping + "ms")
-                .queue()
+            m.editMessage("$r! :ping_pong: Ping: " + ping + "ms | Websocket: "
+                    + event.jda.ping + "ms").queue()
         }
     }
 

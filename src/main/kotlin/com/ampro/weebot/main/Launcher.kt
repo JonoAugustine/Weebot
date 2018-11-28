@@ -70,7 +70,6 @@ fun main(args: Array<String>) = run {
 
     JDA_SHARD_MNGR = jdaDevShardLogIn().build()
 
-
     setUpDatabase()
 
     val cmdClientBuilder = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
@@ -83,10 +82,9 @@ fun main(args: Array<String>) = run {
     JDA_SHARD_MNGR.addEventListener(cmdClientBuilder.build())
 
     MLOG.slog("Shard connected! ${measureTimeMillis {
-        Thread.sleep(1000)
         while (JDA_SHARD_MNGR.shards[0].status != JDA.Status.CONNECTED) {
             MLOG.slog("Waiting for shard to connect...")
-            Thread.sleep(5 * 1000)
+            Thread.sleep(500)
         }
     } / 1_000} seconds")
 
@@ -121,7 +119,7 @@ private fun setUpDatabase() {
         DAO = tdao
     } else {
         MLOG.slog("\tDatabase located. Updating registered Guilds.")
-        DAO = Dao()
+        DAO = tdao
         //GLOBAL_WEEBOT = DAO.GLOBAL_WEEBOT
         updateGuilds()
     }
