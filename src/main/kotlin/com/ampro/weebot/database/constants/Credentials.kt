@@ -14,6 +14,9 @@ import javax.security.auth.login.LoginException
 
 val LINK_INVITEBOT = "https://discordapp.com/api/oauth2/authorize?client_id=437851896263213056&permissions=500296919&scope=bot"
 
+val LINK_INVITE_TESTBOT = "https://discordapp" +
+        ".com/oauth2/authorize?client_id=444323732010303488&permissions=8&scope=bot"
+
 private const val TOKEN_WBT =
         "NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA.Etf9Q9wuk1YCUnUox0IbIon1dUk"
 private const val TOKEN_TEST =

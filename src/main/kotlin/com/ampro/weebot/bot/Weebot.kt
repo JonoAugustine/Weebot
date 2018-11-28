@@ -5,6 +5,7 @@
 package com.ampro.weebot.bot
 
 import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.commands.developer.TrackerInitPassive
 import com.ampro.weebot.database.getGuild
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import net.dv8tion.jda.core.entities.Guild
@@ -84,6 +85,14 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     /** [IPassive] objects, cleared on exit  */
     @get:Synchronized
     val passives: ArrayList<IPassive> = ArrayList()
+
+    /*************************************************
+        *               INIT                       *
+     *************************************************/
+
+    init {
+        passives.add(TrackerInitPassive())
+    }
 
     fun feedPassives(event: Event) = passives.forEach{ it.accept(this, event) }
 

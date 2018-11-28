@@ -9,6 +9,7 @@ import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebot
 import net.dv8tion.jda.core.entities.MessageEmbed
+import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
@@ -34,7 +35,10 @@ class EventDispatcher : ListenerAdapter() {
         val newBot = Weebot(event.guild)
         DAO.addBot(newBot)
 
-        val c = event.guild.systemChannel ?: event.guild.defaultChannel
+        val c: TextChannel = event.guild.systemChannel
+                ?: event.guild.defaultChannel
+                ?: return //If there isnt a default channel to send to just wait till
+                          //The first usage of the bot TODO
 
         val desc = "Thank you for adding **Weebot** to your server! You can use" +
                 " ``w!help`` or ``\\help`` to get help with using any of my shiny features."
@@ -46,12 +50,13 @@ class EventDispatcher : ListenerAdapter() {
                         "turned off by default. *Thank you for your support!*",
                 false)
 
-        c?.sendMessage(strdEmbedBuilder
+        c.sendMessage(strdEmbedBuilder
             .setTitle("***Kicks in door*** The Weebot has arrived!")
-            .setDescription(desc).addField(gdpr).build())?.queue()
+            .setDescription(desc).addField(gdpr).build()).queue()
     }
 
-    override fun onGuildLeave(event: GuildLeaveEvent?) {
+    override fun onGuildLeave(event: GuildLeaveEvent) {
+        DAO.removeBot(event.guild.idLong)
         TODO()
     }
 

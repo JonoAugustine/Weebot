@@ -8,7 +8,9 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.commons.JDAUtilitiesInfo
 import com.jagrosh.jdautilities.doc.standard.CommandInfo
 import com.jagrosh.jdautilities.examples.doc.Author
-import net.dv8tion.jda.core.*
+import net.dv8tion.jda.core.EmbedBuilder
+import net.dv8tion.jda.core.JDAInfo
+import net.dv8tion.jda.core.Permission
 import org.slf4j.LoggerFactory
 import java.awt.Color
 
@@ -18,8 +20,8 @@ import java.awt.Color
  */
 @CommandInfo(name = arrayOf("About"), description = "Gets information about the bot.")
 @Author("John Grosh (jagrosh)")
-class AboutCommand(private val color: Color, private val description: String,
-                   private val features: Array<String>, vararg perms: Permission) :
+class CmdAbout(private val color: Color, private val description: String,
+               private val features: Array<String>, vararg perms: Permission) :
         Command() {
     private var IS_AUTHOR = true
     private var REPLACEMENT_ICON = "+"

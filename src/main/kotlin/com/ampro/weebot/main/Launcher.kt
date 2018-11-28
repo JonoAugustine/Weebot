@@ -60,7 +60,6 @@ fun main(args: Array<String>) = run {
     MLOG = FileLogger("Launcher $NOW_FILE")
     slog("...DONE\n\n")
 
-
     //Debug
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace
@@ -77,7 +76,8 @@ fun main(args: Array<String>) = run {
         .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }.setPrefix("\\")
         .setAlternativePrefix("w!")
         .setGame(Game.of(Game.GameType.LISTENING, "@Weebot help"))
-        .addCommands(CMD_SHUTDOWN, COM_PING, COM_GUILDLIST, CMD_ABOUT, CMD_SUGG, COM_VCR)
+        .addCommands(CMD_SHUTDOWN, CDM_PING, COM_GUILDLIST, CMD_ABOUT, CMD_SUGG,
+                CMD_INVITEBOT, CDM_VCR)
 
     JDA_SHARD_MNGR.addEventListener(cmdClientBuilder.build())
 
