@@ -20,7 +20,7 @@ import java.util.concurrent.TimeUnit
 import java.util.function.Consumer
 
 /**
- *
+ * TODO Customize
  * @author John Grosh (jagrosh)
  */
 @CommandInfo(name = arrayOf("Guildlist"),
@@ -37,6 +37,7 @@ class GuildlistCommand(waiter: EventWaiter) : Command() {
 
     init {
         this.name = "guildlist"
+        aliases = arrayOf("listguilds")
         this.help = "shows the list of guilds the bot is on"
         this.arguments = "[pagenum]"
         this.botPermissions = arrayOf(Permission.MESSAGE_EMBED_LINKS,

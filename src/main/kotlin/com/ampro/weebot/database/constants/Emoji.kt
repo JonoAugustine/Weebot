@@ -6,7 +6,7 @@ package com.ampro.weebot.database.constants
  * @author Jonathan Augustine
  * @since 2.0
  */
-enum class Emoji constructor(val codePoint: String) {
+enum class Emoji constructor(val unicode: String) {
 
     A("\uD83C\uDD70"), Ab("\uD83C\uDD8E"), Abc("\uD83D\uDD24"), Abcd("\uD83D\uDD21"),
     Accept("\uD83C\uDE51"), AerialTramway("\uD83D\uDEA1"), Airplane("\u2708"),
@@ -305,5 +305,5 @@ enum class Emoji constructor(val codePoint: String) {
     YellowHeart("\uD83D\uDC9B"), Yen("\uD83D\uDCB4"), Yum("\uD83D\uDE0B"), Zap("\u26A1"),
     Zero("\u0030\u20E3"), Zzz("\uD83D\uDCA4");
 
-    override fun toString() = codePoint
+    override fun toString() = unicode
 }

@@ -27,7 +27,7 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
         get() { return getGuild(guildID)?.selfMember?.nickname ?: "Weebot" }
 
     /** Guild's command string to call the bot.*/
-    var prefixs = mutableListOf<String>("\\")
+    var prefixs = mutableListOf<String>("\\", "w!")
 
     /** Whether the bot is able to use explicit language  */
     var explicit: Boolean = false
@@ -84,6 +84,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     /** [IPassive] objects, cleared on exit  */
     @get:Synchronized
+    @Transient
     val passives: ArrayList<IPassive> = ArrayList()
 
     /*************************************************

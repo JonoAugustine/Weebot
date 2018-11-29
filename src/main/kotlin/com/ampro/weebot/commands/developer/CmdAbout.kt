@@ -15,7 +15,7 @@ import org.slf4j.LoggerFactory
 import java.awt.Color
 
 /**
- *
+ * TODO Customize
  * @author John Grosh (jagrosh)
  */
 @CommandInfo(name = arrayOf("About"), description = "Gets information about the bot.")

@@ -18,6 +18,8 @@ import net.dv8tion.jda.core.events.guild.GuildJoinEvent
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent
+import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 
 /**
@@ -47,10 +49,11 @@ class EventDispatcher : ListenerAdapter() {
         val desc = "Thank you for adding **Weebot** to your server! You can use" +
                 " ``w!help`` or ``\\help`` to get help with using any of my shiny features."
         val gdpr = MessageEmbed.Field("Enable Tracking?",
-                "Would you like to help Weebot's development by allowing your" +
-                        "Weebot to send anonymous usage stats back to our HQ? All data " +
+                "Would you like to help Weebot's development by allowing your " +
+                        "Weebot to send anonymous usage stats back to our HQ?" +
+                        "\nAll data " +
                         "is completely anonymous and cannot be tracked back to your " +
-                        "server. This feature can be turned off at any point and is " +
+                        "server.\nThis feature can be turned off at any point and is " +
                         "turned off by default.\n(React with a check to accept " +
                         "or an cross (X) to keep it off. or type ``w!skynet on/off``)" +
                         "\n*Thank you for your support!*",
@@ -66,25 +69,33 @@ class EventDispatcher : ListenerAdapter() {
             }
     }
 
-    override fun onGenericEvent(event: Event) {
-        DAO.WEEBOTS.forEach { _, bot -> bot.feedPassives(event) }
-    }
-
     override fun onGuildLeave(event: GuildLeaveEvent) {
         DAO.removeBot(event.guild.idLong)
         //TODO other on-leave actions
     }
 
-    override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
-        if (!event.member.user.isBot) {
-            getWeebot(event.guild.idLong)?.feedPassives(event)
-        }
+    /* ************************
+     *          Messages      *
+     ***************************/
+
+    override fun onGenericGuildMessageReaction(event: GenericGuildMessageReactionEvent) {
+        if (event.user.isBot) return
+        getWeebot(event.guild.idLong)?.feedPassives(event)
     }
 
+    override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
+        if (event.member.user.isBot) return
+        getWeebot(event.guild.idLong)?.feedPassives(event)
+
+    }
+
+    /* ************************
+     *          Voice          *
+     ***************************/
+
     override fun onGuildVoiceJoin(event: GuildVoiceJoinEvent) {
-        if (!event.member.user.isBot) {
-            getWeebot(event.guild.idLong)?.feedPassives(event)
-        }
+        if (event.member.user.isBot) return
+        getWeebot(event.guild.idLong)?.feedPassives(event)
     }
 
 }
