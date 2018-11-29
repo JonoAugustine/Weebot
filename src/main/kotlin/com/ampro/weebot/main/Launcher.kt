@@ -12,6 +12,7 @@ import com.ampro.weebot.database.constants.BOT_DEV_CHAT
 import com.ampro.weebot.database.constants.DEV_IDS
 import com.ampro.weebot.database.constants.jdaDevShardLogIn
 import com.ampro.weebot.database.loadDao
+import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
@@ -76,10 +77,13 @@ fun main(args: Array<String>) = run {
         .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }.setPrefix("\\")
         .setAlternativePrefix("w!")
         .setGame(Game.of(Game.GameType.LISTENING, "@Weebot help"))
-        .addCommands(CMD_SHUTDOWN, CDM_PING, COM_GUILDLIST, CMD_ABOUT, CMD_SUGG,
-                CMD_INVITEBOT, CDM_VCR)
+        .addCommands(CMD_SHUTDOWN, CMD_PING, CMD_GUILDLIST, CMD_ABOUT, CMD_SUGG,
+                CMD_INVITEBOT, CMD_VCR)
 
-    JDA_SHARD_MNGR.addEventListener(cmdClientBuilder.build())
+    JDA_SHARD_MNGR.apply {
+        addEventListener(cmdClientBuilder.build())
+        addEventListener(EventDispatcher())
+    }
 
     MLOG.slog("Shard connected! ${measureTimeMillis {
         while (JDA_SHARD_MNGR.shards[0].status != JDA.Status.CONNECTED) {

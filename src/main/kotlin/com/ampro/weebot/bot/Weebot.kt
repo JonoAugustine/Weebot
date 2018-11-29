@@ -91,9 +91,12 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
      *************************************************/
 
     init {
-        passives.add(TrackerInitPassive())
+
     }
 
+    /**
+     * Takes in an event and distributes it to the bot's [IPassive]s
+     */
     fun feedPassives(event: Event) = passives.forEach{ it.accept(this, event) }
 
     /**

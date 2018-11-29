@@ -1,5 +1,6 @@
 package com.ampro.weebot.util
 
+import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.main.MLOG
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonSyntaxException
@@ -23,8 +24,8 @@ val DAO_BKBK = File(DIR_TEMP, "dbstemp.wbot")
 
 val GSON = GsonBuilder().enableComplexMapKeySerialization()
     .setExclusionStrategies().setPrettyPrinting()
-    //.registerTypeAdapter(IPassive::class.java, InterfaceAdapter<Any>())
-    //.registerTypeAdapter(Class::class.java,CommandClassAdapter())
+    .registerTypeAdapter(IPassive::class.java, InterfaceAdapter<Any>())
+    .registerTypeAdapter(Class::class.java,CommandClassAdapter())
     .create()
 
 

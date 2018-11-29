@@ -2,6 +2,7 @@ package com.ampro.weebot.database.constants
 
 import net.dv8tion.jda.core.EmbedBuilder
 import java.awt.Color
+import java.time.Instant
 
 
 const val weebotAvatarUrl = "https://images-ext-2.discordapp" +
@@ -18,6 +19,7 @@ val strdEmbedBuilder: EmbedBuilder
     get() = EmbedBuilder().setColor(STD_GREEN)
         .setAuthor("Weebot", null, weebotAvatarUrl)
         .setFooter("Run by Weebot", weebotAvatarUrl)
+        .setTimestamp(Instant.now())
 
 /**
  * Makes a standard format EmbedBuilder with standard color and author,

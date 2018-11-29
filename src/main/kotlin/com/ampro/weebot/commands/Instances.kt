@@ -15,8 +15,8 @@ import com.ampro.weebot.main.WAITER
  ********************************/
 
 val CMD_SHUTDOWN        = CmdShutdown()
-val COM_GUILDLIST       = GuildlistCommand(WAITER)
-val CDM_PING            = PingCommand() //Public
+val CMD_GUILDLIST       = GuildlistCommand(WAITER)
+val CMD_PING            = PingCommand() //Public
 val CMD_SUGG            = CmdSendSuggestion() //Public
 
 
@@ -29,5 +29,13 @@ val CMD_ABOUT           = CmdAbout(STD_GREEN, "Weebot is a bot", arrayOf(
         "Voice Channel Roles"
 ))
 
+/* *******************************
+ *         Admin Commands        *
+ ********************************/
 
-val CDM_VCR             = CmdVoiceChannelRole()
+val CMD_SETTINGS        = CmdSettings()
+
+val CMD_VCR             = CmdVoiceChannelRole()
+
+val commands = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING, CMD_SUGG, CMD_INVITEBOT,
+        CMD_ABOUT, CMD_SETTINGS, CMD_VCR)
