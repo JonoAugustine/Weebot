@@ -43,7 +43,7 @@ class CommandClassAdapter : JsonSerializer<Class<out Command>>,
 }
 
 
-class InterfaceAdapter<T> : JsonSerializer<T>, JsonDeserializer<T> {
+class InterfaceAdapter<T: Any> : JsonSerializer<T>, JsonDeserializer<T> {
 
     @Throws(JsonParseException::class)
     override fun deserialize(jsonElement: JsonElement, type: Type,
@@ -59,7 +59,7 @@ class InterfaceAdapter<T> : JsonSerializer<T>, JsonDeserializer<T> {
     override fun serialize(jsonElement: T, type: Type,
                            jsonSerializationContext: JsonSerializationContext): JsonElement {
         val jsonObject = JsonObject()
-        jsonObject.addProperty(CLASSNAME, jsonElement.javaClass.getName())
+        jsonObject.addProperty(CLASSNAME, jsonElement.javaClass.name)
         jsonObject.add(DATA, jsonSerializationContext.serialize(jsonElement))
         return jsonObject
     }

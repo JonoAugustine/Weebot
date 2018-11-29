@@ -72,7 +72,7 @@ data class Statistics(val initTime: String = NOW_FILE) {
  * @author Jonathan Augustine
  * @since 1.0
  */
-data class Dao(var initTime: String = NOW_FILE) {
+class Dao(var initTime: String = NOW_FILE) {
 
     /**
      * List of all suggestions given through
