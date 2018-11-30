@@ -116,7 +116,7 @@ class CmdVoiceChannelRole : Command() {
 
 
     override fun execute(event: CommandEvent) {
-
+        //TODO enable, disable, change limit state
     }
 
 }

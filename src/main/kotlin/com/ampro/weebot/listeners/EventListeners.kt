@@ -16,6 +16,7 @@ import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
@@ -96,5 +97,9 @@ class EventDispatcher : ListenerAdapter() {
         getWeebot(event.guild.idLong)?.feedPassives(event)
     }
 
+    override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
+        if (event.member.user.isBot) return
+        getWeebot(event.guild.idLong)?.feedPassives(event)
+    }
 
 }
