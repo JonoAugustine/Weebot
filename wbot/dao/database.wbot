@@ -76,15 +76,7 @@
         "trackingEnabled": false,
         "guildID": 139168039634468865
       },
-      "passives": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCRoleManager",
-          "DATA": {
-            "dead": false,
-            "limit": "PUBLIC"
-          }
-        }
-      ],
+      "passives": [],
       "guildID": 139168039634468865
     },
     "218979588716494848": {

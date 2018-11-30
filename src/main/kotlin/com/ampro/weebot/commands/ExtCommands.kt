@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 /** @return the string arguments of the message split into a [List]. Does NOT have the
  * command call in it */
-fun CommandEvent.splitArgs(): List<String> = this.args.split(" ")
+fun CommandEvent.splitArgs(): List<String> = this.args.split("\\s+")
 
 /** @return The string used to invoke this command (i.e. the first string of the message */
 fun CommandEvent.getInvocation(): String = this.message.contentStripped

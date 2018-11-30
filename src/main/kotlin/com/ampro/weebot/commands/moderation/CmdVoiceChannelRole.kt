@@ -58,9 +58,9 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
         ALL -> true
         NONE -> false
         PUBLIC -> voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
-                    .allowed.contains(Permission.VOICE_CONNECT)
-                || !voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
-                .denied.contains(Permission.VOICE_CONNECT)
+                    ?.allowed?.contains(Permission.VOICE_CONNECT) ?: true
+                || !(voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
+                ?.denied?.contains(Permission.VOICE_CONNECT) ?: true)
     }
 
     /**
@@ -177,7 +177,7 @@ class CmdVoiceChannelRole : Command() {
                     event.reply("*VoiceChannelRoles are now disabled*")
                     return
                 } else {
-                    event.reply("*VoiceChannelRoles are not enabled.**")
+                    event.reply("*VoiceChannelRoles are not enabled.*")
                     return
                 }
             }

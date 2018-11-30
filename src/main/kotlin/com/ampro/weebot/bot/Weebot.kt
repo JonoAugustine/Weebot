@@ -10,6 +10,7 @@ import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.Event
+import java.lang.IndexOutOfBoundsException
 import java.time.OffsetDateTime
 import kotlin.reflect.KClass
 
@@ -99,7 +100,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
      * @return The first [IPassive] of the given class or null
      */
     fun <C:IPassive> getPassive(klass: KClass<C>)
-            = passives.firstOrNull { klass == it.javaClass }
+            = passives.firstOrNull { klass == it::class }
 
     /**
      * Takes in an event and distributes it to the bot's [IPassive]s
