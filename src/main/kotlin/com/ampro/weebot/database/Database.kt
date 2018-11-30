@@ -50,11 +50,11 @@ fun getWeebot(guildID: Long) = DAO.WEEBOTS[guildID]
 
 /**
  * A class to track the bot's usage.
- * TODO
+ * TODO Stats
  * @author Jonathan Augustine
  * @since 2.0
  */
-data class Statistics(val initTime: String = NOW_FILE) {
+data class Statistics(val initTime: String = NOW_STR_FILE) {
 
     data class CommandUsage(val cmd: String) {
 
@@ -72,7 +72,7 @@ data class Statistics(val initTime: String = NOW_FILE) {
  * @author Jonathan Augustine
  * @since 1.0
  */
-class Dao(var initTime: String = NOW_FILE) {
+class Dao(var initTime: String = NOW_STR_FILE) {
 
     /**
      * List of all suggestions given through

@@ -5,7 +5,6 @@
 package com.ampro.weebot.util
 
 import jdk.nashorn.internal.ir.annotations.Ignore
-import kotlinx.coroutines.newSingleThreadContext
 
 import java.io.*
 
@@ -33,7 +32,7 @@ class FileLogger(val name: String, private val timeStamp: Boolean = true) {
     private val log: File = if (name.isNotEmpty()) {
         File(DIR_LOGS, "$name.flog")
     } else {
-        File(DIR_LOGS, "log_$NOW_FILE.flog")
+        File(DIR_LOGS, "log_$NOW_STR_FILE.flog")
     }
 
     /**
@@ -50,7 +49,7 @@ class FileLogger(val name: String, private val timeStamp: Boolean = true) {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        flog("$HEADDER\t $NOW\n\n\n")
+        flog("$HEADDER\t $NOW_STR\n\n\n")
     }
 
     /**
@@ -62,7 +61,7 @@ class FileLogger(val name: String, private val timeStamp: Boolean = true) {
         val out = if (any == "") {
             ""
         } else {
-            "${if (timeStamp) "[$NOW]" else ""} [$name] [info] $any"
+            "${if (timeStamp) "[$NOW_STR]" else ""} [$name] [info] $any"
         }
         println(out)
         flog(out)
@@ -77,7 +76,7 @@ class FileLogger(val name: String, private val timeStamp: Boolean = true) {
         val out = if (any == "") {
             ""
         } else {
-            "${if (timeStamp) "[$NOW]" else ""} [$name] [err] $any"
+            "${if (timeStamp) "[$NOW_STR]" else ""} [$name] [err] $any"
         }
         System.err.println(out)
         flog(out)
@@ -164,7 +163,7 @@ class InternalLog(val name: String = "flog", initSize: Int = 100_000,
      *
      * @return The created File
      */
-    fun toFile() = log.toFile("${DIR_LOGS.name}/${name}_$NOW_FILE.flog")
+    fun toFile() = log.toFile("${DIR_LOGS.name}/${name}_$NOW_STR_FILE.flog")
 
     /** Add all lines from an InternalLog into this flog */
     fun ingest(src: InternalLog) = synchronized(log) { this.log.addAll(src.log) }

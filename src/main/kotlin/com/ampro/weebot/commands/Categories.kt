@@ -4,6 +4,8 @@
 
 package com.ampro.weebot.commands
 
-import com.jagrosh.jdautilities.command.Command
+import com.jagrosh.jdautilities.command.Command.Category
 
-val CAT_DEV = Command.Category("Developer")
+val CAT_DEV     = Category("Developer")
+val CAT_PROG    = Category("Programmer")
+val CAT_FUN     = Category("Fun")

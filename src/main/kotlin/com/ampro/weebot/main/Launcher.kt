@@ -6,20 +6,17 @@ package com.ampro.weebot.main
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.Dao
-import com.ampro.weebot.database.constants.BOT_DEV_CHAT
-import com.ampro.weebot.database.constants.DEV_IDS
-import com.ampro.weebot.database.constants.jdaDevShardLogIn
-import com.ampro.weebot.database.loadDao
+import com.ampro.weebot.database.*
+import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
+import com.jagrosh.jdautilities.command.CommandClient
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import kotlinx.coroutines.asCoroutineDispatcher
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.entities.Game
+import net.dv8tion.jda.core.entities.Game.listening
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
 import java.util.concurrent.Executors
@@ -38,6 +35,8 @@ lateinit var MLOG: FileLogger
 
 /** The bot's selfuser from */
 lateinit var SELF: SelfUser
+
+lateinit var CMD_CLIENT: CommandClient
 
 //TODO lateinit var GLOBAL_WEEBOT: GlobalWeebot
 
@@ -58,7 +57,7 @@ fun main(args: Array<String>) = run {
     }
     slog("\t...DONE")
     slog("Initializing Main Logger")
-    MLOG = FileLogger("Launcher $NOW_FILE")
+    MLOG = FileLogger("Launcher $NOW_STR_FILE")
     slog("...DONE\n\n")
 
     //Debug
@@ -72,16 +71,17 @@ fun main(args: Array<String>) = run {
 
     setUpDatabase()
 
-    val cmdClientBuilder = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
+    CMD_CLIENT = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
         .setCoOwnerIds(DEV_IDS[1].toString())
-        .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }.setPrefix("\\")
-        .setAlternativePrefix("w!")
-        .setGame(Game.of(Game.GameType.LISTENING, "@Weebot help"))
+        .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }
+        .setPrefix("\\").setAlternativePrefix("w!")
+        .setGame(listening("@Weebot help"))
         .addCommands(CMD_SHUTDOWN, CMD_PING, CMD_GUILDLIST, CMD_ABOUT, CMD_SUGG,
-                CMD_INVITEBOT, CMD_VCR)
+                CMD_INVITEBOT, CMD_REGEX, CMD_VCR)
+        .build()
 
     JDA_SHARD_MNGR.apply {
-        addEventListener(cmdClientBuilder.build())
+        addEventListener(CMD_CLIENT)
         addEventListener(EventDispatcher())
     }
 

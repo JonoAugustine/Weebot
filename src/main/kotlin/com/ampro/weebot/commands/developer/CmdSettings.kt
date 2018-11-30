@@ -2,19 +2,16 @@ package com.ampro.weebot.commands.developer
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.database.constants.Emoji
 import com.ampro.weebot.database.constants.Emoji.*
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebot
-import com.ampro.weebot.hasPerm
-import com.ampro.weebot.util.slog
+import com.ampro.weebot.extensions.hasPerm
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GenericGuildMessageEvent
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent
 
 

@@ -84,7 +84,6 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     /** [IPassive] objects, cleared on exit  */
     @get:Synchronized
-    @Transient
     val passives: ArrayList<IPassive> = ArrayList()
 
     /*************************************************

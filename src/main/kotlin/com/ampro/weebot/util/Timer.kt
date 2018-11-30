@@ -7,18 +7,20 @@ package com.ampro.weebot.util
  * @since 3.0
  */
 
-import java.time.LocalDateTime
+import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
 val DD_MM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
 val DD_MM_YYYY_HH_MM    = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
 
+val NOW = OffsetDateTime.now()
+
 /** @return The current local date and time. dd-MM-yyyy HH:mm:ss */
-val NOW: String get() = LocalDateTime.now().format(
+val NOW_STR: String get() = OffsetDateTime.now().format(
         DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
 
 /** @return The current local date and time. dd-MM-yyyy HH-mm-ss */
-val NOW_FILE: String get() = NOW.replace(":", "-")
+val NOW_STR_FILE: String get() = NOW_STR.replace(":", "-")
 
 /**
  * A Timer object contains a start-time (millisec) that is defined upon creation.

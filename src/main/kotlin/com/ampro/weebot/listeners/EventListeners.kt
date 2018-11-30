@@ -13,13 +13,11 @@ import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebot
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.entities.TextChannel
-import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent
-import net.dv8tion.jda.core.events.message.react.GenericMessageReactionEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 
 /**
@@ -97,5 +95,6 @@ class EventDispatcher : ListenerAdapter() {
         if (event.member.user.isBot) return
         getWeebot(event.guild.idLong)?.feedPassives(event)
     }
+
 
 }

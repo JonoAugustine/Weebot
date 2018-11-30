@@ -6,6 +6,7 @@ package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.commands.moderation.CmdVoiceChannelRole
+import com.ampro.weebot.commands.progammer.CmdRegexTest
 import com.ampro.weebot.database.constants.STD_GREEN
 import com.ampro.weebot.main.WAITER
 
@@ -34,6 +35,14 @@ val CMD_ABOUT           = CmdAbout(STD_GREEN, "Weebot is a bot", arrayOf(
  ********************************/
 
 val CMD_SETTINGS        = CmdSettings()
+
+
+/* *******************************
+ *        Programmer Stuff       *
+ *********************************/
+
+val CMD_REGEX           = CmdRegexTest()
+
 
 val CMD_VCR             = CmdVoiceChannelRole()
 
