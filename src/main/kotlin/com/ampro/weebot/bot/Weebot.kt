@@ -6,12 +6,16 @@ package com.ampro.weebot.bot
 
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.getGuild
+import com.ampro.weebot.main.GLOBAL_WEEBOT
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.Event
-import java.lang.IndexOutOfBoundsException
 import java.time.OffsetDateTime
+import java.util.concurrent.ConcurrentHashMap
 import kotlin.reflect.KClass
 
 /**
@@ -107,7 +111,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
      *
      * @param event The event to distribute
      */
-    fun feedPassives(event: Event) = passives.forEach{ it.accept(this, event) }
+    open fun feedPassives(event: Event) = passives.forEach{ it.accept(this, event) }
 
     /**
      * Any startup settings or states that must be reloaded before launch.
@@ -119,4 +123,31 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
         TODO("not implemented")
     }
 
+}
+
+
+/**
+ * TODO Comments
+ */
+class GlobalWeebot : Weebot(-1L) {
+    /** A list of user IDs that have enabled personal tracking */
+    val trackedUsers = ArrayList<Long>(1000)
+
+    private val userPassives = ConcurrentHashMap<Long, MutableList<IPassive>>()
+
+    /**
+     * @return The list of [IPassive]s linked to this user. If one does not exist,
+     *          it is created, added to the map and returned
+     */
+    fun getUesrPassiveList(user: User) = userPassives[user.idLong] ?: kotlin.run {
+        val list = ArrayList<IPassive>(10)
+        userPassives[user.idLong] = list
+        list
+    }
+
+    override fun feedPassives(event: Event) {
+        userPassives.values.forEach {
+            GlobalScope.launch { it.forEach { it.accept(GLOBAL_WEEBOT, event) } }
+        }
+    }
 }

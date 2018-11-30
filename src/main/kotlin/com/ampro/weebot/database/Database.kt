@@ -5,19 +5,23 @@
 package com.ampro.weebot.database
 
 import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.bot.WeebotSettings
 import com.ampro.weebot.commands.developer.Suggestion
 import com.ampro.weebot.database.constants.DEV_IDS
+import com.ampro.weebot.main.GLOBAL_WEEBOT
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.MLOG
 import com.ampro.weebot.util.*
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import com.jagrosh.jdautilities.command.Command
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.User
 import java.io.FileNotFoundException
 import java.io.FileReader
 import java.io.FileWriter
 import java.io.IOException
+import java.time.OffsetDateTime
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 
@@ -52,6 +56,10 @@ fun getWeebotOrNew(guild: Guild) = getWeebot(guild.idLong) ?: kotlin.run {
     val b = Weebot(guild); DAO.addBot(b);b
 }
 
+fun getWeebotOrNew(guildID: Long) = getWeebot(guildID) ?: kotlin.run {
+    val b = Weebot(guildID); DAO.addBot(b);b
+}
+
 /**
  * A class to track the bot's usage.
  * TODO Stats
@@ -60,11 +68,55 @@ fun getWeebotOrNew(guild: Guild) = getWeebot(guild.idLong) ?: kotlin.run {
  */
 data class Statistics(val initTime: String = NOW_STR_FILE) {
 
-    data class CommandUsage(val cmd: String) {
-
+    /**
+     * A data class to hold tracked information about the state of a Weebot.
+     *
+     * @param settings The weebot's current settings
+     * @param init The init time of the bot (for finding age)
+     * @param passivesEnabled The number of [IPassive]s enabled
+     * @param disabledCommands A list of [Command]s disabled by this bot
+     * @param guildSize The size of the host giuld
+     *
+     * @author Jonathan Augustine
+     * @since 2.0
+     */
+    class WeebotInfo(weebot: Weebot) {
+        val settings: WeebotSettings    = weebot.settings
+        val init: OffsetDateTime        = weebot.initDate
+        val guildSize: Int              = getGuild(weebot.guildID)?.members?.size ?: -1
+        val passivesEnabled: Int        = weebot.passives.size
+        val disabledCommands: List<String>  = TODO()
     }
 
-    val commandUsage: ConcurrentHashMap<String, CommandUsage> = ConcurrentHashMap()
+    /**
+     * A data class to hold tracked information about a User.
+     *
+     * @param mutualGuilds How many guilds does this user share with Weebot
+     * @param
+     *
+     * @author Jonathan Augustine
+     * @since 2.0
+     */
+    data class UserInfo(val mutualGuilds: Int)
+
+    /**
+     * A Unit of a [Command]'s usage, with information about the guild, invoking
+     * user and corresponding Weebot.
+     *
+     * @param cmd The name of the command
+     *
+     * @author Jonathan Augustine
+     * @since 2.0
+     */
+    data class CommandUsage(val cmd: String, val guildID: Long,
+                            val weebotInfo: WeebotInfo, val userInfo: UserInfo)
+
+    /**
+     * A map of Command names to their useage statistics
+     */
+    val commandUsage: ConcurrentHashMap<String, List<CommandUsage>>
+            = ConcurrentHashMap()
+
 }
 
 /**
@@ -92,9 +144,7 @@ class Dao(var initTime: String = NOW_STR_FILE) {
     val PREMIUM_USERS = ConcurrentHashMap<Long, PremiumUser>()
 
     /** Build an empty `Database`. */
-    init {
-        //TODO WEEBOTS.putIfAbsent(0L, GLOBAL_WEEBOT)
-    }
+    init { WEEBOTS.putIfAbsent(-1L, GLOBAL_WEEBOT) }
 
     /**
      * Save the Database to file in the format:

@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.main
 
+import com.ampro.weebot.bot.GlobalWeebot
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.database.DAO
@@ -42,10 +43,13 @@ lateinit var SELF: SelfUser
 
 lateinit var CMD_CLIENT: CommandClient
 
-//TODO lateinit var GLOBAL_WEEBOT: GlobalWeebot
+lateinit var GLOBAL_WEEBOT: GlobalWeebot
 
 /**
  * Put bot online, setup listeners, and get full list of servers (Guilds)
+ *
+ * TODO: https://www.twilio.com/blog/2017/05/send-and-receive-sms-messages-with-kotlin.html
+ *
  *
  * @param args
  * @throws LoginException
@@ -104,6 +108,7 @@ fun main(args: Array<String>) = run {
     MLOG.slog("Launch Complete!\n\n")
 
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!").queue()
+
 }
 
 /**
