@@ -5,13 +5,13 @@
 package com.ampro.weebot.bot
 
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.commands.developer.TrackerInitPassive
 import com.ampro.weebot.database.getGuild
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
+import kotlin.reflect.KClass
 
 /**
  * A store of settings for a Weebot. This class exists to make compliance with
@@ -95,7 +95,16 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     }
 
     /**
+     * @param klass The class of the [IPassive] wanted
+     * @return The first [IPassive] of the given class or null
+     */
+    fun <C:IPassive> getPassive(klass: KClass<C>)
+            = passives.firstOrNull { klass == it.javaClass }
+
+    /**
      * Takes in an event and distributes it to the bot's [IPassive]s
+     *
+     * @param event The event to distribute
      */
     fun feedPassives(event: Event) = passives.forEach{ it.accept(this, event) }
 

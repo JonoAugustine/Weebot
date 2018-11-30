@@ -46,6 +46,47 @@
     }
   ],
   "WEEBOTS": {
+    "139168039634468865": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 11,
+            "day": 30
+          },
+          "time": {
+            "hour": 0,
+            "minute": 42,
+            "second": 15,
+            "nano": 423000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "explicit": false,
+        "nsfw": false,
+        "enablePassives": false,
+        "trackingEnabled": false,
+        "guildID": 139168039634468865
+      },
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCRoleManager",
+          "DATA": {
+            "dead": false,
+            "limit": "PUBLIC"
+          }
+        }
+      ],
+      "guildID": 139168039634468865
+    },
     "218979588716494848": {
       "initDate": {
         "dateTime": {

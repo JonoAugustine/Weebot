@@ -6,8 +6,12 @@ package com.ampro.weebot.main
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.*
-import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.Dao
+import com.ampro.weebot.database.constants.BOT_DEV_CHAT
+import com.ampro.weebot.database.constants.DEV_IDS
+import com.ampro.weebot.database.constants.jdaDevShardLogIn
+import com.ampro.weebot.database.loadDao
 import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandClient
@@ -64,9 +68,7 @@ fun main(args: Array<String>) = run {
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace
 
-    //JDA_CLIENT = jdaLogIn()
-    //JDA_CLIENT = jdaDevLogIn()
-
+    //JDA_SHARD_MNGR = jdaShardLogIn().build()
     JDA_SHARD_MNGR = jdaDevShardLogIn().build()
 
     setUpDatabase()

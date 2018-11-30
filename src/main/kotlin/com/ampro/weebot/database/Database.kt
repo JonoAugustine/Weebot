@@ -48,6 +48,10 @@ fun getUser(id: Long): User? = JDA_SHARD_MNGR.getUserById(id)
 
 fun getWeebot(guildID: Long) = DAO.WEEBOTS[guildID]
 
+fun getWeebotOrNew(guild: Guild) = getWeebot(guild.idLong) ?: kotlin.run {
+    val b = Weebot(guild); DAO.addBot(b);b
+}
+
 /**
  * A class to track the bot's usage.
  * TODO Stats

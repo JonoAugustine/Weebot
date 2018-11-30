@@ -7,7 +7,9 @@ package com.ampro.weebot.commands.moderation
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.*
+import com.ampro.weebot.commands.splitArgs
 import com.ampro.weebot.database.constants.strdEmbedBuilder
+import com.ampro.weebot.database.getWeebotOrNew
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission
@@ -21,6 +23,7 @@ import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
  * VoiceChannel roles.
  *
  * TODO: How to regulate which channels get roles when u can't mention voicechannels
+ * TODO: Clean all roles on deletion
  *
  * @author Jonathan Augustine
  * @since 2.0
@@ -41,12 +44,17 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
     var dead = false
     override fun dead() = dead
 
+    /** TODO: Deletes all roles created for [VCRoleManager] */
+    fun clean() {
+
+    }
+
     /**
      * Check if the voice channel allows VCRoles.
      *
      * @param voiceChannel The [VoiceChannel] to check
      */
-    fun checkLimit(voiceChannel: VoiceChannel) = when (limit) {
+    fun limitSafe(voiceChannel: VoiceChannel) = when (limit) {
         ALL -> true
         NONE -> false
         PUBLIC -> voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
@@ -59,13 +67,13 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
      * When a user joins a voice channel, assign the Member a role named after
      * the VoiceChannel. If the role does not exist, it is made. When there are
      * no members in the voice channel, the role is deleted.
-     *
      */
     override fun accept(bot: Weebot, event: Event) {
         when (event) {
             is GuildVoiceJoinEvent -> {
                 val guild = event.guild
                 val channel = event.channelJoined
+                if (!limitSafe(channel)) return
                 val controller = guild.controller
                 //Check the voice channel for existing roles
                 guild.roles.forEach {
@@ -90,10 +98,14 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
             is GuildVoiceLeaveEvent -> {
                 val guild = event.guild
                 val channel = event.channelLeft
+                if (!limitSafe(channel)) return
                 val controller = guild.controller
                 guild.roles.forEach {
                     if (it.name.equals(channel.name, true)) {
                         controller.removeSingleRoleFromMember(event.member, it).queue()
+                        if (channel.members.isEmpty()) {
+                            it.delete().reason("VCRoleManager").queue()
+                        }
                         return
                     }
                 }
@@ -103,20 +115,100 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
 
 }
 
+/**
+ * A Controller Command for the passive [VCRoleManager].
+ * Can enable and change the VCRole limits
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
 class CmdVoiceChannelRole : Command() {
 
     init {
-        name = "voicechannelrole"
-        aliases = arrayOf("vcrc","vcr","vrc")
+        name        = "voicechannelrole"
+        aliases     = arrayOf("vcrc","vcr","vrc", "vcrole")
+        arguments   = "[enable/disable] [limit] or [limit]"
+        guildOnly   = true
         userPermissions = arrayOf(Permission.MANAGE_ROLES)
         botPermissions = arrayOf(Permission.MANAGE_ROLES)
-        //helpBiConsumer
     }
 
-
+    companion object {
+        val activatedEmbed
+            get() = strdEmbedBuilder
+                .setTitle("Voice Channel Roles Activated!")
+                .setDescription("""
+                |The next time someone joins a voice channel, they will
+                | be assigned a Role with the same name of the channel that can
+                | be mentioned by anyone.
+            """.trimMargin())
+                .build()
+    }
 
     override fun execute(event: CommandEvent) {
-        //TODO enable, disable, change limit state
+        val bot = getWeebotOrNew(event.guild)
+        val args = event.splitArgs()
+        if (args.isEmpty()) return
+        val vcp = bot.getPassive(VCRoleManager::class)
+        val vcRoleManager = if (vcp != null) { vcp as VCRoleManager } else { null }
+        when (args[0].toUpperCase()) {
+            "ENABLE", "ON" -> {
+                if (vcRoleManager == null) {
+                    val lim = if (args.size > 1) {
+                        try {
+                            VCRoleManager.Limit.valueOf(args[1].toUpperCase())
+                        } catch (e: Exception) {
+                            event.reply("${args[1]} is not a valid restriction. ``w!help vcrole``")
+                            return
+                        }
+                    } else { ALL }
+                    bot.passives.add(VCRoleManager(lim))
+                    event.reply(activatedEmbed)
+                    return
+                } else {
+                    event.reply("*The VoiceChannelRole is already enabled.* ``w!help vcrole``")
+                    return
+                }
+            }
+            "DISABLE", "OFF" -> {
+                if (vcRoleManager != null) {
+                    vcRoleManager.clean()
+                    bot.passives.remove(vcRoleManager)
+                    event.reply("*VoiceChannelRoles are now disabled*")
+                    return
+                } else {
+                    event.reply("*VoiceChannelRoles are not enabled.**")
+                    return
+                }
+            }
+            "SETLIMIT", "SL", "LIMIT" -> {
+                if (vcRoleManager != null) {
+                    vcRoleManager.limit = if (args.size > 1) {
+                        try {
+                            VCRoleManager.Limit.valueOf(args[1].toUpperCase())
+                        } catch (e: Exception) {
+                            event.reply("${args[1]} is not a valid restriction. ``w!help vcrole``")
+                            return
+                        }
+                    } else {
+                        //TODO
+                        return
+                    }
+                } else {
+                    //TODO
+                }
+            }
+            ALL.name -> { //TODO
+
+            }
+            NONE.name -> {//TODO
+
+            }
+            PUBLIC.name -> {//TODO
+
+            }
+        }
+
     }
 
 }
