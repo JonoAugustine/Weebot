@@ -9,3 +9,4 @@ import com.jagrosh.jdautilities.command.Command.Category
 val CAT_DEV     = Category("Developer")
 val CAT_PROG    = Category("Programmer")
 val CAT_FUN     = Category("Fun")
+val CAT_MOD     = Category("Moderator")

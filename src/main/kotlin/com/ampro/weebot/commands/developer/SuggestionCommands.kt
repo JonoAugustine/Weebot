@@ -4,11 +4,9 @@
 
 package com.ampro.weebot.commands.developer
 
-import com.ampro.weebot.commands.CAT_DEV
-import com.ampro.weebot.commands.deleteWithResponse
+import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.developer.Suggestion.State
 import com.ampro.weebot.commands.developer.Suggestion.State.UNREVIEWED
-import com.ampro.weebot.commands.splitArgs
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.BOT_DEV_CHAT
 import com.ampro.weebot.database.constants.strdEmbedBuilder
@@ -25,18 +23,13 @@ import java.time.OffsetDateTime
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdSendSuggestion : Command() {
-    init {
-        name = "suggest"
-        aliases = arrayOf("suggestion", "sugg", "suggest")
-        help = "Submit an anonymous suggestion to the Weebot developers" +
-                " right from Discord!"
-        arguments = "<Your Suggestion>"
-        guildOnly = false
-        cooldown = 15
-        children = arrayOf(CmdDevSuggestions())
-        category = CAT_DEV
-    }
+class CmdSendSuggestion : WeebotCommand("suggest", arrayOf("suggestion", "sugg"),
+    CAT_DEV, "<Your Suggestion here>",
+    "Submit an anonymous suggestion to the Weebot developers right from Discord!",
+    cooldown = 60, children = arrayOf(CmdDevSuggestions())
+){
+
+
 
     override fun execute(event: CommandEvent) {
         val sugg: String = event.args
@@ -78,6 +71,7 @@ class CmdDevSuggestions : Command() {
         guildOnly = false
         ownerCommand = true
         cooldown = 0
+        hidden = true
     }
 
     override fun isAllowed(channel: TextChannel?): Boolean {

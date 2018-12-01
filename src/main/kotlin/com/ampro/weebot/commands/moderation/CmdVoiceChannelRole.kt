@@ -5,12 +5,10 @@
 package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.*
-import com.ampro.weebot.commands.splitArgs
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebotOrNew
-import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.VoiceChannel
@@ -122,15 +120,26 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdVoiceChannelRole : Command() {
+class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
+    arrayOf("vcrc","vcr","vrc", "vcrole"), CAT_MOD, "[enable/disable] [limit] or [limit]",
+    "A manager that creates, assigns, removes, and deletes VoiceChannel roles.",
+    cooldown = 10, userPerms = arrayOf(Permission.MANAGE_ROLES),
+    botPerms = arrayOf(Permission.MANAGE_ROLES)
+) {
 
     init {
-        name        = "voicechannelrole"
-        aliases     = arrayOf("vcrc","vcr","vrc", "vcrole")
-        arguments   = "[enable/disable] [limit] or [limit]"
-        guildOnly   = true
-        userPermissions = arrayOf(Permission.MANAGE_ROLES)
-        botPermissions = arrayOf(Permission.MANAGE_ROLES)
+        helpBiConsumer = HelpBiConsumerBuilder("Voice Channel Roles")
+            .setDescription("Allow Weebot to create and automatically assign ")
+            .appendDesc("roles to anyone in a voice channel. The roles will ")
+            .appendDesc("have the same name as the channel and can be ")
+            .appendDesc("@/mentioned by anyone. You can choose to restrict ")
+            .appendDesc("which channels get roles by their publicity (all ")
+            .appendDesc("channels or only channels public to @/everyone)")
+            .addField("Arguments", "[enable/disable/on/off] [all/public]" +
+                    "\n[all/public] (if already enabled)", false)
+            .addField("Aliases",
+                    "$name, ${aliases.toString().removeSurrounding("[","]")}", false)
+            .build()
     }
 
     companion object {
@@ -139,10 +148,9 @@ class CmdVoiceChannelRole : Command() {
                 .setTitle("Voice Channel Roles Activated!")
                 .setDescription("""
                 |The next time someone joins a voice channel, they will
-                | be assigned a Role with the same name of the channel that can
-                | be mentioned by anyone.
-            """.trimMargin())
-                .build()
+                |be assigned a Role with the same name of the channel that can
+                |be mentioned by anyone.
+            """.trimMargin()).build()
     }
 
     override fun execute(event: CommandEvent) {

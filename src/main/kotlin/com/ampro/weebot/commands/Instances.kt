@@ -5,6 +5,7 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.developer.*
+import com.ampro.weebot.commands.moderation.CmdSettings
 import com.ampro.weebot.commands.moderation.CmdVoiceChannelRole
 import com.ampro.weebot.commands.progammer.CmdRegexTest
 import com.ampro.weebot.database.constants.STD_GREEN

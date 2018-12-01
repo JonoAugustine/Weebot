@@ -4,23 +4,19 @@
 
 package com.ampro.weebot.database
 
-import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.bot.WeebotSettings
+import com.ampro.weebot.bot.*
 import com.ampro.weebot.commands.developer.Suggestion
 import com.ampro.weebot.database.constants.DEV_IDS
-import com.ampro.weebot.main.GLOBAL_WEEBOT
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.MLOG
 import com.ampro.weebot.util.*
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
+import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.Command
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.User
-import java.io.FileNotFoundException
-import java.io.FileReader
-import java.io.FileWriter
-import java.io.IOException
+import java.io.*
 import java.time.OffsetDateTime
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -128,7 +124,11 @@ data class Statistics(val initTime: String = NOW_STR_FILE) {
  * @author Jonathan Augustine
  * @since 1.0
  */
-class Dao(var initTime: String = NOW_STR_FILE) {
+
+class Dao() {
+
+    @SerializedName("initTime")
+    val initTime: String = NOW_STR_FILE
 
     /**
      * List of all suggestions given through
@@ -136,7 +136,7 @@ class Dao(var initTime: String = NOW_STR_FILE) {
      */
     val suggestions = mutableListOf<Suggestion>()
 
-    //val GLOBAL_WEEBOT = GlobalWeebot()
+    val GLOBAL_WEEBOT = GlobalWeebot()
 
     /** All Weebots currently in circulation, mapped to their Guild's ID  */
     val WEEBOTS = ConcurrentHashMap<Long, Weebot>()

@@ -6,13 +6,10 @@ package com.ampro.weebot.bot
 
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.getGuild
-import com.ampro.weebot.main.GLOBAL_WEEBOT
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.dv8tion.jda.core.entities.Guild
-import net.dv8tion.jda.core.entities.TextChannel
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
@@ -146,8 +143,8 @@ class GlobalWeebot : Weebot(-1L) {
     }
 
     override fun feedPassives(event: Event) {
-        userPassives.values.forEach {
-            GlobalScope.launch { it.forEach { it.accept(GLOBAL_WEEBOT, event) } }
+        userPassives.values.forEach { it ->
+            GlobalScope.launch { it.forEach { it.accept(this@GlobalWeebot, event) } }
         }
     }
 }

@@ -5,13 +5,12 @@
 package com.ampro.weebot.listeners
 
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.developer.TrackerInitPassive
+import com.ampro.weebot.commands.moderation.TrackerInitPassive
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.Emoji.X
 import com.ampro.weebot.database.constants.Emoji.heavy_check_mark
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebot
-import com.ampro.weebot.main.GLOBAL_WEEBOT
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.Event
@@ -35,7 +34,7 @@ import net.dv8tion.jda.core.hooks.ListenerAdapter
 class EventDispatcher : ListenerAdapter() {
 
     /** Feed all events to the Global Weebot */
-    override fun onGenericEvent(event: Event) = GLOBAL_WEEBOT.feedPassives(event)
+    override fun onGenericEvent(event: Event) = DAO.GLOBAL_WEEBOT.feedPassives(event)
 
     /************************************************
      *               Generic Events                 *
@@ -95,7 +94,8 @@ class EventDispatcher : ListenerAdapter() {
     }
 
     override fun onPrivateChannelCreate(event: PrivateChannelCreateEvent) {
-        if (event.user.isBot) return
+        /*if (event.user.isBot) return
+        //TODO bugged
         val desc = "Hello there! You can use ``w!help`` or ``\\help`` to get help with using any " +
                 "of my shiny features."
         val gdpr = MessageEmbed.Field("Enable Tracking?",
@@ -116,11 +116,11 @@ class EventDispatcher : ListenerAdapter() {
                 GLOBAL_WEEBOT.getUesrPassiveList(event.user).add(TrackerInitPassive(it))
                 it.addReaction(heavy_check_mark.toString()).queue()
                 it.addReaction(X.toString()).queue()
-            }
+            }*/
     }
 
     override fun onGenericPrivateMessage(event: GenericPrivateMessageEvent) {
-        GLOBAL_WEEBOT.feedPassives(event)
+        DAO.GLOBAL_WEEBOT.feedPassives(event)
     }
 
     /* ************************

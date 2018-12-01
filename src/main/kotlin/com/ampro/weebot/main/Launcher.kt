@@ -43,8 +43,6 @@ lateinit var SELF: SelfUser
 
 lateinit var CMD_CLIENT: CommandClient
 
-lateinit var GLOBAL_WEEBOT: GlobalWeebot
-
 /**
  * Put bot online, setup listeners, and get full list of servers (Guilds)
  *
@@ -82,6 +80,26 @@ fun main(args: Array<String>) = run {
         .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }
         .setPrefix("\\").setAlternativePrefix("w!")
         .setGame(listening("@Weebot help"))
+        .setHelpConsumer { event ->
+            //TODO
+            /** Message arguments cleansed of the callsign or bot mention * /
+            //If the only argument is the command invoke
+            if (args.size == 1) {
+                //genericHelp(bot, event)
+            } else {
+                commands.forEach { c ->
+                    if (c.isCommandFor(args[1])) {
+                        val eb = c.
+                        if (eb == null) {
+                            event.privateReply(c.getHelp())
+                        } else {
+                            event.privateReply(c.getEmbedHelp())
+                        }
+                        event.deleteMessage()
+                    }
+                }
+            }
+        */}
         .addCommands(CMD_SHUTDOWN, CMD_PING, CMD_GUILDLIST, CMD_ABOUT, CMD_SUGG,
                 CMD_INVITEBOT, CMD_REGEX, CMD_VCR)
         .build()

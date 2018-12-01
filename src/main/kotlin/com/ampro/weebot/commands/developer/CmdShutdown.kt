@@ -13,6 +13,7 @@ class CmdShutdown : ShutdownCommand() {
     init {
         aliases = arrayOf("tite", "killbot", "devkill")
         category = CAT_DEV
+        hidden = true
     }
 
     override fun execute(event: CommandEvent) {
