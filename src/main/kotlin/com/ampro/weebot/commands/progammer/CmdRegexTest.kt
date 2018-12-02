@@ -5,11 +5,10 @@
 package com.ampro.weebot.commands.progammer
 
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.constants.Emoji
+import com.ampro.weebot.util.Emoji
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.MessageEmbed
-import net.dv8tion.jda.core.entities.MessageEmbed.Field
 
 /**
  * A Command that takes in a Regex string and Strings to test if it matches.

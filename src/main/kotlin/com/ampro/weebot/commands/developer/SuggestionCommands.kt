@@ -29,8 +29,6 @@ class CmdSendSuggestion : WeebotCommand("suggest", arrayOf("suggestion", "sugg")
     cooldown = 60, children = arrayOf(CmdDevSuggestions())
 ){
 
-
-
     override fun execute(event: CommandEvent) {
         val sugg: String = event.args
         if (sugg.length < 3) {

@@ -4,15 +4,10 @@
 
 package com.ampro.weebot.main
 
-import com.ampro.weebot.bot.GlobalWeebot
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.Dao
-import com.ampro.weebot.database.constants.BOT_DEV_CHAT
-import com.ampro.weebot.database.constants.DEV_IDS
-import com.ampro.weebot.database.constants.jdaDevShardLogIn
-import com.ampro.weebot.database.loadDao
+import com.ampro.weebot.database.*
+import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandClient
@@ -101,7 +96,7 @@ fun main(args: Array<String>) = run {
             }
         */}
         .addCommands(CMD_SHUTDOWN, CMD_PING, CMD_GUILDLIST, CMD_ABOUT, CMD_SUGG,
-                CMD_INVITEBOT, CMD_REGEX, CMD_VCR)
+                CMD_INVITEBOT, CMD_SETTINGS, CMD_PURGE, CMD_REGEX, CMD_VCR)
         .build()
 
     JDA_SHARD_MNGR.apply {
@@ -149,8 +144,8 @@ private fun setUpDatabase() {
     } else {
         MLOG.slog("\tDatabase located. Updating registered Guilds.")
         DAO = tdao
-        //GLOBAL_WEEBOT = DAO.GLOBAL_WEEBOT
-        updateGuilds()
+        //Update the Weebots in the database after downtime.
+        JDA_SHARD_MNGR.guilds.forEach { DAO.addBot(Weebot(it)) }
     }
     MLOG.slog("\tBacking up database.")
     DAO.backUp()
@@ -158,11 +153,6 @@ private fun setUpDatabase() {
     MLOG.slog("...DONE")
 }
 
-/**
- * Update the Weebots in the database after downtime.
- * **This is only called once on startup**
- */
-private fun updateGuilds() = JDA_SHARD_MNGR.guilds.forEach { DAO.addBot(Weebot(it)) }
 
 /**
  * Calls the update method for each Weebot to setup NickNames

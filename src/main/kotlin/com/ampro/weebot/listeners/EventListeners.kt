@@ -7,8 +7,8 @@ package com.ampro.weebot.listeners
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.moderation.TrackerInitPassive
 import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.constants.Emoji.X
-import com.ampro.weebot.database.constants.Emoji.heavy_check_mark
+import com.ampro.weebot.util.Emoji.X
+import com.ampro.weebot.util.Emoji.heavy_check_mark
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebot
 import net.dv8tion.jda.core.entities.MessageEmbed

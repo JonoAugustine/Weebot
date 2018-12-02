@@ -1,4 +1,8 @@
-package com.ampro.weebot.database.constants
+/*
+ * Copyright Aquatic Mastery Productions (c) 2018.
+ */
+
+package com.ampro.weebot.util
 
 /**
  * A list of Unicode Emoji

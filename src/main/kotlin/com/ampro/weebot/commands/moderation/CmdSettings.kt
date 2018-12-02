@@ -6,11 +6,11 @@ package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.constants.Emoji.X
-import com.ampro.weebot.database.constants.Emoji.heavy_check_mark
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebot
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.hasPerm
+import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.entities.Message
@@ -92,28 +92,35 @@ class TrackerInitPassive(val enableMessage: Message) : IPassive {
  */
 class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"),
     CAT_MOD, "[settingName] [newSetting]", "View or Change your weebot's settings",
-    guildOnly = true, children = arrayOf(
+    guildOnly = true, cooldown = 10,
+    children = arrayOf(
         CmdSetName(),
         CmdSetPrefix(),
         CmdSetExplicit(),
         CmdSetNsfw(),
         CmdSetEnablePassive(),
         CmdSetLogChannel(),
-        CmdSetTracking()),
-    cooldown = 10
+        CmdSetTracking())
+
 ) {
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Weebot Settings")
             .setDescription("View or Change your weebot's settings.")
             .addField("Available Settings:", "", false).apply {
                 this.addField(CmdSetName.normField)
-                //TODO other settings fields
+                this.addField(CmdSetPrefix.normField)
+                this.addField(CmdSetExplicit.normField)
+                this.addField(CmdSetNsfw.normField)
+                this.addField(CmdSetEnablePassive.normField)
+                this.addField(CmdSetLogChannel.normField)
+                this.addField(CmdSetTracking.normField)
             }
             .build()
     }
 
     override fun execute(event: CommandEvent) {
-        TODO("not implemented")
+        val bot = getWeebotOrNew(event.guild.idLong)
+        TODO()
     }
 }
 
@@ -137,8 +144,10 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
     "<prefix> [newSetting]", "View or Change your weebot's prefix",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(NICKNAME_MANAGE)) {
 
-    init {
-        //val normField: Field = Field()
+    companion object {
+        val normField: Field = Field("Prefix",
+            "Change your weebot's prefix\n``set prefix [prefix]``\nUp to 3 characters",
+            true)
     }
 
     override fun execute(event: CommandEvent) {
@@ -150,8 +159,10 @@ private class CmdSetExplicit : WeebotCommand("explicit", arrayOf("expl", "cuss")
     CAT_MOD, "<expl> [newSetting]", "View or Change your weebot's explicit setting",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)){
 
-    init {
-        //val normField: Field = Field()
+    companion object {
+        val normField: Field = Field("Explicit",
+            "Enable explicit language\n``set expl [on/off]``\nAliases: explicit, cuss",
+            true)
     }
 
     override fun execute(event: CommandEvent) {
@@ -163,8 +174,11 @@ private class CmdSetNsfw : WeebotCommand("nsfw", arrayOf("naughty"), CAT_MOD,
     "<nsfw> [newSetting]", "View or Change your weebot's nsfw setting",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)){
 
-    init {
-        //val normField: Field = Field()
+    companion object {
+        //TODO
+        val normField: Field = Field("NSFW", "this doesnt do anything....*yet*${Smirk
+            .unicode}",
+            true)
     }
 
     override fun execute(event: CommandEvent) {
@@ -176,8 +190,10 @@ private class CmdSetEnablePassive : WeebotCommand("passive", arrayOf("alwayson")
     CAT_MOD, "<passive> [newSetting]", "View or Change your weebot's passive settings",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)) {
 
-    init {
-        //val normField: Field = Field()
+    companion object {
+        val normField: Field = Field("Passive Actions",
+            "Enable Weebot's passive commands (custom responses, moderation, etc)\n" +
+                    "``set passive [on/off]``\nAlias: alwayson", true)
     }
 
     override fun execute(event: CommandEvent) {
@@ -190,8 +206,10 @@ private class CmdSetLogChannel : WeebotCommand("log", arrayOf("logchannel", "set
     "View or Change your weebot's logging channel", guildOnly = true, cooldown = 10,
     userPerms = arrayOf(ADMINISTRATOR)) {
 
-    init {
-        //val normField: Field = Field()
+    companion object {
+        val normField: Field = Field("Bot Logggin Channel",
+            "Set the TextChannel for me to send logs to.\n``set log [#channelMention]``",
+            true)
     }
 
     override fun execute(event: CommandEvent) {
@@ -203,8 +221,10 @@ private class CmdSetTracking : WeebotCommand("skynet", arrayOf("track", "trackin
     CAT_MOD, "<skynet> [newSetting]", "View or Change your weebot's tracking settings",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)) {
 
-    init {
-        //val normField: Field = Field()
+    companion object {
+        val normField: Field = Field("Usage Tracking",
+            "Enable anonymous usage tracking for this server's Weebot\n``set skynet " +
+                    "[on/off]``\nAliases: track, tracking", true)
     }
 
     override fun execute(event: CommandEvent) {

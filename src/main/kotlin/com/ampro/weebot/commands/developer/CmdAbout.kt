@@ -62,7 +62,8 @@ class CmdAbout(private val color: Color, private val description: String,
             event.selfUser.avatarUrl)
         val join = !(event.client.serverInvite == null || event.client.serverInvite.isEmpty())
         val inv = !oauthLink!!.isEmpty()
-        val invline = ("\n" + (if (join) "Join my server [`here`](" + event.client.serverInvite + ")" else if (inv) "Please " else "") + (if (inv) (if (join) ", or " else "") + "[`invite`](" + oauthLink + ") me to your server" else "") + "!")
+        val invline = ("\n" + (if (join) "Join my server [`here`](" + event.client.serverInvite
+                + ")" else if (inv) "Please " else "") + (if (inv) (if (join) ", or " else "") + "[`invite`](" + oauthLink + ") me to your server" else "") + "!")
         val author = if (event.jda.getUserById(
                     event.client.ownerId) == null) "<@" + event.client.ownerId + ">"
         else event.jda.getUserById(event.client.ownerId).name
