@@ -34,6 +34,11 @@ fun BufferedWriter.writeLn(line: Any) {
     this.newLine()
 }
 
+fun quickJson(any: Any): String = GSON.toJson(any)
+
+inline fun <reified T> quickFromJson(string: String): T
+        = GSON.fromJson(string, T::class.java)
+
 /**
  * Print the List to file, each index its own line.
  *

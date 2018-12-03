@@ -18,7 +18,7 @@ import java.util.function.BiConsumer
 
 /** @return the string arguments of the message split into a [List]. Does NOT have the
  * command call in it */
-fun CommandEvent.splitArgs(): List<String> = this.args.split("\\s+")
+fun CommandEvent.splitArgs(): List<String> = this.args.split("\\s+".toRegex())
 
 /** @return The string used to invoke this command (i.e. the first string of the message */
 fun CommandEvent.getInvocation(): String = this.message.contentStripped
@@ -44,7 +44,9 @@ fun CommandEvent.deleteWithResponse(reason: String, delay: Int = 10) {
 /**
  * A wrapper class for [Command] holding functions used by Weebots
  *
- * @param name
+ * @param name Name of the Command
+ * @param aliases Alternative names for the command
+ * @param
  *
  * @author Jonathan Augustine
  * @since 2.0

@@ -2,7 +2,7 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.3.0"
+    kotlin("jvm") version "1.3.10"
     application
     "com.github.johnrengelman.shadow version 1.2.4"
     "com.sedmelluq.jdaction version 1.0.2"
@@ -10,6 +10,10 @@ plugins {
 
 group = "com.ampro"
 version = "2.0"
+
+application {
+    mainClassName = "com.ampro.weebot.main.LauncherKt"
+}
 
 repositories {
     mavenCentral()
@@ -20,7 +24,7 @@ repositories {
 
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.0.1")
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:0.23.4")
+    implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.0")
     implementation(kotlin("stdlib-jdk8"))
     testCompile("junit", "junit", "4.12")
 
@@ -30,6 +34,7 @@ dependencies {
     implementation("joda-time:joda-time:2.2")
     implementation("commons-io:commons-io:2.6")
     implementation("com.google.code.gson:gson:2.8.1")
+    implementation("com.github.jkcclemens:khttp:-SNAPSHOT")
 
     //JDA
     implementation("net.dv8tion:JDA:3.8.1_437")

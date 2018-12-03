@@ -1,6 +1,6 @@
 package com.ampro.weebot.commands
 
-import com.ampro.weebot.database.constants.LINK_INVITEBOT
+import com.ampro.weebot.main.LINK_INVITEBOT
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.constants.weebotAvatarUrl
 import com.jagrosh.jdautilities.command.Command

@@ -162,7 +162,7 @@ class CmdDevSuggestions : Command() {
                     event.deleteWithResponse("Invalid suggestion id.")
                     return
                 }
-                val sugg: Suggestion = DAO.suggestions.removeAt(sn)
+                //val sugg: Suggestion = DAO.suggestions.removeAt(sn)
                 event.reply(strdEmbedBuilder.setTitle("Suggestion $sn removed").build())
             }
         }

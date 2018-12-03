@@ -2,15 +2,26 @@
  * Copyright Aquatic Mastery Productions (c) 2018.
  */
 
-package com.ampro.weebot.database.constants
+package com.ampro.weebot.main
 
-import com.ampro.weebot.main.MLOG
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.JDABuilder
 import net.dv8tion.jda.core.entities.Game
 import javax.security.auth.login.LoginException
+
+
+/* *****************
+        API Keys
+ *******************/
+
+const val API_CAT_TOKEN = "949c9e4b-02af-42a9-a38b-3b90ac927ccf" //https://thecatapi.com/
+
+
+/* *********************
+      Weebot & Tobeew
+ **********************/
 
 val LINK_INVITEBOT = "https://discordapp.com/api/oauth2/authorize?client_id=437851896263213056&permissions=500296919&scope=bot"
 

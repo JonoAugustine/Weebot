@@ -4,10 +4,10 @@
 
 package com.ampro.weebot.commands
 
+import com.ampro.weebot.commands.`fun`.CmdCatFact
 import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.commands.moderation.*
 import com.ampro.weebot.commands.progammer.CmdRegexTest
-import com.ampro.weebot.database.constants.STD_GREEN
 import com.ampro.weebot.main.WAITER
 
 
@@ -26,9 +26,7 @@ val CMD_SUGG            = CmdSendSuggestion() //Public
  ********************************/
 val CMD_INVITEBOT = CmdInviteLink()
 
-val CMD_ABOUT           = CmdAbout(STD_GREEN, "Weebot's little brother.",
-        arrayOf("Regex Testing", "Voice Channel Roles"
-))
+val CMD_ABOUT           = CmdAbout()
 
 /* *******************************
  *         Admin Commands        *
@@ -36,6 +34,7 @@ val CMD_ABOUT           = CmdAbout(STD_GREEN, "Weebot's little brother.",
 
 val CMD_SETTINGS        = CmdSettings()
 val CMD_PURGE           = CmdPurge()
+val CMD_VCR             = CmdVoiceChannelRole()
 
 /* *******************************
  *        Programmer Stuff       *
@@ -44,7 +43,12 @@ val CMD_PURGE           = CmdPurge()
 val CMD_REGEX           = CmdRegexTest()
 
 
-val CMD_VCR             = CmdVoiceChannelRole()
+/* *******************************
+ *              Fun              *
+ *********************************/
+
+val CMD_CATFACT         = CmdCatFact()
+
 
 val commands = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING, CMD_SUGG, CMD_INVITEBOT,
         CMD_ABOUT, CMD_SETTINGS, CMD_PURGE, CMD_VCR)

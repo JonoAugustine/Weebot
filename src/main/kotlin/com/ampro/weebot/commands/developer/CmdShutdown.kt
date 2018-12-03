@@ -19,6 +19,7 @@ class CmdShutdown : ShutdownCommand() {
     override fun execute(event: CommandEvent) {
         event.reactWarning()
         event.reply("Shutting down all Weebots...")
+        //TODO send text to Jono
         shutdown(event.author)
     }
 }

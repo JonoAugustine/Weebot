@@ -29,7 +29,7 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
         get() { return getGuild(guildID)?.selfMember?.nickname ?: "Weebot" }
 
     /** Guild's command string to call the bot.*/
-    var prefixs = mutableListOf<String>("\\", "w!")
+    var prefixs = mutableListOf("\\", "w!")
 
     /** Whether the bot is able to use explicit language  */
     var explicit: Boolean = false

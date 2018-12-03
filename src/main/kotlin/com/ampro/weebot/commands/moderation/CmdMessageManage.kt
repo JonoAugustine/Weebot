@@ -6,9 +6,11 @@ package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.commands.*
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.core.entities.MessageHistory
+import java.util.concurrent.TimeUnit.SECONDS
 
 /**
  * A File contating [WeebotCommand]s regarding [Message] Management (deletion, etc(?))
@@ -51,12 +53,7 @@ class CmdPurge : WeebotCommand("Purge", arrayOf("prune", "clean"), CAT_MOD,
                 }
                 event.reply(
                     "*${event.author.name} cleared $toDelete messages from ${event.textChannel.name}*")
-                { m ->
-                    try {
-                        Thread.sleep(5 * 1_000)
-                    } catch (e: InterruptedException) {}
-                    m.delete().queue()
-                }
+                { m -> m.delete().queueAfter(5, SECONDS) }
             } else {
                 event.reply("*You must choose a number between 2 and 100.*")
             }

@@ -43,10 +43,9 @@ lateinit var CMD_CLIENT: CommandClient
  *
  * TODO: https://www.twilio.com/blog/2017/05/send-and-receive-sms-messages-with-kotlin.html
  *
- *
  * @param args
  * @throws LoginException
- * @throws RateLimitedException
+ * @throws RateLimitedException/
  * @throws InterruptedException
  */
 fun main(args: Array<String>) = run {
@@ -95,8 +94,19 @@ fun main(args: Array<String>) = run {
                 }
             }
         */}
-        .addCommands(CMD_SHUTDOWN, CMD_PING, CMD_GUILDLIST, CMD_ABOUT, CMD_SUGG,
-                CMD_INVITEBOT, CMD_SETTINGS, CMD_PURGE, CMD_REGEX, CMD_VCR)
+        .addCommands(
+            CMD_SHUTDOWN,
+            CMD_PING,
+            CMD_GUILDLIST,
+            CMD_ABOUT,
+            CMD_SUGG,
+            CMD_INVITEBOT,
+            CMD_SETTINGS,
+            CMD_PURGE,
+            CMD_REGEX,
+            CMD_CATFACT,
+            CMD_VCR
+        )
         .build()
 
     JDA_SHARD_MNGR.apply {

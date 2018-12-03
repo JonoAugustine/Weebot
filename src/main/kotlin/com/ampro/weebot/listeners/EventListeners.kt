@@ -89,7 +89,7 @@ class EventDispatcher : ListenerAdapter() {
     }
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
-        if (event.member.user.isBot) return
+        if (event.isWebhookMessage || event.author.isBot) return
         getWeebot(event.guild.idLong)?.feedPassives(event)
     }
 
