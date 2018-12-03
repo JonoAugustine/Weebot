@@ -1,0 +1,119 @@
+{
+  "initTime": "01-12-2018 00-35-04",
+  "suggestions": [],
+  "GLOBAL_WEEBOT": {
+    "trackedUsers": [],
+    "userPassives": {},
+    "initDate": {
+      "dateTime": {
+        "date": {
+          "year": 2018,
+          "month": 12,
+          "day": 1
+        },
+        "time": {
+          "hour": 15,
+          "minute": 15,
+          "second": 21,
+          "nano": 438000000
+        }
+      },
+      "offset": {
+        "totalSeconds": -18000
+      }
+    },
+    "settings": {
+      "prefixs": [
+        "\\",
+        "w!"
+      ],
+      "explicit": false,
+      "nsfw": false,
+      "enablePassives": false,
+      "logchannel": null,
+      "trackingEnabled": false,
+      "guildID": -1
+    },
+    "passives": [],
+    "guildID": -1
+  },
+  "WEEBOTS": {
+    "-1": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 1
+          },
+          "time": {
+            "hour": 0,
+            "minute": 35,
+            "second": 4,
+            "nano": 519000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "explicit": false,
+        "nsfw": false,
+        "enablePassives": false,
+        "logchannel": null,
+        "trackingEnabled": false,
+        "guildID": -1
+      },
+      "passives": [],
+      "guildID": -1
+    },
+    "139168039634468865": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 2
+          },
+          "time": {
+            "hour": 0,
+            "minute": 40,
+            "second": 21,
+            "nano": 468000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "explicit": false,
+        "nsfw": false,
+        "enablePassives": false,
+        "logchannel": null,
+        "trackingEnabled": false,
+        "guildID": 139168039634468865
+      },
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCRoleManager",
+          "DATA": {
+            "dead": false,
+            "limit": "ALL"
+          }
+        }
+      ],
+      "guildID": 139168039634468865
+    }
+  },
+  "PREMIUM_USERS": {}
+}
