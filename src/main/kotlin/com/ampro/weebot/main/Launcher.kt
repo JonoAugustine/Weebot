@@ -6,8 +6,11 @@ package com.ampro.weebot.main
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.*
-import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.Dao
+import com.ampro.weebot.database.constants.BOT_DEV_CHAT
+import com.ampro.weebot.database.constants.DEV_IDS
+import com.ampro.weebot.database.loadDao
 import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandClient
@@ -45,6 +48,7 @@ lateinit var CMD_CLIENT: CommandClient
  * Put bot online, setup listeners, and get full list of servers (Guilds)
  *
  * TODO: https://www.twilio.com/blog/2017/05/send-and-receive-sms-messages-with-kotlin.html
+ * TODO Learn how to use [Paginator]
  *
  * @param args
  * @throws LoginException
