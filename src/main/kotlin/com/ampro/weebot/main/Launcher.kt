@@ -105,7 +105,7 @@ fun main(args_: Array<String>) = run {
                         } else {
                             event.reply("*Help is currently unavailable for this command." +
                                     " You can use ``@Weebot sugg`` to send feedback to the" +
-                                    " Developers and remind them they have a job to do!*$Rage")
+                                    " Developers and remind them they have a job to do!* $Rage")
                             return@setHelpConsumer
                         }
                     }
