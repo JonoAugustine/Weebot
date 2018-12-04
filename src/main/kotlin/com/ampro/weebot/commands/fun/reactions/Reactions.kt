@@ -18,7 +18,6 @@ import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import java.lang.Exception
 import java.util.concurrent.TimeUnit.SECONDS
 
 /**
@@ -29,9 +28,14 @@ import java.util.concurrent.TimeUnit.SECONDS
  * @since 2.0
  */
 class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
-    "[up#]", "React with \"THiS\" to a message or enable an auto-reactor for This",
+    "[on/off]", "React with \"THiS\" to a message or enable an auto-reactor for This",
     cooldown = 10, guildOnly = true,userPerms = arrayOf(MESSAGE_ADD_REACTION),
-    botPerms = arrayOf(MESSAGE_ADD_REACTION)
+    botPerms = arrayOf(MESSAGE_ADD_REACTION),
+        helpBiConsumer = HelpBiConsumerBuilder("^This Reactor")
+            .setDescription("Have me react with *\"THiS\"* to a message whenever someone types ")
+            .appendDesc("\"^this\" or \"^that\".")
+            .addField("Arguments", "[on/off]").addField("Aliases", "^that")
+            .build { it.reactWith(ArrowUp, T, H, I_lowercase, S) }
 ) {
 
     /**
@@ -144,9 +148,8 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
  * @since 2.0
  */
 class CmdHelloThere : WeebotCommand("HelloThere", arrayOf("droppingin"), CAT_FUN,
-    "[@Member]", "Just dropping in.", cooldown = 60,
+    "[@Member]", "*GENERAL KENOBI!*", cooldown = 360,
     userPerms = arrayOf(MESSAGE_EMBED_LINKS), botPerms = arrayOf(MESSAGE_EMBED_LINKS)
-
 ) {
     companion object {
         val HELLO_THERE_GIFS = listOf("https://media.giphy.com/media/Nx0rz3jtxtEre/giphy.gif",

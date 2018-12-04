@@ -13,6 +13,7 @@ import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.function.BiConsumer
@@ -112,9 +113,16 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         fun build(): BiConsumer<CommandEvent, Command> {
             return BiConsumer { event, command ->
                 embedBuilder.setDescription(description.toString())
-
                 if (sendDM) event.replyInDm(embedBuilder.build())
                 else event.reply(embedBuilder.build())
+            }
+        }
+
+        fun build(success: (Message) -> Unit) : BiConsumer<CommandEvent, Command> {
+            return BiConsumer { event, command ->
+                embedBuilder.setDescription(description.toString())
+                if (sendDM) event.replyInDm(embedBuilder.build(), success)
+                else event.reply(embedBuilder.build(), success)
             }
         }
 

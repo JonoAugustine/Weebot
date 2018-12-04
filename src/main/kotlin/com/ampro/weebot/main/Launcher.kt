@@ -16,7 +16,7 @@ import com.ampro.weebot.database.loadDao
 import com.ampro.weebot.extensions.addCommands
 import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
-import com.ampro.weebot.util.Emoji.Rage
+import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandClient
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
@@ -86,6 +86,8 @@ fun main(args_: Array<String>) = run {
         //.setPrefix("\\")
         .setAlternativePrefix("\\")
         .setGame(listening("@Weebot help"))
+        .addCommands(commands)
+        .setEmojis(heavy_check_mark.unicode, Warning.unicode, X.unicode)
         .setHelpConsumer { event ->
             //If the only argument is the command invoke
             val args = event.splitArgs()
@@ -110,7 +112,6 @@ fun main(args_: Array<String>) = run {
                 }
             }
         }
-        .addCommands(commands)
         .build()
 
     JDA_SHARD_MNGR.apply {

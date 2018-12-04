@@ -9,7 +9,9 @@ import com.ampro.weebot.database.getGuild
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
@@ -54,12 +56,15 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
  * Each Weebot is assigned an ID String consisting of the
  * hosting Guild's unique ID + "W" (e.g. "1234W") <br></br><br></br>
  *
+ * @param guildID The ID of the host guild
+ *
  * @author Jonathan Augustine
  * @since 1.0
  */
 open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     : Comparable<Weebot> {
 
+    /** @param guild The host guild */
     constructor(guild: Guild) : this(guild.idLong)
 
     /*************************************************
@@ -104,14 +109,17 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
             = passives.firstOrNull { klass == it::class }
 
     /**
-     * Takes in an event and distributes it to the bot's [IPassive]s
+     * Removes dead [IPassive.dead] then
+     * takes in an event and distributes it to the bot's [IPassive]s.
      *
      * @param event The event to distribute
      */
-    open fun feedPassives(event: Event) = passives.forEach{ it.accept(this, event) }
+    open fun feedPassives(event: Event)
+            = passives.apply { removeIf(IPassive::dead) }.forEach{ it.accept(this, event) }
 
     /**
      * Any startup settings or states that must be reloaded before launch.
+     * TODO
      */
     fun startup() {
     }
@@ -121,7 +129,6 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     }
 
 }
-
 
 /**
  * TODO Comments
@@ -144,7 +151,11 @@ class GlobalWeebot : Weebot(-1L) {
 
     override fun feedPassives(event: Event) {
         userPassives.values.forEach { it ->
-            GlobalScope.launch { it.forEach { it.accept(this@GlobalWeebot, event) } }
+            GlobalScope.launch {
+                it.apply { removeIf { it.dead() } }.forEach {
+                    it.accept(this@GlobalWeebot, event)
+                }
+            }
         }
     }
 }
