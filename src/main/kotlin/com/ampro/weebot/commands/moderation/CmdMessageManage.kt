@@ -56,7 +56,7 @@ class CmdPurge : WeebotCommand("Purge", arrayOf("prune", "clean", "clear"), CAT_
                     "*${event.author.name} cleared $toDelete messages from ${event.textChannel.name}*")
                 { m -> m.delete().queueAfter(5, SECONDS) }
             } else {
-                event.reply("*You must choose a number between 2 and 100.*")
+                event.reply("*You must choose a number between 2 and 99.*")
             }
         }
     }

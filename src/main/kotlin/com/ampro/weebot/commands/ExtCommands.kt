@@ -34,8 +34,12 @@ fun CommandEvent.getInvocation(): String = this.message.contentStripped
  */
 fun CommandEvent.respondThenDelete(reason: String, delay: Long = 10L) {
     this.reply("*$reason*") { response ->
-        event.message.delete().reason(reason).queueAfter(delay, SECONDS) {
-            response.delete().reason(reason).queue()
+        if (this.privateChannel != null) {
+            response.delete().reason(reason).queueAfter(delay, SECONDS)
+        } else {
+            event.message.delete().reason(reason).queueAfter(delay, SECONDS) {
+                response.delete().reason(reason).queue()
+            }
         }
     }
 }

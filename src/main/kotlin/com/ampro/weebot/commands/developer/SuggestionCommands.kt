@@ -149,7 +149,7 @@ class CmdDevSuggestions : WeebotCommand("DevSuggestions", arrayOf("dev", "devsug
                     return
                 }
                 event.reply(strdEmbedBuilder.setTitle(
-                    "Changed Suggestion $sn from $old to ${DAO.suggestions[sn].state}")
+                    "Changed Suggestion ${sn+1} from $old to ${DAO.suggestions[sn].state}")
                     .build())
             }
             "rem", "remove", "delete", "del" -> {

@@ -12,28 +12,6 @@
           "time": {
             "hour": 20,
             "minute": 10,
-            "second": 36,
-            "nano": 88000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "state": "UNREVIEWED",
-      "suggestion": "write a suggestion"
-    },
-    {
-      "submitTime": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 3
-          },
-          "time": {
-            "hour": 20,
-            "minute": 10,
             "second": 46,
             "nano": 607000000
           }
@@ -42,30 +20,8 @@
           "totalSeconds": -18000
         }
       },
-      "state": "UNREVIEWED",
+      "state": "ACCEPTED",
       "suggestion": "when they did ^this \u003c@185063150557593600\u003e  it reacted to the last message the mentioned user sent"
-    },
-    {
-      "submitTime": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 3
-          },
-          "time": {
-            "hour": 20,
-            "minute": 11,
-            "second": 19,
-            "nano": 343000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "state": "UNREVIEWED",
-      "suggestion": "Nerf Bastion"
     },
     {
       "submitTime": {
@@ -86,30 +42,8 @@
           "totalSeconds": -18000
         }
       },
-      "state": "UNREVIEWED",
+      "state": "ACCEPTED",
       "suggestion": "When its a lil more done, im going to add texting to my bot so that it will message me when it goes down or text me each week with new suggestions and i can shut it down when im off the PC and stuff"
-    },
-    {
-      "submitTime": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 3
-          },
-          "time": {
-            "hour": 20,
-            "minute": 17,
-            "second": 9,
-            "nano": 473000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "state": "UNREVIEWED",
-      "suggestion": "i like turtles"
     }
   ],
   "GLOBAL_WEEBOT": {
@@ -223,7 +157,7 @@
           }
         },
         {
-          "CLASSNAME": "com.ampro.weebot.commands.fun.reactions.CmdThis$ThisReactor",
+          "CLASSNAME": "com.ampro.weebot.commands.fun.CmdThis$ThisReactor",
           "DATA": {
             "dead": false
           }

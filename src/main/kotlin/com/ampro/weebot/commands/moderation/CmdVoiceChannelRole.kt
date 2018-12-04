@@ -138,7 +138,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
             .addField("Arguments", "[enable/disable/on/off] [all/public]" +
                     "\n[all/public] (if already enabled)", false)
             .addField("Aliases",
-                    "$name, ${aliases.toString().removeSurrounding("[","]")}", false)
+                    "$name, ${aliases.contentToString().removeSurrounding("[","]")}", false)
             .build()
     }
 

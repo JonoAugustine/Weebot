@@ -124,14 +124,15 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     fun startup() {
     }
 
-    override fun compareTo(other: Weebot): Int {
-        TODO("not implemented")
-    }
+    override fun compareTo(other: Weebot) = (this.guildID - other.guildID).toInt()
 
 }
 
 /**
- * TODO Comments
+ * The Global Weebot, with information on all users. Talks to people in private chats.
+ *
+ * @author Jonathan Augusitine
+ * @since 1.0
  */
 class GlobalWeebot : Weebot(-1L) {
     /** A list of user IDs that have enabled personal tracking */
