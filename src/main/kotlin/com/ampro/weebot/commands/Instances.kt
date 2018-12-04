@@ -7,8 +7,13 @@ package com.ampro.weebot.commands
 import com.ampro.weebot.commands.`fun`.CmdCatFact
 import com.ampro.weebot.commands.`fun`.reactions.CmdHelloThere
 import com.ampro.weebot.commands.`fun`.reactions.CmdThis
-import com.ampro.weebot.commands.developer.*
-import com.ampro.weebot.commands.moderation.*
+import com.ampro.weebot.commands.developer.CmdSendSuggestion
+import com.ampro.weebot.commands.developer.CmdShutdown
+import com.ampro.weebot.commands.developer.GuildlistCommand
+import com.ampro.weebot.commands.developer.PingCommand
+import com.ampro.weebot.commands.moderation.CmdPurge
+import com.ampro.weebot.commands.moderation.CmdSettings
+import com.ampro.weebot.commands.moderation.CmdVoiceChannelRole
 import com.ampro.weebot.commands.progammer.CmdRegexTest
 import com.ampro.weebot.main.WAITER
 
@@ -26,8 +31,9 @@ val CMD_SUGG            = CmdSendSuggestion() //Public
 /* *******************************
  *       Utility Commands      *
  ********************************/
-val CMD_INVITEBOT = CmdInviteLink()
 
+val CMD_INVITEBOT       = CmdInviteLink()
+val CMD_HELP            = CmdHelp()
 val CMD_ABOUT           = CmdAbout()
 
 /* *******************************
@@ -54,5 +60,9 @@ val CMD_HELLOTHERE      = CmdHelloThere()
 val CMD_THIS            = CmdThis()
 
 
-val commands = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING, CMD_SUGG, CMD_INVITEBOT,
-        CMD_ABOUT, CMD_SETTINGS, CMD_PURGE, CMD_VCR, CMD_THIS, CMD_HELLOTHERE)
+val commands = listOf<WeebotCommand>(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING,
+        CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,// CMD_HELP,
+        CMD_SETTINGS, CMD_PURGE,
+        CMD_REGEX,
+        CMD_VCR,
+        CMD_THIS, CMD_HELLOTHERE)

@@ -4,6 +4,8 @@
 
 package com.ampro.weebot.extensions
 
+import com.ampro.weebot.commands.WeebotCommand
+import com.jagrosh.jdautilities.command.CommandClientBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
 
@@ -21,3 +23,14 @@ fun Member.hasOneOfPerms(vararg p: Permission) : Boolean {
 
 infix fun Member.hasPerm(perm: Permission) = this.permissions.contains(perm)
 
+/**
+ * Add multiple commands from an [Iterable].
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+fun CommandClientBuilder.addCommands(commands: Iterable<WeebotCommand>)
+        : CommandClientBuilder {
+    commands.forEach { this.addCommand(it) }
+    return this
+}

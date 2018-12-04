@@ -17,12 +17,12 @@ import com.jagrosh.jdautilities.command.CommandEvent
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdHelp() : WeebotCommand("help", arrayOf("helpo"), CAT_DEV,
+class CmdHelp : WeebotCommand("help", arrayOf("helpo"), CAT_DEV,
     "[category] [command name]", "Get information about Weebot Commands and Usage.",
     cooldown = 90
 ) {
     //"Weebot's little brother."
-    override fun execute(event: CommandEvent) {
+    public override fun execute(event: CommandEvent) {
 
         val bot = getWeebotOrNew(event.guild)
 

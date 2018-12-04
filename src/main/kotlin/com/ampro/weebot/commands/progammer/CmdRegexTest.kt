@@ -4,9 +4,11 @@
 
 package com.ampro.weebot.commands.progammer
 
-import com.ampro.weebot.commands.*
-import com.ampro.weebot.util.Emoji
+import com.ampro.weebot.commands.CAT_PROG
+import com.ampro.weebot.commands.WeebotCommand
+import com.ampro.weebot.commands.splitArgs
 import com.ampro.weebot.database.constants.strdEmbedBuilder
+import com.ampro.weebot.util.Emoji
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.MessageEmbed
 
@@ -23,7 +25,7 @@ class CmdRegexTest : WeebotCommand(
     "Test a Regex against one or more strings", cooldown = 10) {
 
     init {
-        helpBiConsumer = HelpBiConsumerBuilder().setTitle("Regex Tester")
+        helpBiConsumer = HelpBiConsumerBuilder("Regex Tester")
             .setDescription("Test a Regex against one or more strings.")
             .setThumbnail("https://i1.wp.com/digitalfortress" +
                     ".tech/wp-content/uploads/2018/05/regex1.png?fit=526%2C526&ssl=1")

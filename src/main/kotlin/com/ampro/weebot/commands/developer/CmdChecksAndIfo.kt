@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
  * @since 1.0
  */
 class PingCommand : WeebotCommand("ping", arrayOf("pong"), CAT_DEV,
-    "", "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong")
+    "", "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong", false)
         .setDescription("Checks the bot's latency.").build(), false, cooldown = 10
 ) {
     override fun execute(event: CommandEvent) {

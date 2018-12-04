@@ -6,6 +6,7 @@ package com.ampro.weebot.commands
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebotOrNew
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
@@ -90,7 +91,14 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
      * @since 2.0
      */
     open class HelpBiConsumerBuilder() {
-        constructor(title: String) : this() { embedBuilder.setTitle(title) }
+        constructor(title: String) : this() { embedBuilder.setTitle(title).addField(guide) }
+        constructor(title: String, description: String) : this(title) {
+            embedBuilder.setDescription(description)
+        }
+        constructor(title: String, withGuide: Boolean) : this() {
+            embedBuilder.setTitle(title)
+            if (withGuide) embedBuilder.addField(guide) else return
+        }
 
         companion object {
             val guide = Field("Guide", "<required> , [optional], /situational/", false)
@@ -99,7 +107,7 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         var description = StringBuilder()
         var sendDM: Boolean = true
 
-        val embedBuilder: EmbedBuilder = EmbedBuilder().addField(guide)
+        val embedBuilder: EmbedBuilder = strdEmbedBuilder
 
         fun build(): BiConsumer<CommandEvent, Command> {
             return BiConsumer { event, command ->
@@ -170,6 +178,6 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         }
     }
 
-    open fun getHelpBiConsumer() = this.helpBiConsumer
+    public fun getHelpBiConsumer() = this.helpBiConsumer
 
 }

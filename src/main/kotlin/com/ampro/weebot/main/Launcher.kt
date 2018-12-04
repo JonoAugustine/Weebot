@@ -5,14 +5,18 @@
 package com.ampro.weebot.main
 
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.CMD_HELP
+import com.ampro.weebot.commands.commands
+import com.ampro.weebot.commands.splitArgs
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.Dao
 import com.ampro.weebot.database.constants.BOT_DEV_CHAT
 import com.ampro.weebot.database.constants.DEV_IDS
 import com.ampro.weebot.database.loadDao
+import com.ampro.weebot.extensions.addCommands
 import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
+import com.ampro.weebot.util.Emoji.Rage
 import com.jagrosh.jdautilities.command.CommandClient
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
@@ -50,12 +54,12 @@ lateinit var CMD_CLIENT: CommandClient
  * TODO: https://www.twilio.com/blog/2017/05/send-and-receive-sms-messages-with-kotlin.html
  * TODO Learn how to use [Paginator]
  *
- * @param args
+ * @param args_
  * @throws LoginException
  * @throws RateLimitedException/
  * @throws InterruptedException
  */
-fun main(args: Array<String>) = run {
+fun main(args_: Array<String>) = run {
     slog("Launching...")
     slog("\tBuilding Directories...")
     if (!buildDirs()) {
@@ -83,33 +87,30 @@ fun main(args: Array<String>) = run {
         .setAlternativePrefix("\\")
         .setGame(listening("@Weebot help"))
         .setHelpConsumer { event ->
-            //TODO
-            /** Message arguments cleansed of the callsign or bot mention * /
             //If the only argument is the command invoke
-            if (args.size == 1) {
-                //genericHelp(bot, event)
+            val args = event.splitArgs()
+            if (args.isEmpty()) {
+                CMD_HELP.execute(event)
             } else {
-                commands.forEach { c ->
-                    if (c.isCommandFor(args[1])) {
-                        val eb = c.
-                        if (eb == null) {
-                            event.privateReply(c.getHelp())
+                commands.forEach { cmd ->
+                    if (cmd.isCommandFor(args[0])) {
+                        if (cmd.getHelpBiConsumer() != null) {
+                            cmd.getHelpBiConsumer().accept(event, cmd)
+                            return@setHelpConsumer
+                        } else if (!cmd.help.isNullOrBlank()) {
+                            event.reply("*${cmd.help}*")
+                            return@setHelpConsumer
                         } else {
-                            event.privateReply(c.getEmbedHelp())
+                            event.reply("*Help is currently unavailable for this command." +
+                                    " You can use ``@Weebot sugg`` to send feedback to the" +
+                                    " Developers and remind them they have a job to do!*$Rage")
+                            return@setHelpConsumer
                         }
-                        event.deleteMessage()
                     }
                 }
             }
-        */}.useHelpBuilder(false)
-        .addCommands(
-            CMD_SHUTDOWN, CMD_PING, CMD_GUILDLIST,
-            CMD_ABOUT, CMD_SUGG, CMD_INVITEBOT,
-            CMD_SETTINGS, CMD_PURGE,
-            CMD_REGEX,
-            CMD_VCR,
-            CMD_CATFACT, CMD_HELLOTHERE, CMD_THIS
-        )
+        }
+        .addCommands(commands)
         .build()
 
     JDA_SHARD_MNGR.apply {
