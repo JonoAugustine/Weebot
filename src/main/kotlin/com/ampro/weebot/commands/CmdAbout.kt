@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.commands
 
-import com.ampro.weebot.commands.`fun`.reactions.CmdHelloThere
+import com.ampro.weebot.commands.`fun`.CmdHelloThere
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.constants.weebotAvatarUrl
 import com.ampro.weebot.database.getWeebotOrNew

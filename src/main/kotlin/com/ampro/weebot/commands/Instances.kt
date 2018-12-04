@@ -5,8 +5,8 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.CmdCatFact
-import com.ampro.weebot.commands.`fun`.reactions.CmdHelloThere
-import com.ampro.weebot.commands.`fun`.reactions.CmdThis
+import com.ampro.weebot.commands.`fun`.CmdHelloThere
+import com.ampro.weebot.commands.`fun`.CmdThis
 import com.ampro.weebot.commands.developer.CmdSendSuggestion
 import com.ampro.weebot.commands.developer.CmdShutdown
 import com.ampro.weebot.commands.developer.GuildlistCommand

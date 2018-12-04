@@ -2,7 +2,7 @@
  * Copyright Aquatic Mastery Productions (c) 2018.
  */
 
-package com.ampro.weebot.commands.`fun`.reactions
+package com.ampro.weebot.commands.`fun`
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
@@ -60,7 +60,8 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
          */
         fun getNonThis(messages: List<Message>, startDex: Int) : Message? {
             for (i in startDex until messages.size) {
-                if (!messages[i].contentDisplay.matches(THIS_REG)) {
+                if (!messages[i].contentDisplay.matches(
+                            THIS_REG)) {
                     return messages[i]
                 }
             }
