@@ -56,7 +56,7 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
          */
         fun getNonThis(messages: List<Message>, startDex: Int) : Message? {
             for (i in startDex until messages.size) {
-                if (messages[i].contentDisplay.matches(THIS_REG)) {
+                if (!messages[i].contentDisplay.matches(THIS_REG)) {
                     return messages[i]
                 }
             }

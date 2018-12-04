@@ -1,23 +1,64 @@
 /*
  * Copyright Aquatic Mastery Productions (c) 2018.
  */
+
 package com.ampro.weebot.commands.developer
 
+/**
+ * This file holds [WeebotCommand]s for Shutdown, GuildList, and Ping
+ */
+
+import com.ampro.weebot.commands.*
+import com.ampro.weebot.main.shutdown
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
-import com.jagrosh.jdautilities.doc.standard.CommandInfo
-import com.jagrosh.jdautilities.doc.standard.Error
-import com.jagrosh.jdautilities.doc.standard.RequiredPermissions
+import com.jagrosh.jdautilities.doc.standard.*
+import com.jagrosh.jdautilities.examples.command.ShutdownCommand
 import com.jagrosh.jdautilities.examples.doc.Author
 import com.jagrosh.jdautilities.menu.Paginator
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.ChannelType
 import net.dv8tion.jda.core.exceptions.PermissionException
-
-import java.awt.*
+import java.awt.Color
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit
-import java.util.function.Consumer
+
+/**
+ * @author Jonathan Augustine
+ * @since 1.0
+ */
+class PingCommand : WeebotCommand("ping", arrayOf("pong"), CAT_DEV,
+    "", "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong")
+        .setDescription("Checks the bot's latency.").build(), false, cooldown = 10
+) {
+    override fun execute(event: CommandEvent) {
+        val r = if (event.getInvocation().toLowerCase() == "pong") "Ping" else "Pong"
+        event.reply("$r: ...") { m ->
+            val ping = event.message.creationTime.until(m.creationTime, ChronoUnit.MILLIS)
+            m.editMessage("$r! :ping_pong: Ping: " + ping + "ms | Websocket: "
+                    + event.jda.ping + "ms").queue()
+        }
+    }
+}
+
+/**
+ * Shuts down the Weebots.
+ *
+ * @author Jonathan Augustine
+ * @since 1.0
+ */
+class CmdShutdown : WeebotCommand("shutdown", arrayOf("tite", "killbot", "devkill"),
+    CAT_DEV, "", "Shutdown the weebot", hidden = true, ownerOnly = true
+) {
+
+    override fun execute(event: CommandEvent) {
+        event.reactWarning()
+        event.reply("Shutting down all Weebots...")
+        //TODO send text to Jono
+        shutdown(event.author)
+    }
+}
 
 /**
  * TODO Customize
@@ -30,8 +71,11 @@ import java.util.function.Consumer
 @Error(value = "If arguments are provided, but they are not an integer.",
     response = "[PageNumber] is not a valid integer!")
 @RequiredPermissions(Permission.MESSAGE_EMBED_LINKS, Permission.MESSAGE_ADD_REACTION)
-@Author("John Grosh (jagrosh)")
-class GuildlistCommand(waiter: EventWaiter) : Command() {
+
+class GuildlistCommand(waiter: EventWaiter) : WeebotCommand("guildlist",
+    arrayOf("guilds", "serverlist", "servers"), CAT_DEV, "",
+    "Gets a paginated list of the guilds the bot is on."
+) {
 
     private val pbuilder: Paginator.Builder
 
