@@ -15,11 +15,11 @@ import com.ampro.weebot.util.reactWith
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
+import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.lang.Exception
 import java.util.concurrent.TimeUnit.SECONDS
-
 
 /**
  * Adds a reaction THiS to a message. Can also be used to activate an [IPassive]
@@ -30,8 +30,8 @@ import java.util.concurrent.TimeUnit.SECONDS
  */
 class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
     "[up#]", "React with \"THiS\" to a message or enable an auto-reactor for This",
-    cooldown = 10, guildOnly = true,
-    userPerms = arrayOf(MESSAGE_ADD_REACTION), botPerms = arrayOf(MESSAGE_ADD_REACTION)
+    cooldown = 10, guildOnly = true,userPerms = arrayOf(MESSAGE_ADD_REACTION),
+    botPerms = arrayOf(MESSAGE_ADD_REACTION)
 ) {
 
     /**
@@ -41,23 +41,39 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
      * @since 2.0
      */
     class ThisReactor : IPassive {
+        companion object { val THIS_REG = Regex("\\^(t+h+i+s+|t+h+a+t+)") }
 
         var dead = false
         override fun dead() = dead
 
+        /**
+         * Get the first message in the list that isn't "^this".
+         *
+         * @param messages An message iterable
+         * @param startDex The index to start searching at
+         *
+         * @return The first message that doesnt match \^(t+h+i+s+|t+h+a+t+) or null
+         */
+        fun getNonThis(messages: List<Message>, startDex: Int) : Message? {
+            for (i in startDex until messages.size) {
+                if (messages[i].contentDisplay.matches(THIS_REG)) {
+                    return messages[i]
+                }
+            }
+            return null
+        }
+
         override fun accept(bot: Weebot, event: Event) {
             if (event is GuildMessageReceivedEvent) {
-                val args = event.message.contentDisplay.toLowerCase()
-                    .split("\\s+".toRegex())
+                val args = event.message.contentDisplay.toLowerCase().split(Regex("\\s+"))
                 args.forEachIndexed { i, it ->
                     if (it.matches(Regex("\\^(t+h+i+s+|t+h+a+t+)"))) {
-                        event.channel.getHistoryBefore(event.message, 50).queue {
-                            try {
-                                it.retrievedHistory[args[i + 1].toInt() - 1]
-                            } catch (e: Exception) {
-                                it.retrievedHistory[0]
-                            }.reactWith(ArrowUp, T, H, I_lowercase, S)
-                            //event.message.delete().queueAfter(4, SECONDS)
+                        event.channel.getHistoryBefore(event.message, 100).queue {
+                            val dex = try { args[i + 1].toInt() - 1 }
+                            catch (e: Exception) { 0 }
+                            (getNonThis(it.retrievedHistory, dex)
+                                    ?: it.retrievedHistory[0])
+                                .reactWith(ArrowUp, T, H, I_lowercase, S)
                         }
                         return
                     }
