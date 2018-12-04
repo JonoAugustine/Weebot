@@ -44,6 +44,7 @@ dependencies {
     //Tools & APIs
     implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.1.1")
     implementation("me.sargunvohra.lib:pokekotlin:2.3.0")
+    implementation("net.dean.jraw:JRAW:1.1.0")
 }
 
 configure<JavaPluginConvention> {

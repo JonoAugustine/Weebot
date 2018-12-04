@@ -62,6 +62,7 @@ class TrackerInitPassive(val enableMessage: Message) : IPassive {
                                         getWeebot(
                                             guild.idLong)?.settings?.trackingEnabled = true
                                         dead = true
+                                        return
                                     }
                                     emote.name == X.unicode -> {
                                         //Disable
@@ -70,6 +71,7 @@ class TrackerInitPassive(val enableMessage: Message) : IPassive {
                                         getWeebot(
                                             guild.idLong)?.settings?.trackingEnabled = false
                                         dead = true
+                                        return
                                     }
                                     else -> return
                                 }

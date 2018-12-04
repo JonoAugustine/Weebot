@@ -5,6 +5,8 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.CmdCatFact
+import com.ampro.weebot.commands.`fun`.reactions.CmdHelloThere
+import com.ampro.weebot.commands.`fun`.reactions.CmdThis
 import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.commands.moderation.*
 import com.ampro.weebot.commands.progammer.CmdRegexTest
@@ -48,7 +50,9 @@ val CMD_REGEX           = CmdRegexTest()
  *********************************/
 
 val CMD_CATFACT         = CmdCatFact()
+val CMD_HELLOTHERE      = CmdHelloThere()
+val CMD_THIS            = CmdThis()
 
 
 val commands = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING, CMD_SUGG, CMD_INVITEBOT,
-        CMD_ABOUT, CMD_SETTINGS, CMD_PURGE, CMD_VCR)
+        CMD_ABOUT, CMD_SETTINGS, CMD_PURGE, CMD_VCR, CMD_THIS, CMD_HELLOTHERE)

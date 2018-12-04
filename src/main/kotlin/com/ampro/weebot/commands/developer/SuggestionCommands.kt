@@ -118,11 +118,11 @@ class CmdDevSuggestions : Command() {
             "see" -> {
                 val pn = try { args[1].toInt() - 1 }
                 catch (e: NumberFormatException) {
-                    event.deleteWithResponse("Invalid page number.")
+                    event.respondThenDelete("Invalid page number.")
                     return
                 } catch (e: IndexOutOfBoundsException) { 0 }
                 if (pn * PAGE_LENGTH > DAO.suggestions.size) {
-                    event.deleteWithResponse("There are only ${DAO.suggestions.size} pages")
+                    event.respondThenDelete("There are only ${DAO.suggestions.size} pages")
                     return
                 }
                 sendSuggestions(pn, event)
@@ -132,18 +132,18 @@ class CmdDevSuggestions : Command() {
                 val sn = try {
                     args[1].toInt() - 1
                 } catch (e: Exception) {
-                    event.deleteWithResponse("Invalid suggestion id.")
+                    event.respondThenDelete("Invalid suggestion id.")
                     return
                 }
                 if (sn > DAO.suggestions.size) {
-                    event.deleteWithResponse("Invalid suggestion id.")
+                    event.respondThenDelete("Invalid suggestion id.")
                     return
                 }
                 val old = DAO.suggestions[sn].state
                 DAO.suggestions[sn].state = try {
                     State.valueOf(args[2].toUpperCase())
                 } catch (e: IllegalArgumentException) {
-                    event.deleteWithResponse(
+                    event.respondThenDelete(
                         "Invalid State!(UNREVIEWED, ACCEPTED, COMPLETED or IGNORED)")
                     return
                 }
@@ -155,11 +155,11 @@ class CmdDevSuggestions : Command() {
                 val sn = try {
                     args[1].toInt() - 1
                 } catch (e: Exception) {
-                    event.deleteWithResponse("Invalid suggestion id.")
+                    event.respondThenDelete("Invalid suggestion id.")
                     return
                 }
                 if (sn > DAO.suggestions.size) {
-                    event.deleteWithResponse("Invalid suggestion id.")
+                    event.respondThenDelete("Invalid suggestion id.")
                     return
                 }
                 //val sugg: Suggestion = DAO.suggestions.removeAt(sn)

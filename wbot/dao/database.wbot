@@ -110,6 +110,12 @@
             "dead": false,
             "limit": "ALL"
           }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.reactions.CmdThis$ThisReactor",
+          "DATA": {
+            "dead": false
+          }
         }
       ],
       "guildID": 139168039634468865

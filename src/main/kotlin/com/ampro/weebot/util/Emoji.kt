@@ -4,6 +4,44 @@
 
 package com.ampro.weebot.util
 
+import net.dv8tion.jda.core.entities.Message
+import java.util.function.Consumer
+
+/**
+ * Add a Reaction to the [Message] with an [Emoji]
+ *
+ * @param emoji The [Emoji] to react with
+ * @param success The success consumer
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+fun Message.reactWith(emoji: Emoji, success: Consumer<in Void>) {
+    this.addReaction(emoji.unicode).queue(success)
+}
+
+/**
+ * Add a Reaction to the [Message] with an [Emoji]
+ *
+ * @param emoji The [Emoji] to react with
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+infix fun Message.reactWith(emoji: Emoji) {
+    this.addReaction(emoji.unicode).queue()
+}
+
+/**
+ * Adds multiple Reactions to the [Message] in order of submission.
+ * THIS USES ``complete()`` AND IS BLOCKING
+ */
+fun Message.reactWith(vararg emojis: Emoji) {
+    emojis.forEach {
+        this.addReaction(it.unicode).queue()
+    }
+}
+
 /**
  * A list of Unicode Emoji
  * @author blangel
@@ -307,7 +345,8 @@ enum class Emoji constructor(val unicode: String) {
     Woman("\uD83D\uDC69"), WomansClothes("\uD83D\uDC5A"), WomansHat("\uD83D\uDC52"),
     Womens("\uD83D\uDEBA"), Worried("\uD83D\uDE1F"), Wrench("\uD83D\uDD27"), X("\u274C"),
     YellowHeart("\uD83D\uDC9B"), Yen("\uD83D\uDCB4"), Yum("\uD83D\uDE0B"), Zap("\u26A1"),
-    Zero("\u0030\u20E3"), Zzz("\uD83D\uDCA4");
+    Zero("\u0030\u20E3"), Zzz("\uD83D\uDCA4"), T("\uD83C\uDDF9"), H("\uD83C\uDDED"),
+    I_lowercase("\u2139"), S("\uD83C\uDDF8");
 
     override fun toString() = unicode
 }

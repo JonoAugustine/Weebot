@@ -5,6 +5,14 @@ import java.awt.Color
 import java.time.Instant
 
 
+const val EMBED_MAX_TITLE = 256
+const val EMBED_MAX_DESCRIPTION = 2048
+const val EMBED_MAX_FIELDS = 25
+const val EMBED_MAX_FIELD_NAME = 256
+const val EMBED_MAX_FIELD_VAL = 1024
+const val EMBED_MAX_FOOTER_TEXT = 2048
+const val EMBED_MAX_AUTHOR = 256
+
 const val weebotAvatarUrl = "https://images-ext-2.discordapp" +
         ".net/external/jd498W5p3OMMOdHS2F7HqFm0g0d9Lk0yPjJ0bzsguk0/https/cdn." +
         "discordapp.com/avatars/437851896263213056/c00b298498bc546de4ad5512f53fc7d6.png"

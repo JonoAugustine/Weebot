@@ -21,7 +21,10 @@ import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
 import java.util.concurrent.Executors
 import javax.security.auth.login.LoginException
+import kotlin.random.Random
 import kotlin.system.measureTimeMillis
+
+val RAND = Random(128487621469)
 
 //JDA connection shard Client
 lateinit var JDA_SHARD_MNGR: ShardManager
@@ -72,7 +75,8 @@ fun main(args: Array<String>) = run {
     CMD_CLIENT = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
         .setCoOwnerIds(DEV_IDS[1].toString())
         .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }
-        .setPrefix("\\").setAlternativePrefix("w!")
+        //.setPrefix("\\")
+        .setAlternativePrefix("\\")
         .setGame(listening("@Weebot help"))
         .setHelpConsumer { event ->
             //TODO
@@ -93,19 +97,14 @@ fun main(args: Array<String>) = run {
                     }
                 }
             }
-        */}
+        */}.useHelpBuilder(false)
         .addCommands(
-            CMD_SHUTDOWN,
-            CMD_PING,
-            CMD_GUILDLIST,
-            CMD_ABOUT,
-            CMD_SUGG,
-            CMD_INVITEBOT,
-            CMD_SETTINGS,
-            CMD_PURGE,
+            CMD_SHUTDOWN, CMD_PING, CMD_GUILDLIST,
+            CMD_ABOUT, CMD_SUGG, CMD_INVITEBOT,
+            CMD_SETTINGS, CMD_PURGE,
             CMD_REGEX,
-            CMD_CATFACT,
-            CMD_VCR
+            CMD_VCR,
+            CMD_CATFACT, CMD_HELLOTHERE, CMD_THIS
         )
         .build()
 

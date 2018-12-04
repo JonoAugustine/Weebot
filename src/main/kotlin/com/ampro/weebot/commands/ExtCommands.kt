@@ -10,10 +10,10 @@ import com.ampro.weebot.database.getWeebotOrNew
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.*
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
+import java.util.concurrent.TimeUnit.SECONDS
 import java.util.function.BiConsumer
 
 /** @return the string arguments of the message split into a [List]. Does NOT have the
@@ -30,12 +30,10 @@ fun CommandEvent.getInvocation(): String = this.message.contentStripped
  * @param reason The message to send
  * @param delay The delay in seconds between send & delete
  */
-fun CommandEvent.deleteWithResponse(reason: String, delay: Int = 10) {
-    this.reply("*$reason*") {
-        GlobalScope.launch (Dispatchers.Default) {
-            delay(delay * 1000L)
-            event.message.delete().reason(reason).queue()
-            it.delete().reason(reason).queue()
+fun CommandEvent.respondThenDelete(reason: String, delay: Long = 10L) {
+    this.reply("*$reason*") { response ->
+        event.message.delete().reason(reason).queueAfter(delay, SECONDS) {
+            response.delete().reason(reason).queue()
         }
     }
 }
