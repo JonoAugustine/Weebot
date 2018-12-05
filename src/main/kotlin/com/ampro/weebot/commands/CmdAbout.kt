@@ -8,10 +8,10 @@ import com.ampro.weebot.commands.`fun`.CmdHelloThere
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.constants.weebotAvatarUrl
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.main.JDA_SHARD_MNGR
-import com.ampro.weebot.main.LINK_INVITEBOT
-import com.ampro.weebot.main.SELF
+import com.ampro.weebot.main.*
 import com.jagrosh.jdautilities.command.CommandEvent
+import com.jagrosh.jdautilities.menu.SelectionDialog
+import com.jagrosh.jdautilities.menu.SelectionDialog.*
 
 const val HELLO_THERE = "https://www.youtube.com/watch?v=rEq1Z0bjdwc"
 const val AMPRO       = "https://www.aquaticmasteryproductions.com/"
@@ -97,7 +97,7 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
 
 /**
  * Send a [MessageEmbed] giving info about the user.
- * TODO()
+ * ntTODO()
  */
 class CmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
     "", "Get information about Weebot.", cooldown = 90
@@ -110,7 +110,7 @@ class CmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
 
 /**
  * Send an [MessageEmbed] giving help with Weebot Commands.
- *TODO()
+ * TODO(Help)
  * @author Jonathan Augustine
  * @since 2.0
  */
@@ -122,6 +122,10 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
     public override fun execute(event: CommandEvent) {
 
         val bot = getWeebotOrNew(event.guild)
+
+        val menu = Builder().addChoices()
+
+
 
         val HQR = if (event.jda.getUserById(event.client.ownerId) == null) {
             "<@${event.client.ownerId}>"
@@ -172,5 +176,4 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
             event.reply(eb.build())
         }
     }
-
 }

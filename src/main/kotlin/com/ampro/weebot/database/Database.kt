@@ -30,7 +30,7 @@ import java.util.concurrent.ConcurrentHashMap
 fun isDev(id: Long): Boolean = DEV_IDS.contains(id)
 
 /**
- * TODO
+ * TODO PremiumUser
  */
 data class PremiumUser(val ID: Long)
 

@@ -186,7 +186,7 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
             getWeebotOrNew(event.guild?.idLong ?: -1L)
         }
         if (bot.settings.trackingEnabled) {
-            //TODO()
+            TODO("Tracking")
         }
     }
 

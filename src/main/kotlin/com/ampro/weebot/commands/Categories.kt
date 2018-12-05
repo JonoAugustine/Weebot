@@ -6,7 +6,7 @@ package com.ampro.weebot.commands
 
 import com.jagrosh.jdautilities.command.Command.Category
 
-//TODO predicates
+//TODO Category predicates
 
 val CAT_GEN     = Category("General")
 val CAT_DEV     = Category("Developer")

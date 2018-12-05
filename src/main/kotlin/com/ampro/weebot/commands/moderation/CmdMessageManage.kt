@@ -17,10 +17,41 @@ import java.util.concurrent.TimeUnit.SECONDS
  * A File contating [WeebotCommand]s regarding [Message] Management (deletion, etc(?))
  */
 
+
+/**
+ * Automatically deletes the marked message after a given time or 30 seconds by default
+ *
+ * Formatted: \<deleteme> [-t time] [message]
+ *
+ * @author Jonathan Augustine
+ * @since 1.0
+ */
+class CmdSelfDestruct : WeebotCommand("SelfDestruct",
+    arrayOf("deleteme","cleanthis","deletethis","covertracks","whome?","podh","sdc"),
+    CAT_MOD, "[-t delaySeconds] [message]",
+    "Deletes the marked message after the given amount of time (30 sec by default)",
+    HelpBiConsumerBuilder("SelfDestruct Message")
+        .setDescription("Deletes the marked message after the given amount of" +
+                " time (30 sec by " + "default)")
+        .addField("Arguments", "[-t delaySeconds] [message]")
+        .addField("Aliases", "deleteme, cleanthis, deletethis, covertracks, whome?, podh,sdc")
+        .build(), true, cooldown = 0, botPerms = arrayOf(MESSAGE_MANAGE)
+) {
+    override fun execute(event: CommandEvent) {
+        val args = event.splitArgs()
+        val delay = try {
+            if (args[0].matches(Regex("^(-t|-T)$"))) {
+                args[1].toLong()
+            } else { 30L }
+        } catch (e: Exception) { 30L }
+        event.message.delete().queueAfter(delay, SECONDS)
+    }
+}
+
 /**
  * A [WeebotCommand] to delete a number (2-1,000) messages from a given text channel.
  *
- * //TODO Allow more than 100 deletions (must be in 100 message chunks)
+ * //TODO Allow more than 100 deletions (must be in 100 message chunks, 2 sec apart)
  *
  * @author Jonathan Augustine
  * @since 2.0

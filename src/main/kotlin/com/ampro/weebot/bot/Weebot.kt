@@ -119,7 +119,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     /**
      * Any startup settings or states that must be reloaded before launch.
-     * TODO
+     * TODO Startup
      */
     fun startup() {
     }

@@ -11,9 +11,7 @@ import com.ampro.weebot.commands.developer.CmdSendSuggestion
 import com.ampro.weebot.commands.developer.CmdShutdown
 import com.ampro.weebot.commands.developer.GuildlistCommand
 import com.ampro.weebot.commands.developer.PingCommand
-import com.ampro.weebot.commands.moderation.CmdPurge
-import com.ampro.weebot.commands.moderation.CmdSettings
-import com.ampro.weebot.commands.moderation.CmdVoiceChannelRole
+import com.ampro.weebot.commands.moderation.*
 import com.ampro.weebot.commands.progammer.CmdRegexTest
 import com.ampro.weebot.main.WAITER
 
@@ -35,6 +33,8 @@ val CMD_SUGG            = CmdSendSuggestion() //Public
 val CMD_INVITEBOT       = CmdInviteLink()
 val CMD_HELP            = CmdHelp()
 val CMD_ABOUT           = CmdAbout()
+
+val CMD_SELFDESTRUCT    = CmdSelfDestruct()
 
 /* *******************************
  *         Admin Commands        *
@@ -63,6 +63,7 @@ val CMD_THIS            = CmdThis()
 val commands = listOf<WeebotCommand>(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING,
         CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,// CMD_HELP,
         CMD_SETTINGS, CMD_PURGE,
+        CMD_SELFDESTRUCT,
         CMD_REGEX,
         CMD_VCR,
         CMD_THIS, CMD_HELLOTHERE)

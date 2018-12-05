@@ -47,7 +47,8 @@ class CmdRegexTest : WeebotCommand(
     private fun regexEmbedBuilder(name: String, regex: String, strings: List<String>,
                                   matches: List<String>): MessageEmbed
             = strdEmbedBuilder.setTitle("$name's Regex Test")
-        .setDescription("Testing regex\n```\n$regex\n``` against ``$strings``" +
+        .setDescription("Testing regex\n```\n$regex\n``` against ${strings.size} " +
+                "strings: ```$strings```" +
             "\nFound ${matches.size} matches ${if (matches.isNotEmpty()) {
             "!\n```\n${kotlin.run{var s="";matches.forEach {s+="$it\n"};s}}```"
         } else { Emoji.FrowningFace.unicode }}")

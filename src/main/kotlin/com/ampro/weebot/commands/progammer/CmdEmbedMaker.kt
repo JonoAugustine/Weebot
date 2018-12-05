@@ -17,7 +17,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
  */
 class CmdEmbedMaker : WeebotCommand("embedmaker",
         arrayOf("embedbuilder", "embed", "makeembed", "sendembed"), CAT_PROG,
-        ""/*TODO*/, "Sends a message embed with the provided content.",
+        ""/*TODO args*/, "Sends a message embed with the provided content.",
         HelpBiConsumerBuilder("Embed Builder")
             .setDescription("Make a message embed (Like this message) straight from discord!\n\n")
             .appendDesc("")
