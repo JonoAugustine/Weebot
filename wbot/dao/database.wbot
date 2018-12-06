@@ -168,6 +168,30 @@
       "upvotes": 0,
       "downvotes": 0,
       "suggestion": "allow non-devs to see suggestions to allow for upvoting instead of re-submissions"
+    },
+    {
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 6
+          },
+          "time": {
+            "hour": 2,
+            "minute": 56,
+            "second": 7,
+            "nano": 257000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "UNREVIEWED",
+      "upvotes": 1,
+      "downvotes": 1,
+      "suggestion": "change shard to Weebot Centre in the about command"
     }
   ],
   "GLOBAL_WEEBOT": {

@@ -11,7 +11,9 @@ import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.util.Emoji
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.MessageEmbed
+import java.lang.Exception
 import java.util.*
+import java.util.regex.PatternSyntaxException
 
 /**
  * A Command that takes in a Regex string and Strings to test if it matches.
@@ -61,17 +63,26 @@ class CmdRegexTest : WeebotCommand(
         if (args.size < 2) return
         val regex: Regex
         val strings: List<String>
-        if (args[0].toLowerCase() == ("phrase")) { //\regex phrase <phrase here>
-            if (args.size < 3) return
-            regex = args[1].toRegex()
-            strings = listOf(args.subList(2, args.size).joinToString(" ","",""))
-        } else { //\regex <regex> word word word
-            regex = args[0].toRegex()
-            strings = args.subList(1, args.size)
+        try {
+            if (args[0].toLowerCase() == "phrase") { //\regex phrase <phrase here>
+                if (args.size < 3) return
+                regex = args[1].toRegex()
+                strings = listOf(args.subList(2, args.size).joinToString(" ", "", ""))
+            } else { //\regex <regex> word word word
+                regex = args[0].toRegex()
+                strings = args.subList(1, args.size)
+            }
+        } catch (e: PatternSyntaxException) {
+            event.reply("*${e.description}*")
+            return
+        } catch (e: Exception) {
+            event.reply("*Sorry, there was a problem processing your regex. Please try " +
+                    "again.*")
+            return
         }
         event.reply(
             regexEmbedBuilder(event.member?.nickname ?: event.author.name,
-                args[0],strings, strings.filter { regex.matches(it) })
+                regex.toString() ,strings, strings.filter { regex.matches(it) })
         )
     }
 
