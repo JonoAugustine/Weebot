@@ -11,11 +11,13 @@ import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.util.Emoji
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.MessageEmbed
+import java.util.*
 
 /**
  * A Command that takes in a Regex string and Strings to test if it matches.
  * TODO Multiple words in 1 check
  * \regex <regex> <word> {words...}
+ * \regex phrase <regex> {phrase}
  *
  * @author Jonathan Augustine
  * @since 2.0
@@ -57,8 +59,17 @@ class CmdRegexTest : WeebotCommand(
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
         if (args.size < 2) return
-        val regex = args[0].toRegex()
-        val strings = args.subList(1, args.size)
+        val regex: Regex
+        val strings: List<String>
+        if (args[0].toLowerCase() == ("phrase")) { //\regex phrase <phrase here>
+            if (args.size < 3) return
+            regex = args[1].toRegex()
+            strings = listOf(args.subList(2, args.size).joinToString(" ","",""))
+        } else { //\regex <regex> word word word
+            regex = args[0].toRegex()
+            strings = args.subList(1, args.size)
+        }
+
         val matches = strings.filter { regex.matches(it) }
         event.reply(
             regexEmbedBuilder(event.member?.nickname ?: event.author.name, args[0],

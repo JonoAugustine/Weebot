@@ -16,6 +16,8 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
 
+//TODO Still like most of it damn
+
 /**
  *
  * @param userID The ID of the [User]
