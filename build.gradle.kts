@@ -33,8 +33,10 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:1.6.1")
     implementation("joda-time:joda-time:2.2")
     implementation("commons-io:commons-io:2.6")
-    implementation("com.google.code.gson:gson:2.8.1")
-    implementation("com.github.jkcclemens:khttp:-SNAPSHOT")
+    implementation("com.google.code.gson:gson:2.8.5")
+    implementation("com.github.kittinunf.fuel:fuel:1.16.0")
+    implementation("com.github.kittinunf.fuel:fuel-gson:1.16.0")
+    implementation("com.github.kittinunf.fuel:fuel-coroutines:1.16.0")
 
     //JDA
     implementation("net.dv8tion:JDA:3.8.1_437")

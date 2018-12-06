@@ -15,7 +15,7 @@ import java.util.*
 
 /**
  * A Command that takes in a Regex string and Strings to test if it matches.
- * TODO Multiple words in 1 check
+ *
  * \regex <regex> <word> {words...}
  * \regex phrase <regex> {phrase}
  *
@@ -69,11 +69,10 @@ class CmdRegexTest : WeebotCommand(
             regex = args[0].toRegex()
             strings = args.subList(1, args.size)
         }
-
-        val matches = strings.filter { regex.matches(it) }
         event.reply(
-            regexEmbedBuilder(event.member?.nickname ?: event.author.name, args[0],
-                strings, matches))
+            regexEmbedBuilder(event.member?.nickname ?: event.author.name,
+                args[0],strings, strings.filter { regex.matches(it) })
+        )
     }
 
 }

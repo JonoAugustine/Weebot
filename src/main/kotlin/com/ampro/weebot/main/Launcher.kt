@@ -71,6 +71,8 @@ fun main(args_: Array<String>) = run {
     MLOG = FileLogger("Launcher $NOW_STR_FILE")
     slog("...DONE\n\n")
 
+    setupWebFuel()
+
     //Debug
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace

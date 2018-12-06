@@ -7,13 +7,16 @@ package com.ampro.weebot.commands.`fun`
 import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.commands.WeebotCommand
 import com.ampro.weebot.database.constants.strdEmbedBuilder
-import com.ampro.weebot.util.DIR_HOME
-import com.ampro.weebot.util.Emoji.PoutingCat
-import com.ampro.weebot.util.loadJson
+import com.ampro.weebot.main.MLOG
+import com.ampro.weebot.util.ApiLinkResponse
+import com.ampro.weebot.util.get
+import com.github.kittinunf.fuel.gson.responseObject
+import com.github.kittinunf.fuel.httpGet
 import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.CommandEvent
-import java.io.File
-import kotlin.random.Random
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import net.dv8tion.jda.core.entities.MessageEmbed
 
 
 /**
@@ -25,42 +28,40 @@ import kotlin.random.Random
 class CmdCatFact : WeebotCommand("CatFact", arrayOf("cat"), CAT_FUN, "",
     "Get a random fact about Cats.", cooldown = 10) {
 
+    val FALLBACK_CAT_IMAGE = "https://www.readersdigest.ca/wp-content/uploads/sites/14/2011/01/4-ways-cheer-up-depressed-cat.jpg"
+    val RAND_CAT_FACT  = "https://api-to.get-a.life/catfact"
+
     /**
      * A JSON wrapper class for [https://catfact.ninja] fact
      *
      * @author Jonathan Augustine
      * @since 2.0
      */
-    data class KatFact(@SerializedName("fact") val fact: String = "",
-                       @SerializedName("length") val length: Int = 0)
+    inner class KatFact(@SerializedName("fact") val fact: String) {
+        val embed: MessageEmbed get() {
+            val url = "https://api-to.get-a.life/catimg".get<ApiLinkResponse>()
+                .component1()?.link ?: FALLBACK_CAT_IMAGE
+            return strdEmbedBuilder.setTitle("Kat Fact")
+                .setDescription(fact)
+                .setImage(url).build()
+        }
+    }
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Cat Facts")
             .setDescription("Get a random fact about cats.\n").build()
     }
 
-    private lateinit var katFacts: List<KatFact>
-
-    fun loadFacts() = loadJson<List<KatFact>>(File(DIR_HOME, "res/catfact.json"))
+    private val katFacts: List<KatFact> = mutableListOf()
 
     override fun execute(event: CommandEvent) {
-        when {
-            (!this::katFacts.isInitialized || katFacts.isEmpty()) -> {
-                katFacts = loadFacts() ?: emptyList()
-            }
-            katFacts.isEmpty() -> {
-                event.reply("*Sorry, we're all out of cat facts.* $PoutingCat")
-                return
-            }
-            else -> {
-                val fact = katFacts[Random(1).nextInt(0, katFacts.size)]
+        GlobalScope.launch {
+            val catFact = RAND_CAT_FACT.get<KatFact>().component1()
+            if (catFact != null) {
+                event.reply(catFact.embed)
+            } else {
                 event.reply(
-                    strdEmbedBuilder.setTitle("Cat Fact:")
-                        .setDescription(fact.fact)
-                        .setThumbnail("https://purr.objects-us-west-1.dream.io/i/43878072_9b440a24af_z.jpg")
-                        //TODO make the cat image random
-                        .build()
-                )
+                    "*Sorry, Weebot tripped and got frustrated. " + "Please try again later.*")
             }
         }
     }

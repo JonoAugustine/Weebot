@@ -2,7 +2,7 @@
  * Copyright Aquatic Mastery Productions (c) 2018.
  */
 
-package com.ampro.weebot.commands.games
+package com.ampro.weebot.commands.`fun`.games
 
 import com.ampro.weebot.bot.Weebot
 import net.dv8tion.jda.core.entities.*

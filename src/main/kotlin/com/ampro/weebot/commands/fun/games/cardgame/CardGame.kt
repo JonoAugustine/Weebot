@@ -2,11 +2,11 @@
  * Copyright Aquatic Mastery Productions (c) 2018.
  */
 
-package com.ampro.weebot.commands.games.cardgame
+package com.ampro.weebot.commands.`fun`.games.cardgame
 
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.games.Game
-import com.ampro.weebot.commands.games.Player
+import com.ampro.weebot.commands.`fun`.games.Game
+import com.ampro.weebot.commands.`fun`.games.Player
 import net.dv8tion.jda.core.entities.User
 
 /**

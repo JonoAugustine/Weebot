@@ -4,20 +4,73 @@
 
 package com.ampro.weebot.commands.developer
 
-import com.ampro.weebot.commands.CAT_DEV
-import com.ampro.weebot.commands.WeebotCommand
+import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.developer.Suggestion.State
 import com.ampro.weebot.commands.developer.Suggestion.State.UNREVIEWED
-import com.ampro.weebot.commands.respondThenDelete
-import com.ampro.weebot.commands.splitArgs
 import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.constants.BOT_DEV_CHAT
-import com.ampro.weebot.database.constants.EMBED_MAX_DESCRIPTION
-import com.ampro.weebot.database.constants.strdEmbedBuilder
+import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.util.DD_MM_YYYY_HH_MM
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.TextChannel
 import java.time.OffsetDateTime
+
+/**
+ * A suggestion. Basically a String wrapper with info about date and location.
+ *
+ * @author Jonathan Augustine
+ * @since 1.0
+ */
+class Suggestion(val suggestion: String) {
+
+    enum class State {UNREVIEWED, ACCEPTED, COMPLETED, IGNORED}
+
+    /** The date and time the suggestion was submitted */
+    val submitTime: OffsetDateTime = OffsetDateTime.now()
+
+    var state: State = UNREVIEWED
+
+    /** The number of public upvotes a suggestion has */
+    var upvotes: Int = 1
+    /** The number of public downvotes a suggestion has */
+    var downvotes: Int = 1
+
+    override fun toString() = suggestion
+
+}
+
+/**
+ * Get a list of [Suggestion]s that match the given [criteria]
+ *
+ * @param criteria The search parameters
+ * @return A [List] of [Suggestion]s that match the given [criteria] (never null)
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+fun searchSuggs(criteria: (Suggestion) -> Boolean)
+        : List<Suggestion> = DAO.suggestions.filter { criteria(it) }
+
+/**
+ * Send a formatted list of [Suggestion]s in response to a non-dev [User] using
+ * the sugg see command
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+fun sendSuggsPublic(event: CommandEvent, criteria: (Suggestion) -> Boolean) {
+    val list = searchSuggs(criteria)
+
+}
+
+/**
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+fun sendSuggsDev(event: CommandEvent, criteria: (Suggestion) -> Boolean) {
+    val list = searchSuggs(criteria)
+
+}
 
 /**
  * A way for anyone in a Guild hosting a Weebot to make suggestions to the
@@ -27,9 +80,14 @@ import java.time.OffsetDateTime
  * @since 1.0
  */
 class CmdSendSuggestion : WeebotCommand("suggest", arrayOf("suggestion", "sugg"),
-    CAT_DEV, "<Your Suggestion here>",
+    CAT_DEV, "[-g] <Your Suggestion here> | [-s] [page #]",
     "Submit an anonymous suggestion to the Weebot developers right from Discord!",
-    cooldown = 60, children = arrayOf(CmdDevSuggestions())
+    HelpBiConsumerBuilder("Weebot Suggestions").setDescription(
+        "Submit an anonymous suggestion to the Weebot developers right from " +
+                "Discord!\nYou can use this command to report bugs, send " +
+                "suggestions, or vote on suggestions that have been sent by others!" +
+                "(don't worry, no one will know who sent each suggestion; 100% anon)"
+    ).build(), cooldown = 60, children = arrayOf(CmdDevSuggestions())
 ){
 
     override fun execute(event: CommandEvent) {
@@ -47,8 +105,8 @@ class CmdSendSuggestion : WeebotCommand("suggest", arrayOf("suggestion", "sugg")
         event.reply("*Thank you for your suggestion! We're working hard to "
                         + "make Weebot as awesome as possible, and we "
                         + "will try our best to include your suggestion!*")
-
     }
+
 }
 
 
@@ -66,37 +124,36 @@ class CmdSendSuggestion : WeebotCommand("suggest", arrayOf("suggestion", "sugg")
  */
 class CmdDevSuggestions : WeebotCommand("DevSuggestions", arrayOf("dev", "devsugg"),
         CAT_DEV, "sugg dev <args...>\n_ _ see [pageNum]\n_ rem <suggNum>\n_ _ state <suggNum> <newState>",
-        "See user suggestions for weebot",
-        guildOnly = false, ownerOnly = true, cooldown = 0 , hidden = true
+        "See user suggestions for weebot", ownerOnly = true, cooldown = 0 , hidden = true
 ) {
 
     /** How many suggestions per embed page */
     val PAGE_LENGTH: Int = 20
 
-    override fun isAllowed(channel: TextChannel?): Boolean {
-        return super.isAllowed(channel) || channel?.idLong == BOT_DEV_CHAT
-    }
+    override fun isAllowed(channel: TextChannel?)
+            = super.isAllowed(channel) || OFFICIAL_CHATS.contains(channel?.idLong)
 
     /**
      * Send a link of submitted suggestions.
      *
      * @param page The page to view (starts at 1)
+     * @param param The parameter to search by (State)
      * @param event The command event
      */
-    fun sendSuggestions(page: Int = 0, event: CommandEvent) {
+    fun sendSuggestions(page: Int = 0, event: CommandEvent, param: State? = null) {
         val e = strdEmbedBuilder.setTitle("Weebot Suggestions")
             .setDescription("A list of all user suggestions submitted.")
 
         val s = StringBuilder()
-        for (i in page * PAGE_LENGTH until DAO.suggestions.size) {
-            val sugg = DAO.suggestions[i]
-            s.append("${i + 1}) ")
-                .append(sugg.submitTime.format(DD_MM_YYYY_HH_MM))
-                .append(" | **${sugg.state}** |: $sugg\n")
+        for (k in page * PAGE_LENGTH until DAO.suggestions.size) {
+            val sugg = DAO.suggestions[k]
+            if (param != null && sugg.state == param) {
+                s.append("${k + 1}) ").append(sugg.submitTime.format(DD_MM_YYYY_HH_MM))
+                    .append(" | **${sugg.state}** |: $sugg\n")
+            }
         }
         e.addField("Suggestions:", s.toString(), false)
-
-        if (event.channel.idLong == BOT_DEV_CHAT) { event.reply(e.build()) }
+        if (OFFICIAL_CHATS.contains(event.channel.idLong)) { event.reply(e.build()) }
         else { event.replyInDm(e.build()) }
     }
 
@@ -117,16 +174,34 @@ class CmdDevSuggestions : WeebotCommand("DevSuggestions", arrayOf("dev", "devsug
 
         when (args[0].toLowerCase()) {
             "see" -> {
+                var state: State? = null
                 val pn = try { args[1].toInt() - 1 }
                 catch (e: NumberFormatException) {
-                    event.respondThenDelete("Invalid page number.")
+                    state = try {
+                        State.valueOf(args[1].toUpperCase())
+                        sendSuggestions(0, event, state)
+                        return
+                    } catch (e: IllegalArgumentException) {
+                        event.respondThenDelete(
+                            "Invalid State!(UNREVIEWED, ACCEPTED, COMPLETED or IGNORED)")
+                        return
+                    }
                     return
                 } catch (e: IndexOutOfBoundsException) { 0 }
                 if (pn * PAGE_LENGTH > DAO.suggestions.size) {
                     event.respondThenDelete("There are only ${DAO.suggestions.size} pages")
                     return
                 }
-                sendSuggestions(pn, event)
+                state = try {
+                    State.valueOf(args[1].toUpperCase())
+                } catch (e: IllegalArgumentException) {
+                    event.respondThenDelete(
+                        "Invalid State!(UNREVIEWED, ACCEPTED, COMPLETED or IGNORED)")
+                    return
+                } catch (e: java.lang.IndexOutOfBoundsException) {
+                    return
+                }
+                sendSuggestions(pn, event, state)
                 return
             }
             "state" -> {
@@ -187,23 +262,4 @@ class CmdDevSuggestions : WeebotCommand("DevSuggestions", arrayOf("dev", "devsug
         }
 
     }
-}
-
-/**
- * A suggestion. Basically a String wrapper with info about date and location.
- *
- * @author Jonathan Augustine
- * @since 1.0
- */
-class Suggestion(val suggestion: String) {
-
-    enum class State {UNREVIEWED, ACCEPTED, COMPLETED, IGNORED}
-
-    /** The date and time the suggestion was submitted */
-    val submitTime: OffsetDateTime = OffsetDateTime.now()
-
-    var state: State = UNREVIEWED
-
-    override fun toString() = suggestion
-
 }

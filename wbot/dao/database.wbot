@@ -21,6 +21,8 @@
         }
       },
       "state": "ACCEPTED",
+      "upvotes": 0,
+      "downvotes": 0,
       "suggestion": "when they did ^this \u003c@185063150557593600\u003e  it reacted to the last message the mentioned user sent"
     },
     {
@@ -43,7 +45,129 @@
         }
       },
       "state": "ACCEPTED",
+      "upvotes": 0,
+      "downvotes": 0,
       "suggestion": "When its a lil more done, im going to add texting to my bot so that it will message me when it goes down or text me each week with new suggestions and i can shut it down when im off the PC and stuff"
+    },
+    {
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 5
+          },
+          "time": {
+            "hour": 1,
+            "minute": 34,
+            "second": 27,
+            "nano": 141000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "ACCEPTED",
+      "upvotes": 0,
+      "downvotes": 0,
+      "suggestion": "CSGO weapon imagine search"
+    },
+    {
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 5
+          },
+          "time": {
+            "hour": 1,
+            "minute": 35,
+            "second": 26,
+            "nano": 180000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "ACCEPTED",
+      "upvotes": 0,
+      "downvotes": 0,
+      "suggestion": "admin See list of active passives"
+    },
+    {
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 5
+          },
+          "time": {
+            "hour": 1,
+            "minute": 40,
+            "second": 18,
+            "nano": 769000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "ACCEPTED",
+      "upvotes": 0,
+      "downvotes": 0,
+      "suggestion": "react to \\selfdestruct command to show the timer is active"
+    },
+    {
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 5
+          },
+          "time": {
+            "hour": 1,
+            "minute": 42,
+            "second": 14,
+            "nano": 929000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "ACCEPTED",
+      "upvotes": 0,
+      "downvotes": 0,
+      "suggestion": "search by state"
+    },
+    {
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 5
+          },
+          "time": {
+            "hour": 16,
+            "minute": 36,
+            "second": 26,
+            "nano": 773000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "UNREVIEWED",
+      "upvotes": 0,
+      "downvotes": 0,
+      "suggestion": "allow non-devs to see suggestions to allow for upvoting instead of re-submissions"
     }
   ],
   "GLOBAL_WEEBOT": {
