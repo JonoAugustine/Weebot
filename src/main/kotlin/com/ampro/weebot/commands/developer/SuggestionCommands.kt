@@ -393,9 +393,15 @@ class CmdDevSuggestions : WeebotCommand("dev", emptyArray(), CAT_DEV, "",
                     .build())
             }
             "rem", "remove", "delete", "del" -> {
-                val sugg: Suggestion = getSuggById(args[1], event) ?: return
-                DAO.suggestions.remove(sugg)
-                event.reply(strdEmbedBuilder.setTitle("Suggestion ${sugg.id} removed").build())
+                val remList = mutableListOf<String>()
+                for (i in 1 until args.size) {
+                    val sugg: Suggestion = getSuggById(args[i], event) ?: return
+                    DAO.suggestions.remove(sugg)
+                    remList.add(sugg.id)
+                }
+                event.reply(strdEmbedBuilder.setTitle("Suggestions Removed")
+                    .setDescription(remList.joinToString(", "))
+                    .build())
             }
             else -> try {
                 sendSuggsDev(args[0].toInt() - 1, event) { true }

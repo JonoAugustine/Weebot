@@ -118,14 +118,12 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
         "[category] [command name]", "Get information about Weebot Commands and Usage.",
         cooldown = 90
 ) {
-    //"Weebot's little brother."
+
     public override fun execute(event: CommandEvent) {
 
         val bot = getWeebotOrNew(event.guild)
 
         //val menu = Builder().addChoices() //TODO
-
-
 
         val HQR = if (event.jda.getUserById(event.client.ownerId) == null) {
             "<@${event.client.ownerId}>"

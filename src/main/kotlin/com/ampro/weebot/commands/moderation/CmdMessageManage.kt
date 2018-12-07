@@ -59,9 +59,9 @@ class CmdSelfDestruct : WeebotCommand("SelfDestruct",
  * @since 2.0
  */
 class CmdPurge : WeebotCommand("Purge", arrayOf("prune", "clean", "clear"), CAT_MOD,
-    "<number>", "Delete multiple messages.", guildOnly = true,
+    "<number>", "Delete multiple messages, 2-99.", guildOnly = true,
     botPerms = arrayOf(MESSAGE_MANAGE), userPerms = arrayOf(MESSAGE_MANAGE),
-    cooldown = 10, cooldownScope = CooldownScope.GUILD
+    cooldown = 3, cooldownScope = CooldownScope.GUILD
 ) {
 
     init {
@@ -112,6 +112,6 @@ class CmdChatLock : WeebotCommand("chatlock",
     userPerms = arrayOf(MANAGE_CHANNEL)
 ) {
     override fun execute(event: CommandEvent?) {
-            TODO()
+            //TODO Chatlock
     }
 }
