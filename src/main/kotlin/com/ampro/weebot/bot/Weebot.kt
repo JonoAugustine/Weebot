@@ -9,9 +9,7 @@ import com.ampro.weebot.database.getGuild
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.dv8tion.jda.core.entities.Guild
-import net.dv8tion.jda.core.entities.TextChannel
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
@@ -41,7 +39,23 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
     var enablePassives: Boolean = false
 
     /** The [TextChannel] to send logs to */
-    var logchannel: TextChannel? = null
+    var logchannel: Long = -1
+
+    /**
+     * Sneds a log message to the log channel if it is set
+     */
+    fun sendLog(embed: MessageEmbed, consumer: (Message) -> Unit = {}) {
+        getGuild(guildID)?.getTextChannelById(logchannel)?.sendMessage(embed)
+            ?.queue { consumer(it) }
+    }
+
+    /**
+     * Sneds a log message to the log channel if it is set
+     */
+    fun sendLog(message: String, consumer: (Message) -> Unit = {}) {
+        getGuild(guildID)?.getTextChannelById(logchannel)?.sendMessage(message)
+            ?.queue { consumer(it) }
+    }
 
     /** Allows Weebot to track usage for stats */
     var trackingEnabled: Boolean = false

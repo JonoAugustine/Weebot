@@ -4,20 +4,21 @@
 
 package com.ampro.weebot.commands.developer
 
-import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.CAT_DEV
 import com.ampro.weebot.commands.developer.Suggestion.State
-import com.ampro.weebot.commands.developer.Suggestion.State.*
+import com.ampro.weebot.commands.developer.Suggestion.State.COMPLETED
+import com.ampro.weebot.commands.developer.Suggestion.State.UNREVIEWED
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.SELF
-import com.ampro.weebot.util.*
+import com.ampro.weebot.util.DD_MM_YYYY_HH_MM
+import com.ampro.weebot.util.IdGenerator
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.*
 import net.dv8tion.jda.core.entities.TextChannel
-import java.lang.IndexOutOfBoundsException
-import java.lang.NumberFormatException
 import java.time.OffsetDateTime
+import kotlin.math.ceil
 
 val seeRegi = Regex("^(-([sS])+.*)$")
 val giveRegi = Regex("^(-([gG])+.*)$")
@@ -171,7 +172,7 @@ open class CmdSuggestion : WeebotCommand("suggest",
 }
 
 /** How many suggestions per embed page */
-const val PAGE_LENGTH: Int = 6
+const val PAGE_LENGTH = 6.0
 
 /**
  * Get a list of [Suggestion]s that match the given [criteria]
@@ -207,7 +208,7 @@ fun sendSuggsPublic(page: Int, event: CommandEvent, criteria: (Suggestion) -> Bo
     }
 
     val s = StringBuilder()
-    for (k in page * PAGE_LENGTH until list.size) {
+    for (k in page * PAGE_LENGTH.toInt() until list.size) {
         s.append("id : ${list[k].id}:\n*${list[k]}*\n")
             .append("**score: ${list[k].score} | | | state: ${list[k].state}**\n\n")
     }
@@ -217,6 +218,7 @@ fun sendSuggsPublic(page: Int, event: CommandEvent, criteria: (Suggestion) -> Bo
         return
     }
 
+    e.setTitle("Weebot Suggestions | page ${page+1} of ${ceil(list.size/PAGE_LENGTH).toInt()}")
     e.setDescription(s.toString())
     event.reply(e.build())
 }
@@ -238,7 +240,7 @@ fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boole
     }
 
     val s = StringBuilder()
-    for (k in page * PAGE_LENGTH until list.size) {
+    for (k in page * PAGE_LENGTH.toInt() until list.size) {
         s.append("id : ${list[k].id} | ")
             .append(list[k].submitTime.format(DD_MM_YYYY_HH_MM))
             .append(" | **${list[k].state}** | ${list[k].score} \n ${list[k]}\n\n")
@@ -249,7 +251,9 @@ fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boole
         return
     }
 
-    e.setDescription(s.toString())
+    e.setTitle("Weebot Suggestions | page ${page+1} of ${ceil(list.size/PAGE_LENGTH)
+        .toInt()}")
+        .setDescription(s.toString())
     if (OFFICIAL_CHATS.contains(event.channel.idLong)) { event.reply(e.build()) }
     else { event.replyInDm(e.build()) }
 }

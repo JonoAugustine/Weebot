@@ -95,7 +95,7 @@ class TrackerInitPassive(val enableMessage: Message) : IPassive {
  */
 class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"),
     CAT_MOD, "[settingName] [newSetting]", "View or Change your weebot's settings",
-    guildOnly = true, cooldown = 10,
+    guildOnly = true, cooldown = 30,
     children = arrayOf(
         CmdSetName(),
         CmdSetPrefix(),
@@ -123,7 +123,21 @@ class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"
 
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild.idLong)
-        TODO()
+        val config = bot.settings
+        val log = if (config.logchannel == -1L) "not set" else {
+            event.guild.getTextChannelById(config.logchannel).asMention
+        }
+        event.reply(strdEmbedBuilder
+            .setTitle("${event.guild.name}'s Weebot Settings")
+            .addField("Nickname", config.nickname, true)
+            .addField("Prefix", config.prefixes.joinToString(" ") , true)
+            .addField("Explicit", if (config.explicit) "on" else "off", true)
+            .addField("NSFW", if (config.nsfw) "on" else "off", true)
+            .addField("Passives", if (config.enablePassives) "on" else "off", true)
+            .addField("LogChannel", log, true)
+            .addField("Statistics Tracking", if (config.trackingEnabled) "on" else "off", true)
+            .build()
+        )
     }
 }
 

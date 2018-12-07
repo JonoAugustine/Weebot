@@ -42,10 +42,11 @@ class CmdSelfDestruct : WeebotCommand("SelfDestruct",
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
         val delay = try {
-            if (args[0].matches(Regex("^(-t|-T)$"))) {
+            if (args[0].matches(Regex("^-[t|T]$"))) {
                 args[1].toLong()
             } else { 30L }
         } catch (e: Exception) { 30L }
+        event.reactWarning()
         event.message.delete().queueAfter(delay, SECONDS)
     }
 }

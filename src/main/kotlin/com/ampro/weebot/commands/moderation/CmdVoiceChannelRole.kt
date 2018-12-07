@@ -85,13 +85,10 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
                 guild.controller.createRole().setName(channel.name)
                     .setHoisted(false).setMentionable(true).queue({
                         controller.addRolesToMember(event.member, it).queue()
-                    },{
-                        bot.settings.logchannel?.sendMessage(
-                                strdEmbedBuilder.setTitle("Log Message")
-                                    .setDescription(
-                                            "Failed to assign VoiceChannel Role: ${channel.name}"
-                                    ).build()
-                        )?.queue()
+                    }, {
+                        bot.settings.sendLog(strdEmbedBuilder.setTitle("Log Message")
+                            .setDescription(
+                                "Failed to assign VoiceChannel Role: ${channel.name}").build())
                     })
 
             }
