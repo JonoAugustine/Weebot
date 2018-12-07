@@ -2,6 +2,7 @@
   "initTime": "01-12-2018 00-35-04",
   "suggestions": [
     {
+      "id": "0",
       "submitTime": {
         "dateTime": {
           "date": {
@@ -21,35 +22,13 @@
         }
       },
       "state": "ACCEPTED",
-      "upvotes": 0,
-      "downvotes": 0,
-      "suggestion": "when they did ^this \u003c@185063150557593600\u003e  it reacted to the last message the mentioned user sent"
+      "votes": [
+        139167730237571072
+      ],
+      "suggestion": "when they did ^this @/ User it reacted to the last message the mentioned user sent"
     },
     {
-      "submitTime": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 3
-          },
-          "time": {
-            "hour": 20,
-            "minute": 12,
-            "second": 38,
-            "nano": 882000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "state": "ACCEPTED",
-      "upvotes": 0,
-      "downvotes": 0,
-      "suggestion": "When its a lil more done, im going to add texting to my bot so that it will message me when it goes down or text me each week with new suggestions and i can shut it down when im off the PC and stuff"
-    },
-    {
+      "id": "013",
       "submitTime": {
         "dateTime": {
           "date": {
@@ -69,11 +48,13 @@
         }
       },
       "state": "ACCEPTED",
-      "upvotes": 0,
-      "downvotes": 0,
+      "votes": [
+        139167730237571072
+      ],
       "suggestion": "CSGO weapon imagine search"
     },
     {
+      "id": "0134",
       "submitTime": {
         "dateTime": {
           "date": {
@@ -93,11 +74,11 @@
         }
       },
       "state": "ACCEPTED",
-      "upvotes": 0,
-      "downvotes": 0,
+      "votes": [],
       "suggestion": "admin See list of active passives"
     },
     {
+      "id": "01345",
       "submitTime": {
         "dateTime": {
           "date": {
@@ -117,35 +98,11 @@
         }
       },
       "state": "ACCEPTED",
-      "upvotes": 0,
-      "downvotes": 0,
+      "votes": [],
       "suggestion": "react to \\selfdestruct command to show the timer is active"
     },
     {
-      "submitTime": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 5
-          },
-          "time": {
-            "hour": 1,
-            "minute": 42,
-            "second": 14,
-            "nano": 929000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "state": "ACCEPTED",
-      "upvotes": 0,
-      "downvotes": 0,
-      "suggestion": "search by state"
-    },
-    {
+      "id": "as",
       "submitTime": {
         "dateTime": {
           "date": {
@@ -164,12 +121,12 @@
           "totalSeconds": -18000
         }
       },
-      "state": "UNREVIEWED",
-      "upvotes": 0,
-      "downvotes": 0,
+      "state": "COMPLETED",
+      "votes": [],
       "suggestion": "allow non-devs to see suggestions to allow for upvoting instead of re-submissions"
     },
     {
+      "id": "asd",
       "submitTime": {
         "dateTime": {
           "date": {
@@ -188,9 +145,8 @@
           "totalSeconds": -18000
         }
       },
-      "state": "UNREVIEWED",
-      "upvotes": 1,
-      "downvotes": 1,
+      "state": "COMPLETED",
+      "votes": [],
       "suggestion": "change shard to Weebot Centre in the about command"
     }
   ],

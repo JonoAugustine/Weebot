@@ -9,6 +9,7 @@ import com.ampro.weebot.commands.*
 import com.ampro.weebot.database.constants.EMBED_MAX_TITLE
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.RAND
 import com.ampro.weebot.util.Emoji.*
 import com.ampro.weebot.util.reactWith

@@ -5,7 +5,7 @@
 package com.ampro.weebot.commands.progammer
 
 import com.ampro.weebot.commands.CAT_PROG
-import com.ampro.weebot.commands.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommand
 import com.jagrosh.jdautilities.command.CommandEvent
 
 //TODO

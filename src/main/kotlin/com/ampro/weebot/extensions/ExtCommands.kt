@@ -2,7 +2,7 @@
  * Copyright Aquatic Mastery Productions (c) 2018.
  */
 
-package com.ampro.weebot.commands
+package com.ampro.weebot.extensions
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.database.DAO
@@ -14,6 +14,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.function.BiConsumer
@@ -21,6 +22,7 @@ import java.util.function.BiConsumer
 /** @return the string arguments of the message split into a [List]. Does NOT have the
  * command call in it */
 fun CommandEvent.splitArgs(): List<String> = this.args.split("\\s+".toRegex())
+    .filter { it.isNotBlank() }
 
 /** @return The string used to invoke this command (i.e. the first string of the message */
 fun CommandEvent.getInvocation(): String = this.message.contentStripped
@@ -44,6 +46,23 @@ fun CommandEvent.respondThenDelete(reason: String, delay: Long = 10L) {
     }
 }
 
+/**
+ * Send a response to a [CommandEvent] and then delete both messages.
+ *
+ * @param reason The message to send
+ * @param delay The delay in seconds between send & delete
+ */
+fun CommandEvent.respondThenDelete(reason: MessageEmbed, delay: Long = 10L) {
+    this.reply(reason) { response ->
+        if (this.privateChannel != null) {
+            response.delete().queueAfter(delay, SECONDS)
+        } else {
+            event.message.delete().queueAfter(delay, SECONDS) {
+                response.delete().queue()
+            }
+        }
+    }
+}
 
 /**
  * A wrapper class for [Command] holding functions used by Weebots
@@ -96,13 +115,15 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
      * @since 2.0
      */
     open class HelpBiConsumerBuilder() {
-        constructor(title: String) : this() { embedBuilder.setTitle(title).addField(guide) }
+        constructor(title: String) : this() { embedBuilder.setTitle(title).addField(
+            guide) }
         constructor(title: String, description: String) : this(title) {
             embedBuilder.setDescription(description)
         }
         constructor(title: String, withGuide: Boolean) : this() {
             embedBuilder.setTitle(title)
-            if (withGuide) embedBuilder.addField(guide) else return
+            if (withGuide) embedBuilder.addField(
+                guide) else return
         }
 
         companion object {

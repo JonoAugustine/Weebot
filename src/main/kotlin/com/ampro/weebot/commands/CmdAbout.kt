@@ -8,10 +8,9 @@ import com.ampro.weebot.commands.`fun`.CmdHelloThere
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.constants.weebotAvatarUrl
 import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.main.*
 import com.jagrosh.jdautilities.command.CommandEvent
-import com.jagrosh.jdautilities.menu.SelectionDialog
-import com.jagrosh.jdautilities.menu.SelectionDialog.*
 
 const val HELLO_THERE = "https://www.youtube.com/watch?v=rEq1Z0bjdwc"
 const val AMPRO       = "https://www.aquaticmasteryproductions.com/"
@@ -73,10 +72,11 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
                     true)
             } else {
                 eb.addField("Stats",
-                    "${JDA_SHARD_MNGR.guilds.size} Servers\nShard ${event.jda.shardInfo
+                    "${JDA_SHARD_MNGR.guilds.size} Servers\nWeebot Centre ${event.jda
+                        .shardInfo
                         .shardId + 1}/${event.jda.shardInfo.shardTotal}", true)
-                eb.addField("This shard",
-                    "${event.jda.users.size} Users\n${event.jda.guilds.size} Servers",
+                eb.addField("This Weebot Centre",
+                    "${event.jda.users.size} Users on ${event.jda.guilds.size} Servers",
                     true)
                 eb.addField("Channels",
                     "${event.jda.textChannels.size} Text Channels\n${event.jda.voiceChannels.size} Voice Channels",
@@ -123,7 +123,7 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
 
         val bot = getWeebotOrNew(event.guild)
 
-        val menu = Builder().addChoices()
+        //val menu = Builder().addChoices() //TODO
 
 
 

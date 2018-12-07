@@ -5,6 +5,8 @@
 package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.commands.*
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.splitArgs
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

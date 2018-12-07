@@ -9,8 +9,8 @@ package com.ampro.weebot.commands.developer
  */
 
 import com.ampro.weebot.commands.CAT_DEV
-import com.ampro.weebot.commands.WeebotCommand
-import com.ampro.weebot.commands.getInvocation
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.getInvocation
 import com.ampro.weebot.database.constants.STD_GREEN
 import com.ampro.weebot.main.shutdown
 import com.jagrosh.jdautilities.command.CommandEvent

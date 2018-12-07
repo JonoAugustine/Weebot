@@ -4,7 +4,6 @@
 
 package com.ampro.weebot.extensions
 
-import com.ampro.weebot.commands.WeebotCommand
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
@@ -13,6 +12,7 @@ import net.dv8tion.jda.core.entities.Member
  * Extension methods used for JDA elements
  */
 
+val userMentionRegex: Regex = "^(<@.*\\d+>)$".toRegex()
 
 fun Member.hasPerms(vararg p: Permission) = this.permissions.containsAll(p.toList())
 

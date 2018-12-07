@@ -5,14 +5,13 @@
 package com.ampro.weebot.commands.progammer
 
 import com.ampro.weebot.commands.CAT_PROG
-import com.ampro.weebot.commands.WeebotCommand
-import com.ampro.weebot.commands.splitArgs
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.util.Emoji
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.MessageEmbed
 import java.lang.Exception
-import java.util.*
 import java.util.regex.PatternSyntaxException
 
 /**

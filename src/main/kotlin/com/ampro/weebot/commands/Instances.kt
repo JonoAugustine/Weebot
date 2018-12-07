@@ -7,12 +7,13 @@ package com.ampro.weebot.commands
 import com.ampro.weebot.commands.`fun`.CmdCatFact
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
 import com.ampro.weebot.commands.`fun`.CmdThis
-import com.ampro.weebot.commands.developer.CmdSendSuggestion
+import com.ampro.weebot.commands.developer.CmdSuggestion
 import com.ampro.weebot.commands.developer.CmdShutdown
 import com.ampro.weebot.commands.developer.GuildlistCommand
 import com.ampro.weebot.commands.developer.PingCommand
 import com.ampro.weebot.commands.moderation.*
 import com.ampro.weebot.commands.progammer.CmdRegexTest
+import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.main.WAITER
 
 
@@ -23,7 +24,7 @@ import com.ampro.weebot.main.WAITER
 val CMD_SHUTDOWN        = CmdShutdown()
 val CMD_GUILDLIST       = GuildlistCommand(WAITER)
 val CMD_PING            = PingCommand() //Public
-val CMD_SUGG            = CmdSendSuggestion() //Public
+val CMD_SUGG            = CmdSuggestion() //Public
 
 
 /* *******************************

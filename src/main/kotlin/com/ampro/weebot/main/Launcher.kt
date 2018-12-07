@@ -7,7 +7,7 @@ package com.ampro.weebot.main
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CMD_HELP
 import com.ampro.weebot.commands.commands
-import com.ampro.weebot.commands.splitArgs
+import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.Dao
 import com.ampro.weebot.database.constants.BOT_DEV_CHAT

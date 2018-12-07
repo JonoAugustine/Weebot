@@ -3,7 +3,7 @@ package com.ampro.weebot.commands.social
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CAT_SOC
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.commands.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.commands.social.GuildSocialSettings.*
 import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.CommandEvent

@@ -9,6 +9,7 @@ import com.ampro.weebot.commands.*
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebot
 import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.hasPerm
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent

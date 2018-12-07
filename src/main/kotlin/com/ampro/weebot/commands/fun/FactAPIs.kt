@@ -5,13 +5,10 @@
 package com.ampro.weebot.commands.`fun`
 
 import com.ampro.weebot.commands.CAT_FUN
-import com.ampro.weebot.commands.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.database.constants.strdEmbedBuilder
-import com.ampro.weebot.main.MLOG
 import com.ampro.weebot.util.ApiLinkResponse
 import com.ampro.weebot.util.get
-import com.github.kittinunf.fuel.gson.responseObject
-import com.github.kittinunf.fuel.httpGet
 import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.GlobalScope
@@ -26,7 +23,7 @@ import net.dv8tion.jda.core.entities.MessageEmbed
  * @since 2.0
  */
 class CmdCatFact : WeebotCommand("CatFact", arrayOf("cat"), CAT_FUN, "",
-    "Get a random fact about Cats.", cooldown = 10) {
+    "Get a random fact about Cats and a cute picture.", cooldown = 10) {
 
     val FALLBACK_CAT_IMAGE = "https://www.readersdigest.ca/wp-content/uploads/sites/14/2011/01/4-ways-cheer-up-depressed-cat.jpg"
     val RAND_CAT_FACT  = "https://api-to.get-a.life/catfact"
