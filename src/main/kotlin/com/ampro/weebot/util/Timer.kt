@@ -13,7 +13,7 @@ import java.time.format.DateTimeFormatter
 val DD_MM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
 val DD_MM_YYYY_HH_MM    = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
 
-val NOW = OffsetDateTime.now()
+fun NOW() = OffsetDateTime.now()
 
 /** @return The current local date and time. dd-MM-yyyy HH:mm:ss */
 val NOW_STR: String get() = OffsetDateTime.now().format(

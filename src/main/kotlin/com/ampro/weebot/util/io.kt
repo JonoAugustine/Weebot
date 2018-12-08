@@ -22,6 +22,8 @@ val DAO_SAVE = File(DIR_DAO, "database.wbot")
 val DAO_BKUP = File(DIR_DAO, "dbsBK.wbot")
 val DAO_BKBK = File(DIR_TEMP, "dbstemp.wbot")
 
+val DIR_RES = File(DIR_HOME, "res")
+
 val GSON = GsonBuilder().enableComplexMapKeySerialization()
     .setExclusionStrategies().setPrettyPrinting().serializeNulls()
     .registerTypeAdapter(IPassive::class.java, InterfaceAdapter<IPassive>())

@@ -30,13 +30,8 @@ abstract class Card {
  * @author Jonathan Augustine
  * @since 2.0
  */
-abstract class CardGame<P: Player>(bot: Weebot, author: User)
-    : Game<P>(bot, author) {
-
-    constructor(bot: Weebot, author: User, vararg players: P)
-            : this(bot, author) {
-        players.forEach { super.players[it.user.idLong] = it }
-    }
+abstract class CardGame<P: Player>(guildId: Long, authorID: Long)
+    : Game<P>(guildId, authorID) {
 
     /**
      * Deal cards to a player

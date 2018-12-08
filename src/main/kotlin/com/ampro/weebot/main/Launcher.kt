@@ -6,21 +6,20 @@ package com.ampro.weebot.main
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CMD_HELP
+import com.ampro.weebot.commands.`fun`.games.cardgame.*
 import com.ampro.weebot.commands.commands
-import com.ampro.weebot.extensions.splitArgs
-import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.Dao
+import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.BOT_DEV_CHAT
 import com.ampro.weebot.database.constants.DEV_IDS
-import com.ampro.weebot.database.loadDao
 import com.ampro.weebot.extensions.addCommands
+import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandClient
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
-import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.*
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.Game.listening
@@ -59,7 +58,7 @@ lateinit var CMD_CLIENT: CommandClient
  * @throws RateLimitedException/
  * @throws InterruptedException
  */
-fun main(args_: Array<String>) = run {
+fun main(args_: Array<String>) = runBlocking {
     slog("Launching...")
     slog("\tBuilding Directories...")
     if (!buildDirs()) {
@@ -71,8 +70,9 @@ fun main(args_: Array<String>) = run {
     MLOG = FileLogger("Launcher $NOW_STR_FILE")
     slog("...DONE\n\n")
 
-    setupWebFuel()
-
+    /** Setup for random methods and stuff that is needed before launch */
+    val genSetup = listOf(launch { setupWebFuel() })
+    slog(DECK_CUST)
     //Debug
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace
@@ -115,6 +115,8 @@ fun main(args_: Array<String>) = run {
             }
         }
         .build()
+
+    genSetup.joinAll() //Ensure all gensetup is finished
 
     JDA_SHARD_MNGR.apply {
         addEventListener(CMD_CLIENT)

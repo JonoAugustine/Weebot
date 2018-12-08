@@ -4,15 +4,12 @@
 
 package com.ampro.weebot.commands
 
-import com.ampro.weebot.commands.`fun`.CmdCatFact
-import com.ampro.weebot.commands.`fun`.CmdHelloThere
-import com.ampro.weebot.commands.`fun`.CmdThis
-import com.ampro.weebot.commands.developer.CmdSuggestion
-import com.ampro.weebot.commands.developer.CmdShutdown
-import com.ampro.weebot.commands.developer.GuildlistCommand
-import com.ampro.weebot.commands.developer.PingCommand
+import com.ampro.weebot.commands.`fun`.*
+import com.ampro.weebot.commands.`fun`.games.cardgame.CmdCardsAgainstHumanity
+import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.commands.moderation.*
 import com.ampro.weebot.commands.progammer.CmdRegexTest
+import com.ampro.weebot.commands.utilitycommands.CmdOutHouse
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.main.WAITER
 
@@ -34,6 +31,7 @@ val CMD_SUGG            = CmdSuggestion() //Public
 val CMD_INVITEBOT       = CmdInviteLink()
 val CMD_HELP            = CmdHelp()
 val CMD_ABOUT           = CmdAbout()
+val CMD_OHC             = CmdOutHouse()
 
 val CMD_SELFDESTRUCT    = CmdSelfDestruct()
 
@@ -59,11 +57,14 @@ val CMD_REGEX           = CmdRegexTest()
 val CMD_CATFACT         = CmdCatFact()
 val CMD_HELLOTHERE      = CmdHelloThere()
 val CMD_THIS            = CmdThis()
+//val CMD_CAH             = CmdCardsAgainstHumanity()
+
 
 
 val commands = listOf<WeebotCommand>(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING,
         CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,// CMD_HELP,
         CMD_SETTINGS, CMD_PURGE, CMD_SELFDESTRUCT,
         CMD_REGEX,
-        CMD_VCR,
+        CMD_VCR, CMD_OHC,
+  //      CMD_CAH,
         CMD_THIS, CMD_HELLOTHERE, CMD_CATFACT)

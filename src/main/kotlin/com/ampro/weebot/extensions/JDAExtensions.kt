@@ -7,6 +7,7 @@ package com.ampro.weebot.extensions
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.Member
+import net.dv8tion.jda.core.entities.User
 
 /*
  * Extension methods used for JDA elements
@@ -34,3 +35,5 @@ fun CommandClientBuilder.addCommands(commands: Iterable<WeebotCommand>)
     commands.forEach { this.addCommand(it) }
     return this
 }
+
+infix fun User.`is`(id: Long) = this.idLong == id

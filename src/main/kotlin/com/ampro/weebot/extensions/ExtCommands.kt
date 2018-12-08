@@ -192,6 +192,11 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
             embedBuilder.setImage(url)
             return this
         }
+
+        fun addBlankField(b: Boolean = false): HelpBiConsumerBuilder {
+            embedBuilder.addBlankField(b)
+            return this
+        }
     }
 
     /**

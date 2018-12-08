@@ -33,6 +33,11 @@ fun String.matchesAnyConfirm(regecies: Collection<Regex>) : List<Regex> {
     return list
 }
 
+fun List<String>.contains(regex: Regex) : Boolean {
+    forEach { if (it.matches(regex)) return true }
+    return false
+}
+
 fun String.containsAny(strings: Collection<String>, ignoreCase: Boolean = true)
         : Boolean = strings.asSequence().any { this.contains(it, ignoreCase) }
 

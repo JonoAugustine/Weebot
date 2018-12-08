@@ -26,7 +26,7 @@ import java.util.concurrent.ConcurrentHashMap
  * @since 2.0
  */
 class UserProfile(val userID: Long) {
-    val initDate = NOW
+    val initDate = NOW()
 
     /* ******************
             Currency

@@ -5,6 +5,7 @@
 package com.ampro.weebot.commands.`fun`.games
 
 import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.database.constants.DEV_IDS
 import net.dv8tion.jda.core.entities.*
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
@@ -20,6 +21,18 @@ class ModificationWhileRunningException : Exception {
     constructor(err: String) : super(err)
 
     companion object { private val serialVersionUID = 1549072265432776147L }
+}
+
+/**
+ * A class representing a leaderboard
+ *
+ * @param scoredUsers A map of user IDs -> scores
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+open class LeaderBoard(val scoredUsers: MutableList<Pair<Long, Int>> = mutableListOf()) {
+    fun addUser(user: User, score: Int = 0) = scoredUsers.add(Pair(user.idLong, score))
 }
 
 /**
@@ -142,5 +155,8 @@ abstract class Game<P : Player> (
      * @return The player or null if no player is found.
      */
     fun getPlayer(user: User): P? = this.players[user.idLong]
+
+    /** @return true if the game has a dev as a player */
+    fun hasDev() = players.count { DEV_IDS.contains(it.key) } != 0
 
 }

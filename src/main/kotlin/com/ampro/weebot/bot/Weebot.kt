@@ -5,10 +5,10 @@
 package com.ampro.weebot.bot
 
 import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.getGuild
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
@@ -149,6 +149,10 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
  * @since 1.0
  */
 class GlobalWeebot : Weebot(-1L) {
+
+    val PASSIVE_MAX = 10
+    val PASSIVE_MAX_PREM = 50
+
     /** A list of user IDs that have enabled personal tracking */
     val trackedUsers = ArrayList<Long>(1000)
 
@@ -158,10 +162,29 @@ class GlobalWeebot : Weebot(-1L) {
      * @return The list of [IPassive]s linked to this user. If one does not exist,
      *          it is created, added to the map and returned
      */
-    fun getUesrPassiveList(user: User) = userPassives[user.idLong] ?: kotlin.run {
-        val list = ArrayList<IPassive>(10)
-        userPassives[user.idLong] = list
-        list
+    fun getUesrPassiveList(user: User)
+            = userPassives.getOrPut(user.idLong) { mutableListOf()}
+
+
+    /**
+     * Adds a [IPassive] to the user's lists of global passives if the user
+     * has not reached the max number of global passives.
+     *
+     * @return true if the passive was added, false if the max had been reached
+     */
+    fun addUserPassive(user: User, iPassive: IPassive): Boolean {
+        val list = userPassives.getOrPut(user.idLong) { mutableListOf()}
+        return if (DAO isPremium user) {
+            when {
+                list.size >= PASSIVE_MAX_PREM -> false
+                else -> { list.add(iPassive); true }
+            }
+        } else {
+            when {
+                list.size >= PASSIVE_MAX -> false
+                else -> { list.add(iPassive); true }
+            }
+        }
     }
 
     override fun feedPassives(event: Event) {

@@ -5,6 +5,7 @@
 package com.ampro.weebot.util
 
 import java.util.*
+import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
 const val alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
@@ -25,3 +26,5 @@ open class IdGenerator(var idLeng: Long = 5L) {
             .asSequence().map(alphaDigi::get).joinToString("")
     }
 }
+
+fun randInt(upper: Int) = ThreadLocalRandom.current().nextInt(upper)

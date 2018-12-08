@@ -251,7 +251,7 @@ class Dao() {
     fun removeBot(id: Long): Weebot? = this.WEEBOTS.remove(id)
 
     @Synchronized
-    fun isPremium(user: User): Boolean = PREMIUM_USERS.contains(user.idLong)
+    infix fun isPremium(user: User): Boolean = PREMIUM_USERS.contains(user.idLong)
 
     @Synchronized
     fun isPremium(userId: Long?): Boolean = PREMIUM_USERS.contains(userId)

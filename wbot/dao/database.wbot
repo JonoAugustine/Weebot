@@ -151,8 +151,12 @@
     }
   ],
   "GLOBAL_WEEBOT": {
+    "PASSIVE_MAX": 10,
+    "PASSIVE_MAX_PREM": 50,
     "trackedUsers": [],
-    "userPassives": {},
+    "userPassives": {
+      "139167730237571072": []
+    },
     "initDate": {
       "dateTime": {
         "date": {
@@ -179,7 +183,7 @@
       "explicit": false,
       "nsfw": false,
       "enablePassives": false,
-      "logchannel": null,
+      "logchannel": 0,
       "trackingEnabled": false,
       "guildID": -1
     },
@@ -214,7 +218,7 @@
         "explicit": false,
         "nsfw": false,
         "enablePassives": false,
-        "logchannel": null,
+        "logchannel": 0,
         "trackingEnabled": false,
         "guildID": -1
       },
