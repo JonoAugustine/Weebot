@@ -19,10 +19,7 @@ import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.time.temporal.ChronoUnit
 
-
-//TODO Forward mentions to private chat option
-
-/** An instantiable representation of a User's OutHouse.  */
+/** An instantiable representation of a User's OutHouse. */
 class OutHouse(user: User, minutes: Long, val message: String = "", val forward: Boolean)
     : IPassive {
 
@@ -87,7 +84,7 @@ class OutHouse(user: User, minutes: Long, val message: String = "", val forward:
 
 /**
  * Have the bot respond to your metions while you're AFK but shown as online.
- * Requires the bot condition [Weebot.ACTIVE_PARTICIPATE] set true.
+ * Can also forward messages to a private channel.
  *
  * @author Jonathan Augustine
  * @since 1.0
@@ -101,7 +98,9 @@ class CmdOutHouse : WeebotCommand("OutHouse", arrayOf("ohc"), CAT_UTIL,
             .setDescription("Have the bot respond to mentions for you while you're away.")
             .appendDesc("\nYou can also forward any message that mentions you to a ")
             .appendDesc("private channel.")
-            .addField("Arguments", "[Zd] [Xh] [Ym] [afk-message]\ndays, hours, minutes")
+            .addField("Arguments", "[Zd] [Xh] [Ym] [-f] [afk-message]" +
+                    "\ndays, hours, minutes. -f enables message forwarding to private " +
+                    "chat.")
             .addField("Alias", "outhouse")
             .build()
     }
