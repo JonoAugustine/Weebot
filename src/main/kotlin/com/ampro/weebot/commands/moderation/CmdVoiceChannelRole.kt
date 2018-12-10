@@ -15,8 +15,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.VoiceChannel
 import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
-import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
+import net.dv8tion.jda.core.events.guild.voice.*
 
 /**
  * The [IPassive] manager that creates, assigns, removes, and deletes
@@ -92,7 +91,7 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
                     })
 
             }
-            is GuildVoiceLeaveEvent -> {
+            is GuildVoiceUpdateEvent-> {
                 val guild = event.guild
                 val channel = event.channelLeft
                 if (!limitSafe(channel)) return
