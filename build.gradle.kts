@@ -6,6 +6,7 @@ plugins {
     application
     "com.github.johnrengelman.shadow version 1.2.4"
     "com.sedmelluq.jdaction version 1.0.2"
+    "org.springframework.boot"
 }
 
 group = "com.ampro"
@@ -47,6 +48,9 @@ dependencies {
     implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.1.1")
     implementation("me.sargunvohra.lib:pokekotlin:2.3.0")
     implementation("net.dean.jraw:JRAW:1.1.0")
+    //implementation("org.springframework.boot:spring-boot-gradle-plugin:1.4.3.RELEASE")
+    //implementation("org.springframework.boot:spring-boot-starter-web:1.4.3.RELEASE")
+    implementation("com.twilio.sdk:twilio:7.9.0")
 }
 
 configure<JavaPluginConvention> {

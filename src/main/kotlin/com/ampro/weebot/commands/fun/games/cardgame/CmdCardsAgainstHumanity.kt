@@ -95,17 +95,16 @@ data class CahGuildInfo(val guildId: Long) {
  * @since 1.0
  */
 data class WhiteCard(val text: String) : Card() {
-    init {
-        val id: String = CAH_IDGEN.next()
-    }
+    val id: String = CAH_IDGEN.next()
 }
 
 /**
  * @author Jonathan Augustine
  * @since 1.0
  */
-data class BlackCard(val text: String, val pick: Int, val id: String = CAH_IDGEN.next())
+data class BlackCard(val text: String, val pick: Int)
     : Card() {
+    val id: String = CAH_IDGEN.next()
     companion object {
         val MIN_BLANKS = HAND_SIZE_MIN
         val MAX_BLANKS = HAND_SIZE_MAX
@@ -124,11 +123,10 @@ fun <T: Any> Collection<CAHDeck>.collect(params: (CAHDeck) -> List<T>)
  * @since 1.0
  */
 data class CAHDeck(var name: String, val authorID: Long = -1L,
-                   val id: String = CAH_IDGEN.next(),
                    val restriction: Restriction = Restriction(),
                    val blackCards: MutableList<BlackCard> = mutableListOf(),
                    val whiteCards: MutableList<WhiteCard> = mutableListOf()) {
-
+    val id: String = CAH_IDGEN.next()
 }
 
 /**

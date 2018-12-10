@@ -1,8 +1,13 @@
 package com.ampro.weebot.database.constants
 
+import com.ampro.weebot.main.WAITER
+import com.jagrosh.jdautilities.menu.Paginator
+import com.jagrosh.jdautilities.menu.Paginator.Builder
 import net.dv8tion.jda.core.EmbedBuilder
+import net.dv8tion.jda.core.exceptions.PermissionException
 import java.awt.Color
 import java.time.Instant
+import java.util.concurrent.TimeUnit
 
 
 const val EMBED_MAX_TITLE = 256
@@ -40,3 +45,12 @@ val strdEmbedBuilder: EmbedBuilder
 fun makeEmbedBuilder(title: String, titleLink: String, description: String)
         = strdEmbedBuilder.setTitle(title, titleLink)
             .setDescription(description)!!
+
+val strdPaginator: Paginator.Builder
+    get() = Builder().setColor(STD_GREEN).setEventWaiter(WAITER)
+        .waitOnSinglePage(false).useNumberedItems(false).showPageNumbers(true)
+        .setTimeout(3, TimeUnit.MINUTES).setFinalAction { m ->
+            try {
+                m.clearReactions().queue()
+            } catch (ex: PermissionException) {}
+        }

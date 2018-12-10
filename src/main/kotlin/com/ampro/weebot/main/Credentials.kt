@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.main
 
+import com.twilio.type.PhoneNumber
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.core.AccountType
 import net.dv8tion.jda.core.JDA
@@ -16,8 +17,10 @@ import javax.security.auth.login.LoginException
         API Keys
  *******************/
 
-const val API_CAT_TOKEN = "949c9e4b-02af-42a9-a38b-3b90ac927ccf" //https://thecatapi.com/
-
+const val API_CAT_TOKEN  = "949c9e4b-02af-42a9-a38b-3b90ac927ccf" //https://thecatapi.com/
+const val TWILIO_SID     = "ACd4d05126a5cef2d7d3df831aa564f1f8"
+const val TWILIO_TOKEN   = "bd906c9dad4f39c2c2e662f38095bc00"
+val TWILIO_NUMBER  = PhoneNumber("+17084773268")
 
 /* *********************
       Weebot & Tobeew
@@ -42,7 +45,7 @@ private const val TOKEN_TEST = "NDQ0MzIzNzMyMDEwMzAzNDg4.DdaQyQ.ztloAQmeuUffaC-D
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaLogIn() : JDA {
-    MLOG.slog("Logging in to Weebot JDA client...")
+    MLOG.slog("Logging in to Weebot JDA TWILIO_CLIENT...")
     return JDABuilder(AccountType.BOT).setToken(TOKEN_WBT)
         .setGame(Game.playing("@Weebot help")).setCorePoolSize(10)
         .build().awaitReady()
@@ -58,7 +61,7 @@ fun jdaLogIn() : JDA {
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaDevLogIn() : JDA {
-    MLOG.slog("Logging in to TestBot JDA client...")
+    MLOG.slog("Logging in to TestBot JDA TWILIO_CLIENT...")
     return JDABuilder(AccountType.BOT).setToken(TOKEN_TEST)
         .setGame(Game.playing("Genocide")).setCorePoolSize(10)
             .build().awaitReady()

@@ -7,6 +7,10 @@ package com.ampro.weebot.extensions
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 
+/* ****************
+        String
+ *******************/
+
 /**
  * Remove all instances of the given regex
  *
@@ -42,6 +46,14 @@ fun String.containsAny(strings: Collection<String>, ignoreCase: Boolean = true)
         : Boolean = strings.asSequence().any { this.contains(it, ignoreCase) }
 
 
+/* ***********************
+        Map Extensions
+ *************************/
+
 fun <A, B> Iterable<A>.parMap(f: suspend (A) -> B): List<B> = runBlocking {
     map { async { f(it) } }.map { it.await() }
+}
+
+fun <K, V> MutableMap<K, V>.removeIf(predicate: (K, V) -> Boolean) {
+    putAll( filter { predicate(it.key, it.value) } )
 }

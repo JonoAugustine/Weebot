@@ -5,14 +5,41 @@
 package com.ampro.weebot.commands.progammer
 
 import com.ampro.weebot.commands.CAT_PROG
+import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.splitArgs
-import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.util.Emoji
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.MessageEmbed
-import java.lang.Exception
 import java.util.regex.PatternSyntaxException
+import javax.script.ScriptEngineManager
+
+
+/**
+ * @author Nate Sedler
+ * @since 2.0
+ */
+class CmdEval : WeebotCommand("RunCode", arrayOf("eval", "java"), CAT_PROG,
+    "<method.call>", "Evaluates given code.", cooldown = 5) {
+
+    override fun execute(event: CommandEvent) {
+        val se = ScriptEngineManager().getEngineByName("Nashorn")
+        se.put("event", event)
+        se.put("jda", event.jda)
+        se.put("guild", event.guild)
+        se.put("channel", event.textChannel)
+        se.put("bot", event.jda.selfUser)
+
+        try {
+            event.reply(strdEmbedBuilder.setDescription(
+                " Evaluated Successfully:\n```\n${se.eval(event.args)} ```").build())
+        } catch (e: Exception) {
+            event.reply(strdEmbedBuilder.setDescription(" An exception was thrown:\n```\n$e ```")
+                .build())
+        }
+    }
+
+}
 
 /**
  * A Command that takes in a Regex string and Strings to test if it matches.

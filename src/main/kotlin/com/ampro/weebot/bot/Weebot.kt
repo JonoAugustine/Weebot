@@ -4,9 +4,14 @@
 
 package com.ampro.weebot.bot
 
+import com.ampro.weebot.commands.CMD_REM
 import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.commands.utilitycommands.CmdReminder
+import com.ampro.weebot.commands.utilitycommands.CmdReminder.Companion.remWatchJob
+import com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.getGuild
+import com.ampro.weebot.util.elog
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.*
 import net.dv8tion.jda.core.entities.*
@@ -135,7 +140,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
      * Any startup settings or states that must be reloaded before launch.
      * TODO Startup
      */
-    fun startup() {
+    open fun startUp() {
     }
 
     override fun compareTo(other: Weebot) = (this.guildID - other.guildID).toInt()
@@ -150,13 +155,17 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
  */
 class GlobalWeebot : Weebot(-1L) {
 
-    val PASSIVE_MAX = 10
-    val PASSIVE_MAX_PREM = 50
+    init {
+        this.settings.prefixs = mutableListOf("", "w!", "\\", "!")
+    }
 
     /** A list of user IDs that have enabled personal tracking */
     val trackedUsers = ArrayList<Long>(1000)
 
-    private val userPassives = ConcurrentHashMap<Long, MutableList<IPassive>>()
+    val PASSIVE_MAX = 10
+    val PASSIVE_MAX_PREM = 50
+
+    private val userPassives  = ConcurrentHashMap<Long, MutableList<IPassive>>()
 
     /**
      * @return The list of [IPassive]s linked to this user. If one does not exist,
@@ -196,4 +205,40 @@ class GlobalWeebot : Weebot(-1L) {
             }
         }
     }
+
+    val REM_MAX = 10
+    val REM_MAX_PREM = 50
+
+    private val userReminders = ConcurrentHashMap<Long, MutableList<Reminder>>()
+
+    /**
+     * @return The list of [Reminder]s linked to this user
+     */
+    fun getReminders(user: User) = userReminders.getOrPut(user.idLong) { mutableListOf() }
+
+    fun getReminders() = userReminders.toMap()
+
+    fun addReminder(user: User, reminder: Reminder) = synchronized(userReminders) {
+        val list = userReminders.getOrPut(user.idLong) { mutableListOf() }
+        val added = if (DAO isPremium user) {
+            when {
+                list.size >= REM_MAX_PREM -> false
+                else -> { list.add(reminder); true }
+            }
+        } else {
+            when {
+                list.size >= REM_MAX -> false
+                else -> { list.add(reminder); true }
+            }
+        }
+
+        if (added) { CMD_REM.remJobMap.putIfAbsent(user.idLong, remWatchJob(list)) }
+        elog(list.toString())
+        return@synchronized added
+    }
+
+    override fun startUp() {
+        CMD_REM.init()
+    }
+
 }

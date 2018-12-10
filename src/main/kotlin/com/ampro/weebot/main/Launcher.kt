@@ -9,8 +9,7 @@ import com.ampro.weebot.commands.CMD_HELP
 import com.ampro.weebot.commands.`fun`.games.cardgame.*
 import com.ampro.weebot.commands.commands
 import com.ampro.weebot.database.*
-import com.ampro.weebot.database.constants.BOT_DEV_CHAT
-import com.ampro.weebot.database.constants.DEV_IDS
+import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.addCommands
 import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.listeners.EventDispatcher
@@ -32,26 +31,25 @@ import kotlin.system.measureTimeMillis
 
 val RAND = Random(128487621469)
 
-//JDA connection shard Client
-lateinit var JDA_SHARD_MNGR: ShardManager
-val WAITER: EventWaiter = EventWaiter()
+lateinit var SAVE_JOB: Job
 
 val CACHED_POOL =  Executors.newCachedThreadPool().asCoroutineDispatcher()
-//val FIXED_POOL = newFixedThreadPoolContext(100, "FixedPool")
 
 /** Main Logger */
 lateinit var MLOG: FileLogger
 
+//JDA connection shard Client
+lateinit var JDA_SHARD_MNGR: ShardManager
+var ON = true
+lateinit var CMD_CLIENT: CommandClient
+val WAITER: EventWaiter = EventWaiter()
 /** The bot's selfuser from */
 lateinit var SELF: SelfUser
 
-lateinit var CMD_CLIENT: CommandClient
 
 /**
  * Put bot online, setup listeners, and get full list of servers (Guilds)
  *
- * TODO: https://www.twilio.com/blog/2017/05/send-and-receive-sms-messages-with-kotlin.html
- * TODO Learn how to use [Paginator]
  *
  * @param args_
  * @throws LoginException
@@ -72,20 +70,19 @@ fun main(args_: Array<String>) = runBlocking {
 
     /** Setup for random methods and stuff that is needed before launch */
     val genSetup = listOf(launch { setupWebFuel() })
-    slog(DECK_CUST)
+
     //Debug
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace
 
-    //JDA_SHARD_MNGR = jdaShardLogIn().build()
-    JDA_SHARD_MNGR = jdaDevShardLogIn().build()
+    JDA_SHARD_MNGR = jdaShardLogIn().build()
+    //JDA_SHARD_MNGR = jdaDevShardLogIn().build()
 
     setUpDatabase()
 
     CMD_CLIENT = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
         .setCoOwnerIds(DEV_IDS[1].toString())
         .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }
-        //.setPrefix("\\")
         .setAlternativePrefix("\\")
         .setGame(listening("@Weebot help"))
         .addCommands(commands)
@@ -97,7 +94,7 @@ fun main(args_: Array<String>) = runBlocking {
                 CMD_HELP.execute(event)
             } else {
                 commands.forEach { cmd ->
-                    if (cmd.isCommandFor(args[0])) {
+                    if (cmd.isCommandFor(args[0]) && (!cmd.isHidden || event.isOwner)) {
                         if (cmd.getHelpBiConsumer() != null) {
                             cmd.getHelpBiConsumer().accept(event, cmd)
                             return@setHelpConsumer
@@ -133,14 +130,13 @@ fun main(args_: Array<String>) = runBlocking {
     SELF = JDA_SHARD_MNGR.shards[0].selfUser
 
     startupWeebots()
-    //startSaveTimer(.5)
 
-    //console.start()
+    MLOG.slog("Starting Save Job...")
+    SAVE_JOB = saveTimer()
 
     MLOG.slog("Launch Complete!\n\n")
 
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!").queue()
-
 }
 
 /**
@@ -172,51 +168,44 @@ private fun setUpDatabase() {
     MLOG.slog("...DONE")
 }
 
-
 /**
  * Calls the update method for each Weebot to setup NickNames
  * changed during downtime and initialize transient variables.
  */
 private fun startupWeebots() {
     MLOG.slog("Starting Weebots...")
-    DAO.WEEBOTS.forEach { _, bot -> bot.startup() }
+    DAO.GLOBAL_WEEBOT.startUp()
+    DAO.WEEBOTS.values.forEach { bot -> bot.startUp() }
 }
 
 /**
- * Starts a thread that saves a database backup each interval.
- * <br></br> Listens for a shutdown event to save the the main file
- * @param min The delay in minuets between saves.
+ * Starts a [Job] that saves a database backup each interval.
+ * Listens for a shutdown event to save the the main file
  *
+ * @param min The delay in minuets between saves.
+ */
 @Synchronized
-private fun startSaveTimer(min: Double) {
-    saveTimer = Thread {
-        var i = 1
-        val time = Math.round(1000 * 60 * min)
-        try {
-            while (true) {
-                if (JDA_CLIENT.status == JDA.Status.SHUTDOWN)
-                    break
-                if (JDA_CLIENT.status != JDA.Status.CONNECTED)
-                    continue
-                DAO.backUp()
-                if (i % 10 == 0) {
-                    MLOG.elog("Database back up: $i")
-                }
-                i++
-                Thread.sleep(time)
+private fun saveTimer() = GlobalScope.launch {
+    var i = 1
+    try {
+        while (ON) {
+            DAO.backUp()
+            if (i % 50 == 0) {
+                MLOG.elog("Database back up: $i")
             }
-        } catch (e: InterruptedException) {
-            e.printStackTrace()
+            i++
+            delay(30 * 1_000)
         }
+    } catch (e: InterruptedException) {
+        e.printStackTrace()
+        sendSMS(PHONE_JONO, "WEEBOT: Save Job Failed")
     }
-    saveTimer.name = "Save Timer"
-    saveTimer.start()
 }
-*/
 
 /** Begin the shutdown sequence. Backup and save database.  */
 fun shutdown(user: User) {
     MLOG.elog("Shutdown signal received from ${user.name} (${user.id}).")
+    ON = false
     MLOG.elog("\tClearing registered event listeners...")
 
     MLOG.elog("\tStopping save timer thread...")

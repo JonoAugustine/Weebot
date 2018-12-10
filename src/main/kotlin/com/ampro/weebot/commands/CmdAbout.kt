@@ -5,12 +5,14 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
+import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.constants.weebotAvatarUrl
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.main.*
 import com.jagrosh.jdautilities.command.CommandEvent
+import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
 
 const val HELLO_THERE = "https://www.youtube.com/watch?v=rEq1Z0bjdwc"
 const val AMPRO       = "https://www.aquaticmasteryproductions.com/"
@@ -121,7 +123,8 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
 
     public override fun execute(event: CommandEvent) {
 
-        val bot = getWeebotOrNew(event.guild)
+        val bot = if (event.channel.type == PRIVATE) DAO.GLOBAL_WEEBOT
+        else getWeebotOrNew(event.guild)
 
         //val menu = Builder().addChoices() //TODO
 

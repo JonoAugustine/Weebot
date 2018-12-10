@@ -6,8 +6,7 @@ package com.ampro.weebot.commands.developer
 
 import com.ampro.weebot.commands.CAT_DEV
 import com.ampro.weebot.commands.developer.Suggestion.State
-import com.ampro.weebot.commands.developer.Suggestion.State.COMPLETED
-import com.ampro.weebot.commands.developer.Suggestion.State.UNREVIEWED
+import com.ampro.weebot.commands.developer.Suggestion.State.*
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
@@ -18,7 +17,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.*
 import net.dv8tion.jda.core.entities.TextChannel
 import java.time.OffsetDateTime
-import kotlin.math.ceil
+import java.util.concurrent.TimeUnit.MINUTES
 
 val seeRegi = Regex("^(-([sS])+.*)$")
 val giveRegi = Regex("^(-([gG])+.*)$")
@@ -74,6 +73,12 @@ class Suggestion(val suggestion: String) {
 
     override fun toString() = suggestion
 
+    fun toStringPub()
+            = "id : $id:\n*$suggestion*\n**score: $score | | | state: $state.toString().toLowerCase()**\n\n"
+
+    fun toStringDev()
+            = "id : $id | ${submitTime.format(DD_MM_YYYY_HH_MM)} | **$state** | " +
+            "$score\n$suggestion\n\n"
 }
 
 /**
@@ -195,7 +200,11 @@ fun searchSuggs(criteria: (Suggestion) -> Boolean)
  */
 fun sendSuggsPublic(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boolean) {
     val list = searchSuggs(criteria).sortedByDescending {
-        if (it.state == COMPLETED) 0 else it.score
+        when (it.state) {
+            COMPLETED -> -1
+            IGNORED -> -2
+            else -> it.score
+        }
     }
 
     val e = strdEmbedBuilder.setTitle("Weebot Suggestions")
@@ -207,20 +216,9 @@ fun sendSuggsPublic(page: Int, event: CommandEvent, criteria: (Suggestion) -> Bo
         return
     }
 
-    val s = StringBuilder()
-    for (k in page * PAGE_LENGTH.toInt() until list.size) {
-        s.append("id : ${list[k].id}:\n*${list[k]}*\n")
-            .append("**score: ${list[k].score} | | | state: ${list[k].state}**\n\n")
-    }
+    strdPaginator.apply { list.forEach { this.addItems(it.toStringPub()) } }
+        .build().paginate(event.channel, page)
 
-    if (s.isEmpty()) {
-        event.respondThenDelete(e.setDescription("*This page is empty...*").build())
-        return
-    }
-
-    e.setTitle("Weebot Suggestions | page ${page+1} of ${ceil(list.size/PAGE_LENGTH).toInt()}")
-    e.setDescription(s.toString())
-    event.reply(e.build())
 }
 
 /**
@@ -232,30 +230,22 @@ fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boole
     val list = searchSuggs(criteria)
     val e = strdEmbedBuilder.setTitle("Weebot Suggestions")
     if (list.isEmpty()) {
-        event.reply(
-            e.setDescription("*No Suggestions found which match the search criteria*")
-                .build()
-        )
+        event.reply(e.setDescription(
+            "*No Suggestions found which match the search criteria*").build())
         return
     }
 
-    val s = StringBuilder()
-    for (k in page * PAGE_LENGTH.toInt() until list.size) {
-        s.append("id : ${list[k].id} | ")
-            .append(list[k].submitTime.format(DD_MM_YYYY_HH_MM))
-            .append(" | **${list[k].state}** | ${list[k].score} \n ${list[k]}\n\n")
+    if (OFFICIAL_CHATS.contains(event.channel.idLong)) {
+        strdPaginator.setTimeout(5, MINUTES)
+            .apply { list.forEach { this.addItems(it.toStringDev()) } }.build()
+            .paginate(event.channel, page)
+    } else {
+        event.author.openPrivateChannel().queue { ch ->
+            strdPaginator.setTimeout(5, MINUTES)
+                .apply { list.forEach { this.addItems(it.toStringDev()) } }.build()
+                .paginate(ch, page)
+        }
     }
-
-    if (s.isEmpty()) {
-        event.respondThenDelete(e.setDescription("*This page is empty...*").build())
-        return
-    }
-
-    e.setTitle("Weebot Suggestions | page ${page+1} of ${ceil(list.size/PAGE_LENGTH)
-        .toInt()}")
-        .setDescription(s.toString())
-    if (OFFICIAL_CHATS.contains(event.channel.idLong)) { event.reply(e.build()) }
-    else { event.replyInDm(e.build()) }
 }
 
 /**

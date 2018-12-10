@@ -5,11 +5,12 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.*
-import com.ampro.weebot.commands.`fun`.games.cardgame.CmdCardsAgainstHumanity
 import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.commands.moderation.*
+import com.ampro.weebot.commands.progammer.CmdEval
 import com.ampro.weebot.commands.progammer.CmdRegexTest
 import com.ampro.weebot.commands.utilitycommands.CmdOutHouse
+import com.ampro.weebot.commands.utilitycommands.CmdReminder
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.main.WAITER
 
@@ -32,6 +33,7 @@ val CMD_INVITEBOT       = CmdInviteLink()
 val CMD_HELP            = CmdHelp()
 val CMD_ABOUT           = CmdAbout()
 val CMD_OHC             = CmdOutHouse()
+val CMD_REM             = CmdReminder()
 
 val CMD_SELFDESTRUCT    = CmdSelfDestruct()
 
@@ -48,6 +50,7 @@ val CMD_VCR             = CmdVoiceChannelRole()
  *********************************/
 
 val CMD_REGEX           = CmdRegexTest()
+val CMD_EVAL            = CmdEval()
 
 
 /* *******************************
@@ -64,7 +67,7 @@ val CMD_THIS            = CmdThis()
 val commands = listOf<WeebotCommand>(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING,
         CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,// CMD_HELP,
         CMD_SETTINGS, CMD_PURGE, CMD_SELFDESTRUCT,
-        CMD_REGEX,
-        CMD_VCR, CMD_OHC,
+        CMD_REGEX, CMD_EVAL,
+        CMD_VCR, CMD_OHC, CMD_REM,
   //      CMD_CAH,
         CMD_THIS, CMD_HELLOTHERE, CMD_CATFACT)

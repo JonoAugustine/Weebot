@@ -9,13 +9,17 @@ package com.ampro.weebot.commands.developer
  */
 
 import com.ampro.weebot.commands.CAT_DEV
+import com.ampro.weebot.database.constants.PHONE_JONO
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.getInvocation
 import com.ampro.weebot.database.constants.STD_GREEN
 import com.ampro.weebot.main.shutdown
+import com.ampro.weebot.util.sendSMS
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import com.jagrosh.jdautilities.menu.Paginator
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
 import net.dv8tion.jda.core.exceptions.PermissionException
@@ -50,10 +54,11 @@ class CmdShutdown : WeebotCommand("shutdown", arrayOf("tite", "killbot", "devkil
     CAT_DEV, "", "Shutdown the weebot", hidden = true, ownerOnly = true
 ) {
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: CommandEvent) = runBlocking {
         event.reactWarning()
         event.reply("Shutting down all Weebots...")
-        //TODO send text to Jono
+        sendSMS(PHONE_JONO, "WEEBOT: Shutting Down")
+        delay(2_000)
         shutdown(event.author)
     }
 }
