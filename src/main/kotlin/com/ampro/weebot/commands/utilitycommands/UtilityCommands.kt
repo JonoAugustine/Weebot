@@ -14,6 +14,7 @@ import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.ON
 import com.ampro.weebot.util.*
+import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.*
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
@@ -334,8 +335,12 @@ class CmdReminder : WeebotCommand("Reminder", arrayOf("rc", "rem", "remindme"),
     }
 
     init {
-        helpBiConsumer = HelpBiConsumerBuilder("Weebot Discord and Text Reminders")
-                //toDo
+        helpBiConsumer = HelpBiConsumerBuilder("Weebot Reminders $AlarmClock")
+            .setDescription("Set a Reminder from 1 minute to 30 days.")
+            .addField("Set a Reminder", "[-p] [Xmin] [Yhr] [Zd] [Reminder Message]\n" +
+                    "-p (-private) sends the reminder as a private message", true)
+            .addField("See Your Reminders", "-s (-see)", true)
+            .addField("Remove a Reminder", "-r (-remove) <Reminder IDs...>", true)
             .build()
     }
 }

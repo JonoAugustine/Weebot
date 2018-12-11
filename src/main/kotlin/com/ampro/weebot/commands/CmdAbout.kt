@@ -5,6 +5,7 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
+import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.constants.strdPaginator
 import com.ampro.weebot.database.getWeebotOrNew
@@ -64,8 +65,13 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
             sBuilder.setLength(sBuilder.length - 2)
             sBuilder.append("\n\n")
             eb.setDescription(sBuilder.toString())
-
             sBuilder.setLength(0)
+
+            eb.addBlankField(false).addField("Premium Weebotters", //TODO
+                "Premium Weebotters: ${DAO.premiumUsers().size}\n" +
+                        "To get Premium features subscribe to " +
+                        "***[`HQRegent`]($HQTWITCH)*** on twitch and join the " +
+                        "[`NL Discord`](https://discord.gg/VdbNyxr).", true)
 
             //Global stats (server count, shard count)
             //Shard-level stats (User count, server count)
@@ -138,7 +144,8 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
                 if (i == 1) { //if ALL
                     strdPaginator.setText("All Weebot Commands").setUsers(event.author)
                         .apply {
-                            commands.filterNot { it.isHidden }.sortedBy { it.name }
+                            commands.filterNot { it.isHidden || it.isOwnerCommand }
+                                .sortedBy { it.name }
                                 .forEach {
                                     val ali = if (it.aliases.isNotEmpty()) {
                                         "\n*Aliases: ${it.aliases.joinToString(", ")}*"

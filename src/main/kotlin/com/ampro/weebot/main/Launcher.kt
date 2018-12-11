@@ -163,6 +163,7 @@ private fun setUpDatabase() {
         //Update the Weebots in the database after downtime.
         JDA_SHARD_MNGR.guilds.forEach { DAO.addBot(Weebot(it)) }
     }
+    DAO.updatePremiumUsers()
     MLOG.slog("\tBacking up database.")
     DAO.backUp()
     MLOG.slog("\t...DONE")
@@ -192,7 +193,7 @@ private fun saveTimer() = GlobalScope.launch {
         while (ON) {
             DAO.backUp()
             if (i % 50 == 0) {
-                MLOG.elog("Database back up: $i")
+                MLOG.slog("Database back up: $i")
             }
             i++
             delay(30 * 1_000)

@@ -1,0 +1,19 @@
+
+## Aquatic Mastery Productions ##
+		 # Weebot Log #
+	 08-12-2018 01:54:28
+
+
+
+[08-12-2018 01:54:28] [Launcher 08-12-2018 01-54-28] [info] Logging in to TestBot JDA shards...
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] Setting up Database...
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] 	Loading database...
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] 	Database located. Updating registered Guilds.
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] 	Backing up database.
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] 	...DONE
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] ...DONE
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] Waiting for shard to connect...
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] Shard connected! 0 seconds
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] Starting Weebots...
+[08-12-2018 01:54:29] [Launcher 08-12-2018 01-54-28] [info] Launch Complete!
+

@@ -6,7 +6,9 @@ package com.ampro.weebot.database
 
 import com.ampro.weebot.bot.*
 import com.ampro.weebot.commands.developer.Suggestion
-import com.ampro.weebot.database.constants.DEV_IDS
+import com.ampro.weebot.database.constants.NL_GUILD
+import com.ampro.weebot.database.constants.NL_SUBSCRIBER
+import com.ampro.weebot.extensions.removeIf
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.MLOG
 import com.ampro.weebot.util.*
@@ -18,21 +20,7 @@ import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.User
 import java.io.*
 import java.time.OffsetDateTime
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-
-/**
- * Check if user ID matches a Developer ID.
- *
- * @param id long ID to check
- * @return true if the user ID is a dev.
- */
-fun isDev(id: Long): Boolean = DEV_IDS.contains(id)
-
-/**
- * TODO PremiumUser
- */
-data class PremiumUser(val ID: Long)
 
 lateinit var DAO : Dao
 
@@ -115,6 +103,8 @@ data class Statistics(val initTime: String = NOW_STR_FILE) {
 
 }
 
+data class PremiumUser(val userId: Long) { val joinDate = NOW() }
+
 /**
  * A database for storing all the information about the Weebot program
  * between downtime.
@@ -124,8 +114,7 @@ data class Statistics(val initTime: String = NOW_STR_FILE) {
  * @author Jonathan Augustine
  * @since 1.0
  */
-
-class Dao() {
+class Dao {
 
     @SerializedName("initTime")
     val initTime: String = NOW_STR_FILE
@@ -141,10 +130,18 @@ class Dao() {
     /** All Weebots currently in circulation, mapped to their Guild's ID  */
     val WEEBOTS = ConcurrentHashMap<Long, Weebot>()
 
-    val PREMIUM_USERS = ConcurrentHashMap<Long, PremiumUser>()
+    private val PREMIUM_USERS = ConcurrentHashMap<Long, PremiumUser>()
 
     /** Build an empty `Database`. */
-    init { WEEBOTS.putIfAbsent(-1L, GLOBAL_WEEBOT) }
+    init {
+        WEEBOTS.putIfAbsent(-1L, GLOBAL_WEEBOT)
+        JDA_SHARD_MNGR.users.forEach { u ->
+            if (u.mutualGuilds?.contains(NL_GUILD) == true
+                    && NL_GUILD?.getMember(u)?.roles?.none { it.name == NL_SUBSCRIBER } == true) {
+                PREMIUM_USERS.putIfAbsent(u.idLong, PremiumUser(u.idLong))
+            }
+        }
+    }
 
     /**
      * Save the Database to file in the format:
@@ -251,13 +248,29 @@ class Dao() {
     fun removeBot(id: Long): Weebot? = this.WEEBOTS.remove(id)
 
     @Synchronized
-    infix fun isPremium(user: User): Boolean = PREMIUM_USERS.contains(user.idLong)
+    fun isPremium(user: User): Boolean = PREMIUM_USERS.contains(user.idLong)
 
     @Synchronized
     fun isPremium(userId: Long?): Boolean = PREMIUM_USERS.contains(userId)
 
     @Synchronized
-    fun premiumUsers() = Collections.unmodifiableMap(PREMIUM_USERS)
+    fun premiumUsers() = PREMIUM_USERS.toMap()
+
+    @Synchronized
+    fun updatePremiumUsers() {
+        PREMIUM_USERS.removeIf { id, _ ->
+            if (getUser(id)?.mutualGuilds?.contains(NL_GUILD) == true) {
+                NL_GUILD?.getMemberById(id)?.roles?.none { it.name == NL_SUBSCRIBER }
+                        ?: false
+            } else false
+        }
+        JDA_SHARD_MNGR.users.forEach { u ->
+            if (u.mutualGuilds?.contains(NL_GUILD) == true
+                    && NL_GUILD?.getMember(u)?.roles?.none { it.name == NL_SUBSCRIBER } == true) {
+                PREMIUM_USERS.putIfAbsent(u.idLong, PremiumUser(u.idLong))
+            }
+        }
+    }
 
     @Synchronized
     fun addPremiumUser(user: User,

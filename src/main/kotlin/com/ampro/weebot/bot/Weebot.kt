@@ -183,7 +183,7 @@ class GlobalWeebot : Weebot(-1L) {
      */
     fun addUserPassive(user: User, iPassive: IPassive): Boolean {
         val list = userPassives.getOrPut(user.idLong) { mutableListOf()}
-        return if (DAO isPremium user) {
+        return if (DAO.isPremium(user)) {
             when {
                 list.size >= PASSIVE_MAX_PREM -> false
                 else -> { list.add(iPassive); true }
@@ -220,7 +220,7 @@ class GlobalWeebot : Weebot(-1L) {
 
     fun addReminder(user: User, reminder: Reminder) = synchronized(userReminders) {
         val list = userReminders.getOrPut(user.idLong) { mutableListOf() }
-        val added = if (DAO isPremium user) {
+        val added = if (DAO.isPremium(user)) {
             when {
                 list.size >= REM_MAX_PREM -> false
                 else -> { list.add(reminder); true }
@@ -233,7 +233,6 @@ class GlobalWeebot : Weebot(-1L) {
         }
 
         if (added) { CMD_REM.remJobMap.putIfAbsent(user.idLong, remWatchJob(list)) }
-        elog(list.toString())
         return@synchronized added
     }
 
