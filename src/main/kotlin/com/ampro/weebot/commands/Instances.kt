@@ -65,7 +65,7 @@ val CMD_THIS            = CmdThis()
 
 
 val commands = listOf<WeebotCommand>(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING,
-        CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,// CMD_HELP,
+        CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,
         CMD_SETTINGS, CMD_PURGE, CMD_SELFDESTRUCT,
         CMD_REGEX, CMD_EVAL,
         CMD_VCR, CMD_OHC, CMD_REM,

@@ -74,7 +74,8 @@ class Suggestion(val suggestion: String) {
     override fun toString() = suggestion
 
     fun toStringPub()
-            = "id : $id:\n*$suggestion*\n**score: $score | | | state: $state.toString().toLowerCase()**\n\n"
+            = "id : $id:\n*$suggestion*\n**score: $score | | | state: ${
+    state.toString().toLowerCase()}**\n\n"
 
     fun toStringDev()
             = "id : $id | ${submitTime.format(DD_MM_YYYY_HH_MM)} | **$state** | " +
@@ -103,7 +104,7 @@ fun getSuggById(id: String, event: CommandEvent): Suggestion? {
  */
 open class CmdSuggestion : WeebotCommand("suggest",
     arrayOf("suggestion", "sugg"), CAT_DEV, "See help embed.",
-    "Submit an anonymous suggestion to the Weebot developers right from Discord!",
+    "Submit and Vote for anonymous suggestions for the Weebot devs.",
     HelpBiConsumerBuilder("Weebot Suggestions", false).setDescription(
         "Submit an anonymous suggestion to the Weebot developers right from " +
                 "Discord!\nYou can use this command to report bugs, send " +
@@ -217,6 +218,7 @@ fun sendSuggsPublic(page: Int, event: CommandEvent, criteria: (Suggestion) -> Bo
     }
 
     strdPaginator.apply { list.forEach { this.addItems(it.toStringPub()) } }
+        .setText("Weebot Suggestions")
         .build().paginate(event.channel, page)
 
 }
@@ -237,13 +239,13 @@ fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boole
 
     if (OFFICIAL_CHATS.contains(event.channel.idLong)) {
         strdPaginator.setTimeout(5, MINUTES)
-            .apply { list.forEach { this.addItems(it.toStringDev()) } }.build()
-            .paginate(event.channel, page)
+            .apply { list.forEach { this.addItems(it.toStringDev()) } }
+            .setText("Weebot Suggestions").build().paginate(event.channel, page)
     } else {
         event.author.openPrivateChannel().queue { ch ->
             strdPaginator.setTimeout(5, MINUTES)
-                .apply { list.forEach { this.addItems(it.toStringDev()) } }.build()
-                .paginate(ch, page)
+                .apply { list.forEach { this.addItems(it.toStringDev()) } }
+                .setText("Weebot Suggestions").build().paginate(ch, page)
         }
     }
 }

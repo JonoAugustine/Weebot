@@ -96,8 +96,9 @@ class OutHouse(user: User, var remainingMin: Long, val message: String, val forw
  * @since 1.0
  */
 class CmdOutHouse : WeebotCommand("OutHouse", arrayOf("ohc"), CAT_UTIL,
+    "[Zd] [Xh] [Ym] [-f] [activity]",
     "Have the bot respond to anyone who mentions you for the given time.",
-    "[time] [activity]", cooldown = 30) {
+    cooldown = 30) {
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("OutHouse Command")
@@ -239,7 +240,6 @@ class CmdReminder : WeebotCommand("Reminder", arrayOf("rc", "rem", "remindme"),
          */
         fun remWatchJob(list: MutableList<Reminder>) = GlobalScope.launch(remThreadPool) {
             while (list.isNotEmpty()) {
-                elog(list.joinToString{"${it.id}(${it.formatTime()}, \"${it.message}\")"})
                 list.forEach { it.update() }
                 list.filter { it.isDone() }.forEach { it.send() }
                 delay(1_000L)

@@ -73,7 +73,7 @@ class GuildlistCommand(waiter: EventWaiter) : WeebotCommand("guildlist",
     "Gets a paginated list of the guilds the bot is on.",
         HelpBiConsumerBuilder("Guild List")
             .setDescription("Gets a paginated list of the guilds the bot is on.").build(),
-        ownerOnly = true, userPerms = arrayOf(MESSAGE_EMBED_LINKS),
+        ownerOnly = true, userPerms = arrayOf(MESSAGE_EMBED_LINKS), hidden = true,
         botPerms = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ADD_REACTION)
 ) {
 

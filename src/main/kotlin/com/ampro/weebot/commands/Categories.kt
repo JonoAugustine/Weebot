@@ -10,9 +10,12 @@ import com.jagrosh.jdautilities.command.Command.Category
 
 val CAT_GEN     = Category("General")
 val CAT_DEV     = Category("Developer")
+val CAT_MOD     = Category("Moderator")
 val CAT_PROG    = Category("Programmer")
 val CAT_GAME    = Category("Game")
 val CAT_FUN     = Category("Fun")
 val CAT_SOC     = Category("Social")
-val CAT_MOD     = Category("Moderator")
 val CAT_UTIL    = Category("Utility")
+
+val categories = listOf(CAT_GEN, CAT_DEV, CAT_MOD, CAT_PROG, CAT_GAME, CAT_FUN,
+    CAT_SOC, CAT_UTIL)

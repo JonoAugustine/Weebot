@@ -118,6 +118,7 @@ fun main(args_: Array<String>) = runBlocking {
     JDA_SHARD_MNGR.apply {
         addEventListener(CMD_CLIENT)
         addEventListener(EventDispatcher())
+        addEventListener(WAITER)
     }
 
     MLOG.slog("Shard connected! ${measureTimeMillis {

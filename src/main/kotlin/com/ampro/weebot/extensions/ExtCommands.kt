@@ -13,8 +13,8 @@ import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.MessageEmbed
+import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.ChannelType.*
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.function.BiConsumer
@@ -61,6 +61,18 @@ fun CommandEvent.respondThenDelete(reason: MessageEmbed, delay: Long = 10L) {
                 response.delete().queue()
             }
         }
+    }
+}
+
+/**
+ * Delete the [Message] and an event
+ *
+ * @param reason The message to send
+ * @param delay The delay in seconds between send & delete
+ */
+fun CommandEvent.delete(delay: Long = 0L) {
+    if (!isFromType(PRIVATE)) {
+        this.message.delete().queueAfter(delay, SECONDS)
     }
 }
 
@@ -136,7 +148,7 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         val embedBuilder: EmbedBuilder = strdEmbedBuilder
 
         fun build(): BiConsumer<CommandEvent, Command> {
-            return BiConsumer { event, command ->
+            return BiConsumer { event, _ ->
                 embedBuilder.setDescription(description.toString())
                 if (sendDM) event.replyInDm(embedBuilder.build())
                 else event.reply(embedBuilder.build())
@@ -144,7 +156,7 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         }
 
         fun build(success: (Message) -> Unit) : BiConsumer<CommandEvent, Command> {
-            return BiConsumer { event, command ->
+            return BiConsumer { event, _ ->
                 embedBuilder.setDescription(description.toString())
                 if (sendDM) event.replyInDm(embedBuilder.build(), success)
                 else event.reply(embedBuilder.build(), success)

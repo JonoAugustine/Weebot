@@ -5,14 +5,15 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
-import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.constants.strdEmbedBuilder
-import com.ampro.weebot.database.constants.weebotAvatarUrl
+import com.ampro.weebot.database.constants.strdPaginator
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.delete
 import com.ampro.weebot.main.*
 import com.jagrosh.jdautilities.command.CommandEvent
-import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
+import com.jagrosh.jdautilities.menu.OrderedMenu
+import java.util.concurrent.TimeUnit.MINUTES
 
 const val HELLO_THERE = "https://www.youtube.com/watch?v=rEq1Z0bjdwc"
 const val AMPRO       = "https://www.aquaticmasteryproductions.com/"
@@ -122,59 +123,44 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
 ) {
 
     public override fun execute(event: CommandEvent) {
-
-        val bot = if (event.channel.type == PRIVATE) DAO.GLOBAL_WEEBOT
-        else getWeebotOrNew(event.guild)
-
-        //val menu = Builder().addChoices() //TODO
-
-        val HQR = if (event.jda.getUserById(event.client.ownerId) == null) {
-            "<@${event.client.ownerId}>"
-        } else {
-            event.jda.getUserById(event.client.ownerId).name
-        }
-
-        event.jda.asBot().applicationInfo.queue { appInfo ->
-
-            val eb = strdEmbedBuilder.setTitle("All about Weebot")
-                .setThumbnail(weebotAvatarUrl)
-            val r = "[\\[\\]]" // Regex for clearing array brackets
-
-            //Description
-            val descBuilder = StringBuilder("[`Hello there!`](\"$HELLO_THERE\") ")
-                .append("I am ***Weebot***, a bot, that ")
-                .append("is certainly not a weeb, no sir. No weebs here.")
-                .append("\nI was made by ***$HQR***, you can learn more about my")
-                .append(" father [`here`]($AMPRO).")
-                .append("\nPlease [`invite me to your server!`]($LINK_INVITEBOT)!")
-                .append("\n\n**Use ``${bot.settings.prefixs[0]}help`` ")
-                .append("for help using Weebot.**")
-                .append("*Use ``${bot.settings.prefixs[0]}about more`` for more details.")
-                .append("\n\n**__Weebot Commands__**")
-
-            //List of commands
-
-            //For each command build a "fake" field with styling
-            commands.forEach { cmd ->
-                if (cmd.isOwnerCommand) return@forEach
-                descBuilder.append("*__${cmd.name}__*").append("${cmd.help}\n")
-                    .append("Aliases: ${cmd.aliases.toString().replace(r,"")}\n")
-                    .append("User Permissions: ${cmd.userPermissions.toString()
-                        .replace(r,"")}\n")
-                    .append("Cooldown: ${cmd.cooldown} seconds\n")
-                    .append("In-guild only: ${cmd.isGuildOnly}\n")
-                if (!cmd.requiredRole.isNullOrBlank()) {
-                    descBuilder.append("Required Role: ${cmd.requiredRole}\n")
+        OrderedMenu.Builder().setEventWaiter(WAITER).setUsers(event.author)
+            .useCancelButton(true).setDescription("Weebot Help").apply {
+                addChoice("All")
+                categories.forEach { addChoice(it.name) }
+            }.setTimeout(1, MINUTES).setSelection { _, i ->
+                event.delete()
+                if (i == 1) { //if ALL
+                    strdPaginator.setText("All Weebot Commands").setUsers(event.author)
+                        .apply {
+                            commands.filterNot { it.isHidden }.sortedBy { it.name }
+                                .forEach {
+                                    val ali = if (it.aliases.isNotEmpty()) {
+                                        "\n*Aliases: ${it.aliases.joinToString(", ")}*"
+                                    } else ""
+                                    addItems("**${it.name}**\n${it.help}$ali\n")
+                                }
+                        }.build().apply {
+                            event.author.openPrivateChannel().queue {
+                                paginate(it, 1)
+                            }
+                        }
+                    return@setSelection
                 }
-                descBuilder.append("\n")
-            }
-            eb.setDescription(descBuilder.toString())
-            //Global stats (server count, shard count)
-            //Shard-level stats (User count, server count)
-
-            //other (?)
-
-            event.reply(eb.build())
-        }
+                val cat = categories[i - 2]
+                strdPaginator.setText("Weebot's ${cat.name} Commands")
+                    .setUsers(event.author).apply {
+                        commands.filter { it.category == cat && !it.isHidden }
+                            .sortedBy { it.name }.forEach {
+                                val ali = if (it.aliases.isNotEmpty()) {
+                                    "\n*Aliases: ${it.aliases.joinToString(", ")}*"
+                                } else ""
+                                addItems("**${it.name}**\n${it.help}$ali\n")
+                            }
+                    }.build().apply {
+                        event.author.openPrivateChannel().queue {
+                            paginate(it, 1)
+                        }
+                    }
+            }.build().display(event.channel)
     }
 }
