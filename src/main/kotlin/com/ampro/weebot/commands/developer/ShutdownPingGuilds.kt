@@ -9,6 +9,7 @@ package com.ampro.weebot.commands.developer
  */
 
 import com.ampro.weebot.commands.CAT_DEV
+import com.ampro.weebot.commands.CAT_GEN
 import com.ampro.weebot.database.constants.PHONE_JONO
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.getInvocation
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit
  * @author Jonathan Augustine
  * @since 1.0
  */
-class PingCommand : WeebotCommand("ping", arrayOf("pong"), CAT_DEV,
+class PingCommand : WeebotCommand("ping", arrayOf("pong"), CAT_GEN,
     "", "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong", false)
         .setDescription("Checks the bot's latency.").build(), false, cooldown = 10
 ) {

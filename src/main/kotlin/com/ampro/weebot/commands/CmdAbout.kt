@@ -8,8 +8,7 @@ import com.ampro.weebot.commands.`fun`.CmdHelloThere
 import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.constants.strdPaginator
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.delete
+import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.menu.OrderedMenu
@@ -42,14 +41,18 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
                 .append("I am ***Weebot***, a bot, that ")
                 .append("is certainly not a weeb, no sir. No weebs here.\n")
                 .append("I Have a bunch of fun, useful, and sometimes random commands ")
-                .append("that aim to make life on Discord easy, fun, and intuitive!\n")
+                .append("that aim to make life on Discord easy, fun, and intuitive!\n\n")
                 .append("I was made by ***[`HQRegent`]($HQTWITCH)***, ")
                 .append("using [`Kotlin`](https://kotlinlang.org) and the ")
                 .append("[`JDA library`](https://github.com/DV8FromTheWorld/JDA).\n")
                 .append("Please [`invite me to your server!`]($LINK_INVITEBOT)")
-                .append("\n\n*Use ${SELF.asMention} help for info using my commands.*")
+                .append("\n\nIf you need more Help using Weebot, want help ")
+                .append("using JDA to make your own bot, or just want to say hi to ")
+                .append("***[`HQRegent`]($HQTWITCH)***, join the ")
+                .append("[`Numberless Liquidator Discord`](https://discord.gg/VdbNyxr).")
+                .append("\n\n*Use \"${SELF.asMention} help\" for info using my commands.*")
                 .append("\n*Use ``${bot.settings.prefixs[0]}about more`` for more details.*")
-                .append("\n\n**__Weebot Commands__**\n")
+                .append("\n\n**__Weebot Commands__**\n\n")
 
             //List of commands
 
@@ -100,13 +103,16 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
 
 /**
  * Send a [MessageEmbed] giving info about the user.
- * ntTODO()
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
  */
 class CmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
     "", "Get information about Weebot.", cooldown = 90
 ) {
-    override fun execute(event: CommandEvent?) {
-        TODO("not implemented")
+    override fun execute(event: CommandEvent) {
+        event.respondThenDelete("*Under Constructions*", 5)
+        //TODO
     }
 }
 
