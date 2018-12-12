@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.util
 
-import com.ampro.weebot.main.*
+import com.ampro.weebot.database.constants.*
 import com.github.kittinunf.fuel.core.FuelError
 import com.github.kittinunf.fuel.core.FuelManager
 import com.github.kittinunf.fuel.gson.responseObject
@@ -32,13 +32,17 @@ fun setupWebFuel() {
 }
 
 
-val TWILIO_CLIENT = TwilioRestClient.Builder(TWILIO_SID, TWILIO_TOKEN).build()
+val TWILIO_CLIENT = TwilioRestClient.Builder(
+    TWILIO_SID,
+    TWILIO_TOKEN).build()
 
 fun sendSMS(to: String, message: String): Message?
-        = MessageCreator(PhoneNumber(to), TWILIO_NUMBER, message).create(TWILIO_CLIENT)
+        = MessageCreator(PhoneNumber(to),
+    TWILIO_NUMBER, message).create(TWILIO_CLIENT)
 
 fun sendSMS(to: String, message: String, handler: (Message?) -> Unit): Message?
-        = MessageCreator(PhoneNumber(to), TWILIO_NUMBER, message).create(TWILIO_CLIENT)
+        = MessageCreator(PhoneNumber(to),
+    TWILIO_NUMBER, message).create(TWILIO_CLIENT)
     .also { handler(it) }
 
 

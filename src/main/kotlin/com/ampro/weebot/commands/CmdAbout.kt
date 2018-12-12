@@ -5,9 +5,7 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
-import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.constants.strdEmbedBuilder
-import com.ampro.weebot.database.constants.strdPaginator
+import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.*
@@ -45,19 +43,16 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
                 .append("that aim to make life on Discord easy, fun, and intuitive!\n\n")
                 .append("I was made by ***[`HQRegent`]($HQTWITCH)***, ")
                 .append("using [`Kotlin`](https://kotlinlang.org) and the ")
-                .append("[`JDA library`](https://github.com/DV8FromTheWorld/JDA).\n")
-                .append("Please [`invite me to your server!`]($LINK_INVITEBOT)")
-                .append("\n\nIf you need more Help using Weebot, want help ")
+                .append("[`JDA library`](https://github.com/DV8FromTheWorld/JDA).")
+                .append("\nIf you need more Help using Weebot, want help ")
                 .append("using JDA to make your own bot, or just want to say hi to ")
                 .append("***[`HQRegent`]($HQTWITCH)***, join the ")
                 .append("[`Numberless Liquidator Discord`](https://discord.gg/VdbNyxr).")
+                .append("\n\nPlease [`invite me to your server!`]($LINK_INVITEBOT) and")
+                .append("vote for me on [`discordbots.org`]($DISCORD_BOTS_LINK)!")
                 .append("\n\n*Use \"${SELF.asMention} help\" for info using my commands.*")
-                .append("\n*Use ``${bot.settings.prefixs[0]}about more`` for more details.*")
                 .append("\n\n**__Weebot Commands__**\n\n")
 
-            //List of commands
-
-            //For each command build a "fake" field with styling
             commands.sortedBy { it.name.toLowerCase() }.forEach { cmd ->
                 if (cmd.isOwnerCommand) return@forEach
                 sBuilder.append("*${cmd.name}*, ")
@@ -67,11 +62,12 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
             eb.setDescription(sBuilder.toString())
             sBuilder.setLength(0)
 
-            eb.addBlankField(false).addField("Premium Weebotters", //TODO
+            /*eb.addBlankField(false).addField("Premium Weebotters", //TODO
                 "Premium Weebotters: ${DAO.premiumUsers().size}\n" +
                         "To get Premium features subscribe to " +
                         "***[`HQRegent`]($HQTWITCH)*** on twitch and join the " +
                         "[`NL Discord`](https://discord.gg/VdbNyxr).", true)
+                        */
 
             //Global stats (server count, shard count)
             //Shard-level stats (User count, server count)

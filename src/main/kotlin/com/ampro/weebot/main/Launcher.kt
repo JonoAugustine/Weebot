@@ -6,8 +6,8 @@ package com.ampro.weebot.main
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CMD_HELP
-import com.ampro.weebot.commands.`fun`.games.cardgame.*
 import com.ampro.weebot.commands.commands
+import com.ampro.weebot.commands.utilitycommands.remThreadPool
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.addCommands
@@ -75,8 +75,8 @@ fun main(args_: Array<String>) = runBlocking {
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace
 
-    JDA_SHARD_MNGR = jdaShardLogIn().build()
-    //JDA_SHARD_MNGR = jdaDevShardLogIn().build()
+    //JDA_SHARD_MNGR = jdaShardLogIn().build()
+    JDA_SHARD_MNGR = jdaDevShardLogIn().build()
 
     setUpDatabase()
 
@@ -111,6 +111,8 @@ fun main(args_: Array<String>) = runBlocking {
                 }
             }
         }
+        .setDiscordBotsKey(BOTSONDISCORD_KEY)
+        .setDiscordBotListKey(BOTLIST_KEY)
         .build()
 
     genSetup.joinAll() //Ensure all gensetup is finished
@@ -207,11 +209,7 @@ private fun saveTimer() = GlobalScope.launch {
 /** Begin the shutdown sequence. Backup and save database.  */
 fun shutdown(user: User) {
     MLOG.elog("Shutdown signal received from ${user.name} (${user.id}).")
-    ON = false
-    MLOG.elog("\tClearing registered event listeners...")
 
-    MLOG.elog("\tStopping save timer thread...")
-    //saveTimer.interrupt()
     MLOG.elog("\tShutting down Global Weebot Reminder pools...")
     //DAO.GLOBAL_WEEBOT.reminderPools.forEach { _, pool -> pool.shutdown() }
     MLOG.elog("\tBacking up database...")
@@ -234,7 +232,7 @@ fun shutdown(user: User) {
         while (status != JDA.Status.SHUTDOWN) {}
     }
 
-    //FIXED_POOL.close()
+    remThreadPool.close()
     CACHED_POOL.close()
 
     MLOG.elog("Safely shutdown.")

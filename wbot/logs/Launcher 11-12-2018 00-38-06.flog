@@ -51,3 +51,19 @@
 [11-12-2018 13:32:56] [Launcher 11-12-2018 00-38-06] [info] Database back up: 1550
 [11-12-2018 13:57:57] [Launcher 11-12-2018 00-38-06] [info] Database back up: 1600
 [11-12-2018 14:22:57] [Launcher 11-12-2018 00-38-06] [info] Database back up: 1650
+[11-12-2018 14:47:58] [Launcher 11-12-2018 00-38-06] [info] Database back up: 1700
+[11-12-2018 15:12:58] [Launcher 11-12-2018 00-38-06] [info] Database back up: 1750
+[11-12-2018 15:37:59] [Launcher 11-12-2018 00-38-06] [info] Database back up: 1800
+[11-12-2018 16:02:59] [Launcher 11-12-2018 00-38-06] [info] Database back up: 1850
+[11-12-2018 16:28:00] [Launcher 11-12-2018 00-38-06] [info] Database back up: 1900
+[11-12-2018 16:53:00] [Launcher 11-12-2018 00-38-06] [info] Database back up: 1950
+[11-12-2018 17:18:01] [Launcher 11-12-2018 00-38-06] [info] Database back up: 2000
+[11-12-2018 17:26:43] [Launcher 11-12-2018 00-38-06] [err] Shutdown signal received from HQR (139167730237571072).
+[11-12-2018 17:26:43] [Launcher 11-12-2018 00-38-06] [err] 	Clearing registered event listeners...
+[11-12-2018 17:26:44] [Launcher 11-12-2018 00-38-06] [err] 	Stopping save timer thread...
+[11-12-2018 17:26:44] [Launcher 11-12-2018 00-38-06] [err] 	Shutting down Global Weebot Reminder pools...
+[11-12-2018 17:26:44] [Launcher 11-12-2018 00-38-06] [err] 	Backing up database...
+[11-12-2018 17:26:44] [Launcher 11-12-2018 00-38-06] [err] 	Saving Database...
+[11-12-2018 17:26:44] [Launcher 11-12-2018 00-38-06] [err] 		Database saved.
+[11-12-2018 17:26:44] [Launcher 11-12-2018 00-38-06] [err] 	Clearing temp directories...
+[11-12-2018 17:26:44] [Launcher 11-12-2018 00-38-06] [err] Safely shutdown.

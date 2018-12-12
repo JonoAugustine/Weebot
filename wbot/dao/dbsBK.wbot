@@ -155,66 +155,12 @@
     "PASSIVE_MAX": 10,
     "PASSIVE_MAX_PREM": 50,
     "userPassives": {
-      "139167730237571072": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.utilitycommands.OutHouse",
-          "DATA": {
-            "lastTime": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 12,
-                  "day": 11
-                },
-                "time": {
-                  "hour": 14,
-                  "minute": 35,
-                  "second": 41,
-                  "nano": 50000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -18000
-              }
-            },
-            "userId": 139167730237571072,
-            "remainingMin": 14,
-            "message": "6hr",
-            "forward": false
-          }
-        }
-      ]
+      "139167730237571072": []
     },
     "REM_MAX": 10,
     "REM_MAX_PREM": 50,
     "userReminders": {
-      "139167730237571072": [
-        {
-          "id": "YR4DCNB",
-          "lastTime": {
-            "dateTime": {
-              "date": {
-                "year": 2018,
-                "month": 12,
-                "day": 11
-              },
-              "time": {
-                "hour": 14,
-                "minute": 39,
-                "second": 10,
-                "nano": 265000000
-              }
-            },
-            "offset": {
-              "totalSeconds": -18000
-            }
-          },
-          "userID": 139167730237571072,
-          "channel": null,
-          "minutes": 34,
-          "message": "Move the premium Weebotter count to the title of the field"
-        }
-      ]
+      "139167730237571072": []
     },
     "initDate": {
       "dateTime": {

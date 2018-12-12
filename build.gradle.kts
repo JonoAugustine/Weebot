@@ -43,6 +43,7 @@ dependencies {
     implementation("net.dv8tion:JDA:3.8.1_437")
     implementation("com.github.JDA-Applications:JDA-Utilities:fcaf53dfb7")
     implementation("ca.pjer:chatter-bot-api:1.4.7")
+    implementation("org.discordbots:DBL-Java-Library:2.0.1")
 
     //Tools & APIs
     implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.1.1")

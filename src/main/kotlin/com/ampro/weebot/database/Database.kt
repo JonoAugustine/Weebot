@@ -6,8 +6,7 @@ package com.ampro.weebot.database
 
 import com.ampro.weebot.bot.*
 import com.ampro.weebot.commands.developer.Suggestion
-import com.ampro.weebot.database.constants.NL_GUILD
-import com.ampro.weebot.database.constants.NL_SUBSCRIBER
+import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.removeIf
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.MLOG
@@ -18,11 +17,19 @@ import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.Command
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.User
+import org.discordbots.api.client.DiscordBotListAPI
 import java.io.*
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
 
 lateinit var DAO : Dao
+
+val DISCORD_BOTLIST_API = DiscordBotListAPI.Builder().token(BOTSONDISCORD_KEY)
+    .botId(CLIENT_WBT.toString()).build()
+
+infix fun User.hasVoted(handler: (Boolean, Throwable) -> Boolean) {
+    DISCORD_BOTLIST_API.hasVoted(this.id).handleAsync(handler)
+}
 
 /**
  * Get a guild matching the ID given.

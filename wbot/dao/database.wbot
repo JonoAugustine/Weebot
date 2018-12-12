@@ -154,7 +154,9 @@
     "trackedUsers": [],
     "PASSIVE_MAX": 10,
     "PASSIVE_MAX_PREM": 50,
-    "userPassives": {},
+    "userPassives": {
+      "139167730237571072": []
+    },
     "REM_MAX": 10,
     "REM_MAX_PREM": 50,
     "userReminders": {
