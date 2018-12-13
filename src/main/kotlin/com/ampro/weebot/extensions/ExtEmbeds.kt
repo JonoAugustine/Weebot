@@ -5,11 +5,11 @@
 package com.ampro.weebot.extensions
 
 import com.ampro.weebot.main.WAITER
-import com.ampro.weebot.util.Emoji
+import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
-import com.ampro.weebot.util.toEmoji
 import com.jagrosh.jdautilities.menu.*
 import com.jagrosh.jdautilities.menu.Paginator.Builder
+import kotlinx.coroutines.*
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.*
@@ -96,11 +96,11 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     : Menu(WAITER, users, roles, timeout, unit) {
 
     companion object {
-        val BIG_LEFT = Rewind.unicode
-        val LEFT = ArrowBackward.unicode
-        val STOP = Stop.unicode
-        val RIGHT = ArrowForward.unicode
-        val BIG_RIGHT = FastForward.unicode
+        val BIG_LEFT = Rewind
+        val LEFT = ArrowBackward
+        val STOP = Stop
+        val RIGHT = ArrowForward
+        val BIG_RIGHT = FastForward
     }
 
     private val pages: Int = Math.ceil(items.size.toDouble() / itemsPerPage).toInt()
@@ -174,32 +174,46 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         initialize(message.editMessage(msg), page)
     }
 
-    private fun initialize(action: RestAction<Message>, pageNum: Int) {
+    private fun initialize(action: RestAction<Message>, pageNum: Int) = runBlocking {
         action.queue { m ->
             when {
                 pages > 1 -> {
-                    if (bulkSkipNumber > 1) m.addReaction(BIG_LEFT).queue()
-                    m.addReaction(LEFT).queue()
-                    m.addReaction(STOP).queue()
-                    if (bulkSkipNumber > 1) m.addReaction(RIGHT).queue()
-                    m.addReaction(if (bulkSkipNumber > 1) BIG_RIGHT else RIGHT)
-                        .queue({ pagination(m, pageNum) }, { pagination(m, pageNum) })
+                    if (bulkSkipNumber > 1) m.reactWith(BIG_LEFT)
+                    m.reactWith(LEFT, STOP)
+                    //items.forEach { m.reactWith(it.first) }
+                    val start = (pageNum - 1) * itemsPerPage
+                    val end = when {
+                        items.size < pageNum * itemsPerPage -> items.size
+                        else -> pageNum * itemsPerPage
+                    }
+                    (start until end).forEach { m.reactWith(items[it].first) }
+                    runBlocking {  delay(1_000); pagination(m, pageNum) }
+                    if (bulkSkipNumber > 1) m.reactWith(RIGHT)
+                    m.reactWith(if (bulkSkipNumber > 1) BIG_RIGHT else RIGHT)
+                    launch {
+                        delay(500)
+                        pagination(m, pageNum)
+                    }
+                    return@queue
                 }
-                waitOnSinglePage -> // Go straight to without text-input because only one page is available
-                    m.addReaction(STOP).queue(
-                        { paginationWithoutTextInput(m, pageNum) },
-                        { paginationWithoutTextInput(m, pageNum) }
-                    )
-                else -> finalAction(m)
+                else -> {
+                    val start = (pageNum - 1) * itemsPerPage
+                    val end = when {
+                        items.size < pageNum * itemsPerPage -> items.size
+                        else -> pageNum * itemsPerPage
+                    }
+                    (start until end).forEach { m.reactWith(items[it].first) }
+                    runBlocking {  delay(1_000); pagination(m, pageNum) }
+                    launch {
+                        delay(500)
+                        pagination(m, pageNum)
+                    }
+                }
             }
         }
     }
 
     private fun pagination(message: Message, pageNum: Int) {
-        paginationWithoutTextInput(message, pageNum)
-    }
-
-    private fun paginationWithoutTextInput(message: Message, pageNum: Int) {
         waiter.waitForEvent(MessageReactionAddEvent::class.java,
             { event -> checkReaction(event, message.idLong) }, // Check Reaction
             { event -> handleMessageReactionAddAction(event, message, pageNum) },
@@ -209,14 +223,16 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     // Private method that checks MessageReactionAddEvents
     private fun checkReaction(event: MessageReactionAddEvent, messageId: Long): Boolean {
         if (event.messageIdLong != messageId) return false
-        when (event.reactionEmote.name) {
+        val emoji = event.reactionEmote.toEmoji()
+        return when (emoji) {
             // LEFT, STOP, RIGHT, BIG_LEFT, BIG_RIGHT all fall-through to
             // return if the User is valid or not. If none trip, this defaults
             // and returns false.
-            LEFT, STOP, RIGHT -> return isValidUser(event.user, event.guild)
-            BIG_LEFT, BIG_RIGHT -> return bulkSkipNumber > 1 && isValidUser(event.user,
-                event.guild)
-            else -> return false
+            LEFT, STOP, RIGHT -> isValidUser(event.user, event.guild)
+            BIG_LEFT, BIG_RIGHT -> bulkSkipNumber > 1 && isValidUser(event.user, event.guild)
+            else -> if (items.indexOfFirst { it.first == emoji } != 0) {
+                isValidUser(event.user,event.guild)
+            } else false
         }
     }
 
@@ -224,7 +240,8 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     private fun handleMessageReactionAddAction(event: MessageReactionAddEvent,
                                                message: Message, pageNum: Int) {
         var newPageNum = pageNum
-        when (event.reaction.reactionEmote.name) {
+        val emoji = event.reaction.reactionEmote.toEmoji()
+        when (emoji) {
             LEFT -> {
                 if (newPageNum == 1 && wrapPageEnds) newPageNum = pages + 1
                 if (newPageNum > 1) newPageNum--
@@ -249,15 +266,8 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                     i++
                 }
             }
-            STOP -> {
-                finalAction(message)
-                return
-            }
             else -> {
-                items.find { event.reaction.reactionEmote.emote.toEmoji() == it.first }
-                    ?.apply {
-                        third(first, message)
-                }
+                items.find { emoji == it.first }?.apply { third(first, message) }
                 return
             }
         }
@@ -267,7 +277,15 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         } catch (ignored: PermissionException) {}
 
         val n = newPageNum
-        message.editMessage(renderPage(newPageNum)).queue { m -> pagination(m, n) }
+        message.editMessage(renderPage(newPageNum)).queue { m ->
+            val start = (newPageNum - 1) * itemsPerPage
+            val end = when {
+                items.size < newPageNum * itemsPerPage -> items.size
+                else -> newPageNum * itemsPerPage
+            }
+            (start until end).forEach { m.reactWith(items[it].first) }
+            runBlocking {  delay(1_000); pagination(m, n) }
+        }
     }
 
     private fun renderPage(pageNum: Int): Message {

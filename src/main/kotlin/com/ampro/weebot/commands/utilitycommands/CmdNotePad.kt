@@ -9,11 +9,12 @@ import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.utilitycommands.NotePad.Note
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.util.IdGenerator
-import com.ampro.weebot.util.NOW
+import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.exceptions.PermissionException
+import java.lang.Exception
 import java.time.OffsetDateTime
 
 
@@ -53,7 +54,7 @@ internal infix fun List<String>.toNotes(authorID: Long) : List<Note> {
  * False if the Member is not allowed. <br></br>
  * False if the Role is not allowed.
  */
-infix fun CommandEvent.canWrite(notePad: NotePad): Boolean {
+infix fun CommandEvent.canWriteTo(notePad: NotePad): Boolean {
     return when {
         //The Author can always edit
         member.user.idLong == notePad.authorID -> true
@@ -72,6 +73,38 @@ infix fun CommandEvent.canWrite(notePad: NotePad): Boolean {
                 }
             }
             return notePad.writeRestriction.isAllowed(member.user)
+        }
+    }
+
+}
+
+/**
+ * Check if the event can edit the NotePad.
+ * @param event
+ * @return True if Author or Admin <br></br>
+ * False if the channel is not allowed. <br></br>
+ * False if the Member is not allowed. <br></br>
+ * False if the Role is not allowed.
+ */
+infix fun CommandEvent.canRead(notePad: NotePad): Boolean {
+    return when {
+        //The Author can always edit
+        member.user.idLong == notePad.authorID -> true
+
+        //Admins are admins so ya know...they win
+        member.permissions.contains(ADMINISTRATOR) -> true
+
+        //Check Channel
+        !notePad.readRestriction.isAllowed(textChannel) -> false
+
+        //Check Role
+        else -> {
+            for (r in this.member.roles) {
+                if (notePad.readRestriction.isAllowed(r)) {
+                    return true
+                }
+            }
+            return notePad.readRestriction.isAllowed(member.user)
         }
     }
 
@@ -133,6 +166,24 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
 
     val readRestriction = Restriction()
     val writeRestriction = Restriction()
+
+    /**
+     * Sends the NotePad as an Embed. If the message couldnt be edited then resends.
+     * //TODO Send as a new [SelectablePaginator] with a back button that resends
+     * the note list
+     */
+    fun send(message: Message) {
+        val eb = strdEmbedBuilder.setTitle("Sample").build()
+        try {
+            message.editMessage(eb).queue {
+
+            }
+        } catch (e: Exception) {
+            message.textChannel.sendMessage(eb).queue {
+
+            }
+        }
+    }
 
     /**
      * Add notes to the NotePad.
@@ -253,7 +304,10 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
         val mem = event.member
         val guild = event.guild
         val bot = getWeebotOrNew(event.guild)
-        val pads = bot.notePads
+        val pads = bot.notePads.apply {add(NotePad("TestPad", event.author.idLong))}
+        /** User's Viewable notepads */
+        val cv = pads.filter { event canRead it }
+
 
         if (args.isEmpty()) {
             if (pads.isEmpty()) {
@@ -262,18 +316,36 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
                     .setDescription("Use ``make [Notepad Name]`` to make a new NotePad")
                     .build(), 30)
                 return
+            } else if (cv.isEmpty()) {
+                event.respondThenDelete(strdEmbedBuilder
+                    .setTitle("${guild.name} has no NotePads you can view")
+                    .setDescription("Use ``make [Notepad Name]`` to make a new NotePad")
+                    .build(), 30)
+                return
             }
+
+            val emojiCounter = EmojiCounter()
             SelectablePaginator(setOf(auth),
                 title = "${guild.name} NotePads",
                 description = "${guild.name} NotePads available to ${mem.effectiveName}",
                 itemsPerPage = 10, thumbnail = "https://47eaps32orgm24ec5k1dcrn1" +
                         "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/" +
                         "notepad-pen-sponsor.png",
-                items = emptyList()
-            ) { message ->
+                items = List<Triple<Emoji, String, (Emoji, Message) -> Unit>>(pads.size) {
+                    Triple(emojiCounter.next(), "${cv[it].name} (${cv[it].id})")
+                    { e, m ->
+                        try { m.clearReactions().queue()
+                        } catch (e: PermissionException) {}
+                        pads[OrderedEmoji.indexOf(e)].send(m)
+                    }
+                }) { m -> //Final Action
+                try {
+                    m.clearReactions().queue()
+                } catch (e: Exception) {
 
+                }
             }.display(event.textChannel)
-
+            return
         }
 
         /*

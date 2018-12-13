@@ -8,6 +8,7 @@ package com.ampro.weebot.util
 import com.ampro.weebot.util.Emoji.*
 import net.dv8tion.jda.core.entities.Emote
 import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.MessageReaction.ReactionEmote
 import java.util.function.Consumer
 
 /**
@@ -52,13 +53,37 @@ fun Message.reactWith(vararg emojis: Emoji) {
  */
 fun Emote.toEmoji() = values().find { it.unicode == this.name }
 
+fun ReactionEmote.toEmoji() = Emoji.values().find { it.unicode == name }
+
 /** A list of 0-10 then A-Z emojis */
 internal val OrderedEmoji = listOf(Zero, One, Two, Three, Four, Five, Six, Seven,
     Eight, Nine, KeycapTen, A, B, C, D, E, F, G, H, I_lowercase, J, K, L, M, N, O, P,
     Q, R, S, T, U, V, W, X, Y, Z)
 
-class EmojiCounter(val alsoUseLetters: Boolean = true) {
+/**
+ * An incrementer for sequential Emoji
+ *
+ * @param alsoUseLetters If the counter should use letters as well as numbers
+ * @param wrap Whether the
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+class EmojiCounter(val alsoUseLetters: Boolean = true, val wrap: Boolean = false) {
+    var i = 0
 
+    /**
+     * Returns the next [Emoji] in the sequence of [OrderedEmoji]
+     *
+     * @throws NoSuchElementException if the Counter has reaced the end
+     */
+    @Throws(NoSuchElementException::class)
+    fun next() : Emoji {
+        if (!alsoUseLetters && i == 12) {
+            i = if (wrap) 0 else throw NoSuchElementException()
+        } else if (OrderedEmoji.size == i) i = 0
+        return OrderedEmoji[i++]
+    }
 }
 
 /**
