@@ -9,8 +9,7 @@ import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CAT_GAME
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.`fun`.games.*
-import com.ampro.weebot.commands.`fun`.games.Game
-import com.ampro.weebot.database.constants.strdEmbedBuilder
+import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.database.getGuild
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.removeAll
@@ -24,7 +23,6 @@ import java.io.IOException
 import java.nio.file.Files
 import java.util.*
 import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ThreadLocalRandom
 
 const val CAH_MIN_PLAYERS   = 3
 /**

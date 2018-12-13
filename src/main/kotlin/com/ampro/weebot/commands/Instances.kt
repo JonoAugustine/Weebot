@@ -9,8 +9,7 @@ import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.commands.moderation.*
 import com.ampro.weebot.commands.progammer.CmdEval
 import com.ampro.weebot.commands.progammer.CmdRegexTest
-import com.ampro.weebot.commands.utilitycommands.CmdOutHouse
-import com.ampro.weebot.commands.utilitycommands.CmdReminder
+import com.ampro.weebot.commands.utilitycommands.*
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.main.WAITER
 
@@ -34,6 +33,7 @@ val CMD_HELP            = CmdHelp()
 val CMD_ABOUT           = CmdAbout()
 val CMD_OHC             = CmdOutHouse()
 val CMD_REM             = CmdReminder()
+val CMD_NOTE            = CmdNotePad()
 
 val CMD_SELFDESTRUCT    = CmdSelfDestruct()
 
@@ -68,6 +68,7 @@ val commands = listOf<WeebotCommand>(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING,
         CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,
         CMD_SETTINGS, CMD_PURGE, CMD_SELFDESTRUCT,
         CMD_REGEX, CMD_EVAL,
-        CMD_VCR, CMD_OHC, CMD_REM,
+        CMD_OHC, CMD_REM, CMD_NOTE,
+        CMD_VCR,
   //      CMD_CAH,
         CMD_THIS, CMD_HELLOTHERE, CMD_CATFACT)

@@ -6,7 +6,7 @@ package com.ampro.weebot.commands.`fun`
 
 import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.database.constants.strdEmbedBuilder
+import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.util.ApiLinkResponse
 import com.ampro.weebot.util.get
 import com.google.gson.annotations.SerializedName

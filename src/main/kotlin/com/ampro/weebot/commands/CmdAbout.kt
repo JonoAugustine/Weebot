@@ -49,7 +49,7 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
                 .append("***[`HQRegent`]($HQTWITCH)***, join the ")
                 .append("[`Numberless Liquidator Discord`](https://discord.gg/VdbNyxr).")
                 .append("\n\nPlease [`invite me to your server!`]($LINK_INVITEBOT) and")
-                .append("vote for me on [`discordbots.org`]($DISCORD_BOTS_LINK)!")
+                .append(" vote for me on [`discordbots.org`]($DISCORD_BOTS_LINK)!")
                 .append("\n\n*Use \"${SELF.asMention} help\" for info using my commands.*")
                 .append("\n\n**__Weebot Commands__**\n\n")
 

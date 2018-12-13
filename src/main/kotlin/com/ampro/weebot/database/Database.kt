@@ -5,8 +5,10 @@
 package com.ampro.weebot.database
 
 import com.ampro.weebot.bot.*
+import com.ampro.weebot.commands.developer.CmdSuggestion
 import com.ampro.weebot.commands.developer.Suggestion
 import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.removeIf
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.MLOG
@@ -50,6 +52,13 @@ fun getWeebotOrNew(guild: Guild) = getWeebot(guild.idLong) ?: kotlin.run {
 fun getWeebotOrNew(guildID: Long) = getWeebot(guildID) ?: kotlin.run {
     val b = Weebot(guildID); DAO.addBot(b);b
 }
+
+infix fun User.isBlocked(klass: Class<out WeebotCommand>)
+        = DAO.blockedUsers[klass]?.contains(idLong) == true
+
+infix fun WeebotCommand.blocks(user: User)
+        = DAO.blockedUsers[this.javaClass]?.contains(user.idLong) == true
+
 
 /**
  * A class to track the bot's usage.
@@ -138,6 +147,10 @@ class Dao {
     val WEEBOTS = ConcurrentHashMap<Long, Weebot>()
 
     private val PREMIUM_USERS = ConcurrentHashMap<Long, PremiumUser>()
+
+    val blockedUsers = ConcurrentHashMap<Class<out WeebotCommand>, MutableList<Long>>(
+        mapOf(CmdSuggestion::class.java to mutableListOf(383656411789524995))
+    )
 
     /** Build an empty `Database`. */
     init {

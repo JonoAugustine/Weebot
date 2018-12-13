@@ -1,9 +1,12 @@
 /*
  * Copyright Aquatic Mastery Productions (c) 2018.
+ * https://www.compart.com/en/unicode/search?q=Regional+Indicator+Symbol+Letter#characters
  */
 
 package com.ampro.weebot.util
 
+import com.ampro.weebot.util.Emoji.*
+import net.dv8tion.jda.core.entities.Emote
 import net.dv8tion.jda.core.entities.Message
 import java.util.function.Consumer
 
@@ -40,6 +43,22 @@ fun Message.reactWith(vararg emojis: Emoji) {
     emojis.forEach {
         this.addReaction(it.unicode).queue()
     }
+}
+
+/**
+ * Attempt to convert a JDA [Emote] to an [Emoji]
+ *
+ * @return The [Emoji] or null
+ */
+fun Emote.toEmoji() = values().find { it.unicode == this.name }
+
+/** A list of 0-10 then A-Z emojis */
+internal val OrderedEmoji = listOf(Zero, One, Two, Three, Four, Five, Six, Seven,
+    Eight, Nine, KeycapTen, A, B, C, D, E, F, G, H, I_lowercase, J, K, L, M, N, O, P,
+    Q, R, S, T, U, V, W, X, Y, Z)
+
+class EmojiCounter(val alsoUseLetters: Boolean = true) {
+
 }
 
 /**
@@ -204,8 +223,8 @@ enum class Emoji constructor(val unicode: String) {
     Lock("\uD83D\uDD12"), LockWithInkPen("\uD83D\uDD0F"), Lollipop("\uD83C\uDF6D"),
     Loop("\u27BF"), LoudSound("\uD83D\uDD0A"), Loudspeaker("\uD83D\uDCE2"),
     LoveHotel("\uD83C\uDFE9"), LoveLetter("\uD83D\uDC8C"), LowBrightness("\uD83D\uDD05"),
-    M("\u24C2"), Mag("\uD83D\uDD0D"), MagRight("\uD83D\uDD0E"), Mahjong("\uD83C\uDC04"),
-    Mailbox("\uD83D\uDCEB"), MailboxClosed("\uD83D\uDCEA"),
+    M_IN_CIRCLE("\u24C2"), Mag("\uD83D\uDD0D"), MagRight("\uD83D\uDD0E"),
+    Mahjong("\uD83C\uDC04"), Mailbox("\uD83D\uDCEB"), MailboxClosed("\uD83D\uDCEA"),
     MailboxWithMail("\uD83D\uDCEC"), MailboxWithNoMail("\uD83D\uDCED"),
     Man("\uD83D\uDC68"), ManWithGuaPiMao("\uD83D\uDC72"), ManWithTurban("\uD83D\uDC73"),
     MansShoe("\uD83D\uDC5E"), MapleLeaf("\uD83C\uDF41"), Mask("\uD83D\uDE37"),
@@ -230,11 +249,11 @@ enum class Emoji constructor(val unicode: String) {
     NoMouth("\uD83D\uDE36"), NoPedestrians("\uD83D\uDEB7"), NoSmoking("\uD83D\uDEAD"),
     NonPotableWater("\uD83D\uDEB1"), Nose("\uD83D\uDC43"), Notebook("\uD83D\uDCD3"),
     NotebookWithDecorativeCover("\uD83D\uDCD4"), Notes("\uD83C\uDFB6"),
-    NutAndBolt("\uD83D\uDD29"), O("\u2B55"), O2("\uD83C\uDD7E"), Ocean("\uD83C\uDF0A"),
-    Octopus("\uD83D\uDC19"), Oden("\uD83C\uDF62"), Office("\uD83C\uDFE2"),
-    Ok("\uD83C\uDD97"), OkHand("\uD83D\uDC4C"), OkWoman("\uD83D\uDE46"),
-    OlderMan("\uD83D\uDC74"), OlderWoman("\uD83D\uDC75"), On("\uD83D\uDD1B"),
-    OncomingAutomobile("\uD83D\uDE98"), OncomingBus("\uD83D\uDE8D"),
+    NutAndBolt("\uD83D\uDD29"), Red_Circle("\u2B55"), O2("\uD83C\uDD7E"),
+    Ocean("\uD83C\uDF0A"), Octopus("\uD83D\uDC19"), Oden("\uD83C\uDF62"),
+    Office("\uD83C\uDFE2"), Ok("\uD83C\uDD97"), OkHand("\uD83D\uDC4C"),
+    OkWoman("\uD83D\uDE46"), OlderMan("\uD83D\uDC74"), OlderWoman("\uD83D\uDC75"),
+    On("\uD83D\uDD1B"), OncomingAutomobile("\uD83D\uDE98"), OncomingBus("\uD83D\uDE8D"),
     OncomingPoliceCar("\uD83D\uDE94"), OncomingTaxi("\uD83D\uDE96"), One("\u0031\u20E3"),
     OneHundred("\uD83D\uDCAF"), OneTwoThreeFour("\uD83D\uDD22"),
     OpenFileFolder("\uD83D\uDCC2"), OpenHands("\uD83D\uDC50"), OpenMouth("\uD83D\uDE2E"),
@@ -297,24 +316,25 @@ enum class Emoji constructor(val unicode: String) {
     SpeechBalloon("\uD83D\uDCAC"), Speedboat("\uD83D\uDEA4"), Star("\u2B50"),
     Star2("\uD83C\uDF1F"), Stars("\uD83C\uDF20"), Station("\uD83D\uDE89"),
     StatueOfLiberty("\uD83D\uDDFD"), SteamLocomotive("\uD83D\uDE82"),
-    Stew("\uD83C\uDF72"), StraightRuler("\uD83D\uDCCF"), Strawberry("\uD83C\uDF53"),
-    StuckOutTongue("\uD83D\uDE1B"), StuckOutTongueClosedEyes("\uD83D\uDE1D"),
-    StuckOutTongueWinkingEye("\uD83D\uDE1C"), SunWith("\uD83C\uDF1E"),
-    Sunflower("\uD83C\uDF3B"), Sunglasses("\uD83D\uDE0E"), Sunny("\u2600"),
-    Sunrise("\uD83C\uDF05"), SunriseOverMountains("\uD83C\uDF04"), Surfer("\uD83C\uDFC4"),
-    Sushi("\uD83C\uDF63"), SuspensionRailway("\uD83D\uDE9F"), Sweat("\uD83D\uDE13"),
-    SweatDrops("\uD83D\uDCA6"), SweatSmile("\uD83D\uDE05"), SweetPotato("\uD83C\uDF60"),
-    Swimmer("\uD83C\uDFCA"), Symbols("\uD83D\uDD23"), Syringe("\uD83D\uDC89"),
-    Tada("\uD83C\uDF89"), TanabataTree("\uD83C\uDF8B"), Tangerine("\uD83C\uDF4A"),
-    Taurus("\u2649"), Taxi("\uD83D\uDE95"), Tea("\uD83C\uDF75"), Telephone("\u260E"),
-    TelephoneReceiver("\uD83D\uDCDE"), Telescope("\uD83D\uDD2D"), Tennis("\uD83C\uDFBE"),
-    Tent("\u26FA"), ThoughtBalloon("\uD83D\uDCAD"), Three("\u0033\u20E3"),
-    ThumbsDown("\uD83D\uDC4E"), ThumbsUp("\uD83D\uDC4D"), Ticket("\uD83C\uDFAB"),
-    Tiger("\uD83D\uDC2F"), Tiger2("\uD83D\uDC05"), Tired("\uD83D\uDE2B"), Tm("\u2122"),
-    Toilet("\uD83D\uDEBD"), TokyoTower("\uD83D\uDDFC"), Tomato("\uD83C\uDF45"),
-    Tongue("\uD83D\uDC45"), Top("\uD83D\uDD1D"), TopHat("\uD83C\uDFA9"),
-    Tractor("\uD83D\uDE9C"), TrafficLight("\uD83D\uDEA5"), Train("\uD83D\uDE8B"),
-    Train2("\uD83D\uDE86"), Tram("\uD83D\uDE8A"), TriangularFlagOnPost("\uD83D\uDEA9"),
+    Stew("\uD83C\uDF72"), Stop("\u23F9"), StraightRuler("\uD83D\uDCCF"),
+    Strawberry("\uD83C\uDF53"), StuckOutTongue("\uD83D\uDE1B"),
+    StuckOutTongueClosedEyes("\uD83D\uDE1D"), StuckOutTongueWinkingEye("\uD83D\uDE1C"),
+    SunWith("\uD83C\uDF1E"), Sunflower("\uD83C\uDF3B"), Sunglasses("\uD83D\uDE0E"),
+    Sunny("\u2600"), Sunrise("\uD83C\uDF05"), SunriseOverMountains("\uD83C\uDF04"),
+    Surfer("\uD83C\uDFC4"), Sushi("\uD83C\uDF63"), SuspensionRailway("\uD83D\uDE9F"),
+    Sweat("\uD83D\uDE13"), SweatDrops("\uD83D\uDCA6"), SweatSmile("\uD83D\uDE05"),
+    SweetPotato("\uD83C\uDF60"), Swimmer("\uD83C\uDFCA"), Symbols("\uD83D\uDD23"),
+    Syringe("\uD83D\uDC89"), Tada("\uD83C\uDF89"), TanabataTree("\uD83C\uDF8B"),
+    Tangerine("\uD83C\uDF4A"), Taurus("\u2649"), Taxi("\uD83D\uDE95"),
+    Tea("\uD83C\uDF75"), Telephone("\u260E"), TelephoneReceiver("\uD83D\uDCDE"),
+    Telescope("\uD83D\uDD2D"), Tennis("\uD83C\uDFBE"), Tent("\u26FA"),
+    ThoughtBalloon("\uD83D\uDCAD"), Three("\u0033\u20E3"), ThumbsDown("\uD83D\uDC4E"),
+    ThumbsUp("\uD83D\uDC4D"), Ticket("\uD83C\uDFAB"), Tiger("\uD83D\uDC2F"),
+    Tiger2("\uD83D\uDC05"), Tired("\uD83D\uDE2B"), Tm("\u2122"), Toilet("\uD83D\uDEBD"),
+    TokyoTower("\uD83D\uDDFC"), Tomato("\uD83C\uDF45"), Tongue("\uD83D\uDC45"),
+    Top("\uD83D\uDD1D"), TopHat("\uD83C\uDFA9"), Tractor("\uD83D\uDE9C"),
+    TrafficLight("\uD83D\uDEA5"), Train("\uD83D\uDE8B"), Train2("\uD83D\uDE86"),
+    Tram("\uD83D\uDE8A"), TriangularFlagOnPost("\uD83D\uDEA9"),
     TriangularRuler("\uD83D\uDCD0"), Trident("\uD83D\uDD31"), Triumph("\uD83D\uDE24"),
     Trolleybus("\uD83D\uDE8E"), Trophy("\uD83C\uDFC6"), TropicalDrink("\uD83C\uDF79"),
     TropicalFish("\uD83D\uDC20"), Truck("\uD83D\uDE9A"), Trumpet("\uD83C\uDFBA"),
@@ -327,26 +347,33 @@ enum class Emoji constructor(val unicode: String) {
     U7533("\uD83C\uDE38"), U7981("\uD83C\uDE32"), U7A7A("\uD83C\uDE33"),
     Uk("\uD83C\uDDEC\uD83C\uDDE7"), Umbrella("\u2614"), Unamused("\uD83D\uDE12"),
     Underage("\uD83D\uDD1E"), Unlock("\uD83D\uDD13"), Up("\uD83C\uDD99"),
-    Us("\uD83C\uDDFA\uD83C\uDDF8"), V("\u270C"), VerticalTrafficLight("\uD83D\uDEA6"),
-    Vhs("\uD83D\uDCFC"), VibrationMode("\uD83D\uDCF3"), VideoCamera("\uD83D\uDCF9"),
-    VideoGame("\uD83C\uDFAE"), Violin("\uD83C\uDFBB"), Virgo("\u264D"),
-    Volcano("\uD83C\uDF0B"), Vs("\uD83C\uDD9A"), Walking("\uD83D\uDEB6"),
-    WaningCrescentMoon("\uD83C\uDF18"), WaningGibbousMoon("\uD83C\uDF16"),
-    Warning("\u26A0"), Watch("\u231A"), WaterBuffalo("\uD83D\uDC03"),
-    Watermelon("\uD83C\uDF49"), Wave("\uD83D\uDC4B"), WavyDash("\u3030"),
-    WaxingCrescentMoon("\uD83C\uDF12"), WaxingGibbousMoon("\uD83C\uDF14"),
-    Wc("\uD83D\uDEBE"), Weary("\uD83D\uDE29"), Wedding("\uD83D\uDC92"),
-    Whale("\uD83D\uDC33"), Whale2("\uD83D\uDC0B"), Wheelchair("\u267F"),
-    WhiteCheckMark("\u2705"), WhiteCircle("\u26AA"), WhiteFlower("\uD83D\uDCAE"),
-    WhiteLargeSquare("\u2B1C"), WhiteMediumSmallSquare("\u25FD"),
-    WhiteMediumSquare("\u25FB"), WhiteSmallSquare("\u25AB"),
-    WhiteSquareButton("\uD83D\uDD33"), WindChime("\uD83C\uDF90"),
-    WineGlass("\uD83C\uDF77"), Wink("\uD83D\uDE09"), Wolf("\uD83D\uDC3A"),
-    Woman("\uD83D\uDC69"), WomansClothes("\uD83D\uDC5A"), WomansHat("\uD83D\uDC52"),
-    Womens("\uD83D\uDEBA"), Worried("\uD83D\uDE1F"), Wrench("\uD83D\uDD27"), X("\u274C"),
-    YellowHeart("\uD83D\uDC9B"), Yen("\uD83D\uDCB4"), Yum("\uD83D\uDE0B"), Zap("\u26A1"),
-    Zero("\u0030\u20E3"), Zzz("\uD83D\uDCA4"), T("\uD83C\uDDF9"), H("\uD83C\uDDED"),
-    I_lowercase("\u2139"), S("\uD83C\uDDF8");
+    Us("\uD83C\uDDFA\uD83C\uDDF8"), Peace_hand("\u270C"),
+    VerticalTrafficLight("\uD83D\uDEA6"), Vhs("\uD83D\uDCFC"),
+    VibrationMode("\uD83D\uDCF3"), VideoCamera("\uD83D\uDCF9"), VideoGame("\uD83C\uDFAE"),
+    Violin("\uD83C\uDFBB"), Virgo("\u264D"), Volcano("\uD83C\uDF0B"), Vs("\uD83C\uDD9A"),
+    Walking("\uD83D\uDEB6"), WaningCrescentMoon("\uD83C\uDF18"),
+    WaningGibbousMoon("\uD83C\uDF16"), Warning("\u26A0"), Watch("\u231A"),
+    WaterBuffalo("\uD83D\uDC03"), Watermelon("\uD83C\uDF49"), Wave("\uD83D\uDC4B"),
+    WavyDash("\u3030"), WaxingCrescentMoon("\uD83C\uDF12"),
+    WaxingGibbousMoon("\uD83C\uDF14"), Wc("\uD83D\uDEBE"), Weary("\uD83D\uDE29"),
+    Wedding("\uD83D\uDC92"), Whale("\uD83D\uDC33"), Whale2("\uD83D\uDC0B"),
+    Wheelchair("\u267F"), WhiteCheckMark("\u2705"), WhiteCircle("\u26AA"),
+    WhiteFlower("\uD83D\uDCAE"), WhiteLargeSquare("\u2B1C"),
+    WhiteMediumSmallSquare("\u25FD"), WhiteMediumSquare("\u25FB"),
+    WhiteSmallSquare("\u25AB"), WhiteSquareButton("\uD83D\uDD33"),
+    WindChime("\uD83C\uDF90"), WineGlass("\uD83C\uDF77"), Wink("\uD83D\uDE09"),
+    Wolf("\uD83D\uDC3A"), Woman("\uD83D\uDC69"), WomansClothes("\uD83D\uDC5A"),
+    WomansHat("\uD83D\uDC52"), Womens("\uD83D\uDEBA"), Worried("\uD83D\uDE1F"),
+    Wrench("\uD83D\uDD27"), X_Red("\u274C"), YellowHeart("\uD83D\uDC9B"),
+    Yen("\uD83D\uDCB4"), Yum("\uD83D\uDE0B"), Zap("\u26A1"), Zero("\u0030\u20E3"),
+    Zzz("\uD83D\uDCA4"),
+
+    C("\uD83C\uDDE8"), D("\uD83C\uDDE9"), E("\uD83C\uDDEA"), F("\uD83C\uDDEB"),
+    G("\uD83C\uDDEC"), H("\uD83C\uDDED"), I_lowercase("\u2139"), J("\uD83C\uDDEF"),
+    K("\uD83C\uDDF0"), L("\uD83C\uDDF1"), M("\uD83C\uDDF2"), N("\uD83C\uDDF3"),
+    O("\uD83C\uDDF4"), P("\uD83C\uDDF5"), Q("\uD83C\uDDF6"), R("\uD83C\uDDF7"),
+    S("\uD83C\uDDF8"), T("\uD83C\uDDF9"), U("\uD83C\uDDFA"), V("\uD83C\uDDFB"),
+    W("\uD83C\uDDFC"), X("\uD83C\uDDFD"), Y("\uD83C\uDDFE"), Z("\uD83C\uDDFF");
 
     override fun toString() = unicode
 }

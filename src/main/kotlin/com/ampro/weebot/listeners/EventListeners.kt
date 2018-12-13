@@ -7,10 +7,10 @@ package com.ampro.weebot.listeners
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.moderation.TrackerInitPassive
 import com.ampro.weebot.database.DAO
-import com.ampro.weebot.util.Emoji.X
-import com.ampro.weebot.util.Emoji.heavy_check_mark
-import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebot
+import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.util.Emoji.X_Red
+import com.ampro.weebot.util.Emoji.heavy_check_mark
 import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.Event
@@ -60,7 +60,7 @@ class EventDispatcher : ListenerAdapter() {
                         "is completely anonymous and cannot be tracked back to your " +
                         "server.\nThis feature can be turned off at any point and is " +
                         "turned off by default.\n(React with a check to accept " +
-                        "or an cross (X) to keep it off. or type ``w!skynet on/off``)" +
+                        "or an cross (X_Red) to keep it off. or type ``w!skynet on/off``)" +
                         "\n*Thank you for your support!*",
                 false)
 
@@ -70,7 +70,7 @@ class EventDispatcher : ListenerAdapter() {
             .queue {
                 newBot.passives.add(TrackerInitPassive(it))
                 it.addReaction(heavy_check_mark.toString()).queue()
-                it.addReaction(X.toString()).queue()
+                it.addReaction(X_Red.toString()).queue()
             }
     }
 
@@ -105,7 +105,7 @@ class EventDispatcher : ListenerAdapter() {
                         "is completely anonymous and cannot be tracked back to your " +
                         "server.\nThis feature can be turned off at any point and is " +
                         "turned off by default.\n(React with a check to accept " +
-                        "or an cross (X) to keep it off. or type ``w!skynet on/off``)" +
+                        "or an cross (X_Red) to keep it off. or type ``w!skynet on/off``)" +
                         "\n*Thank you for your support!*",
                 false)
 
@@ -115,7 +115,7 @@ class EventDispatcher : ListenerAdapter() {
             .queue {
                 GLOBAL_WEEBOT.getUesrPassiveList(event.user).add(TrackerInitPassive(it))
                 it.addReaction(heavy_check_mark.toString()).queue()
-                it.addReaction(X.toString()).queue()
+                it.addReaction(X_Red.toString()).queue()
             }*/
     }
 

@@ -6,14 +6,14 @@ package com.ampro.weebot.bot
 
 import com.ampro.weebot.commands.CMD_REM
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.commands.utilitycommands.CmdReminder
 import com.ampro.weebot.commands.utilitycommands.CmdReminder.Companion.remWatchJob
 import com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder
+import com.ampro.weebot.commands.utilitycommands.NotePad
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.getGuild
-import com.ampro.weebot.util.elog
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
@@ -110,7 +110,13 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     /** [IPassive] objects, cleared on exit  */
     @get:Synchronized
+    //@Transient
     val passives: ArrayList<IPassive> = ArrayList()
+
+    /** [NotePad]s */
+    @get:Synchronized
+    val notePads = mutableListOf<NotePad>()
+
 
     /*************************************************
         *               INIT                       *

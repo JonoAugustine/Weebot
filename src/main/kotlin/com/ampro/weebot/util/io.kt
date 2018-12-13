@@ -25,7 +25,7 @@ val DAO_BKBK = File(DIR_TEMP, "dbstemp.wbot")
 val DIR_RES = File(DIR_HOME, "res")
 
 val GSON = GsonBuilder().enableComplexMapKeySerialization()
-    .setExclusionStrategies().setPrettyPrinting().serializeNulls()
+    .setExclusionStrategies().setPrettyPrinting()
     .registerTypeAdapter(IPassive::class.java, InterfaceAdapter<IPassive>())
     .registerTypeAdapter(Class::class.java, CommandClassAdapter())
     .create()

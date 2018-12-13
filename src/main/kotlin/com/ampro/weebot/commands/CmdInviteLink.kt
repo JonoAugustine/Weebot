@@ -1,7 +1,7 @@
 package com.ampro.weebot.commands
 
-import com.ampro.weebot.database.constants.strdEmbedBuilder
-import com.ampro.weebot.database.constants.weebotAvatarUrl
+import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.extensions.weebotAvatarUrl
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.database.constants.LINK_INVITEBOT
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -22,6 +22,7 @@ class CmdInviteLink : WeebotCommand("invitelink", arrayOf("ilc", "inviteme", "in
 ) {
     override fun execute(event: CommandEvent) {
         event.reply(strdEmbedBuilder.setTitle("Invite me to another server!")
-            .setDescription(LINK_INVITEBOT).setThumbnail(weebotAvatarUrl).build())
+            .setDescription(LINK_INVITEBOT).setThumbnail(
+                weebotAvatarUrl).build())
     }
 }

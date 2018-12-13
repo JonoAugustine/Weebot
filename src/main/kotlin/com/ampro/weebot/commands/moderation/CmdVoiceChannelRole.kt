@@ -7,7 +7,7 @@ package com.ampro.weebot.commands.moderation
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.*
-import com.ampro.weebot.database.constants.strdEmbedBuilder
+import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.splitArgs

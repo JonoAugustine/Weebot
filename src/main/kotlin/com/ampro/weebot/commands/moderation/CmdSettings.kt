@@ -6,7 +6,7 @@ package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.constants.strdEmbedBuilder
+import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebot
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.WeebotCommand
@@ -65,7 +65,7 @@ class TrackerInitPassive(val enableMessage: Message) : IPassive {
                                         dead = true
                                         return
                                     }
-                                    emote.name == X.unicode -> {
+                                    emote.name == X_Red.unicode -> {
                                         //Disable
                                         event.channel.sendMessage(
                                             denyEmbed).queue()

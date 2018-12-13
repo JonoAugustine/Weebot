@@ -6,8 +6,8 @@ package com.ampro.weebot.commands.`fun`
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.constants.EMBED_MAX_TITLE
-import com.ampro.weebot.database.constants.strdEmbedBuilder
+import com.ampro.weebot.extensions.EMBED_MAX_TITLE
+import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.RAND

@@ -86,7 +86,7 @@ fun main(args_: Array<String>) = runBlocking {
         .setAlternativePrefix("\\")
         .setGame(listening("@Weebot help"))
         .addCommands(commands)
-        .setEmojis(heavy_check_mark.unicode, Warning.unicode, X.unicode)
+        .setEmojis(heavy_check_mark.unicode, Warning.unicode, X_Red.unicode)
         .setHelpConsumer { event ->
             //If the only argument is the command invoke
             val args = event.splitArgs()

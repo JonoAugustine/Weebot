@@ -6,7 +6,6 @@ package com.ampro.weebot.extensions
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.constants.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebotOrNew
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER

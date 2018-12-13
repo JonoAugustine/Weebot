@@ -7,8 +7,8 @@ package com.ampro.weebot.commands.developer
 import com.ampro.weebot.commands.CAT_DEV
 import com.ampro.weebot.commands.developer.Suggestion.State
 import com.ampro.weebot.commands.developer.Suggestion.State.*
-import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.database.*
+import com.ampro.weebot.database.constants.OFFICIAL_CHATS
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.SELF
 import com.ampro.weebot.util.DD_MM_YYYY_HH_MM
@@ -123,6 +123,7 @@ open class CmdSuggestion : WeebotCommand("suggest",
     // \sugg [-g[ive]] <suggestion>
     // \sugg -v(ote) <suggID>
     override fun execute(event: CommandEvent) {
+        if (this blocks event.author) return
         val args = event.splitArgs()
         val message = event.args.replace(userMentionRegex, "@/ User")
 
@@ -178,7 +179,7 @@ open class CmdSuggestion : WeebotCommand("suggest",
 }
 
 /** How many suggestions per embed page */
-const val PAGE_LENGTH = 6.0
+const val PAGE_LENGTH = 6
 
 /**
  * Get a list of [Suggestion]s that match the given [criteria]
@@ -218,7 +219,7 @@ fun sendSuggsPublic(page: Int, event: CommandEvent, criteria: (Suggestion) -> Bo
     }
 
     strdPaginator.apply { list.forEach { this.addItems(it.toStringPub()) } }
-        .setText("Weebot Suggestions")
+        .setText("Weebot Suggestions").setItemsPerPage(PAGE_LENGTH)
         .build().paginate(event.channel, page)
 
 }
@@ -229,7 +230,13 @@ fun sendSuggsPublic(page: Int, event: CommandEvent, criteria: (Suggestion) -> Bo
  * @since 2.0
  */
 fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boolean) {
-    val list = searchSuggs(criteria)
+    val list = searchSuggs(criteria).sortedByDescending {
+        when (it.state) {
+            COMPLETED -> -1
+            IGNORED -> 2
+            else -> it.score
+        }
+    }
     val e = strdEmbedBuilder.setTitle("Weebot Suggestions")
     if (list.isEmpty()) {
         event.reply(e.setDescription(
@@ -238,12 +245,12 @@ fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boole
     }
 
     if (OFFICIAL_CHATS.contains(event.channel.idLong)) {
-        strdPaginator.setTimeout(5, MINUTES)
+        strdPaginator.setTimeout(5, MINUTES).setItemsPerPage(PAGE_LENGTH)
             .apply { list.forEach { this.addItems(it.toStringDev()) } }
             .setText("Weebot Suggestions").build().paginate(event.channel, page)
     } else {
         event.author.openPrivateChannel().queue { ch ->
-            strdPaginator.setTimeout(5, MINUTES)
+            strdPaginator.setTimeout(5, MINUTES).setItemsPerPage(PAGE_LENGTH)
                 .apply { list.forEach { this.addItems(it.toStringDev()) } }
                 .setText("Weebot Suggestions").build().paginate(ch, page)
         }

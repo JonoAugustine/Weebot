@@ -7,7 +7,7 @@ package com.ampro.weebot.commands.utilitycommands
 import com.ampro.weebot.Restriction
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.utilitycommands.NotePad.Note
-import com.ampro.weebot.database.constants.strdEmbedBuilder
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.IdGenerator
 import com.ampro.weebot.util.NOW
@@ -19,8 +19,9 @@ import java.time.OffsetDateTime
 
 /** The maximum number of note pads a Weebot will hold for a single guild  */
 internal val MAX_NOTEPADS = 20
+internal val MAX_NOTES_PER = 100
 
-internal val NOTEPAD_ID_GEN = IdGenerator(7)
+internal val NOTEPAD_ID_GEN = IdGenerator(5)
 internal val NOTE_ID_GEN    = IdGenerator(10)
 
 /** List of words that cannot be used as [NotePad] names, to avoid parsing err. */
@@ -224,9 +225,9 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
 
 /**
  * View and modify [Note Pads][NotePad].
- * TODO: Add separate view and edit permissions.
- * TODO Convert to Paginated list
+ *
  * @author Jonathan Augustine
+ * @since 1.0
  */
  class CmdNotePad : WeebotCommand("NotePad",
     arrayOf("notepads", "notes", "jotter", "todo", "note"), CAT_UTIL,
@@ -247,7 +248,50 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
 
 
     override fun execute(event: CommandEvent) {
-        //make custom paginated selection dialogue
+        val args = event.splitArgs()
+        val auth = event.author
+        val mem = event.member
+        val guild = event.guild
+        val bot = getWeebotOrNew(event.guild)
+        val pads = bot.notePads
+
+        if (args.isEmpty()) {
+            if (pads.isEmpty()) {
+                event.respondThenDelete(strdEmbedBuilder
+                    .setTitle("${guild.name} has no NotePads")
+                    .setDescription("Use ``make [Notepad Name]`` to make a new NotePad")
+                    .build(), 30)
+                return
+            }
+            SelectablePaginator(setOf(auth),
+                title = "${guild.name} NotePads",
+                description = "${guild.name} NotePads available to ${mem.effectiveName}",
+                itemsPerPage = 10, thumbnail = "https://47eaps32orgm24ec5k1dcrn1" +
+                        "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/" +
+                        "notepad-pen-sponsor.png",
+                items = emptyList()
+            ) { message ->
+
+            }.display(event.textChannel)
+
+        }
+
+        /*
+        when (args[0]) {
+            "make" ->
+            "write", "add" ->
+            "insert" ->
+            "edit" ->
+            "get", "see" ->
+            "delete", "remove" ->
+            "clear" ->
+            "toss", "trash", "bin", "garbo" ->
+            "file" ->
+            "lockto" ->
+            "lockout" ->
+        }
+        */
+
     }
 
     /**
