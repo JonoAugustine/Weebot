@@ -136,7 +136,9 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
      * @param  message
      * The Message to display the Menu in
      */
-    override fun display(message: Message) = paginate(message, 1)
+    override fun display(message: Message) {
+        paginate(message, 1)
+    }
 
     /**
      * Begins pagination as a new [Message][net.dv8tion.jda.core.entities.Message]
@@ -272,20 +274,11 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
             }
         }
 
-        try {
-            event.reaction.removeReaction(event.user).queue()
-        } catch (ignored: PermissionException) {}
 
-        val n = newPageNum
-        message.editMessage(renderPage(newPageNum)).queue { m ->
-            val start = (newPageNum - 1) * itemsPerPage
-            val end = when {
-                items.size < newPageNum * itemsPerPage -> items.size
-                else -> newPageNum * itemsPerPage
-            }
-            (start until end).forEach { m.reactWith(items[it].first) }
-            runBlocking {  delay(1_000); pagination(m, n) }
-        }
+        try {
+            message.clearReactions().queue()
+        } catch (ignored: PermissionException) {}
+        initialize(message.editMessage(renderPage(newPageNum)), newPageNum)
     }
 
     private fun renderPage(pageNum: Int): Message {
@@ -302,7 +295,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
             (start until end).forEach { i ->
                 sb.append("\n${items[i].first} ${items[i].second}")
             }
-            ebuilder.setDescription(sb.toString())
+            ebuilder.appendDescription("\n\n" + sb.toString())
         } else {
             val per = Math.ceil((end - start).toDouble() / columns).toInt()
             (0 until columns).forEach { k ->

@@ -172,8 +172,12 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
      * //TODO Send as a new [SelectablePaginator] with a back button that resends
      * the note list
      */
-    fun send(message: Message) {
-        val eb = strdEmbedBuilder.setTitle("Sample").build()
+    fun send(message: Message, mem: Member) {
+        val eb = strdEmbedBuilder.setTitle("Tell Jono To do this ffs")
+            .setDescription("This is ***SUPPOSED*** to show u the notes in a" +
+                    " cool list that can go back and forth between menues but...")
+            .build()
+        //SelectablePaginator(users = setOf())
         try {
             message.editMessage(eb).queue {
 
@@ -274,6 +278,7 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
 
 }
 
+
 /**
  * View and modify [Note Pads][NotePad].
  *
@@ -310,6 +315,7 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
 
 
         if (args.isEmpty()) {
+            event.delete(30)
             if (pads.isEmpty()) {
                 event.respondThenDelete(strdEmbedBuilder
                     .setTitle("${guild.name} has no NotePads")
@@ -323,28 +329,7 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
                     .build(), 30)
                 return
             }
-
-            val emojiCounter = EmojiCounter()
-            SelectablePaginator(setOf(auth),
-                title = "${guild.name} NotePads",
-                description = "${guild.name} NotePads available to ${mem.effectiveName}",
-                itemsPerPage = 10, thumbnail = "https://47eaps32orgm24ec5k1dcrn1" +
-                        "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/" +
-                        "notepad-pen-sponsor.png",
-                items = List<Triple<Emoji, String, (Emoji, Message) -> Unit>>(pads.size) {
-                    Triple(emojiCounter.next(), "${cv[it].name} (${cv[it].id})")
-                    { e, m ->
-                        try { m.clearReactions().queue()
-                        } catch (e: PermissionException) {}
-                        pads[OrderedEmoji.indexOf(e)].send(m)
-                    }
-                }) { m -> //Final Action
-                try {
-                    m.clearReactions().queue()
-                } catch (e: Exception) {
-
-                }
-            }.display(event.textChannel)
+            sendNotePads(guild, mem, pads, cv, event.textChannel)
             return
         }
 
@@ -365,6 +350,7 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
         */
 
     }
+
 
     /**
      * Attempts to parse a NotePad from a string. If it fails, an err message is
@@ -474,4 +460,55 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
             //TODO NotePad help
             .build()
     }
+}
+
+/**
+ * Send a list of [NotePad]s as a [SelectablePaginator]
+ */
+internal fun sendNotePads(guild: Guild, mem: Member,
+                          pads: MutableList<NotePad>,
+                          cv: List<NotePad>, textChannel: TextChannel) {
+    val emojiCounter = EmojiCounter()
+    SelectablePaginator(setOf(mem.user), title = "${guild.name} NotePads",
+        description = "${guild.name} NotePads available to ${mem.effectiveName}",
+        itemsPerPage = 10,
+        thumbnail = "https://47eaps32orgm24ec5k1dcrn1" + "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/" + "notepad-pen-sponsor.png",
+        items = List<Triple<Emoji, String, (Emoji, Message) -> Unit>>(pads.size) {
+            Triple(emojiCounter.next(), "${cv[it].name} (${cv[it].id})") { e, m ->
+                try {
+                    m.clearReactions().queue()
+                } catch (e: PermissionException) {
+                }
+                pads[OrderedEmoji.indexOf(e)].send(m, mem)
+            }
+        }) { m ->
+        try {
+            m.clearReactions().queue()
+        } catch (ignored: Exception) {
+        }
+    }.display(textChannel)
+}
+
+internal fun sendNotePads(auth: User, guild: Guild, mem: Member,
+                          pads: MutableList<NotePad>,
+                          cv: List<NotePad>, message: Message) {
+    val emojiCounter = EmojiCounter()
+    SelectablePaginator(setOf(auth), title = "${guild.name} NotePads",
+        description = "${guild.name} NotePads available to ${mem.effectiveName}",
+        itemsPerPage = 10,
+        thumbnail = "https://47eaps32orgm24ec5k1dcrn1" + "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/" + "notepad-pen-sponsor.png",
+        items = List<Triple<Emoji, String, (Emoji, Message) -> Unit>>(pads.size) {
+            Triple(emojiCounter.next(), "${cv[it].name} (${cv[it].id})") { e, m ->
+                try {
+                    m.clearReactions().queue()
+                } catch (e: PermissionException) {
+                }
+                pads[OrderedEmoji.indexOf(e)].send(m, mem)
+            }
+        }) { m ->
+        try {
+            m.clearReactions().queue()
+        } catch (ignored: Exception) {
+        }
+    }.display(message)
 }
