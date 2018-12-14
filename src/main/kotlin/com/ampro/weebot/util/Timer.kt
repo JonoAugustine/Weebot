@@ -22,6 +22,27 @@ val NOW_STR: String get() = OffsetDateTime.now().format(
 /** @return The current local date and time. dd-MM-yyyy HH-mm-ss */
 val NOW_STR_FILE: String get() = NOW_STR.replace(":", "-")
 
+
+/**
+ * Takes in a time length in SECONDS
+ * @return W days, X hrs, Y min, Z sec
+ */
+fun Long.formatTime() : String {
+    val d = this / 60 / 60 / 24
+    val h = (this / 60 / 60 ) - 24 * d
+    val m = this / 60 - (h * 60) - (d * 60 * 24)
+    val s = this - (m * 60) - (h * 60 * 60) - (d * 60 * 60 * 24)
+    val list = listOf(d to "day", h to "hr", m to "min", s to "sec")
+    val sb = StringBuilder()
+    list.forEachIndexed { i, pair ->
+        if (pair.first > 0) sb.append("${pair.first} ${pair.second}")
+        if (pair.first > 1 && i in (0..1)) sb.append("s")
+        sb.append(", ")
+    }
+    sb.setLength(sb.length - 2)
+    return sb.toString()
+}
+
 /**
  * A Timer object contains a start-time (millisec) that is defined upon creation.
  *

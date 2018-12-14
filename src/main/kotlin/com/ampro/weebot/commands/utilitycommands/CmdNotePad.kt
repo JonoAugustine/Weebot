@@ -10,12 +10,16 @@ import com.ampro.weebot.commands.utilitycommands.NotePad.Note
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
+import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
-import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.exceptions.PermissionException
-import java.lang.Exception
 import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
 
 
 /** The maximum number of note pads a Weebot will hold for a single guild  */
@@ -40,10 +44,12 @@ internal val keyWords = listOf(Regex("(?i)(make)"), Regex("(?i)(write)"),
 internal fun String.isOk(test: String) = test.matchesAny(keyWords)
 
 /** Convert any [String] to a [Note] */
-internal infix fun String.toNote(authorID: Long) : Note = Note(this, authorID)
+internal fun String.toNote(authorID: Long, initTime: OffsetDateTime)
+        : Note = Note(this, authorID, initTime)
 /** Convert a list of [String]s to a list of [Note]s */
-internal infix fun List<String>.toNotes(authorID: Long) : List<Note> {
-    return List(size) { Note(this[it], authorID) }
+internal fun List<String>.toNotes(authorID: Long, init: OffsetDateTime)
+        : List<Note> {
+    return List(size) { Note(this[it], authorID, init) }
 }
 
 /**
@@ -121,19 +127,19 @@ infix fun CommandEvent.canRead(notePad: NotePad): Boolean {
  * @author Jonathan Augustine
  * @since 1.0
  */
-data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
+data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDateTime)
+    : Iterable<Note> {
 
     /**
      * A note has a {@link String} note and a creation time & date.
      *
      * @since 1.0
      */
-    data class Note(var note: String, val authorID: Long) {
+    data class Note(var note: String, val authorID: Long,val initTime: OffsetDateTime) {
 
         val id = NOTE_ID_GEN.next()
 
-        val creationTime: OffsetDateTime = NOW()
-        var lastEditTime: OffsetDateTime = NOW()
+        var lastEditTime: OffsetDateTime = initTime
 
         var edits: Long = 0
 
@@ -150,6 +156,16 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
             this.lastEditTime = OffsetDateTime.now()
             this.edits++
         }
+
+        fun toEmbed(guild: Guild) = strdEmbedBuilder
+            .setTitle("${if(readRestriction.restricted() || writeRestrictions.restricted())
+             Lock else Unlock} Note $id").setDescription(note)
+            .addField("Author", guild.getMemberById(authorID)?.effectiveName, true)
+            .addField("Created at ${initTime.format(DD_MM_YYYY_HH_MM)}", "", true)
+            .addField("Edits", "$edits\nTime since last edit: ${ChronoUnit
+                .SECONDS.between(lastEditTime, NOW()).formatTime()}", true)
+            .addField("Guide", "To Edit: $Pencil\nTo Lock: $Lock\nTo Unlock: $Unlock" +
+                    "\nTo delete: $X_Red", true).build()
 
         override fun toString() = this.note
 
@@ -169,23 +185,33 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
 
     /**
      * Sends the NotePad as an Embed. If the message couldnt be edited then resends.
-     * //TODO Send as a new [SelectablePaginator] with a back button that resends
+     * //TODO Send as a new [ButtonPaginator] with a back button that resends
      * the note list
      */
-    fun send(message: Message, mem: Member) {
-        val eb = strdEmbedBuilder.setTitle("Tell Jono To do this ffs")
-            .setDescription("This is ***SUPPOSED*** to show u the notes in a" +
-                    " cool list that can go back and forth between menues but...")
-            .build()
-        //SelectablePaginator(users = setOf())
-        try {
-            message.editMessage(eb).queue {
-
-            }
-        } catch (e: Exception) {
-            message.textChannel.sendMessage(eb).queue {
-
-            }
+    fun send(event: CommandEvent, message: Message?, pads: List<NotePad>) {
+        val mem = event.member
+        val cv = notes.filter { TODO() }
+        val userSet = setOf(mem.user)
+        val sp = SelectablePaginator(users = userSet, title = this.name,
+                itemsPerPage = 10,
+                items = List<Pair<String, (Int, Message) -> Unit>>(notes.size) {
+                    "(${cv[it].id}) ${cv[it].note}" to { i, m ->
+                        try { m.clearReactions().queue()} catch (e: PermissionException) {}
+                        SelectableEmbed(userSet, messageEmbed = notes[i].toEmbed(event.guild),
+                                options = listOf(),
+                                cancelEmoji = Rewind
+                        ) {message ->
+                            send(event, message, pads)
+                        }.display(m)
+                    }
+                }
+        ) { message ->
+            sendNotePads(event, pads, message)
+        }
+        if (message != null) {
+            sp.display(message)
+        } else {
+            sp.display(event.channel)
         }
     }
 
@@ -194,8 +220,8 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
      *
      * @param notes The [String] notes to add
      */
-    fun addNotes(user: User, vararg notes: String) {
-        notes.forEach { this.notes.add(Note(it, user.idLong)) }
+    fun addNotes(user: User, vararg notes: String, creation: OffsetDateTime) {
+        notes.forEach { this.notes.add(Note(it, user.idLong, creation)) }
     }
 
     /**
@@ -203,8 +229,8 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
      *
      * @param notes The [Note]s to add
      */
-    fun addNotes(user: User, notes: Collection<String>) {
-        notes.forEach { this.notes.add(Note(it, user.idLong)) }
+    fun addNotes(user: User, creation: OffsetDateTime, notes: Collection<String>) {
+        notes.forEach { this.notes.add(Note(it, user.idLong, creation)) }
     }
 
     /**
@@ -213,11 +239,11 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
      * @param index The index to insert the notes at
      * @param notes The notes to insert
      */
-    fun insertNotes(author: User, index: Int, notes: List<String>) {
+    fun insertNotes(author: User, creation: OffsetDateTime, index: Int, notes: List<String>) {
         try {
-            this.notes.addAll(if (index < 0) 0 else index, notes.toNotes(author.idLong))
+            this.notes.addAll(if (index < 0) 0 else index, notes.toNotes(author.idLong, creation))
         } catch (e: IndexOutOfBoundsException) {
-            this.addNotes(author, notes)
+            this.addNotes(author, creation, notes)
         }
     }
 
@@ -309,10 +335,9 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
         val mem = event.member
         val guild = event.guild
         val bot = getWeebotOrNew(event.guild)
-        val pads = bot.notePads.apply {add(NotePad("TestPad", event.author.idLong))}
+        val pads = bot.notePads
         /** User's Viewable notepads */
         val cv = pads.filter { event canRead it }
-
 
         if (args.isEmpty()) {
             event.delete(30)
@@ -329,7 +354,7 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
                     .build(), 30)
                 return
             }
-            sendNotePads(guild, mem, pads, cv, event.textChannel)
+            sendNotePads(event, cv, event.textChannel)
             return
         }
 
@@ -351,30 +376,6 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
 
     }
 
-
-    /**
-     * Attempts to parse a NotePad from a string. If it fails, an err message is
-     * sent by the [event][BetterMessageEvent].
-     * @param notes The NotePad [List] to retrieve from.
-     * @param index The [String] to parse for an [Integer].
-     * (Based on 1 based counting array [1,2,3] not [0,1,2])
-     * @param event The event to reply from if an err occurs.
-     * @return The NotePad at the passed index.<br></br>Null if and err occurred.
-     */
-    private fun parseNotePad(notes: List<NotePad>, index: String,
-                             event: CommandEvent): NotePad? {
-        return try {
-            notes[Integer.parseInt(index) - 1]
-        } catch (e: NumberFormatException) {
-            event.reply(
-                "Sorry, I couldn't understand '$index'. Please use an integer between 1 and 2,147,483,647.")
-            null
-        } catch (e: IndexOutOfBoundsException) {
-            this.invalidNotePadIndexMessage(index, event, notes)
-            null
-        }
-
-    }
 
     /**
      * I couldn't find the notepad (index). I will send you a message containing
@@ -463,52 +464,48 @@ data class NotePad(var name: String, val authorID: Long) : Iterable<Note> {
 }
 
 /**
- * Send a list of [NotePad]s as a [SelectablePaginator]
+ * Send a list of [NotePad]s as a [ButtonPaginator] to the [textChannel]
+ *
+ * @param textChannel
+ * @param pads
+ * @param event
  */
-internal fun sendNotePads(guild: Guild, mem: Member,
-                          pads: MutableList<NotePad>,
-                          cv: List<NotePad>, textChannel: TextChannel) {
-    val emojiCounter = EmojiCounter()
-    SelectablePaginator(setOf(mem.user), title = "${guild.name} NotePads",
-        description = "${guild.name} NotePads available to ${mem.effectiveName}",
-        itemsPerPage = 10,
-        thumbnail = "https://47eaps32orgm24ec5k1dcrn1" + "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/" + "notepad-pen-sponsor.png",
-        items = List<Triple<Emoji, String, (Emoji, Message) -> Unit>>(pads.size) {
-            Triple(emojiCounter.next(), "${cv[it].name} (${cv[it].id})") { e, m ->
-                try {
-                    m.clearReactions().queue()
-                } catch (e: PermissionException) {
-                }
-                pads[OrderedEmoji.indexOf(e)].send(m, mem)
-            }
-        }) { m ->
-        try {
-            m.clearReactions().queue()
-        } catch (ignored: Exception) {
-        }
-    }.display(textChannel)
+internal fun sendNotePads(event: CommandEvent, pads: List<NotePad>, textChannel: TextChannel) {
+    buildNotePadPaginator(event, pads).display(textChannel)
 }
 
-internal fun sendNotePads(auth: User, guild: Guild, mem: Member,
-                          pads: MutableList<NotePad>,
-                          cv: List<NotePad>, message: Message) {
+/**
+ * Sends a [NotePad] [ButtonPaginator] as an edit of [message]
+ *
+ * @param message The message to replace
+ */
+internal fun sendNotePads(event: CommandEvent, pads: List<NotePad> , message: Message) {
+    buildNotePadPaginator(event, pads).display(message)
+}
+
+/**
+ * Builds a [ButtonPaginator] from the [NotePad] list
+ *
+ * @param event the inkoving event
+ * @param pads The notepads to paginate
+ *
+ * @return a [ButtonPaginator] consisting of the [NotePad]s given
+ */
+internal fun buildNotePadPaginator(event: CommandEvent, pads: List<NotePad>)
+        : ButtonPaginator {
     val emojiCounter = EmojiCounter()
-    SelectablePaginator(setOf(auth), title = "${guild.name} NotePads",
-        description = "${guild.name} NotePads available to ${mem.effectiveName}",
-        itemsPerPage = 10,
-        thumbnail = "https://47eaps32orgm24ec5k1dcrn1" + "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/" + "notepad-pen-sponsor.png",
-        items = List<Triple<Emoji, String, (Emoji, Message) -> Unit>>(pads.size) {
-            Triple(emojiCounter.next(), "${cv[it].name} (${cv[it].id})") { e, m ->
-                try {
-                    m.clearReactions().queue()
-                } catch (e: PermissionException) {
+    val mem = event.member
+    return ButtonPaginator(setOf(mem.user), title = "${mem.guild.name} NotePads",
+            description = "${mem.guild.name} NotePads available to ${mem.effectiveName}",
+            itemsPerPage = 10,
+            thumbnail = "https://47eaps32orgm24ec5k1dcrn1" + "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/" + "notepad-pen-sponsor.png",
+            items = List<Triple<Emoji, String, (Emoji, Message) -> Unit>>(pads.size) {
+                Triple(emojiCounter.next(), "${pads[it].name} (${pads[it].id})")
+                { e, m ->
+                    try { m.clearReactions().queue() } catch (e: PermissionException) {}
+                    pads[OrderedEmoji.indexOf(e)].send(event, m, pads)
                 }
-                pads[OrderedEmoji.indexOf(e)].send(m, mem)
-            }
-        }) { m ->
-        try {
-            m.clearReactions().queue()
-        } catch (ignored: Exception) {
-        }
-    }.display(message)
+            }) { m ->
+        try { m.clearReactions().queue() } catch (ignored: Exception) { }
+    }
 }

@@ -84,6 +84,11 @@ class EmojiCounter(val alsoUseLetters: Boolean = true, val wrap: Boolean = false
         } else if (OrderedEmoji.size == i) i = 0
         return OrderedEmoji[i++]
     }
+
+    /**
+     * Reset the counter
+     */
+    fun reset() { i = 0 }
 }
 
 /**

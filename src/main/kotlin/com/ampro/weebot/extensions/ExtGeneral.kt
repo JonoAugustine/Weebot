@@ -45,6 +45,7 @@ fun List<String>.contains(regex: Regex) : Boolean {
 fun String.containsAny(strings: Collection<String>, ignoreCase: Boolean = true)
         : Boolean = strings.asSequence().any { this.contains(it, ignoreCase) }
 
+infix fun <T: Any> Iterable<T>.has(predicate: (T) -> Boolean) = find(predicate) != null
 
 /* ***********************
         Map Extensions
