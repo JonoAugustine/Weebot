@@ -7,8 +7,6 @@ package com.ampro.weebot
 import com.ampro.weebot.extensions.strdEmbedBuilder
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.entities.*
-import java.util.*
-import kotlin.collections.ArrayList
 
 /**
  * Contains validation information and methods to restrict access to any entity.
@@ -34,14 +32,14 @@ class Restriction {
         DISABLED
     }
 
-    private val allowedUsers: MutableList<Long> = ArrayList()
-    private val blockedUsers: MutableList<Long> = ArrayList()
-    private val allowedRoles: MutableList<Long> = ArrayList()
-    private val blockedRoles: MutableList<Long> = ArrayList()
-    private val allowedTextChannels: MutableList<Long> = ArrayList()
-    private val blockedTextChannels: MutableList<Long> = ArrayList()
-    private val allowedVoiceChannels: MutableList<Long> = ArrayList()
-    private val blockedVoiceChannels: MutableList<Long> = ArrayList()
+    val allowedUsers: MutableList<Long> = ArrayList()
+    val blockedUsers: MutableList<Long> = ArrayList()
+    val allowedRoles: MutableList<Long> = ArrayList()
+    val blockedRoles: MutableList<Long> = ArrayList()
+    val allowedTextChannels: MutableList<Long> = ArrayList()
+    val blockedTextChannels: MutableList<Long> = ArrayList()
+    val allowedVoiceChannels: MutableList<Long> = ArrayList()
+    val blockedVoiceChannels: MutableList<Long> = ArrayList()
 
     /**
      * Add allowed [users][User], [roles][Role], or
@@ -98,18 +96,6 @@ class Restriction {
         }
     }
 
-    /** @return An [Collections.unmodifiableList] of allowed users.
-     */
-    fun getAllowedUsers(): List<Long> {
-        return Collections.unmodifiableList(allowedUsers)
-    }
-
-    /** @return An [Collections.unmodifiableList] of blocked users.
-     */
-    fun getBlockedUsers(): List<Long> {
-        return Collections.unmodifiableList(blockedUsers)
-    }
-
     /**
      * Add an allowed [User].
      * Will remove the user from the "blocked" list if present.
@@ -145,18 +131,6 @@ class Restriction {
         }
     }
 
-    /** @return An [Collections.unmodifiableList] of allowed Roles.
-     */
-    fun getAllowedRoles(): List<Long> {
-        return Collections.unmodifiableList(allowedRoles)
-    }
-
-    /** @return An [Collections.unmodifiableList] of blocked Roles.
-     */
-    fun getBlockedRoles(): List<Long> {
-        return Collections.unmodifiableList(blockedRoles)
-    }
-
     /**
      * Allow a Role access.
      * Will remove the role from the "blocked" list if present.
@@ -190,18 +164,6 @@ class Restriction {
         } else {
             true
         }
-    }
-
-    /** @return An [Collections.unmodifiableList] of allowed TextChannels.
-     */
-    fun getAllowedTextChannels(): List<Long> {
-        return Collections.unmodifiableList(allowedTextChannels)
-    }
-
-    /** @return An [Collections.unmodifiableList] of blocked TextChannels.
-     */
-    fun getBlockedTextChannels(): List<Long> {
-        return Collections.unmodifiableList(blockedTextChannels)
     }
 
     /**
@@ -256,43 +218,43 @@ class Restriction {
     fun toEmbedBuilder(guild: Guild): EmbedBuilder {
         val sb = StringBuilder()
         val eb = strdEmbedBuilder
-        if (!this.getAllowedUsers().isEmpty()) {
-            this.getAllowedUsers().forEach { u ->
+        if (!allowedUsers.isEmpty()) {
+            this.allowedUsers.forEach { u ->
                 sb.append("*").append(guild.getMemberById(u).effectiveName).append("*\n")
             }
             eb.addField("Allowed Members", sb.toString(), true)
             sb.setLength(0)
         }
-        if (!this.getAllowedRoles().isEmpty()) {
-            this.getAllowedRoles().forEach { r ->
+        if (!this.allowedRoles.isEmpty()) {
+            this.allowedRoles.forEach { r ->
                 sb.append("*").append(guild.getRoleById(r).name).append("*\n")
             }
             eb.addField("Allowed Roles", sb.toString(), true)
             sb.setLength(0)
         }
-        if (!this.getAllowedTextChannels().isEmpty()) {
-            this.getAllowedTextChannels().forEach { tc ->
+        if (!this.allowedTextChannels.isEmpty()) {
+            this.allowedTextChannels.forEach { tc ->
                 sb.append("*").append(guild.getTextChannelById(tc).name).append("*\n")
             }
             eb.addField("Allowed TextChannels", sb.toString(), true)
             sb.setLength(0)
         }
-        if (!this.getBlockedUsers().isEmpty()) {
-            this.getBlockedUsers().forEach { u ->
+        if (!this.blockedUsers.isEmpty()) {
+            this.blockedUsers.forEach { u ->
                 sb.append("*").append(guild.getMemberById(u).effectiveName).append("*\n")
             }
             eb.addField("Blocked Members", sb.toString(), true)
             sb.setLength(0)
         }
-        if (!this.getBlockedRoles().isEmpty()) {
-            this.getBlockedRoles().forEach { r ->
+        if (!this.blockedRoles.isEmpty()) {
+            this.blockedRoles.forEach { r ->
                 sb.append("*").append(guild.getRoleById(r).name).append("*\n")
             }
             eb.addField("BlockedRoles", sb.toString(), true)
             sb.setLength(0)
         }
-        if (!this.getBlockedTextChannels().isEmpty()) {
-            this.getBlockedTextChannels().forEach { tc ->
+        if (!this.blockedTextChannels.isEmpty()) {
+            this.blockedTextChannels.forEach { tc ->
                 sb.append("*").append(guild.getTextChannelById(tc).name).append("*\n")
             }
             eb.addField("Blocked TextChannels", sb.toString(), true)

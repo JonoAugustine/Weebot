@@ -35,11 +35,14 @@ fun Long.formatTime() : String {
     val list = listOf(d to "day", h to "hr", m to "min", s to "sec")
     val sb = StringBuilder()
     list.forEachIndexed { i, pair ->
-        if (pair.first > 0) sb.append("${pair.first} ${pair.second}")
-        if (pair.first > 1 && i in (0..1)) sb.append("s")
-        sb.append(", ")
+        if (pair.first > 0) {
+            sb.append("${pair.first} ${pair.second}")
+            if (pair.first > 1 && i in (0..1)) sb.append("s")
+            sb.append(", ")
+        }
     }
-    sb.setLength(sb.length - 2)
+    if (sb.length >= 2) sb.setLength(sb.length - 2)
+    else { sb.setLength(0); sb.append(0) }
     return sb.toString()
 }
 

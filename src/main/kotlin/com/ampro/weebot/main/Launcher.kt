@@ -24,7 +24,9 @@ import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.Game.listening
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.requests.RestAction
 import java.util.concurrent.Executors
+import java.util.function.Consumer
 import javax.security.auth.login.LoginException
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
@@ -73,7 +75,7 @@ fun main(args_: Array<String>) = runBlocking {
 
     //Debug
     //RestAction.setPassContext(true) // enable context by default
-    //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace
+    //RestAction.DEFAULT_FAILURE = Consumer(Throwable::printStackTrace)
 
     //JDA_SHARD_MNGR = jdaShardLogIn().build()
     JDA_SHARD_MNGR = jdaDevShardLogIn().build()
@@ -239,5 +241,5 @@ fun shutdown(user: User) {
     System.exit(0)
 }
 
-
-
+const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try that " +
+        "again later*"

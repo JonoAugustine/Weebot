@@ -7,24 +7,21 @@ package com.ampro.weebot.extensions
 import com.ampro.weebot.main.WAITER
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
-import com.jagrosh.jdautilities.menu.Menu
-import com.jagrosh.jdautilities.menu.OrderedMenu
-import com.jagrosh.jdautilities.menu.Paginator
+import com.jagrosh.jdautilities.menu.*
 import com.jagrosh.jdautilities.menu.Paginator.Builder
 import com.sun.javaws.exceptions.InvalidArgumentException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
 import net.dv8tion.jda.core.exceptions.PermissionException
 import net.dv8tion.jda.core.requests.RestAction
 import java.awt.Color
 import java.time.Instant
 import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeUnit.MINUTES
+import java.util.concurrent.TimeUnit.*
 
 
 const val EMBED_MAX_TITLE = 256
@@ -63,13 +60,35 @@ fun makeEmbedBuilder(title: String, titleLink: String, description: String)
         = strdEmbedBuilder.setTitle(title, titleLink)
             .setDescription(description)!!
 
+/**
+ * Add a [Field] to the [EmbedBuilder] that has a blank value
+ *
+ * @param title
+ * @param inline
+ */
+fun EmbedBuilder.addEmptyField(title: String, inline: Boolean = false) : EmbedBuilder {
+    addField(title, "", inline)
+    return this
+}
+
+/**
+ * Add [Field]s to the [EmbedBuilder] that has a blank value
+ *
+ * @param titles
+ * @param inline
+ */
+fun EmbedBuilder.addEmptyFields(inline: Boolean = false, vararg titles: String): EmbedBuilder {
+    titles.forEach { addField(it, "", inline) }
+    return this
+}
+
 val strdPaginator: Paginator.Builder
     get() = Builder().setColor(STD_GREEN).setEventWaiter(WAITER)
         .waitOnSinglePage(false).useNumberedItems(false).showPageNumbers(true)
         .wrapPageEnds(true).setTimeout(3, MINUTES)
         .setFinalAction { m ->
             try {
-                m.clearReactions().queue()
+                m.clearReactions().queueAfter(250, SECONDS)
             } catch (ex: Exception) {
             }
         }
@@ -78,6 +97,9 @@ val strdOrderedMenu: OrderedMenu.Builder
     get() = OrderedMenu.Builder().setEventWaiter(WAITER)
         .useCancelButton(true).setTimeout(3, MINUTES)
 
+val strdButtonMenu: ButtonMenu.Builder
+    get() = ButtonMenu.Builder().setEventWaiter(WAITER)
+        .setColor(STD_GREEN).setTimeout(3, MINUTES)
 
 /**
  * A Paginator based on JAgrosh's [Paginator] that allows users to react with
@@ -99,7 +121,7 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                       val color: Color = STD_GREEN,
                       val finalAction: (Message) -> Unit = { m ->
                               try {
-                                  m.clearReactions().queue()
+                                  m.clearReactions().queueAfter(250, SECONDS)
                               } catch (ignored: Exception) {
                               }
                           })
@@ -199,7 +221,6 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                         else -> pageNum * itemsPerPage
                     }
                     (start until end).forEach { m.reactWith(items[it].first) }
-                    runBlocking {  delay(1_000); pagination(m, pageNum) }
                     if (bulkSkipNumber > 1) m.reactWith(RIGHT)
                     m.reactWith(if (bulkSkipNumber > 1) BIG_RIGHT else RIGHT)
                     launch {
@@ -215,7 +236,6 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                         else -> pageNum * itemsPerPage
                     }
                     (start until end).forEach { m.reactWith(items[it].first) }
-                    runBlocking {  delay(1_000); pagination(m, pageNum) }
                     launch {
                         delay(500)
                         pagination(m, pageNum)
@@ -237,7 +257,7 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
         if (event.messageIdLong != messageId) return false
         val emoji = event.reactionEmote.toEmoji()
         return when (emoji) {
-            // LEFT, STOP, RIGHT, BIG_LEFT, BIG_RIGHT all fall-through to
+            // LEFT, EXIT, RIGHT, BIG_LEFT, BIG_RIGHT all fall-through to
             // return if the User is valid or not. If none trip, this defaults
             // and returns false.
             LEFT, STOP, RIGHT -> isValidUser(event.user, event.guild)
@@ -286,7 +306,7 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
 
 
         try {
-            message.clearReactions().queue()
+            message.clearReactions().queueAfter(250, SECONDS)
         } catch (ignored: PermissionException) {}
         initialize(message.editMessage(renderPage(newPageNum)), newPageNum)
     }
@@ -339,13 +359,12 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                           val items: List<Pair<String, (Int, Message) ->Unit>>,
                           val columns: Int = 1, val itemsPerPage: Int = 10,
                           val waitOnSinglePage: Boolean = false,
-                          val bulkSkipNumber: Int = 0,
-                          val wrapPageEnds: Boolean = true,
-                          val thumbnail: String = "",
-                          val color: Color = STD_GREEN,
+                          val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
+                          val thumbnail: String = "", val color: Color = STD_GREEN,
+                          val fields: List<Field> = emptyList(),
                           val finalAction: (Message) -> Unit = { m ->
                               try {
-                                  m.clearReactions().queue()
+                                  m.clearReactions().queueAfter(250, SECONDS)
                               } catch (ignored: Exception) {
                               }
                           })
@@ -354,7 +373,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     companion object {
         val BIG_LEFT = Rewind
         val LEFT = ArrowBackward
-        val STOP = X_Red
+        val EXIT = X_Red
         val RIGHT = ArrowForward
         val BIG_RIGHT = FastForward
     }
@@ -365,6 +384,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         if (title.isNotBlank()) setTitle(title)
         if (description.isNotBlank()) setDescription(description)
         if (thumbnail.isNotBlank()) setThumbnail(thumbnail)
+        if (fields.isNotEmpty()) fields.forEach { addField(it) }
         setColor(color)
     }
 
@@ -372,14 +392,13 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     val emojiCounter: EmojiCounter = EmojiCounter(wrap = true)
 
     init {
-        if (this.itemsPerPage > 10) {
-            throw InvalidArgumentException(arrayOf("Max Items per page is 10"))
+        if (this.itemsPerPage !in 1..EmojiNumbers.size) {
+            throw InvalidArgumentException(arrayOf("Items Per Page must be in 1..10"))
         }
     }
 
-
     /**
-     * Begins pagination on page 1 as a new [Message][net.dv8tion.jda.core.entities.Message]
+     * Begins waitFor on page 1 as a new [Message][net.dv8tion.jda.core.entities.Message]
      * in the provided [MessageChannel][net.dv8tion.jda.core.entities.MessageChannel].
      *
      *
@@ -391,7 +410,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     override fun display(channel: MessageChannel) = paginate(channel, 1)
 
     /**
-     * Begins pagination on page 1 displaying this Pagination by editing the provided
+     * Begins waitFor on page 1 displaying this Pagination by editing the provided
      * [Message][net.dv8tion.jda.core.entities.Message].
      *
      *
@@ -401,12 +420,10 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
      * @param  message
      * The Message to display the Menu in
      */
-    override fun display(message: Message) {
-        paginate(message, 1)
-    }
+    override fun display(message: Message) = paginate(message, 1)
 
     /**
-     * Begins pagination as a new [Message][net.dv8tion.jda.core.entities.Message]
+     * Begins waitFor as a new [Message][net.dv8tion.jda.core.entities.Message]
      * in the provided [MessageChannel][net.dv8tion.jda.core.entities.MessageChannel], starting
      * on whatever page number is provided.
      *
@@ -422,7 +439,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     }
 
     /**
-     * Begins pagination displaying this Pagination by editing the provided
+     * Begins waitFor displaying this Pagination by editing the provided
      * [Message][net.dv8tion.jda.core.entities.Message], starting on whatever
      * page number is provided.
      *
@@ -437,58 +454,42 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         initialize(message.editMessage(msg), page)
     }
 
-    private fun initialize(action: RestAction<Message>, pageNum: Int) = runBlocking {
-        action.queue { m ->
+    private fun initialize(action: RestAction<Message>, pageNum: Int) {
+        val start = (pageNum - 1) * itemsPerPage
+        val end = when {
+            items.size < pageNum * itemsPerPage -> items.size
+            else -> pageNum * itemsPerPage
+        }
+        action.queueAfter(250, MILLISECONDS) { m ->
             when {
                 pages > 1 -> {
                     if (bulkSkipNumber > 1) m.reactWith(BIG_LEFT)
                     m.reactWith(LEFT)
+                    runBlocking { delay(500) }
                     emojiCounter.reset()
-                    (0 until itemsPerPage).forEach { m.reactWith(emojiCounter.next()) }
-                    runBlocking { delay(1_000); pagination(m, pageNum) }
+                    (start until end).forEach { m.reactWith(emojiCounter.next()) }
+                    runBlocking { delay(500) }
                     if (bulkSkipNumber > 1) m.reactWith(RIGHT)
                     m.reactWith(if (bulkSkipNumber > 1) BIG_RIGHT else RIGHT)
-                    m.reactWith(STOP)
-                    launch {
-                        delay(500)
-                        pagination(m, pageNum)
-                    }
-                    return@queue
+                    m.reactWith(EXIT)
+                    waitFor(m, pageNum)
+
                 }
                 else -> {
-                    (0 until itemsPerPage).forEach { m.reactWith(emojiCounter.next()) }
-                    m.reactWith(STOP)
-                    runBlocking {  delay(1_000); pagination(m, pageNum) }
-                    launch {
-                        delay(500)
-                        pagination(m, pageNum)
-                    }
+                    (start until end).forEach { m.reactWith(emojiCounter.next()) }
+                    runBlocking { delay(500) }
+                    m.reactWith(EXIT)
+                    waitFor(m, pageNum)
                 }
             }
         }
     }
 
-    private fun pagination(message: Message, pageNum: Int) {
+    private fun waitFor(message: Message, pageNum: Int) {
         waiter.waitForEvent(MessageReactionAddEvent::class.java,
                 { event -> checkReaction(event, message.idLong) }, // Check Reaction
                 { event -> handleMessageReactionAddAction(event, message, pageNum) },
                 timeout, unit, { finalAction(message) })
-    }
-
-    // Private method that checks MessageReactionAddEvents
-    private fun checkReaction(event: MessageReactionAddEvent, messageId: Long): Boolean {
-        if (event.messageIdLong != messageId) return false
-        val emoji = event.reactionEmote.toEmoji()
-        return when (emoji) {
-            // LEFT, STOP, RIGHT, BIG_LEFT, BIG_RIGHT all fall-through to
-            // return if the User is valid or not. If none trip, this defaults
-            // and returns false.
-            LEFT, STOP, RIGHT -> isValidUser(event.user, event.guild)
-            BIG_LEFT, BIG_RIGHT -> bulkSkipNumber > 1 && isValidUser(event.user, event.guild)
-            else -> if (OrderedEmoji.indexOfFirst { it == emoji } != 0) {
-                isValidUser(event.user,event.guild)
-            } else false
-        }
     }
 
     // Private method that handles MessageReactionAddEvents
@@ -521,18 +522,25 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                     i++
                 }
             }
+            EXIT -> finalAction(message)
             else -> {
-                val i = OrderedEmoji.indexOfFirst { emoji == it } * pageNum
-                when (i) {
-                    -1   -> return
-                    else -> items[i].second(i, message)
+                val i = EmojiNumbers.indexOf(emoji) + ((pageNum - 1) * itemsPerPage)
+                when {
+                    i >= 0 -> {
+                        try {
+                            items[i].second(i, message)
+                        } catch (e: IndexOutOfBoundsException) {
+                            elog(e.message)
+                        }
+                        return
+                    }
+                    else -> return
                 }
             }
         }
 
-
         try {
-            message.clearReactions().queue()
+            message.clearReactions().queueAfter(250, SECONDS)
         } catch (ignored: PermissionException) {}
         initialize(message.editMessage(renderPage(newPageNum)), newPageNum)
     }
@@ -540,6 +548,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     private fun renderPage(pageNum: Int): Message {
         val mbuilder = MessageBuilder()
         val ebuilder = this.baseEmbed
+        emojiCounter.reset()
         val sb = StringBuilder()
 
         val start = (pageNum - 1) * itemsPerPage
@@ -549,7 +558,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         }
         if (columns == 1) {
             (start until end).forEach { i ->
-                sb.append("\n${items[i].first} ${items[i].second}")
+                sb.append("\n${emojiCounter.next().unicode}${items[i].first}")
             }
             ebuilder.appendDescription("\n\n" + sb.toString())
         } else {
@@ -557,16 +566,32 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
             (0 until columns).forEach { k ->
                 var i = start + k * per
                 while (i < end && i < start + (k + 1) * per) {
-                    sb.append("\n${items[i].first} ${items[i].second}")
+                    sb.append("\n${emojiCounter.next().unicode}${items[i].first}")
                     i++
                 }
                 ebuilder.addField("", sb.toString(), true)
             }
         }
-
+        emojiCounter.reset()
         ebuilder.setFooter("Page $pageNum/$pages", null)
         mbuilder.setEmbed(ebuilder.build())
         return mbuilder.build()
+    }
+
+    // Private method that checks MessageReactionAddEvents
+    private fun checkReaction(event: MessageReactionAddEvent, messageId: Long): Boolean {
+        if (event.messageIdLong != messageId) return false
+        val emoji = event.reactionEmote.toEmoji()
+        return  when (emoji) {
+            // LEFT, EXIT, RIGHT, BIG_LEFT, BIG_RIGHT all fall-through to
+            // return if the User is valid or not. If none trip, this defaults
+            // and returns false.
+            LEFT, EXIT, RIGHT -> isValidUser(event.user, event.guild)
+            BIG_LEFT, BIG_RIGHT -> bulkSkipNumber > 1 && isValidUser(event.user, event.guild)
+            else -> if (EmojiNumbers.has { it == emoji }) {
+                isValidUser(event.user,event.guild)
+            } else false
+        }
     }
 
 }
@@ -580,9 +605,15 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
 class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet(),
                       timeout: Long = 3L, unit: TimeUnit = MINUTES,
                       val messageEmbed: MessageEmbed,
-                      val options: List<Pair<Emoji, (Emoji, Message) -> Unit>>,
-                      val cancelEmoji: Emoji, val finalAction: (Message) -> Unit)
+                      val options: List<Pair<Emoji, (Message) -> Unit>>,
+                      val cancelEmoji: Emoji? = null, val finalAction: (Message) -> Unit)
     : Menu(WAITER, users, roles, timeout, unit) {
+
+    constructor(user: User, messageEmbed: MessageEmbed,
+                options: List<Pair<Emoji, (Message) -> Unit>>,
+                cancelEmoji: Emoji? = null, finalAction: (Message) -> Unit)
+            : this(setOf(user), messageEmbed = messageEmbed, options = options,
+        cancelEmoji = cancelEmoji, finalAction = finalAction)
 
     override fun display(channel: MessageChannel) {
         initialize(channel.sendMessage(messageEmbed))
@@ -592,25 +623,26 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
         initialize(message.editMessage(messageEmbed))
     }
 
-
     private fun initialize(action: RestAction<Message>) = action.queue { m ->
-        options.forEach { m.reactWith(it.first) }
-        m.reactWith(cancelEmoji)
-        runBlocking { delay(1_000) }
-        waiter.waitForEvent(MessageReactionAddEvent::class.java,
-                { event -> when {
-                    event.messageIdLong != m.idLong -> false
-                    options.has { it.first == event.reactionEmote.toEmoji() } -> {
-                        isValidUser(event.user, event.guild)
-                    }
-                    else ->false
-                    }
-                },
-                { event -> event.reaction.reactionEmote.toEmoji()?.run {
-                        val i = OrderedEmoji.indexOfFirst { this == it }
-                        if (i != -1) options[i].second(this, m)
-                    }
-                }, timeout, unit, { finalAction(m) })
+        if (cancelEmoji != null) m reactWith cancelEmoji
+        options.forEach {
+            runBlocking { delay(250) }
+            m reactWith it.first
+        }
+        waiter.waitForEvent(MessageReactionAddEvent::class.java, { event ->
+            when {
+                event.messageIdLong != m.idLong -> false
+                options.has { it.first == event.reactionEmote.toEmoji() } -> {
+                    isValidUser(event.user, event.guild)
+                }
+                else -> false
+            }
+        }, { event ->
+            event.reaction.reactionEmote.toEmoji()?.run {
+                val i = options.indexOfFirst { this == it.first }
+                if (i != -1) options[i].second(m)
+            }
+        }, timeout, unit, { finalAction(m) })
     }
 
 }

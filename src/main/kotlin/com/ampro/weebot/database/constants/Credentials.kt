@@ -5,12 +5,18 @@
 package com.ampro.weebot.database.constants
 
 import com.ampro.weebot.main.MLOG
+import com.mysql.cj.jdbc.MysqlDataSource
+import com.sun.xml.internal.bind.v2.util.DataSourceSource
 import com.twilio.type.PhoneNumber
+import io.requery.meta.EntityModel
+import io.requery.sql.KotlinConfiguration
+import io.requery.sql.KotlinEntityDataStore
+import io.requery.sql.platform.MySQL
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
-import net.dv8tion.jda.core.AccountType
-import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.JDABuilder
+import net.dv8tion.jda.core.*
 import net.dv8tion.jda.core.entities.Game
+import org.jetbrains.exposed.sql.Database
+import java.sql.DriverManager
 import javax.security.auth.login.LoginException
 
 
@@ -23,10 +29,23 @@ const val TWILIO_SID     = "ACd4d05126a5cef2d7d3df831aa564f1f8"
 const val TWILIO_TOKEN   = "bd906c9dad4f39c2c2e662f38095bc00"
 val TWILIO_NUMBER  = PhoneNumber("+17084773268")
 
+/* *********************
+      SQL
+ **********************
+
+val ds = MysqlDataSource().apply {
+    serverName = "den1.mysql4.gear.host"
+    databaseName = "weebotdb"
+    user = "weebotdb"
+    password = "kjshdo&A(*Sdba76y879as"
+}
+val configuration = KotlinConfiguration(dataSource = ds, model = )
+val data = KotlinEntityDataStore(configuration)
+*/
 
 /* *********************
       Weebot & Tobeew
- **********************/
+ ********************* */
 
 const val BOTSONDISCORD_KEY = "cb54546df399c39238d263d5bcc41e18"
 const val BOTLIST_KEY     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQzNzg1MTg5NjI2MzIxMzA1NiIsImJvdCI6dHJ1ZSwiaWF0IjoxNTQ0NjM4MDAyfQ.gRBPSSymkwQenP8hgijV_npBUee3VEx8uEbVN0WvOjM"

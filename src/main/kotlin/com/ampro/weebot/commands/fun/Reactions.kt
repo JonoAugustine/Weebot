@@ -25,6 +25,8 @@ import java.util.concurrent.TimeUnit.SECONDS
  * Adds a reaction THiS to a message. Can also be used to activate an [IPassive]
  * watcher for "^this" or "^that" messages.
  *
+ * TODO: Generalize this command
+ *
  * @author Jonathan Augustine
  * @since 2.0
  */

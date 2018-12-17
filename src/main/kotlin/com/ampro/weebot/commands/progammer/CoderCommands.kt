@@ -23,6 +23,7 @@ class CmdEval : WeebotCommand("RunCode", arrayOf("eval", "java"), CAT_PROG,
     "<method.call>", "Evaluates given code.", cooldown = 5) {
 
     override fun execute(event: CommandEvent) {
+        if (event.message.contentRaw.contains("token", true)) return
         val se = ScriptEngineManager().getEngineByName("Nashorn")
         se.put("event", event)
         se.put("jda", event.jda)

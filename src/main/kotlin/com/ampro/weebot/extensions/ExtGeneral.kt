@@ -7,6 +7,11 @@ package com.ampro.weebot.extensions
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 
+/* **************
+        Lists
+ ***************/
+
+
 /* ****************
         String
  *******************/
@@ -21,10 +26,12 @@ fun String.removeAll(regex: Regex) = this.replace(regex, "")
 
 fun String.removeAll(string: String) = this.replace(string.toRegex(), "")
 
-fun String.matchesAny(regecies: Collection<Regex>) : Boolean {
+infix fun String.matchesAny(regecies: Collection<Regex>) : Boolean {
     regecies.forEach { if (this.matches(it)) return true }
     return false
 }
+
+infix fun String.matches(regex: String) = this.matches(regex.toRegex())
 
 fun String.matchesAny(vararg regecies: Regex) : Boolean {
     regecies.forEach { if (this.matches(it)) return true }
