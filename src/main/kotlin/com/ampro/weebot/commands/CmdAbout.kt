@@ -5,12 +5,20 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
-import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.database.constants.DISCORD_BOTS_LINK
+import com.ampro.weebot.database.constants.LINK_INVITEBOT
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.*
-import com.ampro.weebot.main.*
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.delete
+import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.extensions.strdPaginator
+import com.ampro.weebot.main.JDA_SHARD_MNGR
+import com.ampro.weebot.main.SELF
+import com.ampro.weebot.main.WAITER
+import com.ampro.weebot.util.WKDAY_MONTH_YEAR_TIME
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.menu.OrderedMenu
+import net.dv8tion.jda.core.entities.Role.DEFAULT_COLOR_RAW
 import java.util.concurrent.TimeUnit.MINUTES
 
 const val HELLO_THERE = "https://www.youtube.com/watch?v=rEq1Z0bjdwc"
@@ -110,18 +118,35 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
  * @since 2.0
  */
 class CmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
-    "", "Get information about Weebot.", cooldown = 90
+    "", "Get information about Weebot.", cooldown = 90, guildOnly = true
 ) {
     override fun execute(event: CommandEvent) {
-        event.respondThenDelete("*Under Constructions*", 5)
-        //TODO
+        val roles = event.member.roles
+        event.reply(
+                strdEmbedBuilder.apply {
+                    if (roles.isNotEmpty() && roles[0].colorRaw != DEFAULT_COLOR_RAW)
+                        setColor(event.member.roles[0].colorRaw)
+                    setThumbnail(event.author.avatarUrl)
+                    addField("ID", """
+                        ***Name:***     ${event.author.name} #${event.author.discriminator}
+                        ***Nickname:*** ${event.member.effectiveName}
+                        ***ID:***       ${event.author.id}
+                    """.trimIndent(), true)
+                    addField("Account Created", event.author.creationTime.format(
+                            WKDAY_MONTH_YEAR_TIME), true)
+                    addField("Join Date", event.member.joinDate.format(WKDAY_MONTH_YEAR_TIME), true)
+                    addField("Shared Weebot Servers: ${event.author.mutualGuilds.size}", "", true)
+                    addField("${roles.size} Roles", if (roles.isEmpty()) "" else
+                        roles.joinToString(", ", transform = { it.name }), true)
+                }.build()
+        )
     }
 }
 
 
 /**
  * Send an [MessageEmbed] giving help with Weebot Commands.
- * TODO(Help)
+ *
  * @author Jonathan Augustine
  * @since 2.0
  */
