@@ -23,6 +23,11 @@ const val TWILIO_SID     = "ACd4d05126a5cef2d7d3df831aa564f1f8"
 const val TWILIO_TOKEN   = "bd906c9dad4f39c2c2e662f38095bc00"
 val TWILIO_NUMBER  = PhoneNumber("+17084773268")
 
+/* Reddit */
+const val REDDIT_ID = "wt50r_Mqf1zs_A"
+const val REDDIT_SEC = "WRLTL6bEdgtSELdw_3a79QoRAA0"
+const val REDDIT_USR = "Ventus_Aurelius"
+const val REDDIT_PAS = "G3lassenheit"
 
 /* *********************
       Weebot & Tobeew
