@@ -7,19 +7,26 @@ package com.ampro.weebot.commands.utilitycommands
 import com.ampro.weebot.Restriction
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.utilitycommands.NotePad.Note
+import com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit.EditType
+import com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit.EditType.*
+import com.ampro.weebot.database.getUser
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
+import com.ampro.weebot.extensions.MentionType.*
+import com.ampro.weebot.main.GENERIC_ERR_MESG
+import com.ampro.weebot.main.WAITER
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
+import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
-import net.dv8tion.jda.core.entities.Guild
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.TextChannel
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.MessageEmbed.Field
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.exceptions.PermissionException
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
+import java.util.concurrent.TimeUnit.*
 
 
 /** The maximum number of note pads a Weebot will hold for a single guild  */
@@ -135,7 +142,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      *
      * @since 1.0
      */
-    data class Note(var note: String, val authorID: Long,val initTime: OffsetDateTime) {
+    class Note(var note: String, val authorID: Long, val initTime: OffsetDateTime) {
 
         val id = NOTE_ID_GEN.next()
 
@@ -143,42 +150,116 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
 
         var edits: Long = 0
 
-        /** TODO Restrictions used only for user ids  */
-        val writeRestrictions: Restriction = Restriction()
-        val readRestriction: Restriction = Restriction()
-
         /**
-         * Edit the note content and update the date-time.
-         * @param note The new note.
+         * Edit the [Note.note] content and update the [NotePad.editHistory]
+         *
+         * @param edit The new note.
+         * @param editor the [User] who edited the note
+         * @param time The time of the edit
          */
-        fun edit(note: String, editor: User) {
-            this.note = note
-            this.lastEditTime = OffsetDateTime.now()
+        fun edit(edit: String, time: OffsetDateTime) : String {
+            val old = note // save
+            note = edit //edit
+            this.lastEditTime = time
             this.edits++
+            return old
         }
 
-        fun toEmbed(guild: Guild) = strdEmbedBuilder
-            .setTitle("${if(readRestriction.restricted() || writeRestrictions.restricted())
-             Lock else Unlock} Note $id").setDescription(note)
+        fun toEmbed(guild: Guild): EmbedBuilder = strdEmbedBuilder
+            .setTitle("Note $id").setDescription(note)
             .addField("Author", guild.getMemberById(authorID)?.effectiveName, true)
             .addField("Created at ${initTime.format(DD_MM_YYYY_HH_MM)}", "", true)
-            .addField("Edits", "$edits\nTime since last edit: ${ChronoUnit
+            .addField("Edits: $edits", "Time since last edit: ${ChronoUnit
                 .SECONDS.between(lastEditTime, NOW()).formatTime()}", true)
             .addField("Guide", "To Edit: $Pencil\nTo Lock: $Lock\nTo Unlock: $Unlock" +
-                    "\nTo delete: $X_Red", true).build()
+                    "\nTo delete: $X_Red", true)
+
+        fun toSelectableEmbed(userSet: Set<User>, guild: Guild, notePad: NotePad,
+                              finalAction: (Message) -> Unit) : SelectableEmbed {
+            return SelectableEmbed(userSet, messageEmbed = toEmbed(guild).build(),
+                options = listOf(Pencil to { m1 ->
+                    m1.textChannel.sendMessage("To Edit, send the new note:").queue {
+                        WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                            { e -> e.isValidUser(users = userSet, guild = e.guild) },
+                            { e ->
+                                notePad.editNote(this, e.message.contentDisplay, e.author,
+                                    e.message.creationTime)
+                                val nm = toSelectableEmbed(userSet, guild, notePad,
+                                    finalAction)
+                                try {
+                                    nm.display(m1)
+                                } catch (ex: Exception) {
+                                    nm.display(e.channel)
+                                }
+                            }, 2, MINUTES, {
+                                it.editMessage("~~${it.contentDisplay}~~ *timed out*")
+                                    .queue()
+                            })
+                    }
+                }, Lock to { m -> /*TODO Lock*/ },
+                    Unlock to { m -> /*TODO Unlock*/ },
+                    X_Red to { m ->
+                        strdButtonMenu.setUsers(userSet.first())
+                            .setText("*Are you sure you want to delete note:${this.id}?*")
+                            .setDescription("${Fire.unicode} = YES,* ***ignore this to cancel***")
+                            .addChoice(Fire.unicode).setTimeout(30, SECONDS)
+                            .setAction {
+                                if (it.toEmoji() == Fire) {
+                                    val index = notePad.indexOf(this)
+                                    if (index == -1) {
+                                        m.channel.sendMessage(GENERIC_ERR_MESG).queue()
+                                        return@setAction
+                                    } else {
+                                        notePad.deleteNote(index, userSet.first(),
+                                            m.creationTime)
+                                        try {
+                                            m.delete().queueAfter(250, MILLISECONDS)
+                                            m.channel.sendMessage("*Note deleted.*")
+                                                .queueAfter(250, MILLISECONDS)
+                                        } catch (ex: Exception) {
+                                            m.clearReactions().queueAfter(250, MILLISECONDS)
+                                        }
+                                    }
+                                }
+                            }.setFinalAction {}
+                            .build().display(m.channel)
+                    }
+                ), cancelEmoji = Rewind, finalAction = finalAction)
+        }
 
         override fun toString() = this.note
 
     }
 
+    /**
+     * A data class holding information about an Edit made to the [NotePad].
+     *
+     * @param noteIDs The ids of the [Note]s edited
+     * @param editorID the id of the [User] editing
+     * @param type the type of edit
+     * @param info any additional information about the edit
+     * @param time the time of the edit
+     *
+     * @author Jonathan Augustine
+     * @since 2.0
+     */
+    data class NotePadEdit(val noteIDs: List<String>, val editorID: Long,
+                           val type: EditType, val info: String = "",
+                           val time: OffsetDateTime) {
+        constructor(noteIDs: List<String>, editorID: Long, type: EditType,
+                    time: OffsetDateTime) : this(noteIDs, editorID, type, "",  time)
+
+        enum class EditType {ADD, EDIT, DELETE, CLEAR, LOCK, UNLOCK}
+
+
+    }
+
     val id = NOTEPAD_ID_GEN.next()
 
-    val initDate = NOW()
-    val lastEdit = NOW()
-
     val notes = mutableListOf<Note>()
-    /** An ordered history of each time the [NotePad] was edited */
-    val editHistory = mutableListOf<Triple<Long, String, OffsetDateTime>>()
+
+    /** An ordered history of each time the [NotePad] was edited | Editor, NoteID, Time*/
+    val editHistory = mutableListOf<NotePadEdit>()
 
     val readRestriction = Restriction()
     val writeRestriction = Restriction()
@@ -189,29 +270,48 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      * the note list
      */
     fun send(event: CommandEvent, message: Message?, pads: List<NotePad>) {
+        val guild = event.guild
         val mem = event.member
-        val cv = notes.filter { TODO() }
         val userSet = setOf(mem.user)
-        val sp = SelectablePaginator(users = userSet, title = this.name,
-                itemsPerPage = 10,
-                items = List<Pair<String, (Int, Message) -> Unit>>(notes.size) {
-                    "(${cv[it].id}) ${cv[it].note}" to { i, m ->
-                        try { m.clearReactions().queue()} catch (e: PermissionException) {}
-                        SelectableEmbed(userSet, messageEmbed = notes[i].toEmbed(event.guild),
-                                options = listOf(),
-                                cancelEmoji = Rewind
-                        ) {message ->
-                            send(event, message, pads)
-                        }.display(m)
+        val items = List<Pair<String, (Int, Message) -> Unit>>(notes.size) {
+            "(${notes[it].id}) ${notes[it].note}" to { i, m ->
+                try { m.clearReactions().queueAfter(250, MILLISECONDS)}
+                catch (e: PermissionException) {}
+                notes[i].toSelectableEmbed(userSet, guild, this) {
+                    //final
+                    try {
+                        send(event, m, pads)
+                    } catch (e: Exception) {
+                        send(event, null, pads)
+                        m.delete().queueAfter(1, SECONDS)
                     }
-                }
-        ) { message ->
-            sendNotePads(event, pads, message)
+                }.display(m)
+            }
         }
+        val notePad = SelectablePaginator(users = userSet, title = this.name,
+                itemsPerPage = 10, items = items, fields = listOf(
+                //Field("Read Restrictions"), TODO
+                //Field("Write Restrictions", ), TODO
+                Field("Created: ${initTime.format(DD_MM_YYYY_HH_MM)}","""
+                    Edits: ${editHistory.size}
+                    Last edit: ${editHistory[0].type} by ${guild.getMemberById
+                    (editHistory[0].editorID) ?.effectiveName ?: getUser(editHistory[0].editorID)?.name ?: "Unknown User"
+                } at ${editHistory[0].time.format(DD_MM_YYYY_HH_MM)}
+                on notes [${editHistory[0].noteIDs.joinToString(", ")}]
+                """.trimIndent(), true)
+            )
+        ) {
+            //final action
+            try { it.clearReactions().queueAfter(250, MILLISECONDS) }
+            catch (ignored: Exception) {}
+            sendNotePads(event, pads, it.textChannel)
+            it.delete().queueAfter(1, SECONDS)
+        }
+
         if (message != null) {
-            sp.display(message)
+            notePad.display(message)
         } else {
-            sp.display(event.channel)
+            notePad.display(event.channel)
         }
     }
 
@@ -220,8 +320,13 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      *
      * @param notes The [String] notes to add
      */
-    fun addNotes(user: User, vararg notes: String, creation: OffsetDateTime) {
-        notes.forEach { this.notes.add(Note(it, user.idLong, creation)) }
+    fun addNotes(user: User, time: OffsetDateTime, vararg notes: String) {
+        val ids = mutableListOf<String>()
+        var n: Note
+        notes.forEach {
+            n = Note(it, user.idLong, time); this.notes.add(n); ids.add(n.id)
+        }
+        recordEdit(ids, user, ADD, time)
     }
 
     /**
@@ -229,8 +334,13 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      *
      * @param notes The [Note]s to add
      */
-    fun addNotes(user: User, creation: OffsetDateTime, notes: Collection<String>) {
-        notes.forEach { this.notes.add(Note(it, user.idLong, creation)) }
+    fun addNotes(user: User, time: OffsetDateTime, notes: Collection<String>) {
+        val ids = mutableListOf<String>()
+        var n: Note
+        notes.forEach {
+            n = Note(it, user.idLong, time); this.notes.add(n); ids.add(n.id)
+        }
+        recordEdit(ids, user, ADD, time)
     }
 
     /**
@@ -239,11 +349,15 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      * @param index The index to insert the notes at
      * @param notes The notes to insert
      */
-    fun insertNotes(author: User, creation: OffsetDateTime, index: Int, notes: List<String>) {
+    fun insertNotes(author: User, time: OffsetDateTime, index: Int, notes: List<String>) {
+        val ids = mutableListOf<String>()
         try {
-            this.notes.addAll(if (index < 0) 0 else index, notes.toNotes(author.idLong, creation))
+            val nn = notes.toNotes(author.idLong, time)
+            this.notes.addAll(if (index < 0) 0 else index, nn)
+            nn.forEach { ids.add(it.id) }
+            recordEdit(List(ids.size) {nn[it].id}, author, ADD, time)
         } catch (e: IndexOutOfBoundsException) {
-            this.addNotes(author, creation, notes)
+            this.addNotes(author, time, notes)
         }
     }
 
@@ -254,23 +368,36 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      * @return The message previously held by the note.
      */
     @Throws(IndexOutOfBoundsException::class)
-    fun editNote(index: Int, edit: String, editor: User): String {
-        val old = this.notes[index].note
-        this.notes[index].edit(edit, editor)
+    fun editNote(note: Note, edit: String, editor: User, time: OffsetDateTime): String {
+        val old = note.edit(edit, time) //edit
+        recordEdit(listOf(note.id), editor, EDIT, time) //record
         return old
     }
 
     /**
-     * Remove notes from the NotePad.
-     *
-     * @param indices The indeces of the notes to remove. (starting at 1)
-     *
-     * @return The removed notes.
+     * Edit a note.
+     * @param index The index of the note.
+     * @param edit The new note.
+     * @return The message previously held by the note.
      */
-    fun deleteNotesByIndex(indices: List<Int>): List<Note> {
-        val out = mutableListOf<Note>()
-        indices.forEach { i -> out.add(this.notes.removeAt(i - 1)) }
-        return out
+    @Throws(IndexOutOfBoundsException::class)
+    fun editNote(index: Int, edit: String, editor: User, time: OffsetDateTime): String {
+        return editNote(notes[index], edit, editor, time)
+    }
+
+    fun deleteNote(note: Note, editor: User, time: OffsetDateTime) : Boolean {
+        return if (notes.remove(note)) {
+            recordEdit(listOf(note.id), editor, DELETE, time)
+            true
+        } else false
+    }
+
+    fun deleteNote(index: Int, editor: User, time: OffsetDateTime) : Boolean {
+        return if (index !in 0 until notes.size)  false
+        else {
+            recordEdit(listOf(notes[index].id), editor, DELETE, time)
+            true
+        }
     }
 
     /**
@@ -280,12 +407,14 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      *
      * @return The removed notes.
      */
-    fun deleteNotesById(ids: List<String>) : List<Note> {
+    fun deleteNotesById(ids: List<String>, editor: User, time: OffsetDateTime)
+            : List<Note> {
         val out = mutableListOf<Note>()
         ids.forEach { id ->
             val i = this.notes.indexOfFirst { it.id.equals(id, true) }
             out.add(this.notes.removeAt(i))
         }
+        recordEdit(List(out.size){ out[it].id }, editor, DELETE, time)
         return out
     }
 
@@ -294,16 +423,30 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      *
      * @return The removed notes
      */
-    fun clear(): List<Note> {
+    fun clear(editor: User, time: OffsetDateTime): List<Note> {
         val out = this.notes.toList()
         this.notes.clear()
+        recordEdit(emptyList(), editor, CLEAR, time)
         return out
+    }
+
+    /**
+     * Add a [NotePadEdit] to the [editHistory]
+     *
+     * @param noteIDs The ids of the [Note]s edited
+     * @param editorID the id of the [User] editing
+     * @param type the type of edit
+     * @param info any additional information about the edit
+     * @param time the time of the edit
+     */
+    fun recordEdit(ids: List<String>, editor: User, type: EditType,
+                   time: OffsetDateTime, info: String = "") {
+        editHistory.add(0, NotePadEdit(ids, editor.idLong, type, info, time))
     }
 
     override fun iterator() = notes.iterator()
 
 }
-
 
 /**
  * View and modify [Note Pads][NotePad].
@@ -328,54 +471,198 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         """.trimIndent(), "Write in-discord notes and organize them into NotePds",
     cooldown = 5, guildOnly = true) {
 
-
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
         val auth = event.author
         val mem = event.member
         val guild = event.guild
         val bot = getWeebotOrNew(event.guild)
-        val pads = bot.notePads
+        val pads = bot.notePads.apply {
+            val testNote = NotePad("TEST ${this.size}", event.author.idLong,
+                event.message.creationTime)
+            testNote.addNotes(event.author, event.message.creationTime,
+                "This is a testNote")
+            add(testNote)
+        } //TODO remove test notepads later
         /** User's Viewable notepads */
         val cv = pads.filter { event canRead it }
 
         if (args.isEmpty()) {
-            event.delete(30)
-            if (pads.isEmpty()) {
-                event.respondThenDelete(strdEmbedBuilder
-                    .setTitle("${guild.name} has no NotePads")
-                    .setDescription("Use ``make [Notepad Name]`` to make a new NotePad")
-                    .build(), 30)
-                return
-            } else if (cv.isEmpty()) {
-                event.respondThenDelete(strdEmbedBuilder
-                    .setTitle("${guild.name} has no NotePads you can view")
-                    .setDescription("Use ``make [Notepad Name]`` to make a new NotePad")
-                    .build(), 30)
-                return
-            }
-            sendNotePads(event, cv, event.textChannel)
-            return
+            //TODO Open a Selectable Embed with all options
+            SelectableEmbed(auth, mainMenuEmbed.apply {
+                if (pads.isNotEmpty() && cv.contains(pads[0]))
+                    addEmptyField("Default NotePad: ${pads[0].name}")
+            }.build(), listOf(
+                Eyes to seeNotePads(event, pads, cv),
+                MagnifyingGlass to searchForNotePad(event, cv),
+                Notebook to addNotePad(event),
+                Pencil to writeToDefault(event, pads),
+                EightSpokedAsterisk to setDefaultById(event, pads),
+                FileFolder to notePadToFileById(event, cv),
+                C to clearNotePadById(event, cv),
+                X_Red to deleteNotePadById(event, cv)
+            )) {
+                try {
+                    it.delete().queue()
+                } catch (e: Exception) {
+                    try {
+                        it.clearReactions().queue()
+                    } catch (e: Exception) {}
+                }
+            }.display(event.textChannel)
         }
-
-        /*
-        when (args[0]) {
-            "make" ->
-            "write", "add" ->
-            "insert" ->
-            "edit" ->
-            "get", "see" ->
-            "delete", "remove" ->
-            "clear" ->
-            "toss", "trash", "bin", "garbo" ->
-            "file" ->
-            "lockto" ->
-            "lockout" ->
-        }
-        */
 
     }
 
+    /**
+     * Send a list of viewable notePads or respond help
+     *
+     * @param allPads All [NotePad]s in the guild
+     * @param viewable The notepads that the uesr can view
+     */
+    fun seeNotePads(event: CommandEvent, allPads: List<NotePad>,
+                    viewable: List<NotePad>) : (Message) -> Unit = {
+            when {
+                allPads.isEmpty() -> event.respondThenDelete(strdEmbedBuilder.setTitle(
+                    "${event.guild.name} has no NotePads").setDescription(
+                    "Use ``make [Notepad Name]`` to make a new NotePad").build(), 30)
+                viewable.isEmpty() -> event.respondThenDelete(strdEmbedBuilder.setTitle(
+                    "${event.guild.name} has no NotePads you can view").setDescription(
+                    "Use ``make [Notepad Name]`` to make a new NotePad").build(), 30)
+                else -> sendNotePads(event, viewable, event.textChannel)
+            }
+        }
+
+    fun searchForNotePad(event: CommandEvent, viewable: List<NotePad>)
+            : (Message) -> Unit = {
+        //TODO Send search criteria and wait for search request
+        event.reply("Under Construction")
+    }
+
+    /**
+     * Send dialogue for adding a new [NotePad]
+     *
+     * @param event The invoking event
+     */
+    fun addNotePad(event: CommandEvent) : (Message) -> Unit = { message ->
+        //TODO ask for name and locking info
+        val eb = strdEmbedBuilder.setTitle("Make a NotePad").setDescription("""
+                To make a new NotePad, reply to this message with the following format:
+                ```
+                [name] [-r <@ Members or Roles>]
+                    [-w <@ Members or Roles>]
+                    [-b <@ Members or Roles>]
+                    [-c <# channel mention>]
+                ```
+                ``-r`` (read lock) will allow only the mentioned Members or Roles to see this NotePad
+                ``-w`` (write lock) will allow only the mentioned Members or Roles to edit this NotePad
+                ``-b`` (block) will block the mentioned users or Roles from seeing this NotePad
+                ``-c`` (channel lock) will the NotePad to the mentioned TextChannels
+            """.trimIndent()).build()
+        event.reply(eb)
+        WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+            { ev -> ev.author.idLong == event.author.idLong },
+            { ev ->
+                val m = ev.message.contentDisplay
+                val args = ev.splitArgsRaw()
+                val notePads = getWeebotOrNew(ev.guild).notePads
+                val readRestriction = Restriction()
+                val writeRestriction = Restriction()
+                val nameList = mutableListOf<String>()
+                val notePad: NotePad
+
+                //parse the response
+                var currentChar: Char = 'e'
+
+                loop@for (s in args) {
+                    when {
+                        s matches "-r" -> currentChar = 'r'
+                        s matches "-w" -> currentChar = 'w'
+                        s matches "-b" -> currentChar = 'b'
+                        s matches "-c" -> currentChar = 'c'
+                        else -> {
+                            when (currentChar) {
+                                'e' ->  nameList.add(s)
+                                else -> {
+                                    val i = s.parseMentionId()
+                                    if (i == -1L) continue@loop
+                                    when (s.mentionType()) {
+                                        USER -> when (currentChar) {
+                                            'r' -> readRestriction.allowedUsers.add(i)
+                                            'w' -> writeRestriction.allowedUsers.add(i)
+                                            'b' -> readRestriction.blockedUsers.add(i)
+                                        }
+                                        ROLE -> when (currentChar) {
+                                            'r' -> readRestriction.allowedRoles.add(i)
+                                            'w' -> writeRestriction.allowedRoles.add(i)
+                                            'b' -> readRestriction.blockedRoles.add(i)
+                                        }
+                                        CHANNEL -> if (currentChar == 'c') {
+                                            readRestriction.allowedTextChannels.add(i)
+                                        }
+                                        else -> {}
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                notePad = NotePad(nameList.joinToString(" "), ev.author.idLong,
+                    ev.message.creationTime)
+
+                if (!notePads.has {it.name.toLowerCase() == notePad.name.toLowerCase()}) {
+                    notePads.add(notePad)
+                    ev.channel.sendMessage("*NotePad \"${notePad.name}\" added!*")
+                        .queue {
+                            notePad.send(event, null,notePads.filter {n ->  event canRead n })
+                        }
+                } else {
+                    ev.channel.sendMessage("*There is already a NotePad by that name.*")
+                        .queue()
+                }
+            }, 3, MINUTES, { event.reply("*Timed Out*") })
+    }
+
+    fun writeToDefault(event: CommandEvent, pads: List<NotePad>) : (Message) -> Unit
+            = {
+        //TODO check if can write to defaul then write ro err
+    }
+
+    fun setDefaultById(event: CommandEvent, pads: List<NotePad>) : (Message) -> Unit
+            = {
+        //TODO check if Moderator then ask for ID
+    }
+
+    fun notePadToFileById(event: CommandEvent, viewable: List<NotePad>)
+            : (Message) -> Unit = {
+        //TODO ask for ID and then send file in DM
+        event.reply("Under Construction")
+    }
+
+    fun clearNotePadById(event: CommandEvent, viewable: List<NotePad>)
+            : (Message) -> Unit = {
+        //TODO ask for ID then confirm clear then clear notepad
+        event.reply("Under Construction")
+    }
+
+    fun deleteNotePadById(event: CommandEvent, viewable: List<NotePad>)
+            : (Message) -> Unit = {
+        //TODO ask for ID then confirm delete
+        event.reply("Under Construction")
+    }
+
+    val mainMenuEmbed = strdEmbedBuilder.setTitle("Weebot NotePads").setDescription("""
+            $Eyes to see NotePads
+            $MagnifyingGlass to search for a NotePad
+            $Notebook to add a new NotePad
+            $Pencil to write to the default NotePad
+            $EightSpokedAsterisk to change the default NotePad (by ID)
+            $C to clear all of a NotePad's notes (by ID)
+            $FileFolder to get a NotePad as a file (by ID)
+            $X_Red to delete a NotePad (by ID)
+            """.trimIndent()
+    )
 
     /**
      * I couldn't find the notepad (index). I will send you a message containing
@@ -492,20 +779,21 @@ internal fun sendNotePads(event: CommandEvent, pads: List<NotePad> , message: Me
  * @return a [ButtonPaginator] consisting of the [NotePad]s given
  */
 internal fun buildNotePadPaginator(event: CommandEvent, pads: List<NotePad>)
-        : ButtonPaginator {
-    val emojiCounter = EmojiCounter()
+        : SelectablePaginator {
     val mem = event.member
-    return ButtonPaginator(setOf(mem.user), title = "${mem.guild.name} NotePads",
+    return SelectablePaginator(setOf(mem.user), title = "${mem.guild.name} NotePads",
             description = "${mem.guild.name} NotePads available to ${mem.effectiveName}",
             itemsPerPage = 10,
-            thumbnail = "https://47eaps32orgm24ec5k1dcrn1" + "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/" + "notepad-pen-sponsor.png",
-            items = List<Triple<Emoji, String, (Emoji, Message) -> Unit>>(pads.size) {
-                Triple(emojiCounter.next(), "${pads[it].name} (${pads[it].id})")
-                { e, m ->
-                    try { m.clearReactions().queue() } catch (e: PermissionException) {}
-                    pads[OrderedEmoji.indexOf(e)].send(event, m, pads)
+            thumbnail = "https://47eaps32orgm24ec5k1dcrn1"
+                    + "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/"
+                    + "notepad-pen-sponsor.png",
+            items = List<Pair<String, (Int, Message) -> Unit>>(pads.size) {
+                (" ${pads[it].name} (${pads[it].id})") to { i, m ->
+                    pads[i].send(event, null, pads)
                 }
             }) { m ->
-        try { m.clearReactions().queue() } catch (ignored: Exception) { }
+        try { m.clearReactions().queueAfter(250, MILLISECONDS) }
+        catch (ignored: Exception) { }
+        m.delete().queueAfter(2, SECONDS)
     }
 }

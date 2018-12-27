@@ -32,9 +32,7 @@ fun Message.reactWith(emoji: Emoji, success: Consumer<in Void>) {
  * @author Jonathan Augustine
  * @since 2.0
  */
-infix fun Message.reactWith(emoji: Emoji) {
-    this.addReaction(emoji.unicode).queue()
-}
+infix fun Message.reactWith(emoji: Emoji) = addReaction(emoji.unicode).queue()
 
 /**
  * Adds multiple Reactions to the [Message] in order of submission.
@@ -51,14 +49,20 @@ fun Message.reactWith(vararg emojis: Emoji) {
  *
  * @return The [Emoji] or null
  */
-fun Emote.toEmoji() = values().find { it.unicode == this.name }
+fun Emote.toEmoji() = Emoji.values().find { it.unicode == this.name }
 
 fun ReactionEmote.toEmoji() = Emoji.values().find { it.unicode == name }
 
-/** A list of 0-10 then A-Z emojis */
-internal val OrderedEmoji = listOf(Zero, One, Two, Three, Four, Five, Six, Seven,
-    Eight, Nine, KeycapTen, A, B, C, D, E, F, G, H, I_lowercase, J, K, L, M, N, O, P,
-    Q, R, S, T, U, V, W, X, Y, Z)
+infix fun ReactionEmote.`is`(emoji: Emoji) = toEmoji() == emoji
+
+/** A list of 1-10 emojis */
+internal val EmojiNumbers = listOf(One, Two, Three, Four, Five, Six, Seven,
+    Eight, Nine, KeycapTen)
+/** List of A-Z emoji */
+internal val EmojiLetters = listOf(A, B, C, D, E, F, G, H, I_lowercase, J, K,
+    L, M, N, O, P, Q, R, S, T, U, V, W, X, Y, Z)
+
+internal val EmojiNumAndLett = EmojiNumbers + EmojiLetters
 
 /**
  * An incrementer for sequential Emoji
@@ -69,7 +73,7 @@ internal val OrderedEmoji = listOf(Zero, One, Two, Three, Four, Five, Six, Seven
  * @author Jonathan Augustine
  * @since 2.0
  */
-class EmojiCounter(val alsoUseLetters: Boolean = true, val wrap: Boolean = false) {
+class EmojiCounter(val alsoUseLetters: Boolean = false, val wrap: Boolean = false) {
     var i = 0
 
     /**
@@ -79,10 +83,10 @@ class EmojiCounter(val alsoUseLetters: Boolean = true, val wrap: Boolean = false
      */
     @Throws(NoSuchElementException::class)
     fun next() : Emoji {
-        if (!alsoUseLetters && i == 12) {
+        if (!alsoUseLetters && i == EmojiNumbers.size) {
             i = if (wrap) 0 else throw NoSuchElementException()
-        } else if (OrderedEmoji.size == i) i = 0
-        return OrderedEmoji[i++]
+        } else if (EmojiNumAndLett.size == i) i = 0
+        return EmojiNumAndLett[i++]
     }
 
     /**
@@ -253,7 +257,7 @@ enum class Emoji constructor(val unicode: String) {
     Lock("\uD83D\uDD12"), LockWithInkPen("\uD83D\uDD0F"), Lollipop("\uD83C\uDF6D"),
     Loop("\u27BF"), LoudSound("\uD83D\uDD0A"), Loudspeaker("\uD83D\uDCE2"),
     LoveHotel("\uD83C\uDFE9"), LoveLetter("\uD83D\uDC8C"), LowBrightness("\uD83D\uDD05"),
-    M_IN_CIRCLE("\u24C2"), Mag("\uD83D\uDD0D"), MagRight("\uD83D\uDD0E"),
+    M_IN_CIRCLE("\u24C2"), MagnifyingGlass("\uD83D\uDD0D"), MagRight("\uD83D\uDD0E"),
     Mahjong("\uD83C\uDC04"), Mailbox("\uD83D\uDCEB"), MailboxClosed("\uD83D\uDCEA"),
     MailboxWithMail("\uD83D\uDCEC"), MailboxWithNoMail("\uD83D\uDCED"),
     Man("\uD83D\uDC68"), ManWithGuaPiMao("\uD83D\uDC72"), ManWithTurban("\uD83D\uDC73"),

@@ -1,0 +1,33 @@
+
+## Aquatic Mastery Productions ##
+		 # Weebot Log #
+	 25-12-2018 11:36:08
+
+
+
+[25-12-2018 11:36:08] [Launcher 25-12-2018 11-36-08] [info] Logging in to TestBot JDA shards...
+[25-12-2018 11:36:09] [Launcher 25-12-2018 11-36-08] [info] Setting up Database...
+[25-12-2018 11:36:09] [Launcher 25-12-2018 11-36-08] [info] 	Loading database...
+[25-12-2018 11:36:09] [Launcher 25-12-2018 11-36-08] [info] 	Database located. Updating registered Guilds.
+[25-12-2018 11:36:09] [Launcher 25-12-2018 11-36-08] [info] 	Backing up database.
+[25-12-2018 11:36:09] [Launcher 25-12-2018 11-36-08] [info] 	...DONE
+[25-12-2018 11:36:09] [Launcher 25-12-2018 11-36-08] [info] ...DONE
+[25-12-2018 11:36:10] [Launcher 25-12-2018 11-36-08] [info] Waiting for shard to connect...
+[25-12-2018 11:36:10] [Launcher 25-12-2018 11-36-08] [info] Shard connected! 0 seconds
+[25-12-2018 11:36:10] [Launcher 25-12-2018 11-36-08] [info] Starting Weebots...
+[25-12-2018 11:36:10] [Launcher 25-12-2018 11-36-08] [info] Starting Save Job...
+[25-12-2018 11:36:10] [Launcher 25-12-2018 11-36-08] [info] Launch Complete!
+
+
+[25-12-2018 12:00:41] [Launcher 25-12-2018 11-36-08] [info] Database back up: 50
+[25-12-2018 12:25:41] [Launcher 25-12-2018 11-36-08] [info] Database back up: 100
+[25-12-2018 12:50:42] [Launcher 25-12-2018 11-36-08] [info] Database back up: 150
+[25-12-2018 13:15:43] [Launcher 25-12-2018 11-36-08] [info] Database back up: 200
+[25-12-2018 13:40:43] [Launcher 25-12-2018 11-36-08] [info] Database back up: 250
+[25-12-2018 14:05:44] [Launcher 25-12-2018 11-36-08] [info] Database back up: 300
+[25-12-2018 14:30:44] [Launcher 25-12-2018 11-36-08] [info] Database back up: 350
+[25-12-2018 14:55:45] [Launcher 25-12-2018 11-36-08] [info] Database back up: 400
+[25-12-2018 15:20:46] [Launcher 25-12-2018 11-36-08] [info] Database back up: 450
+[25-12-2018 15:45:46] [Launcher 25-12-2018 11-36-08] [info] Database back up: 500
+[25-12-2018 16:10:47] [Launcher 25-12-2018 11-36-08] [info] Database back up: 550
+[25-12-2018 17:04:02] [Launcher 25-12-2018 11-36-08] [info] Database back up: 600

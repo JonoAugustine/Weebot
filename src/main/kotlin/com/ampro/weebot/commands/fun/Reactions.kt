@@ -5,9 +5,8 @@
 package com.ampro.weebot.commands.`fun`
 
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.*
-import com.ampro.weebot.extensions.EMBED_MAX_TITLE
-import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.commands.CAT_FUN
+import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.RAND
@@ -24,6 +23,8 @@ import java.util.concurrent.TimeUnit.SECONDS
 /**
  * Adds a reaction THiS to a message. Can also be used to activate an [IPassive]
  * watcher for "^this" or "^that" messages.
+ *
+ * TODO: Generalize this command
  *
  * @author Jonathan Augustine
  * @since 2.0
@@ -142,6 +143,7 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
     }
 
 }
+
 
 /**
  * Sends a General Kenobi Hello There gif.

@@ -30,6 +30,20 @@ const val REDDIT_USR = "Ventus_Aurelius"
 const val REDDIT_PAS = "G3lassenheit"
 
 /* *********************
+      SQL
+ **********************
+
+val ds = MysqlDataSource().apply {
+    serverName = "den1.mysql4.gear.host"
+    databaseName = "weebotdb"
+    user = "weebotdb"
+    password = "kjshdo&A(*Sdba76y879as"
+}
+val configuration = KotlinConfiguration(dataSource = ds, model = )
+val data = KotlinEntityDataStore(configuration)
+*/
+
+/* *********************
       Weebot & Tobeew
  **********************/
 

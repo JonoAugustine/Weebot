@@ -2,7 +2,8 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
     java
-    kotlin("jvm") version "1.3.10"
+    kotlin("jvm") version "1.3.11"
+    kotlin("kapt") version "1.3.11"
     application
     "com.github.johnrengelman.shadow version 1.2.4"
     "com.sedmelluq.jdaction version 1.0.2"
@@ -35,9 +36,17 @@ dependencies {
     implementation("joda-time:joda-time:2.2")
     implementation("commons-io:commons-io:2.6")
     implementation("com.google.code.gson:gson:2.8.5")
+        //Web
     implementation("com.github.kittinunf.fuel:fuel:1.16.0")
     implementation("com.github.kittinunf.fuel:fuel-gson:1.16.0")
     implementation("com.github.kittinunf.fuel:fuel-coroutines:1.16.0")
+        //Database
+    implementation("org.jetbrains.exposed:exposed:0.11.2")
+    implementation("mysql:mysql-connector-java:8.0.13")
+    implementation("io.requery:requery:1.5.1")
+    implementation("io.requery:requery-kotlin:1.5.1")
+    kapt("io.requery:requery-processor:1.5.1")
+    implementation("io.reactivex.rxjava2:rxjava:2.2.4")
 
     //JDA
     implementation("net.dv8tion:JDA:3.8.1_437")

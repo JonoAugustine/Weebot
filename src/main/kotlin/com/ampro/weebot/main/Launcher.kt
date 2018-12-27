@@ -8,8 +8,10 @@ import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CMD_HELP
 import com.ampro.weebot.commands.commands
 import com.ampro.weebot.commands.utilitycommands.remThreadPool
-import com.ampro.weebot.database.*
+import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.Dao
 import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.database.loadDao
 import com.ampro.weebot.extensions.addCommands
 import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.listeners.EventDispatcher
@@ -32,6 +34,8 @@ import kotlin.system.measureTimeMillis
 val RAND = Random(128487621469)
 
 lateinit var SAVE_JOB: Job
+/** How ofter to asve to file in Seconds */
+const val SAVE_INTER = 30
 
 val CACHED_POOL =  Executors.newCachedThreadPool().asCoroutineDispatcher()
 
@@ -73,7 +77,7 @@ fun main(args_: Array<String>) = runBlocking {
 
     //Debug
     //RestAction.setPassContext(true) // enable context by default
-    //RestAction.DEFAULT_FAILURE = Throwable::printStackTrace
+    //RestAction.DEFAULT_FAILURE = Consumer(Throwable::printStackTrace)
 
     //JDA_SHARD_MNGR = jdaShardLogIn().build()
     JDA_SHARD_MNGR = jdaDevShardLogIn().build()
@@ -198,7 +202,7 @@ private fun saveTimer() = GlobalScope.launch {
                 MLOG.slog("Database back up: $i")
             }
             i++
-            delay(30 * 1_000)
+            delay(SAVE_INTER * 1_000L)
         }
     } catch (e: InterruptedException) {
         e.printStackTrace()
@@ -239,5 +243,5 @@ fun shutdown(user: User) {
     System.exit(0)
 }
 
-
-
+const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try that " +
+        "again later*"
