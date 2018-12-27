@@ -7,10 +7,15 @@ package com.ampro.weebot.extensions
 import com.ampro.weebot.main.WAITER
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
-import com.jagrosh.jdautilities.menu.*
+import com.jagrosh.jdautilities.menu.ButtonMenu
+import com.jagrosh.jdautilities.menu.Menu
+import com.jagrosh.jdautilities.menu.OrderedMenu
+import com.jagrosh.jdautilities.menu.Paginator
 import com.jagrosh.jdautilities.menu.Paginator.Builder
 import com.sun.javaws.exceptions.InvalidArgumentException
-import kotlinx.coroutines.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.*

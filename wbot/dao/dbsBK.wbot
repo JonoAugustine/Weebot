@@ -1,0 +1,144 @@
+{
+  "initTime": "25-12-2018 02-14-36",
+  "suggestions": [],
+  "GLOBAL_WEEBOT": {
+    "trackedUsers": [],
+    "PASSIVE_MAX": 10,
+    "PASSIVE_MAX_PREM": 50,
+    "userPassives": {},
+    "REM_MAX": 10,
+    "REM_MAX_PREM": 50,
+    "userReminders": {},
+    "initDate": {
+      "dateTime": {
+        "date": {
+          "year": 2018,
+          "month": 12,
+          "day": 25
+        },
+        "time": {
+          "hour": 2,
+          "minute": 14,
+          "second": 36,
+          "nano": 365000000
+        }
+      },
+      "offset": {
+        "totalSeconds": -28800
+      }
+    },
+    "settings": {
+      "prefixs": [
+        "",
+        "w!",
+        "\\",
+        "!"
+      ],
+      "explicit": false,
+      "nsfw": false,
+      "enablePassives": false,
+      "logchannel": -1,
+      "trackingEnabled": false,
+      "guildID": -1
+    },
+    "passives": [],
+    "notePads": [],
+    "guildID": -1
+  },
+  "WEEBOTS": {
+    "-1": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 25
+          },
+          "time": {
+            "hour": 2,
+            "minute": 14,
+            "second": 36,
+            "nano": 365000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -28800
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "",
+          "w!",
+          "\\",
+          "!"
+        ],
+        "explicit": false,
+        "nsfw": false,
+        "enablePassives": false,
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "guildID": -1
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": -1
+    },
+    "139168039634468865": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 25
+          },
+          "time": {
+            "hour": 19,
+            "minute": 19,
+            "second": 58,
+            "nano": 256000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -28800
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "explicit": false,
+        "nsfw": false,
+        "enablePassives": false,
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "guildID": 139168039634468865
+      },
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.Reddicord",
+          "DATA": {
+            "dead": false,
+            "channelID": 439522471369244683,
+            "scoreMap": {},
+            "incrementConsumer": {},
+            "decrementConsumer": {}
+          }
+        }
+      ],
+      "notePads": [],
+      "guildID": 139168039634468865
+    }
+  },
+  "PREMIUM_USERS": {},
+  "blockedUsers": [
+    [
+      {
+        "CLASSNAME": "com.ampro.weebot.commands.developer.CmdSuggestion"
+      },
+      [
+        383656411789524995
+      ]
+    ]
+  ]
+}

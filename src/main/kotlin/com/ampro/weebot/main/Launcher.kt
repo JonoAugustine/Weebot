@@ -8,8 +8,10 @@ import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CMD_HELP
 import com.ampro.weebot.commands.commands
 import com.ampro.weebot.commands.utilitycommands.remThreadPool
-import com.ampro.weebot.database.*
+import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.Dao
 import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.database.loadDao
 import com.ampro.weebot.extensions.addCommands
 import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.listeners.EventDispatcher
@@ -24,9 +26,7 @@ import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.Game.listening
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
-import net.dv8tion.jda.core.requests.RestAction
 import java.util.concurrent.Executors
-import java.util.function.Consumer
 import javax.security.auth.login.LoginException
 import kotlin.random.Random
 import kotlin.system.measureTimeMillis
@@ -34,6 +34,8 @@ import kotlin.system.measureTimeMillis
 val RAND = Random(128487621469)
 
 lateinit var SAVE_JOB: Job
+/** How ofter to asve to file in Seconds */
+const val SAVE_INTER = 30
 
 val CACHED_POOL =  Executors.newCachedThreadPool().asCoroutineDispatcher()
 
@@ -200,7 +202,7 @@ private fun saveTimer() = GlobalScope.launch {
                 MLOG.slog("Database back up: $i")
             }
             i++
-            delay(30 * 1_000)
+            delay(SAVE_INTER * 1_000L)
         }
     } catch (e: InterruptedException) {
         e.printStackTrace()

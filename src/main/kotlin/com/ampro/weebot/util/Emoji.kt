@@ -9,7 +9,6 @@ import com.ampro.weebot.util.Emoji.*
 import net.dv8tion.jda.core.entities.Emote
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageReaction.ReactionEmote
-import java.util.concurrent.TimeUnit.*
 import java.util.function.Consumer
 
 /**
@@ -53,6 +52,8 @@ fun Message.reactWith(vararg emojis: Emoji) {
 fun Emote.toEmoji() = Emoji.values().find { it.unicode == this.name }
 
 fun ReactionEmote.toEmoji() = Emoji.values().find { it.unicode == name }
+
+infix fun ReactionEmote.`is`(emoji: Emoji) = toEmoji() == emoji
 
 /** A list of 1-10 emojis */
 internal val EmojiNumbers = listOf(One, Two, Three, Four, Five, Six, Seven,

@@ -11,7 +11,9 @@ package com.ampro.weebot.commands.developer
 import com.ampro.weebot.commands.CAT_DEV
 import com.ampro.weebot.commands.CAT_GEN
 import com.ampro.weebot.database.constants.PHONE_JONO
-import com.ampro.weebot.extensions.*
+import com.ampro.weebot.extensions.STD_GREEN
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.getInvocation
 import com.ampro.weebot.main.shutdown
 import com.ampro.weebot.util.sendSMS
 import com.jagrosh.jdautilities.command.CommandEvent
