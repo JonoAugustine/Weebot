@@ -11,6 +11,7 @@ import com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder
 import com.ampro.weebot.commands.utilitycommands.NotePad
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.getGuild
+import com.ampro.weebot.extensions.WeebotCommand
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -40,11 +41,15 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
     var explicit: Boolean = false
     /** Whether the bot is able to be nsfw */
     var nsfw: Boolean = false
-    /** Whether the bot is able to respond to actions not directed to it */
-    var enablePassives: Boolean = false
 
     /** The [TextChannel] to send logs to */
     var logchannel: Long = -1
+
+    /** Allows Weebot to track usage for stats */
+    var trackingEnabled: Boolean = false
+
+    /** Channel ID -> [MutableList]<Class<[WeebotCommand]> */ //TODO
+    val disabledCommands = ConcurrentHashMap<Long, MutableList<Class<WeebotCommand>>>()
 
     /**
      * Sneds a log message to the log channel if it is set
@@ -61,9 +66,6 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
         getGuild(guildID)?.getTextChannelById(logchannel)?.sendMessage(message)
             ?.queue { consumer(it) }
     }
-
-    /** Allows Weebot to track usage for stats */
-    var trackingEnabled: Boolean = false
 
     override fun getPrefixes() = prefixs
 }
@@ -174,6 +176,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     override fun compareTo(other: Weebot) = (this.guildID - other.guildID).toInt()
 
 }
+
 
 /**
  * The Global Weebot, with information on all users. Talks to people in private chats.

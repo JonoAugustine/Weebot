@@ -53,8 +53,6 @@ class CmdSelfDestruct : WeebotCommand("SelfDestruct",
 /**
  * A [WeebotCommand] to delete a number (2-1,000) messages from a given text channel.
  *
- * //TODO Allow more than 100 deletions (must be in 100 message chunks, 2 sec apart)
- *
  * @author Jonathan Augustine
  * @since 2.0
  */
@@ -128,6 +126,6 @@ class CmdChatLock : WeebotCommand("chatlock",
     }
 
     init {
-        helpBiConsumer = HelpBiConsumerBuilder().build() //TODO
+        helpBiConsumer = HelpBiConsumerBuilder().build()
     }
 }

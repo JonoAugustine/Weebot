@@ -224,7 +224,7 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
     }
 
     /**
-     * Send Tracking data to Dao. TODO
+     * Send Tracking data to Dao.
      *
      * @param weebot
      * @param event

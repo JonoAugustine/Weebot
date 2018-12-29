@@ -9,6 +9,7 @@ import com.ampro.weebot.commands.CAT_MOD
 import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
+import com.ampro.weebot.extensions.MentionType.CHANNEL
 import com.ampro.weebot.main.WAITER
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -58,7 +59,6 @@ class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"
             .addField("Prefix", config.prefixes.joinToString(" ") , true)
             .addField("Explicit", if (config.explicit) "on" else "off", true)
             .addField("NSFW", if (config.nsfw) "on" else "off", true)
-            .addField("Passives", if (config.enablePassives) "on" else "off", true)
             .addField("LogChannel", log, true)
             .addField("Statistics Tracking", if (config.trackingEnabled) "on" else "off", true)
             .build()
@@ -178,7 +178,7 @@ private class CmdSetExplicit : WeebotCommand("explicit", arrayOf("expl", "cuss")
     }
 
     override fun execute(event: CommandEvent) {
-        TODO()
+        TODO("Explicit Settings")
     }
 }
 
@@ -194,7 +194,7 @@ private class CmdSetNsfw : WeebotCommand("nsfw", arrayOf("naughty"), CAT_UNDER_C
     }
 
     override fun execute(event: CommandEvent) {
-        TODO()
+        TODO("NSFW Setting")
     }
 }
 
@@ -216,7 +216,13 @@ private class CmdSetLogChannel : WeebotCommand("log",
         when {
             channels.isEmpty() -> {
                 SelectableEmbed(event.author, strdEmbedBuilder
-                    //TODO
+                    .setTitle("Logging Channen").setDescription("""
+                        ${if(bot.settings.logchannel != -1L) {
+                        "My Logging channel is currently set to ${
+                        bot.settings.logchannel.asMention(CHANNEL)}"
+                    } else "My logging channel has not been set."}
+                     $C to set or change the logging channel
+                    """.trimIndent())
                     .build(), listOf(C to { _ ->
                     event.reply("Which channel should I send log messages to?")
                     WAITER.waitForEvent(GuildMessageReceivedEvent::class.java, {
@@ -225,10 +231,13 @@ private class CmdSetLogChannel : WeebotCommand("log",
                         val channels_2 = event_2.message.mentionedChannels
                         if (channels_2.isEmpty() || channels_2.size > 1) event.reply(
                             "*Please mention ONE (1) text channel.*")
-                        else set(event, bot, channels_2[0])
-                    }, 3L, MINUTES) { }
-                })) { it.clearReactions().queueAfter(250, MILLISECONDS) }.display(
-                    event.textChannel)
+                        else {
+                            set(event, bot, channels_2[0])
+                            event.reply("The logging channel has been set to " + channels_2[0].asMention)
+                        }
+                    }, 3L, MINUTES) { event.respondThenDelete("*Timed out*") }
+                })) { it.clearReactions().queueAfter(250, MILLISECONDS) }
+                    .display(event.textChannel)
             }
             channels.size == 1 -> set(event, bot, channels[0])
             else -> event.reply("*Please mention only ONE (1) text channel.*")
@@ -259,6 +268,6 @@ private class CmdSetTracking : WeebotCommand("skynet", arrayOf("track", "trackin
     }
 
     override fun execute(event: CommandEvent) {
-        TODO()
+        TODO("Tracking setting")
     }
 }

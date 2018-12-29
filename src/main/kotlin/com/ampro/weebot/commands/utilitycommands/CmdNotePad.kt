@@ -266,8 +266,6 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
 
     /**
      * Sends the NotePad as an Embed. If the message couldnt be edited then resends.
-     * //TODO Send as a new [ButtonPaginator] with a back button that resends
-     * the note list
      */
     fun send(event: CommandEvent, message: Message?, pads: List<NotePad>) {
         val guild = event.guild
@@ -505,21 +503,83 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                 }
             }.display(event.textChannel)
         } else {
-            when (args[0].toLowerCase()) {//TODO
+            when (args[0].toLowerCase()) {
                 "see", "view", "list" -> seeNotePads(event, pads, cv)(event.message)
-                "make" -> {}
-                "writeto", "write" -> {
+                "make", "add" -> {
+                    val readRestriction = Restriction()
+                    val writeRestriction = Restriction()
+                    val nameList = mutableListOf<String>()
+                    val notePad: NotePad
+
+                    //parse the response
+                    var currentChar: Char = 'e'
+
+                    loop@ for (s in args.subList(1, args.size)) {
+                        when {
+                            s matches "-r" -> currentChar = 'r'
+                            s matches "-w" -> currentChar = 'w'
+                            s matches "-b" -> currentChar = 'b'
+                            s matches "-c" -> currentChar = 'c'
+                            else -> {
+                                when (currentChar) {
+                                    'e' -> nameList.add(s)
+                                    else -> {
+                                        val i = s.parseMentionId()
+                                        if (i == -1L) continue@loop
+                                        when (s.mentionType()) {
+                                            USER -> when (currentChar) {
+                                                'r' -> readRestriction.allowedUsers.add(i)
+                                                'w' -> writeRestriction.allowedUsers.add(
+                                                    i)
+                                                'b' -> readRestriction.blockedUsers.add(i)
+                                            }
+                                            ROLE -> when (currentChar) {
+                                                'r' -> readRestriction.allowedRoles.add(i)
+                                                'w' -> writeRestriction.allowedRoles.add(
+                                                    i)
+                                                'b' -> readRestriction.blockedRoles.add(i)
+                                            }
+                                            CHANNEL -> if (currentChar == 'c') {
+                                                readRestriction.allowedTextChannels.add(i)
+                                            }
+                                            else -> {
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+
+                    notePad = NotePad(nameList.joinToString(" "), auth.idLong,
+                        event.message.creationTime)
+
+                    if (!pads.has { it.name.toLowerCase() == notePad.name.toLowerCase() }) {
+                        pads.add(notePad)
+                        event.reply("*NotePad \"${notePad.name}\" added!*")
+                    } else {
+                        event.reply("*There is already a NotePad by that name.*")
+                    }
+                }
+                "writeto", "write" -> { //TODO
                     //writeTo <notepad_id> <the note>
                     //write [default] <the note>
                     if (args[1].equals("default")) {
 
                     }
                 }
-                // "Insert a Note into the NotePad"``insert <notepad_id> <TheMessage>``")
-                //"``edit <notepad_id> <note_id or number> <New Message>``")
-                //"``del <notepad_id> <note_id or number>``")
-
-                //  .addField("Clear a NotePad of all Notes", "``clear <notepad_id>``")
+                "insert" -> {
+                    //``insert <notepad_id> <TheMessage>`` TODO
+                }
+                "edit" -> {
+                    //"``edit <notepad_id> <note_id or number> <New Message>`` TODO
+                }
+                "clear" -> {
+                    // ``clear <notepad_id>`` TODO
+                }
+                "scratch" -> {
+                    //"``scratch <notepad_id> <note_id or number>`` TODO
+                }
                 "del", "delete", "rem", "remove", "bin" -> {
                     val IDs = args.subList(1, args.size)
                     val notePads = cv.filter { IDs.contains(it.id) }
@@ -559,12 +619,14 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                             unUsed.joinToString(", ")}")
                     }
                 }
-                //    .addField("Lock access to a NotePad",
-                //        "``allow <notepad_id> [@/roles] [@/members] [#/channels]``")
-                //   .addField("Block a NotePad's access from Roles, Members, or " +
-                //    "Channels", block <notepad_id> [@/roles] [@/members] [#/channels]
+                "allow", "lockto" -> {
+                    //``allow <notepad_id> [@/roles] [@/members] [#/channels]``TODO
+                }
+                "block", "lockfrom" -> {
+                    //block <notepad_id> [@/roles] [@/members] [#/channels] TODO
+                }
                 else -> {
-                    //"See the contents of a Note Pad", "``<notepad_id>``"
+                    //"See the contents of a Note Pad", "``<notepad_id>`` TODO
                     //Check for notepad ID
                 }
             }
@@ -660,10 +722,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
 
                 if (!notePads.has {it.name.toLowerCase() == notePad.name.toLowerCase()}) {
                     notePads.add(notePad)
-                    ev.channel.sendMessage("*NotePad \"${notePad.name}\" added!*")
-                        .queue {
-                            notePad.send(event, null,notePads.filter {n ->  event canRead n })
-                        }
+                    ev.channel.sendMessage("*NotePad \"${notePad.name}\" added!*").queue()
                 } else {
                     ev.channel.sendMessage("*There is already a NotePad by that name.*")
                         .queue()
@@ -715,7 +774,6 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         })
     }
 
-
     val mainMenuEmbed
         get() = strdEmbedBuilder.setTitle("Weebot NotePads").setDescription("""
             $Eyes to see NotePads
@@ -730,7 +788,6 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
     )
 
     val makeArgs = """
-        To make a new NotePad, reply to this message with the following format:
         ```css
         [name] [-r <@ Members or Roles>]
             [-w <@ Members or Roles>]
@@ -750,7 +807,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                 "commands or by using the NotePad menu with ``notes`` or any " +
                 "alias (listed at the bottom) or called directly with the following" +
                 " commands.")
-            .setAliases(aliases).addField("Make a NotePad", makeArgs)
+            .setAliases(aliases).addField("Make a NotePad","``make`` or " +
+                    "``add`` then \n$makeArgs")
             .addField("See the contents of a Note Pad", "``<notepad_id>``")
             .addField("See all NotePads", "``see`` or ``view`` or ``list``")
             .addField("Write to a NotePad", """``writeTo <notepad_id> <the note>``
@@ -760,7 +818,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             .addField("Edit (replace) a Note",
                 "``edit <notepad_id> <note_id or number> <New Message>``")
             .addField("Delete a Note from a NotePad",
-                "``del <notepad_id> <note_id or number>``")
+                "``scratch <notepad_id> <note_id or number>``")
             .addField("Clear a NotePad of all Notes", "``clear <notepad_id>``")
             .addField("Delete a NotePad", "``del <notepad_id>``")
             .addField("Lock access to a NotePad",
