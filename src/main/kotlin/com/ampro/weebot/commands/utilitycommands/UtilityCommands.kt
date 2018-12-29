@@ -104,8 +104,8 @@ class CmdOutHouse : WeebotCommand("OutHouse", arrayOf("ohc"), CAT_UTIL,
     init {
         helpBiConsumer = HelpBiConsumerBuilder("OutHouse Command")
             .setDescription("Have the bot respond to mentions for you while you're away.")
-            .appendDesc("\nYou can also forward any message that mentions you to a ")
-            .appendDesc("private channel.")
+            .addToDesc("\nYou can also forward any message that mentions you to a ")
+            .addToDesc("private channel.")
             .addField("Arguments", "[Zd] [Xh] [Ym] [-f] [afk-message]" +
                     "\ndays, hours, minutes. -f enables message forwarding to private " +
                     "chat.")

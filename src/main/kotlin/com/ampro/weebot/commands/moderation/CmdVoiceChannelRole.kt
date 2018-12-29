@@ -128,11 +128,11 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Voice Channel Roles")
             .setDescription("Allow Weebot to create and automatically assign ")
-            .appendDesc("roles to anyone in a voice channel. The roles will ")
-            .appendDesc("have the same name as the channel and can be ")
-            .appendDesc("@/mentioned by anyone. You can choose to restrict ")
-            .appendDesc("which channels get roles by their publicity (all ")
-            .appendDesc("channels or only channels public to @/everyone)")
+            .addToDesc("roles to anyone in a voice channel. The roles will ")
+            .addToDesc("have the same name as the channel and can be ")
+            .addToDesc("@/mentioned by anyone. You can choose to restrict ")
+            .addToDesc("which channels get roles by their publicity (all ")
+            .addToDesc("channels or only channels public to @/everyone)")
             .addField("Arguments", "[enable/disable/on/off] [all/public]" +
                     "\n[all/public] (if already enabled)", false)
             .addField("Aliases",
@@ -155,11 +155,10 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
         val bot = getWeebotOrNew(event.guild)
         val args = event.splitArgs()
         if (args.isEmpty()) return
-        val vcp = bot.getPassive(VCRoleManager::class)
-        val vcRoleManager = if (vcp != null) { vcp as VCRoleManager } else { null }
+        val vcp = bot.getPassive<VCRoleManager>()
         when (args[0].toUpperCase()) {
             "ENABLE", "ON" -> {
-                if (vcRoleManager == null) {
+                if (vcp == null) {
                     val lim = if (args.size > 1) {
                         try {
                             VCRoleManager.Limit.valueOf(args[1].toUpperCase())
@@ -177,9 +176,9 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
                 }
             }
             "DISABLE", "OFF" -> {
-                if (vcRoleManager != null) {
-                    vcRoleManager.clean()
-                    bot.passives.remove(vcRoleManager)
+                if (vcp != null) {
+                    vcp.clean()
+                    bot.passives.remove(vcp)
                     event.reply("*VoiceChannelRoles are now disabled*")
                     return
                 } else {
@@ -188,8 +187,8 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
                 }
             }
             "SETLIMIT", "SL", "LIMIT" -> {
-                if (vcRoleManager != null) {
-                    vcRoleManager.limit = if (args.size > 1) {
+                if (vcp != null) {
+                    vcp.limit = if (args.size > 1) {
                         try {
                             VCRoleManager.Limit.valueOf(args[1].toUpperCase())
                         } catch (e: Exception) {

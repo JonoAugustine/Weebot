@@ -5,6 +5,7 @@
 package com.ampro.weebot.commands.utilitycommands
 
 import com.ampro.weebot.Restriction
+import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.utilitycommands.NotePad.Note
 import com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit.EditType
@@ -13,10 +14,10 @@ import com.ampro.weebot.database.getUser
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.*
-import com.ampro.weebot.main.GENERIC_ERR_MESG
-import com.ampro.weebot.main.WAITER
+import com.ampro.weebot.main.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
+import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_GUILD
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
@@ -123,7 +124,6 @@ infix fun CommandEvent.canRead(notePad: NotePad): Boolean {
 
 }
 
-
 /**
  * A way for members to keep a notepad of ideas and whatnot.
  * Each notepad has a name and [MutableList] of [Note]s
@@ -224,7 +224,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                             }.setFinalAction {}
                             .build().display(m.channel)
                     }
-                ), cancelEmoji = Rewind, finalAction = finalAction)
+                ), cancelEmoji = Rewind, timoutAction = finalAction)
         }
 
         override fun toString() = this.note
@@ -294,9 +294,10 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                 //Field("Write Restrictions", ), TODO
                 Field("Created: ${initTime.format(DD_MM_YYYY_HH_MM)}","""
                     Edits: ${editHistory.size}
+                    ${if(editHistory.isNotEmpty()) """
                     Last edit: ${editHistory[0].type} by ${guild.getMemberById
                     (editHistory[0].editorID) ?.effectiveName ?: getUser(editHistory[0].editorID)?.name ?: "Unknown User"
-                } at ${editHistory[0].time.format(DD_MM_YYYY_HH_MM)}
+                } at ${editHistory[0].time.format(DD_MM_YYYY_HH_MM)}""" else ""}
                 on notes [${editHistory[0].noteIDs.joinToString(", ")}]
                 """.trimIndent(), true)
             )
@@ -469,7 +470,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         notes # lockto <roles, members, or channels>
         notes # lockout <roles, members, or channels>
         """.trimIndent(), "Write in-discord notes and organize them into NotePds",
-    cooldown = 5, guildOnly = true) {
+    cooldown = 5, guildOnly = true, children = arrayOf(CmdToFile())) {
 
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
@@ -477,18 +478,11 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         val mem = event.member
         val guild = event.guild
         val bot = getWeebotOrNew(event.guild)
-        val pads = bot.notePads.apply {
-            val testNote = NotePad("TEST ${this.size}", event.author.idLong,
-                event.message.creationTime)
-            testNote.addNotes(event.author, event.message.creationTime,
-                "This is a testNote")
-            add(testNote)
-        } //TODO remove test notepads later
+        val pads = bot.notePads
         /** User's Viewable notepads */
         val cv = pads.filter { event canRead it }
 
         if (args.isEmpty()) {
-            //TODO Open a Selectable Embed with all options
             SelectableEmbed(auth, mainMenuEmbed.apply {
                 if (pads.isNotEmpty() && cv.contains(pads[0]))
                     addEmptyField("Default NotePad: ${pads[0].name}")
@@ -510,6 +504,70 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                     } catch (e: Exception) {}
                 }
             }.display(event.textChannel)
+        } else {
+            when (args[0].toLowerCase()) {//TODO
+                "see", "view", "list" -> seeNotePads(event, pads, cv)(event.message)
+                "make" -> {}
+                "writeto", "write" -> {
+                    //writeTo <notepad_id> <the note>
+                    //write [default] <the note>
+                    if (args[1].equals("default")) {
+
+                    }
+                }
+                // "Insert a Note into the NotePad"``insert <notepad_id> <TheMessage>``")
+                //"``edit <notepad_id> <note_id or number> <New Message>``")
+                //"``del <notepad_id> <note_id or number>``")
+
+                //  .addField("Clear a NotePad of all Notes", "``clear <notepad_id>``")
+                "del", "delete", "rem", "remove", "bin" -> {
+                    val IDs = args.subList(1, args.size)
+                    val notePads = cv.filter { IDs.contains(it.id) }
+                    when {
+                        notePads.isNotEmpty() -> {
+                            event.reply("Are you sure you want to delete NotePad(s): *${
+                            notePads.joinToString(", ") {
+                                "${it.name} (${it.id})" }}*? *(say ``yes`` or ``no``)*"
+                            )
+                            WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                                { it.isValidUser(event.guild, setOf(event.author)) },
+                                {
+                                    if (it.message.contentDisplay.matches(REG_YES)) {
+                                        if (getWeebotOrNew(event.guild).notePads.removeAll(notePads)) {
+                                            event.reply("*NotePad(s) deleted.* $heavy_check_mark")
+                                        } else {
+                                            event.reply(
+                                                "*Uhh...hmm.. sorry something went wrong. Please try again later*")
+                                            MLOG.elog("Failed to delete valid NotePads")
+                                        }
+                                    } else if (it.message.contentDisplay.matches(REG_NO)) {
+                                        event.reply("Ok, deletion cancelled.")
+                                    }
+                                }, 1L, MINUTES) {
+                                event.reply("Deletion cancelled (timed out).")
+                            }
+                        }
+                        IDs.isEmpty() -> event.reply("No NotePad ID was provided.")
+                        notePads.isEmpty() -> event.reply(
+                            "No NotePad(s) could be found with the given ID(s).")
+
+                    }
+                    val unUsed = IDs.filterNot{ cv.has { np -> np.id.equals(it, true) } }
+                    if (unUsed.isNotEmpty()) {
+                        event.reply(
+                            "I couldn't find any NotePad(s) matching: ${
+                            unUsed.joinToString(", ")}")
+                    }
+                }
+                //    .addField("Lock access to a NotePad",
+                //        "``allow <notepad_id> [@/roles] [@/members] [#/channels]``")
+                //   .addField("Block a NotePad's access from Roles, Members, or " +
+                //    "Channels", block <notepad_id> [@/roles] [@/members] [#/channels]
+                else -> {
+                    //"See the contents of a Note Pad", "``<notepad_id>``"
+                    //Check for notepad ID
+                }
+            }
         }
 
     }
@@ -546,19 +604,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      */
     fun addNotePad(event: CommandEvent) : (Message) -> Unit = { message ->
         //TODO ask for name and locking info
-        val eb = strdEmbedBuilder.setTitle("Make a NotePad").setDescription("""
-                To make a new NotePad, reply to this message with the following format:
-                ```
-                [name] [-r <@ Members or Roles>]
-                    [-w <@ Members or Roles>]
-                    [-b <@ Members or Roles>]
-                    [-c <# channel mention>]
-                ```
-                ``-r`` (read lock) will allow only the mentioned Members or Roles to see this NotePad
-                ``-w`` (write lock) will allow only the mentioned Members or Roles to edit this NotePad
-                ``-b`` (block) will block the mentioned users or Roles from seeing this NotePad
-                ``-c`` (channel lock) will the NotePad to the mentioned TextChannels
-            """.trimIndent()).build()
+        val eb = strdEmbedBuilder.setTitle("Make a NotePad")
+            .setDescription(makeArgs).build()
         event.reply(eb)
         WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
             { ev -> ev.author.idLong == event.author.idLong },
@@ -647,12 +694,30 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
     }
 
     fun deleteNotePadById(event: CommandEvent, viewable: List<NotePad>)
-            : (Message) -> Unit = {
-        //TODO ask for ID then confirm delete
-        event.reply("Under Construction")
+            : (Message) -> Unit = { _ ->
+        getNotePadByIdDialogue(event, viewable, {
+            event.reply("Are you sure you want to delete NotePad(s): *${
+            it.joinToString(", ") { "${it.name} (${it.id})" }}*? *(say ``yes`` or ``no``)*")
+            WAITER.waitForEvent(GuildMessageReceivedEvent::class.java, { e ->
+                e.isValidUser(users = setOf(event.author), guild = event.guild)
+            }, { event_2 ->
+                if (event_2.message.contentDisplay.matches(Regex("(?i)y+e+s+"))) {
+                    if (getWeebotOrNew(event.guild).notePads.removeAll(it)) {
+                        event.reply("*NotePad(s) deleted.* $heavy_check_mark")
+                    } else {
+                        event.reply("*Uhh...hmm.. sorry something went wrong. Please try again later*")
+                        MLOG.elog("Failed to delete valid NotePads")
+                    }
+                } else if (event_2.message.contentDisplay.matches(Regex("(?i)n+o+"))) {
+                    event.reply("Ok, deletion cancelled.")
+                }
+            }, 1L, MINUTES) {event.reply("Deletion cancelled (timed out).")}
+        })
     }
 
-    val mainMenuEmbed = strdEmbedBuilder.setTitle("Weebot NotePads").setDescription("""
+
+    val mainMenuEmbed
+        get() = strdEmbedBuilder.setTitle("Weebot NotePads").setDescription("""
             $Eyes to see NotePads
             $MagnifyingGlass to search for a NotePad
             $Notebook to add a new NotePad
@@ -664,90 +729,102 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             """.trimIndent()
     )
 
-    /**
-     * I couldn't find the notepad (index). I will send you a message containing
-     * all the notepads available to you on (server name). Use this format
-     * (arg format) to write or edit a notepad.
-     * @param arg
-     * @param event
-     * @param notes
-     */
-    private fun invalidNotePadIndexMessage(arg: String, event: CommandEvent,
-                                           notes: List<NotePad>) {
-        if (Integer.parseInt(arg) > notes.size) {
-            val k = notes.size
-            event.reply(
-                "There ${if (k != 1) "are" else "is"} only ${notes.size} Note Pad${
-                if (k != 1) "s" else ""}.\nUse ```${this.arguments
-                }``` to write or edit a specific notepad.")
-            return
-        }
-        var out = "I couldn't find NotePad $arg. I will send a private message of all the NotePads available to you."
-        event.reply(out)
-        out = "Here are the available NotePads " + (if (event.guild != null) "on " + event.guild.name
-        else "") + "\n```"
-        var i = 1
-        for ((name) in notes) {
-            out += (i++.toString() + ".) " + name + "\n")
-        }
-        event.replyInDm(
-            "$out```\nUse ```${this.arguments}``` to make or edit a specific notepad.")
-    }
-
-    /**
-     * "I couldn't find a note " + arg + ". Please use a number" +
-     * " listed in the NotePad."
-     * @param arg
-     * @param event
-     */
-    private fun invalidNoteIndexMessage(arg: String, event: CommandEvent) {
-        event.respondThenDelete(
-            "I couldn't find a note $arg. Please use a number listed in the NotePad.", 30)
-    }
+    val makeArgs = """
+        To make a new NotePad, reply to this message with the following format:
+        ```css
+        [name] [-r <@ Members or Roles>]
+            [-w <@ Members or Roles>]
+            [-b <@ Members or Roles>]
+            [-c <# channel mention>]
+        ```
+        ``-r`` (read lock) will allow only the mentioned Members or Roles to see this NotePad
+        ``-w`` (write lock) will allow only the mentioned Members or Roles to edit this NotePad
+        ``-b`` (block) will block the mentioned users or Roles from seeing this NotePad
+        ``-c`` (channel lock) will the NotePad to the mentioned TextChannels
+        """.trimIndent()
 
     init {
-        val sb = StringBuilder()
-        sb.append("Write and edit server NotePads\n")
-            .append("Note Pads can be locked to specific")
-            .append("roles, members, and text channels.\n")
-
-        val eb = strdEmbedBuilder.setTitle("Note Pad")
-        sb.setLength(0)
-
-        eb.addField("See all available NotePads", "notes", false)
-            .addField("Make a NotePad",
-                "notes make [The_Name]\n*If no name is given, the date and time will " + "be used as the name of the NotePad*",
-                false)
-            .addField("See the contents of a Note Pad",
-                "notes <notepad_number>\n*To find the NotePad's number, use 'notes'*",
-                false)
-            .addField("Write to a NotePad",
-                "notes write <notepad_number> <The Message>\n*Alias:* add", false)
+        helpBiConsumer = HelpBiConsumerBuilder("Weebot NotePads", "Write and edit " +
+                "server NotePads which can be locked to specificroles, members, " +
+                "and channels.\nAny action can be performed through direct " +
+                "commands or by using the NotePad menu with ``notes`` or any " +
+                "alias (listed at the bottom) or called directly with the following" +
+                " commands.")
+            .setAliases(aliases).addField("Make a NotePad", makeArgs)
+            .addField("See the contents of a Note Pad", "``<notepad_id>``")
+            .addField("See all NotePads", "``see`` or ``view`` or ``list``")
+            .addField("Write to a NotePad", """``writeTo <notepad_id> <the note>``
+                Write to the default NotePad: ``write [default] <the note>``""".trimIndent())
             .addField("Insert a Note into the NotePad",
-                "notes <notepad_number> insert <The Message>", false)
+                "``insert <notepad_id> <The Message>``")
             .addField("Edit (replace) a Note",
-                "notes <notepad_number> edit <note_number> <New Message>", false)
+                "``edit <notepad_id> <note_id or number> <New Message>``")
             .addField("Delete a Note from a NotePad",
-                "notes <notepad_number> delete <note_number>\n*Alias*: remove\n", false)
-            .addField("Clear a NotePad of all Notes", "notes <notepad_number> clear",
-                false)
-            .addField("Get a NotePad as a text file", "notes <notepad_number> file",
-                false)
+                "``del <notepad_id> <note_id or number>``")
+            .addField("Clear a NotePad of all Notes", "``clear <notepad_id>``")
+            .addField("Delete a NotePad", "``del <notepad_id>``")
             .addField("Lock access to a NotePad",
-                "notes <notepad_number> lockto [roles, members, or channels]", false)
-            .addField("Lock a NotePad's access from Roles, Members, or Channels",
-                "notes <notepad_number> lockout [roles, members, or channels]", false)
-            .addField("Delete a NotePad",
-                "notes <notepad_number> trash\n*Aliases*:toss, bin, garbo", false)
-
-        sb.append("Any usagage of '*notes*' can be replaced with any of the following:\n")
-            .append(this.aliases.toString() + ".\n\n")
-            .append("<required>   [optional]   /situationally_required/")
-        eb.addField("Extra", sb.toString(), false)
-        helpBiConsumer = HelpBiConsumerBuilder("Weebot NotePads")
-            //TODO NotePad help
+                "``allow <notepad_id> [@/roles] [@/members] [#/channels]``")
+            .addField("Block a NotePad's access from Roles, Members, or Channels",
+                "``block <notepad_id> [@/roles] [@/members] [#/channels]``")
+            .addField("Get a NotePad as a text file", "``file <notepad_id>``")
             .build()
     }
+
+    class CmdToFile : WeebotCommand("file", arrayOf("tofile", "txt", "asfile"),
+        CAT_UNDER_CONSTRUCTION, "<notepad_id>", "Get the NotePad as a .txt file",
+        guildOnly = true, cooldown = 90, cooldownScope = USER_GUILD) {
+
+        override fun execute(event: CommandEvent) {
+            TODO()
+        }
+    }
+
+}
+
+/**
+ *
+ */
+fun getNotePadByIdDialogue(event: CommandEvent, viewable: List<NotePad>,
+                           action: (List<NotePad>) -> Unit, timeout: () -> Unit = {}) {
+    event.reply("Please provide the ID(s) of the NotePad(s):")
+    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+        { e -> e.isValidUser(event.guild, setOf(event.author)) }, { e ->
+            val IDs = e.message.contentDisplay.split(Regex("\\s+"))
+            val notePads = viewable.filter { IDs.contains(it.id) }
+            when {
+                notePads.isNotEmpty() -> action(notePads)
+                IDs.isEmpty() -> event.reply("No NotePad ID was provided.")
+                notePads.isEmpty() -> event.reply(
+                    "No NotePad(s) could be found with the given ID(s).")
+            }
+            val unUsed = IDs.filterNot { viewable.has { np -> np.id.equals(it, true) } }
+            if (unUsed.isNotEmpty()) {
+                event.reply("I couldn't find any NotePad(s) matching: ${unUsed.joinToString(", ")}")
+            }
+        }, 1L, MINUTES, timeout)
+}
+
+/**
+ *
+ */
+fun getNoteByIdDialogue(event: CommandEvent, notes: List<Note>,
+                        action: (List<Note>) -> Unit, timeout: () -> Unit = {}) {
+    event.reply("Please provide the ID(s) of the Note(s):")
+    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+        { e -> e.isValidUser(users = setOf(event.author), guild = event.guild) }, { e ->
+            val IDs = e.message.contentDisplay.split(Regex("\\s+"))
+            val notes_2 = notes.filter { IDs.contains(it.id) }
+            when {
+                notes_2.isNotEmpty() -> action(notes_2)
+                IDs.isEmpty() -> event.reply("No Note ID was provided.")
+                notes_2.isEmpty() -> event.reply("No Note(s) could be found with the given ID(s).")
+            }
+            val unUsed = IDs.filterNot { notes_2.has { np -> np.id.equals(it, true) } }
+            if (unUsed.isNotEmpty()) {
+                event.reply("I couldn't find any Note(s) matching: ${unUsed.joinToString(", ")}")
+            }
+        }, 1L, MINUTES, timeout)
 }
 
 /**

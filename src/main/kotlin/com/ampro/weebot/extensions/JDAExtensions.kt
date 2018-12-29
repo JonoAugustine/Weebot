@@ -18,7 +18,7 @@ import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEv
 
 enum class MentionType {USER, ROLE, CHANNEL}
 
-val userMentionRegex: Regex = "^(<@.?\\d+>)$".toRegex()
+val userMentionRegex: Regex = "^(<@!?\\d+>)$".toRegex()
 val roleMentionRegex: Regex = "^(<@&\\d+>)$".toRegex()
 val channelMentionRegex = "^(<#\\d+>)\$".toRegex()
 
@@ -43,6 +43,16 @@ fun String.mentionType() : MentionType?  = when {
     this matches roleMentionRegex -> ROLE
     this matches channelMentionRegex -> CHANNEL
     else -> null
+}
+
+/**
+ * Convert a [ISnowflake] ID to a mention String
+ * @param mentionType the type of mention to convert to
+ */
+fun Long.asMention(mentionType: MentionType) : String = when (mentionType) {
+    USER -> "<@$this>"
+    ROLE -> "<@$this>"
+    CHANNEL -> "<#$this>"
 }
 
 infix fun Member.outRanks(other: Member) : Boolean {
@@ -92,9 +102,8 @@ fun CommandClientBuilder.addCommands(commands: Iterable<WeebotCommand>)
 
 infix fun User.`is`(id: Long) = this.idLong == id
 
-fun GuildMessageReceivedEvent.isValidUser(roles: List<Role> = emptyList(),
-                                          users: Set<User> = emptySet(),
-                                          guild: Guild) : Boolean {
+fun GuildMessageReceivedEvent.isValidUser(guild: Guild, users: Set<User> = emptySet(),
+                                          roles: List<Role> = emptyList()) : Boolean {
     return when {
         author.isBot -> false
         users.isEmpty() && roles.isEmpty() -> true

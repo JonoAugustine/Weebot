@@ -8,6 +8,7 @@ import com.ampro.weebot.commands.`fun`.CmdCatFact
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
 import com.ampro.weebot.commands.`fun`.CmdReddicord
 import com.ampro.weebot.commands.`fun`.CmdThis
+import com.ampro.weebot.commands.`fun`.games.cardgame.CmdCardsAgainstHumanity
 import com.ampro.weebot.commands.developer.CmdShutdown
 import com.ampro.weebot.commands.developer.CmdSuggestion
 import com.ampro.weebot.commands.developer.GuildlistCommand
@@ -29,10 +30,9 @@ import com.ampro.weebot.main.WAITER
  ********************************/
 
 val CMD_SHUTDOWN        = CmdShutdown()
-val CMD_GUILDLIST       = GuildlistCommand(WAITER)
+val CMD_GUILDLIST       = GuildlistCommand()
 val CMD_PING            = PingCommand() //Public
 val CMD_SUGG            = CmdSuggestion() //Public
-
 
 /* *******************************
  *       Utility Commands      *
@@ -70,7 +70,7 @@ val CMD_CATFACT         = CmdCatFact()
 val CMD_HELLOTHERE      = CmdHelloThere()
 val CMD_THIS            = CmdThis()
 val CMD_REDDICORD       = CmdReddicord()
-//val CMD_CAH             = CmdCardsAgainstHumanity()
+val CMD_CAH             = CmdCardsAgainstHumanity()
 
 
 
@@ -80,5 +80,5 @@ val commands = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_PING,
         CMD_REGEX, CMD_EVAL,
         CMD_OHC, CMD_REM, CMD_NOTE,
         CMD_VCR,
-  //      CMD_CAH,
+        CMD_CAH,
         CMD_THIS, CMD_HELLOTHERE, CMD_CATFACT, CMD_REDDICORD)

@@ -5,87 +5,19 @@
 package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.*
-import com.ampro.weebot.extensions.strdEmbedBuilder
-import com.ampro.weebot.database.getWeebot
+import com.ampro.weebot.commands.CAT_MOD
+import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.hasPerm
+import com.ampro.weebot.extensions.*
+import com.ampro.weebot.main.WAITER
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.*
-import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
-import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.events.message.guild.GenericGuildMessageEvent
-import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent
-
-
-/**
- * Waits for a response to the initial message asking for tracking permissions.
- *
- * @author Jonathan Augustine
- * @since 2.0
- */
-class TrackerInitPassive(val enableMessage: Message) : IPassive {
-
-    var dead: Boolean = false
-
-    companion object {
-        const val onOff = "Statistics Tracking can be turned on or off at anytime with " +
-                "the command ``w!skynet [on/off]``."
-        val acceptEmbed get() = strdEmbedBuilder.setTitle("Statistics Tracking Enabled!")
-            .setDescription("Thank you for helping Weebot's development!\n$onOff").build()
-        val denyEmbed   get() =  strdEmbedBuilder.setTitle("Keeping Statistics Tracking Off")
-            .setDescription("This can be turned on later\n$onOff").build()
-    }
-
-    override fun accept(bot: Weebot, event: Event) {
-        if (dead) return
-        when (event) {
-            is GenericGuildMessageEvent -> {
-                val guild = event.guild
-                val messageID = event.messageIdLong
-                when (event) {
-                    //Accept by react
-                    is GuildMessageReactionAddEvent -> {
-                        if (event.user.isBot) return
-                        if (messageID != enableMessage.idLong) return
-                        val emote = event.reaction.reactionEmote
-                        event.reaction.users.forEach { user ->
-                            //If an Admin reacts
-                            if (guild.getMemberById(user.id) hasPerm ADMINISTRATOR) {
-                                when {
-                                    emote.name == heavy_check_mark.unicode -> {
-                                        //enable
-                                        event.channel.sendMessage(
-                                            acceptEmbed).queue()
-                                        getWeebot(
-                                            guild.idLong)?.settings?.trackingEnabled = true
-                                        dead = true
-                                        return
-                                    }
-                                    emote.name == X_Red.unicode -> {
-                                        //Disable
-                                        event.channel.sendMessage(
-                                            denyEmbed).queue()
-                                        getWeebot(
-                                            guild.idLong)?.settings?.trackingEnabled = false
-                                        dead = true
-                                        return
-                                    }
-                                    else -> return
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    override fun dead() = dead
-}
+import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit.MINUTES
 
 /**
  * Parent class for viewing and changing [Weebot] settings
@@ -101,23 +33,16 @@ class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"
         CmdSetPrefix(),
         CmdSetExplicit(),
         CmdSetNsfw(),
-        CmdSetEnablePassive(),
         CmdSetLogChannel(),
         CmdSetTracking())
 
 ) {
     init {
-        helpBiConsumer = HelpBiConsumerBuilder("Weebot Settings")
-            .setDescription("View or Change your weebot's settings.")
-            .addField("Available Settings:", "", false).apply {
-                this.addField(CmdSetName.normField)
-                this.addField(CmdSetPrefix.normField)
-                this.addField(CmdSetExplicit.normField)
-                this.addField(CmdSetNsfw.normField)
-                this.addField(CmdSetEnablePassive.normField)
-                this.addField(CmdSetLogChannel.normField)
-                this.addField(CmdSetTracking.normField)
-            }
+        helpBiConsumer = HelpBiConsumerBuilder("Weebot Settings").setDescription(
+            "View or Change your weebot's settings.").addField("Available Settings:", "")
+            .addField(CmdSetName.normField).addField(CmdSetPrefix.normField)
+            .addField(CmdSetExplicit.normField).addField(CmdSetNsfw.normField)
+            .addField(CmdSetLogChannel.normField).addField(CmdSetTracking.normField)
             .build()
     }
 
@@ -142,7 +67,7 @@ class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"
 }
 
 private class CmdSetName : WeebotCommand("nickname", arrayOf("name", "changename"),
-    CAT_MOD, "<name> [newSetting]", "View or Change your weebot's nickname",
+    CAT_MOD, "<name> [newSetting]", "Change your Weebot's nickname",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(NICKNAME_MANAGE),
     botPerms = arrayOf(NICKNAME_CHANGE)) {
 
@@ -153,12 +78,18 @@ private class CmdSetName : WeebotCommand("nickname", arrayOf("name", "changename
     }
 
     override fun execute(event: CommandEvent) {
-        TODO()
+        if (event.args.isBlank()) return
+        val name = event.splitArgs().joinToString(" ")
+        val old = getWeebotOrNew(event.guild).settings.nickname
+        event.guild.controller.setNickname(event.selfMember, name)
+        event.reply("Say goodbye to $old and hello to *$name*")
+        if (name.equals("Weebot", true) || name.equals(old, true))
+            event.reply("*....wait a second*")
     }
 }
 
 private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
-    "<prefix> [newSetting]", "View or Change your weebot's prefix",
+    "[newPrefix]", "View or Change your weebot's prefix",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(NICKNAME_MANAGE)) {
 
     companion object {
@@ -168,12 +99,76 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
     }
 
     override fun execute(event: CommandEvent) {
-        TODO()
+        val bot = getWeebotOrNew(event.guild)
+        when {
+            event.args.isBlank() -> {
+                SelectableEmbed(event.author, strdEmbedBuilder
+                    .setTitle("Prefix").setDescription("""
+                        My current prefixes are: ``${
+                    bot.settings.prefixs.joinToString(", ")}
+                        $A to add a prefix
+                        $C to change the prefix
+                    """.trimIndent())
+                    .build(),
+                    listOf(
+                        A to { _ ->
+                            event.reply("What would you like to add? " +
+                                    "*(must be under 4 characters, e.g. pw!, w!, \\)*")
+                            WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                                { event_2 ->
+                                    event_2.isValidUser(users = setOf(event.author),
+                                        guild = event.guild)
+                                }, { event_2 ->
+                                    if (event_2.message.contentDisplay.length > 3) {
+                                        event.reply("*That prefix is too long*")
+                                    } else {
+                                        bot.settings.prefixs.add(
+                                            event_2.message.contentDisplay
+                                        )
+                                        event.reply("You can now call me with ``${
+                                        event_2.message.contentDisplay}``")
+                                    }
+                                }, 1L, MINUTES) {}
+                        }, C to { _ ->
+                            event.reply("What would you like to change it to? " +
+                                    "*(must be under 4 characters, e.g. pw!, w!, \\)*")
+                            WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                                { event_2 ->
+                                    event_2.isValidUser(users = setOf(event.author),
+                                        guild = event.guild)
+                                }, { event_2 ->
+                                    if (event_2.message.contentDisplay.length > 3) {
+                                        event.reply("*That prefix is too long*")
+                                    } else {
+                                        bot.settings.prefixs.clear()
+                                        bot.settings.prefixs.add(
+                                            event_2.message.contentDisplay
+                                        )
+                                        event.reply("You can now call me with ``${
+                                        event_2.message.contentDisplay}``")
+                                    }
+                                }, 1L, MINUTES) {}
+                        }
+                    )) { it.clearReactions().queueAfter(250, MILLISECONDS) }
+                    .display(event.channel)
+            }
+            event.args.length > 3 -> {
+                event.reply("*That prefix is too long" +
+                        "(must be under 4 characters, e.g. pw!, w!, \\)*")
+            }
+            else -> {
+                bot.settings.prefixs.clear()
+                bot.settings.prefixs.add(event.args)
+                event.reply("You can now call me with ${event.args}")
+            }
+        }
     }
+
 }
 
 private class CmdSetExplicit : WeebotCommand("explicit", arrayOf("expl", "cuss"),
-    CAT_MOD, "<expl> [newSetting]", "View or Change your weebot's explicit setting",
+    CAT_UNDER_CONSTRUCTION, "<expl> [newSetting]",
+    "View or Change your weebot's explicit setting",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)){
 
     companion object {
@@ -187,7 +182,7 @@ private class CmdSetExplicit : WeebotCommand("explicit", arrayOf("expl", "cuss")
     }
 }
 
-private class CmdSetNsfw : WeebotCommand("nsfw", arrayOf("naughty"), CAT_MOD,
+private class CmdSetNsfw : WeebotCommand("nsfw", arrayOf("naughty"), CAT_UNDER_CONSTRUCTION,
     "<nsfw> [newSetting]", "View or Change your weebot's nsfw setting",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)){
 
@@ -203,39 +198,58 @@ private class CmdSetNsfw : WeebotCommand("nsfw", arrayOf("naughty"), CAT_MOD,
     }
 }
 
-private class CmdSetEnablePassive : WeebotCommand("passive", arrayOf("alwayson"),
-    CAT_MOD, "<passive> [newSetting]", "View or Change your weebot's passive settings",
+private class CmdSetLogChannel : WeebotCommand("log",
+    arrayOf("logchannel", "setlog", "logger"), CAT_MOD,
+    "[logChannel]", "View or Change your weebot's logging channel",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)) {
 
     companion object {
-        val normField: Field = Field("Passive Actions",
-            "Enable Weebot's passive commands (custom responses, moderation, etc)\n" +
-                    "``set passive [on/off]``\nAlias: alwayson", true)
-    }
-
-    override fun execute(event: CommandEvent) {
-        TODO()
-    }
-}
-
-private class CmdSetLogChannel : WeebotCommand("log", arrayOf("logchannel", "setlog"),
-    CAT_MOD, "[settingName] [newSetting]",
-    "View or Change your weebot's logging channel", guildOnly = true, cooldown = 10,
-    userPerms = arrayOf(ADMINISTRATOR)) {
-
-    companion object {
-        val normField: Field = Field("Bot Logggin Channel",
+        val normField: Field = Field("Bot Loggging Channel",
             "Set the TextChannel for me to send logs to.\n``set log [#channelMention]``",
             true)
     }
 
     override fun execute(event: CommandEvent) {
-        TODO()
+        val bot = getWeebotOrNew(event.guild)
+        val channels = event.message.mentionedChannels
+
+        when {
+            channels.isEmpty() -> {
+                SelectableEmbed(event.author, strdEmbedBuilder
+                    //TODO
+                    .build(), listOf(C to { _ ->
+                    event.reply("Which channel should I send log messages to?")
+                    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java, {
+                        it.isValidUser(users = setOf(event.author), guild = event.guild)
+                    }, { event_2 ->
+                        val channels_2 = event_2.message.mentionedChannels
+                        if (channels_2.isEmpty() || channels_2.size > 1) event.reply(
+                            "*Please mention ONE (1) text channel.*")
+                        else set(event, bot, channels_2[0])
+                    }, 3L, MINUTES) { }
+                })) { it.clearReactions().queueAfter(250, MILLISECONDS) }.display(
+                    event.textChannel)
+            }
+            channels.size == 1 -> set(event, bot, channels[0])
+            else -> event.reply("*Please mention only ONE (1) text channel.*")
+        }
     }
+
+    private fun set(event: CommandEvent, bot: Weebot, textChannel: TextChannel) {
+        if (textChannel.canTalk()) {
+            bot.settings.logchannel = textChannel.idLong
+            event.reply("*The loggin channel has been set to ${textChannel.asMention}*")
+        } else {
+            event.reply("*I am unable to send messages to this channel. Check my " +
+                    "permission settings and then try again.*")
+        }
+    }
+
 }
 
 private class CmdSetTracking : WeebotCommand("skynet", arrayOf("track", "tracking"),
-    CAT_MOD, "<skynet> [newSetting]", "View or Change your weebot's tracking settings",
+    CAT_UNDER_CONSTRUCTION, "<skynet> [newSetting]",
+    "View or Change your weebot's tracking settings",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)) {
 
     companion object {

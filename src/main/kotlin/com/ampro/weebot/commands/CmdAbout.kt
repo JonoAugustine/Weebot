@@ -8,13 +8,8 @@ import com.ampro.weebot.commands.`fun`.CmdHelloThere
 import com.ampro.weebot.database.constants.DISCORD_BOTS_LINK
 import com.ampro.weebot.database.constants.LINK_INVITEBOT
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.delete
-import com.ampro.weebot.extensions.strdEmbedBuilder
-import com.ampro.weebot.extensions.strdPaginator
-import com.ampro.weebot.main.JDA_SHARD_MNGR
-import com.ampro.weebot.main.SELF
-import com.ampro.weebot.main.WAITER
+import com.ampro.weebot.extensions.*
+import com.ampro.weebot.main.*
 import com.ampro.weebot.util.WKDAY_MONTH_YEAR_TIME
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.menu.OrderedMenu
@@ -38,74 +33,60 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
     //"Weebot's little brother."
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild)
-        event.jda.asBot().applicationInfo.queue { appInfo ->
+        val eb = strdEmbedBuilder.setTitle("All about Weebot")
+            .setThumbnail(CmdHelloThere.HELLO_THERE_GIFS[0])
 
-            val eb = strdEmbedBuilder.setTitle("All about Weebot")
-                .setThumbnail(CmdHelloThere.HELLO_THERE_GIFS[0])
+        //Description
+        val sBuilder = StringBuilder("[`Hello there!`]($HELLO_THERE) ").append(
+            "I am ***Weebot***, a bot, that ")
+            .append("is certainly not a weeb, no sir. No weebs here.\n")
+            .append("I Have a bunch of fun, useful, and sometimes random commands ")
+            .append("that aim to make life on Discord easy, fun, and intuitive!\n\n")
+            .append("I was made by ***[`HQRegent`]($HQTWITCH)***, ")
+            .append("using [`Kotlin`](https://kotlinlang.org) and the ")
+            .append("[`JDA library`](https://github.com/DV8FromTheWorld/JDA).")
+            .append("\nIf you need more Help using Weebot, want help ")
+            .append("using JDA to make your own bot, or just want to say hi to ")
+            .append("***[`HQRegent`]($HQTWITCH)***, join the ")
+            .append("[`Numberless Liquidator Discord`](https://discord.gg/VdbNyxr).")
+            .append("\n\nPlease [`invite me to your server!`]($LINK_INVITEBOT) and")
+            .append(" vote for me on [`discordbots.org`]($DISCORD_BOTS_LINK)!")
+            .append("\n\n*Use \"${SELF.asMention} help\" for info using my commands.*")
+            .append("\n\n**__Weebot Commands__**\n\n")
 
-            //Description
-            val sBuilder = StringBuilder("[`Hello there!`]($HELLO_THERE) ")
-                .append("I am ***Weebot***, a bot, that ")
-                .append("is certainly not a weeb, no sir. No weebs here.\n")
-                .append("I Have a bunch of fun, useful, and sometimes random commands ")
-                .append("that aim to make life on Discord easy, fun, and intuitive!\n\n")
-                .append("I was made by ***[`HQRegent`]($HQTWITCH)***, ")
-                .append("using [`Kotlin`](https://kotlinlang.org) and the ")
-                .append("[`JDA library`](https://github.com/DV8FromTheWorld/JDA).")
-                .append("\nIf you need more Help using Weebot, want help ")
-                .append("using JDA to make your own bot, or just want to say hi to ")
-                .append("***[`HQRegent`]($HQTWITCH)***, join the ")
-                .append("[`Numberless Liquidator Discord`](https://discord.gg/VdbNyxr).")
-                .append("\n\nPlease [`invite me to your server!`]($LINK_INVITEBOT) and")
-                .append(" vote for me on [`discordbots.org`]($DISCORD_BOTS_LINK)!")
-                .append("\n\n*Use \"${SELF.asMention} help\" for info using my commands.*")
-                .append("\n\n**__Weebot Commands__**\n\n")
+        sBuilder.append(commands.sortedBy { it.name.toLowerCase() }
+            .filterNot { it.isOwnerCommand }.joinToString(", ") { "*${it.name}*" })
+        sBuilder.setLength(sBuilder.length - 2)
+        sBuilder.append("\n\n")
+        eb.setDescription(sBuilder.toString())
+        sBuilder.setLength(0)
 
-            commands.sortedBy { it.name.toLowerCase() }.forEach { cmd ->
-                if (cmd.isOwnerCommand) return@forEach
-                sBuilder.append("*${cmd.name}*, ")
-            }
-            sBuilder.setLength(sBuilder.length - 2)
-            sBuilder.append("\n\n")
-            eb.setDescription(sBuilder.toString())
-            sBuilder.setLength(0)
-
-            /*eb.addBlankField(false).addField("Premium Weebotters", //TODO
-                "Premium Weebotters: ${DAO.premiumUsers().size}\n" +
-                        "To get Premium features subscribe to " +
-                        "***[`HQRegent`]($HQTWITCH)*** on twitch and join the " +
-                        "[`NL Discord`](https://discord.gg/VdbNyxr).", true)
-                        */
-
-            //Global stats (server count, shard count)
-            //Shard-level stats (User count, server count)
-            if (event.jda.shardInfo == null) {
-                eb.addField("Stats", "${event.jda.guilds.size} servers\n1 shard", true)
-                eb.addField("Users","${event.jda.users.size} unique\n${event.jda.guilds
-                    .stream().mapToInt { g -> g.members.size }.sum()} total", true)
-                eb.addField("Channels",
-                    "${event.jda.textChannels.size} Text\n${event.jda.voiceChannels.size} Voice",
-                    true)
-            } else {
-                eb.addField("Stats",
-                    "${JDA_SHARD_MNGR.guilds.size} Servers\nWeebot Centre ${event.jda
-                        .shardInfo
-                        .shardId + 1}/${event.jda.shardInfo.shardTotal}", true)
-                eb.addField("This Weebot Centre",
-                    "${event.jda.users.size} Users on ${event.jda.guilds.size} Servers",
-                    true)
-                eb.addField("Channels",
-                    "${event.jda.textChannels.size} Text Channels\n${event.jda.voiceChannels.size} Voice Channels",
-                    true)
-            }
-            eb.setFooter("Last restart", null)
-            eb.setTimestamp(event.client.startTime)
-
-            //other (?)
-
-            event.reply(eb.build())
+        //Global stats (server count, shard count)
+        //Shard-level stats (User count, server count)
+        if (event.jda.shardInfo == null) {
+            eb.addField("Stats", "${event.jda.guilds.size} servers\n1 shard", true)
+            eb.addField("Users",
+                "${event.jda.users.size} unique\n${event.jda.guilds.stream()
+                    .mapToInt { g -> g.members.size }.sum()} total", true)
+            eb.addField("Channels",
+                "${event.jda.textChannels.size} Text\n${event.jda.voiceChannels.size} Voice",
+                true)
+        } else {
+            eb.addField("Stats",
+                "${JDA_SHARD_MNGR.guilds.size} Servers\nWeebot Centre ${event.jda.shardInfo.shardId + 1}/${event.jda.shardInfo.shardTotal}",
+                true)
+            eb.addField("This Weebot Centre",
+                "${event.jda.users.size} Users on ${event.jda.guilds.size} Servers", true)
+            eb.addField("Channels",
+                "${event.jda.textChannels.size} Text Channels\n${event.jda.voiceChannels.size} Voice Channels",
+                true)
         }
+        eb.setFooter("Last restart", null)
+        eb.setTimestamp(event.client.startTime)
 
+        //other (?)
+
+        event.reply(eb.build())
     }
 
 }

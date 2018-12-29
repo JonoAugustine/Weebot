@@ -11,13 +11,11 @@ package com.ampro.weebot.commands.developer
 import com.ampro.weebot.commands.CAT_DEV
 import com.ampro.weebot.commands.CAT_GEN
 import com.ampro.weebot.database.constants.PHONE_JONO
-import com.ampro.weebot.extensions.STD_GREEN
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.getInvocation
+import com.ampro.weebot.extensions.*
+import com.ampro.weebot.main.WAITER
 import com.ampro.weebot.main.shutdown
 import com.ampro.weebot.util.sendSMS
 import com.jagrosh.jdautilities.command.CommandEvent
-import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import com.jagrosh.jdautilities.menu.Paginator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
@@ -69,7 +67,7 @@ class CmdShutdown : WeebotCommand("shutdown", arrayOf("tite", "killbot", "devkil
  * @author John Grosh (jagrosh)
  * @since 2.0
  */
-class GuildlistCommand(waiter: EventWaiter) : WeebotCommand("guildlist",
+class GuildlistCommand : WeebotCommand("guildlist",
     arrayOf("guilds", "serverlist", "servers"), CAT_DEV, "[pagenum]",
     "Gets a paginated list of the guilds the bot is on.",
         HelpBiConsumerBuilder("Guild List")
@@ -89,7 +87,7 @@ class GuildlistCommand(waiter: EventWaiter) : WeebotCommand("guildlist",
                 } catch (ex: PermissionException) {
                     m.delete().queue()
                 }
-            }.setEventWaiter(waiter).setTimeout(1, TimeUnit.MINUTES)
+            }.setEventWaiter(WAITER).setTimeout(1, TimeUnit.MINUTES)
     }
 
     override fun execute(event: CommandEvent) {
@@ -102,16 +100,15 @@ class GuildlistCommand(waiter: EventWaiter) : WeebotCommand("guildlist",
                 return
             }
         }
-        pbuilder.clearItems()
+        pbuilder.clearItems() //TODO change to selectable paginator
         event.jda.guilds.stream()
             .map { g -> "**${g.name}** (ID:${g.id}) ~ ${g.members.size} Members" }
             .forEach { pbuilder.addItems(it) }
-        val p = pbuilder.setColor(STD_GREEN)
+        strdPaginator
             .setText("${event.client.success} Guilds that **${event.selfUser.name}**" +
                     " is connected to ${if (event.jda.shardInfo == null) ":"
                     else "(Shard ID " + event.jda.shardInfo.shardId + "):"}")
-            .setUsers(event.author).build()
-        p.paginate(event.channel, page)
+            .setUsers(event.author).build().paginate(event.channel, page)
     }
 
 }

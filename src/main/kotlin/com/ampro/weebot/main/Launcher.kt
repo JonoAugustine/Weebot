@@ -8,12 +8,9 @@ import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CMD_HELP
 import com.ampro.weebot.commands.commands
 import com.ampro.weebot.commands.utilitycommands.remThreadPool
-import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.Dao
+import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
-import com.ampro.weebot.database.loadDao
-import com.ampro.weebot.extensions.addCommands
-import com.ampro.weebot.extensions.splitArgs
+import com.ampro.weebot.extensions.*
 import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
@@ -23,7 +20,7 @@ import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import kotlinx.coroutines.*
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.entities.Game.listening
+import net.dv8tion.jda.core.entities.Game.playing
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
 import java.util.concurrent.Executors
@@ -79,18 +76,23 @@ fun main(args_: Array<String>) = runBlocking {
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Consumer(Throwable::printStackTrace)
 
+    //LOGIN
     //JDA_SHARD_MNGR = jdaShardLogIn().build()
     JDA_SHARD_MNGR = jdaDevShardLogIn().build()
 
+    //DATABASE
     setUpDatabase()
 
+    //COMMAND CLIENT
     CMD_CLIENT = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
         .setCoOwnerIds(DEV_IDS[1].toString())
-        .setGuildSettingsManager { DAO.WEEBOTS[it.idLong]?.settings }
+        .setGuildSettingsManager { getWeebotOrNew(it.idLong).settings }
         .setAlternativePrefix("\\")
-        .setGame(listening("@Weebot help"))
+        //.setGame(listening("@Weebot help"))
+        .setGame(playing("Weebot 2.0 Kotlin!"))
         .addCommands(commands)
         .setEmojis(heavy_check_mark.unicode, Warning.unicode, X_Red.unicode)
+        .setServerInvite(LINK_INVITEBOT)
         .setHelpConsumer { event ->
             //If the only argument is the command invoke
             val args = event.splitArgs()
@@ -127,6 +129,7 @@ fun main(args_: Array<String>) = runBlocking {
         addEventListener(WAITER)
     }
 
+    //WAIT FOR SHARD CONNECT
     MLOG.slog("Shard connected! ${measureTimeMillis {
         while (JDA_SHARD_MNGR.shards[0].status != JDA.Status.CONNECTED) {
             MLOG.slog("Waiting for shard to connect...")
@@ -134,7 +137,9 @@ fun main(args_: Array<String>) = runBlocking {
         }
     } / 1_000} seconds")
 
+    //SET SELF AND AVATAR URL
     SELF = JDA_SHARD_MNGR.shards[0].selfUser
+    weebotAvatar = SELF.avatarUrl
 
     startupWeebots()
 

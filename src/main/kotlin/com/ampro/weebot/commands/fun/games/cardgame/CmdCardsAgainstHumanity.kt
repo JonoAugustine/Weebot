@@ -6,8 +6,7 @@ package com.ampro.weebot.commands.`fun`.games.cardgame
 
 import com.ampro.weebot.Restriction
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.CAT_GAME
-import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.`fun`.games.*
 import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.database.getGuild
@@ -290,7 +289,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
  * @since 1.0
  */
 class CmdCardsAgainstHumanity : WeebotCommand("CardsAgainstHumanity", arrayOf("cah"),
-    CAT_GAME, "<command> [arguments]",
+    CAT_UNDER_CONSTRUCTION, "<command> [arguments]",
     "Start a game of CardsAgainstHumanity or make custom cards.", guildOnly = true
 ) {
 

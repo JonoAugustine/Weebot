@@ -35,7 +35,7 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
     botPerms = arrayOf(MESSAGE_ADD_REACTION),
         helpBiConsumer = HelpBiConsumerBuilder("^This Reactor")
             .setDescription("Have me react with *\"THiS\"* to a message whenever someone types ")
-            .appendDesc("\"^this\" or \"^that\".")
+            .addToDesc("\"^this\" or \"^that\".")
             .addField("Arguments", "[on/off]").addField("Aliases", "^that")
             .build { it.reactWith(ArrowUp, T, H, I_lowercase, S) }
 ) {
@@ -92,7 +92,7 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
         val bot = getWeebotOrNew(event.guild)
-        val reactor = bot.getPassive(ThisReactor::class)
+        val reactor = bot.getPassive<ThisReactor>()
 
         //Check for ThisReactor enabling
         // \thisreactor on

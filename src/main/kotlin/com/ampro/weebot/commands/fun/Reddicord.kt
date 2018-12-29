@@ -9,17 +9,14 @@ import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
+import com.ampro.weebot.extensions.MentionType.CHANNEL
 import com.ampro.weebot.main.SELF
 import com.ampro.weebot.main.WAITER
-import com.ampro.weebot.util.Emoji
+import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
-import com.ampro.weebot.util.`is`
-import com.ampro.weebot.util.reactWith
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.*
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.TextChannel
-import net.dv8tion.jda.core.entities.User
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GenericGuildMessageEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
@@ -27,13 +24,14 @@ import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEv
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionRemoveEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.MILLISECONDS
-import java.util.concurrent.TimeUnit.MINUTES
+import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
 
 
 internal val UP = ArrowUp
 internal val DOWN = ArrowDown
 internal val CHECK = heavy_check_mark
+internal val REDDIT_ICON = "https://www.redditstatic.com/new-icon.png"
 
 /* ***************
     Reddicord
@@ -43,17 +41,16 @@ internal val CHECK = heavy_check_mark
  * A Reddit clone that gives customizable [Emoji.ArrowUp] [Emoji.ArrowDown]
  * reactions to each message.
  * At the end of an allotted time span, the top Reddicorders are announced.
- * TODO Asks if the user wants this message to be a submission before checking
  *
  * @author Jonathan Augustine
  * @since 2.0
  */
-class Reddicord(channel: TextChannel) : IPassive {
+class Reddicord(channels: MutableList<TextChannel> = mutableListOf()) : IPassive {
     var dead: Boolean = false
     override fun dead() = dead
 
-    /** The Channel being Reddicorded */
-    val channelID = channel.idLong
+    /** Enabled Channels (empty = all channels) */
+    val channelIDs = MutableList(channels.size) {channels[it].idLong}
 
     /** */
     val scoreMap = ConcurrentHashMap<Long, AtomicInteger>()
@@ -70,41 +67,67 @@ class Reddicord(channel: TextChannel) : IPassive {
             is GuildMessageReceivedEvent -> {
                 event.message.reactWith(CHECK, X_Red)
                 WAITER.waitForEvent(GuildMessageReactionAddEvent::class.java, { e ->
-                    e.messageId == event.messageId && e.member.user.idLong == event.author.idLong
+                    e.messageId == event.messageId
+                            && e.member.user.idLong == event.author.idLong
                             && (e.reactionEmote `is` CHECK || e.reactionEmote `is` X_Red)
-                }, { when {
-                    it.reactionEmote `is` CHECK -> event.message.clearReactions()
-                        .queue { event.message.reactWith(UP, DOWN) }
-                    it.reactionEmote `is` X_Red -> event.message.clearReactions()
-                        .queueAfter(250, MILLISECONDS)
-                }
-                },1L, MINUTES) { event.message.clearReactions().queue() }
+                }, {
+                    when {
+                        it.reactionEmote `is` CHECK -> event.message.clearReactions().queueAfter(
+                            250, MILLISECONDS) { event.message.reactWith(UP, DOWN) }
+                        it.reactionEmote `is` X_Red -> event.message.clearReactions().queueAfter(
+                            250, MILLISECONDS)
+                    }
+                }, 30L, SECONDS) { event.message.clearReactions().queue() }
             }
             is GuildMessageReactionAddEvent -> when {
-                event.reactionEmote `is` UP   -> event.channel.getMessageById(event.messageId)
-                    .queue { message -> message.isPosted({ incrementConsumer }) }
-                event.reactionEmote `is` DOWN -> event.channel.getMessageById(event.messageId)
-                    .queue { message -> message.isPosted({ decrementConsumer }) }
+                event.reactionEmote `is` UP -> event.channel.getMessageById(
+                    event.messageId).queue { message ->
+                    message.ifPosted({
+                        if (message.author.idLong != event.member.user.idLong)
+                            incrementConsumer(message, event.user)
+                        else message.removeUserReaction(message.author, UP)
+                    })
+                }
+                event.reactionEmote `is` DOWN -> event.channel.getMessageById(
+                    event.messageId).queue { message ->
+                    message.ifPosted({
+                        if (message.author.idLong != event.member.user.idLong)
+                            decrementConsumer(message, event.user)
+                        else message.removeUserReaction(message.author, DOWN)
+                    })
+                }
             }
             is GuildMessageReactionRemoveEvent -> when {
-                event.reactionEmote `is` DOWN   -> event.channel.getMessageById(event.messageId)
-                        .queue { message -> message.isPosted({ incrementConsumer }) }
-                event.reactionEmote `is` UP -> event.channel.getMessageById(event.messageId)
-                    .queue { message -> message.isPosted({ decrementConsumer }) }
+                event.reactionEmote `is` DOWN -> event.channel.getMessageById(
+                    event.messageId).queue { message ->
+                    message.ifPosted({
+                        if (message.author.idLong != event.member.user.idLong)
+                            incrementConsumer(message, event.user)
+                        else message.removeUserReaction(message.author, DOWN)
+                    })
+                }
+                event.reactionEmote `is` UP -> event.channel.getMessageById(
+                    event.messageId).queue { message ->
+                    message.ifPosted({
+                        if (message.author.idLong != event.member.user.idLong)
+                            decrementConsumer(message, event.user)
+                        else message.removeUserReaction(message.author, UP)
+                    })
+                }
             }
         }
     }
 
-    private val incrementConsumer: (Message) -> Unit = {
-        scoreMap.getOrPut(it.author.idLong) { AtomicInteger(getScore(it) - 1) }.incrementAndGet()
-        it.reactions.firstOrNull { r -> r.reactionEmote `is` DOWN }
-            ?.removeReaction(it.author)?.queue()
+    private fun incrementConsumer(message: Message, user: User) {
+        scoreMap.getOrPut(message.author.idLong) { AtomicInteger(getScore(message)) }
+            .incrementAndGet()
+        message.removeUserReaction(user, DOWN)
     }
 
-    private val decrementConsumer: (Message) -> Unit = {
-        scoreMap.getOrPut(it.author.idLong) { AtomicInteger(getScore(it) + 1) }.decrementAndGet()
-        it.reactions.firstOrNull { r -> r.reactionEmote `is` UP }
-            ?.removeReaction(it.author)?.queue()
+    private fun decrementConsumer(message: Message, user: User) {
+        scoreMap.getOrPut(message.author.idLong) { AtomicInteger(getScore(message)) }
+            .decrementAndGet()
+        message.removeUserReaction(user, UP)
     }
 
     /**
@@ -114,10 +137,10 @@ class Reddicord(channel: TextChannel) : IPassive {
      * @return the score of the message
      */
     private fun getScore(message: Message) : Int {
-        var up = message.reactions.firstOrNull { it.reactionEmote `is` UP}?.count ?: 0
-        var down = message.reactions.firstOrNull { it.reactionEmote `is` DOWN}?.count ?: 0
-        if (up == 1) up--
-        if (down == 1) down--
+        val up = message.reactions.firstOrNull { it.reactionEmote `is` UP}?.count ?: 0
+        val down = message.reactions.firstOrNull { it.reactionEmote `is` DOWN}?.count ?: 0
+        //if (up == 1) up--
+        //if (down == 1) down--
         return up - down
     }
 
@@ -127,10 +150,13 @@ class Reddicord(channel: TextChannel) : IPassive {
      * @param success The action to perform if true
      * @param failure The action to perform if false
      */
-    private fun Message.isPosted(success: (MutableList<User>) -> Unit,
+    private fun Message.ifPosted(success: (MutableList<User>) -> Unit,
                                  failure: (MutableList<User>) -> Unit = {}) {
-        reactions.firstOrNull { it.reactionEmote `is` UP || it.reactionEmote `is` DOWN}
-            ?.users?.queue {
+        val k = reactions.firstOrNull {
+            it.reactionEmote `is` UP || it.reactionEmote `is` DOWN
+        }
+        k?.users?.queue {
+            it.joinToString(", ") { it.name }
             if (it.has { it.idLong == SELF.idLong }) success(it)
             else failure(it)
         }
@@ -138,7 +164,8 @@ class Reddicord(channel: TextChannel) : IPassive {
 
     /** @return true if the Event's [TextChannel] is the same as [channelID] */
     private fun check(event: Event) = when (event) {
-        is GenericGuildMessageEvent -> if (event.channel.idLong == channelID) {
+        is GenericGuildMessageEvent -> if (channelIDs.isEmpty()
+                || channelIDs.contains(event.channel.idLong)) {
             when (event) {
                 is GuildMessageReceivedEvent -> !event.author.isBot
                 is GuildMessageReactionAddEvent -> !event.member.user.isBot
@@ -157,33 +184,97 @@ class Reddicord(channel: TextChannel) : IPassive {
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdReddicord : WeebotCommand("Reddicord", arrayOf("reddiscord"), CAT_FUN,
-        ""/*TODO*/, "Upvote and Downvote messages to gain points.",
-        userPerms = arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
-        botPerms =  arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
-        guildOnly = true, cooldown = 10
+class CmdReddicord : WeebotCommand("Reddicord", arrayOf("reddiscord", "redditcord",
+    "reddiscore", "reddiscores"), CAT_FUN, "[on/off/scores]",
+    "Upvote and Downvote messages to gain points.",
+    userPerms = arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
+    botPerms =  arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
+    guildOnly = true, children = arrayOf(CmdReddicord.CmdLeaderBoard())
 ) {
+
+    /**
+     * A command to view the guild [Reddicord] leaderboard
+     *
+     * @author Jonathan Augustine
+     * @since 2.0
+     */
+    class CmdLeaderBoard : WeebotCommand("leaderboard",
+        arrayOf("ranks", "lb", "scores", "reddiscore"),
+        CAT_FUN, "[@/member @/member2...]", "See the Reddicord leaderboard.",
+        guildOnly = true, ownerOnly = false, cooldown = 180,
+        cooldownScope = CooldownScope.USER_CHANNEL) {
+
+        override fun execute(event: CommandEvent) {
+            val bot = getWeebotOrNew(event.guild)
+            val rCord = bot.getPassive<Reddicord>()
+            val mentions = event.message.mentionedUsers
+
+            when {
+                rCord == null -> {
+                    event.respondThenDelete(makeEmbedBuilder("Reddicord has not been activated",
+                        description = "To activate Reddicord, use ``reddicord on`` or try "
+                                + "``help reddicord`` for more info.").build(), 60)
+                }
+                rCord.scoreMap.isEmpty() -> {
+                    event.respondThenDelete(makeEmbedBuilder(
+                        "Reddicord has been activated but no one has any points yet!",
+                        description = "To get started, post a meme in a Reddicord chat.")
+                        .build(), 60)
+                }
+                mentions.size == 1 -> event.reply(strdEmbedBuilder.setTitle(
+                    "${mentions[0].name}'s ReddiScore: ${
+                    rCord.scoreMap[mentions[0].idLong]?.get() ?: 0}")
+                    .setThumbnail(mentions[0].avatarUrl)
+                    .setDescription("Keep posting in Reddiscore channels to increase")
+                    .appendDescription(" your score!").build())
+                rCord.scoreMap.size > 0 -> {
+                    val scoreMap = if (mentions.isEmpty()) rCord.scoreMap else {
+                        rCord.scoreMap.filterKeys { k -> mentions.has { it.idLong == k } }
+                    }.toSortedMap()
+                    strdPaginator.setText("Reddicord Leaderboard").setItemsPerPage(10)
+                        .useNumberedItems(true).apply {
+                            scoreMap.forEach { id, score ->
+                                val name = event.guild.getMemberById(id)?.effectiveName
+                                        ?: "Uknown User"
+                                addItems("$name: $score")
+                            }
+                        }.build().display(event.textChannel)
+                }
+            }
+        }
+
+    }
+
     override fun execute(event: CommandEvent) {
-        //TODO Reddicord leaderboard,
+
+        if (children[0].isCommandFor(event.getInvocation())) {
+            children[0].run(event)
+            return
+        }
 
         val bot = getWeebotOrNew(event.guild)
-        val rCord = bot.getPassive(Reddicord::class)
+        val rCord = bot.getPassive<Reddicord>()
         val args = event.splitArgs()
+        val mentionedChannels = event.message.mentionedChannels
 
         when {
             args.isEmpty() -> {
                 event.reply(strdEmbedBuilder.setTitle("Reddicord")
-                    .setThumbnail("https://www.redditstatic.com/new-icon.png")
+                    .setThumbnail(REDDIT_ICON)
                     .setDescription("Reddiscord is currently ")
-                    .appendDescription(if (rCord == null) "off" else "on")
-                    .appendDescription(" in ${event.textChannel.asMention}.")
+                    .appendDescription(when (rCord) {
+                        null -> "off."
+                        else -> "on in ${rCord.channelIDs.joinToString(", ") {
+                            it.asMention(CHANNEL)
+                        }}."
+                    })
                     .appendDescription(" Use ``help reddicord`` for more ")
                     .appendDescription("info on usage.")
                     .build())
             }
             args[0].toLowerCase().matches(Regex("^(on|enable)$"))   -> {
                 if (rCord == null) {
-                    bot.passives.add(Reddicord(event.textChannel))
+                    bot.passives.add(Reddicord(mentionedChannels))
                     event.reply(strdEmbedBuilder.setTitle("Reddicord Activated!").apply {
                         descriptionBuilder.append("Each message in ${event.textChannel.asMention}")
                             .append(" will get a $CHECK and $X_Red reaction; if you ")
@@ -194,6 +285,7 @@ class CmdReddicord : WeebotCommand("Reddicord", arrayOf("reddiscord"), CAT_FUN,
                             .append("vote! Each vote will add or detract to the author's ")
                             .append("ReddiScore.\n*Bring your bestest memes and posts and ")
                             .append("let the games begin!*")
+                        setThumbnail(REDDIT_ICON)
                     }.build()) { it.reactWith(UP, DOWN) }
                 } else {
                     event.respondThenDelete(
@@ -202,20 +294,28 @@ class CmdReddicord : WeebotCommand("Reddicord", arrayOf("reddiscord"), CAT_FUN,
             }
             args[0].toLowerCase().matches(Regex("^(off|disable)$")) -> {
                 if (rCord != null) {
-                    bot.passives.remove(rCord)
-                    event.reply(strdEmbedBuilder.setTitle("Reddicord has been deactivated.")
-                        .setDescription("Use ``\\reddicord on`` to turn it back on at any time.")
-                        .build())
+                    if (mentionedChannels.isNotEmpty()) {
+                        rCord.channelIDs.removeAll { id ->
+                            mentionedChannels.has { it.idLong == id }
+                        }
+                        event.reply(strdEmbedBuilder.setTitle(
+                            "Reddicord has been deactivated in ${mentionedChannels
+                                .joinToString(", ") { it.name }}").setDescription(
+                            "Use ``reddicord on <channels>`` to turn it back on at any time.")
+                            .build())
+                    } else {
+                        bot.passives.remove(rCord)
+                        event.reply(strdEmbedBuilder.setTitle(
+                            "Reddicord has been deactivated.").setDescription(
+                            "Use ``reddicord on`` to turn it back on at any time.").build())
+                    }
                 } else {
                     event.respondThenDelete(
                             "Reddicord is already off in ${event.textChannel.asMention}")
                 }
             }
-            else -> {
-                event.respondThenDelete(
-                        "Sorry, I had trouble understanding ${args[0]}. Try using " +
-                                "``on`` or ``off``.", 30)
-            }
+            else -> event.respondThenDelete("Sorry, I had trouble understanding " +
+                    "${args[0]}. Try using ``on`` or ``off``.", 30)
         }
     }
 

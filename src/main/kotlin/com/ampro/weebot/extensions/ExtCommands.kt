@@ -130,7 +130,7 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         constructor(title: String) : this() { embedBuilder.setTitle(title).addField(
             guide) }
         constructor(title: String, description: String) : this(title) {
-            embedBuilder.setDescription(description)
+            this.description.append(description)
         }
         constructor(title: String, withGuide: Boolean) : this() {
             embedBuilder.setTitle(title)
@@ -139,7 +139,9 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         }
 
         companion object {
-            val guide = Field("Guide", "<required> , [optional], /situational/", false)
+            val guide = Field("Guide",
+                        "<required> , [optional], <[at][least][one]..>, /situational/",
+                false)
         }
 
         var description = StringBuilder()
@@ -174,8 +176,18 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         }
 
         /** Append a string to the description */
-        fun appendDesc(string: String) : HelpBiConsumerBuilder {
+        fun addToDesc(string: String) : HelpBiConsumerBuilder {
             this.description.append(string)
+            return this
+        }
+
+        /**
+         * Add a list of command aliases
+         * @param aliases
+         * @return [HelpBiConsumerBuilder]
+         */
+        fun setAliases(aliases: Array<String>) : HelpBiConsumerBuilder {
+            addField("Aliases", aliases.joinToString(", "))
             return this
         }
 

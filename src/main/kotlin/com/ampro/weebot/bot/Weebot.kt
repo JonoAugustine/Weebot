@@ -127,11 +127,33 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     }
 
     /**
-     * @param klass The class of the [IPassive] wanted
      * @return The first [IPassive] of the given class or null
      */
-    fun <C:IPassive> getPassive(klass: KClass<C>)
-            = passives.firstOrNull { klass == it::class }
+    inline fun <reified C:IPassive> getPassive()
+            = passives.firstOrNull {  it::class == C::class } as C?
+
+    /**
+     * @param predicate The conditions on which to return
+     * @return The first [IPassive] of the given class or null
+     */
+    inline fun <reified C:IPassive> getPassive(predicate: (C) -> Boolean)
+            = passives.firstOrNull { it::class == C::class && predicate(it as C) } as C?
+
+    /**
+     * @return The all [IPassive]s of the type [C] held by this [Weebot]
+     */
+    inline fun <reified C:IPassive> getPassives()
+            = passives.filter {  it::class == C::class } as MutableList<*>
+
+    /**
+     * @param predicate The conditions on which to return
+     * @return The all [IPassive]s of the type [C] held by this [Weebot] that match
+     * the given [predicate]
+     */
+    inline fun <reified C:IPassive> getPassives(predicate: (C) -> Boolean)
+            = passives.filter { it::class == C::class && predicate(it as C) }
+            as MutableList<*>
+
 
     /**
      * Removes dead [IPassive.dead] then

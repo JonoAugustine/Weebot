@@ -5,11 +5,10 @@
 package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.splitArgs
+import com.ampro.weebot.extensions.*
+import com.jagrosh.jdautilities.command.Command.CooldownScope.*
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.dv8tion.jda.core.Permission.MANAGE_CHANNEL
 import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.core.entities.MessageHistory
@@ -60,40 +59,53 @@ class CmdSelfDestruct : WeebotCommand("SelfDestruct",
  * @since 2.0
  */
 class CmdPurge : WeebotCommand("Purge", arrayOf("prune", "clean", "clear"), CAT_MOD,
-    "<number>", "Delete multiple messages, 2-99.", guildOnly = true,
+    "<number>", "Delete multiple messages, 2-1,000.", guildOnly = true,
     botPerms = arrayOf(MESSAGE_MANAGE), userPerms = arrayOf(MESSAGE_MANAGE),
-    cooldown = 3, cooldownScope = CooldownScope.GUILD
+    cooldown = 3, cooldownScope = GUILD
 ) {
 
     init {
-        helpBiConsumer = HelpBiConsumerBuilder() //TODO
-            .build()
+        helpBiConsumer = HelpBiConsumerBuilder("Chat Purge", false).setDescription(
+            "Delete 2 to 1,000 messages from the chat.\n``purge <2...1,000>``"
+        ).setAliases(this.aliases).build()
     }
 
     // \purge #
-    override fun execute(event: CommandEvent) {
-        GlobalScope.launch {
+    override fun execute(event: CommandEvent)  {
+        var toDelete = try {
+            Integer.parseInt(event.splitArgs()[0])
+        } catch (e: Exception) { return }
+        val td = toDelete
 
-            val toDelete = try {
-                Integer.parseInt(event.splitArgs()[0])
-            } catch (e: Exception) {
-                return@launch
-            }
+        if (toDelete !in 2..1_000) {
+            event.respondThenDelete("You must choose a number between 2 and 1,000.")
+            return
+        }
 
-            val mh = MessageHistory(event.textChannel)
-
-            if (toDelete in 2..100) {
-                mh.retrievePast(toDelete + 1).queue { messages ->
-                    event.textChannel.deleteMessages(messages).queue()
-                }
-                event.reply(
-                    "*${event.author.name} cleared $toDelete messages from ${event.textChannel.name}*")
-                { m -> m.delete().queueAfter(5, SECONDS) }
+        val list = mutableListOf<Int>()
+        while (toDelete > 0) {
+            if (toDelete >= 100) {
+                list.add(100)
+                toDelete -= 100
             } else {
-                event.reply("*You must choose a number between 2 and 99.*")
+                list.add(toDelete)
+                toDelete = 0
             }
         }
+
+        GlobalScope.launch {
+            list.forEach { toDel ->
+                MessageHistory(event.textChannel).retrievePast(toDel).queue {
+                    event.textChannel.deleteMessages(it).queue()
+                }
+                delay(1_000)
+            }
+            event.respondThenDelete("*${event.author.name} cleared $td messages from ${
+            event.textChannel.name}*", 5)
+        }
+
     }
+
 }
 
 /**
@@ -105,14 +117,17 @@ class CmdPurge : WeebotCommand("Purge", arrayOf("prune", "clean", "clear"), CAT_
  * @since 2.0
  */
 class CmdChatLock : WeebotCommand("chatlock",
-    arrayOf("lockchat", "pausechat", "holdchat", "blockchat"), CAT_MOD,
-    "[delete] or [limit] @/RoleOrMember",
+    arrayOf("lockchat", "pausechat", "holdchat", "blockchat"), CAT_UNDER_CONSTRUCTION,
+    "<[-s #] [-m #] [-h #]> [from @/Roles @/Members]",
     "Block messages to the TextChannel for a given time.",
-    HelpBiConsumerBuilder().build(),
-    true, false, botPerms = arrayOf(MESSAGE_MANAGE),
-    userPerms = arrayOf(MANAGE_CHANNEL)
+    guildOnly = true, botPerms = arrayOf(MESSAGE_MANAGE, MANAGE_CHANNEL),
+    userPerms = arrayOf(MANAGE_CHANNEL), cooldown = 20, cooldownScope = USER_CHANNEL
 ) {
     override fun execute(event: CommandEvent?) {
             //TODO Chatlock
+    }
+
+    init {
+        helpBiConsumer = HelpBiConsumerBuilder().build() //TODO
     }
 }

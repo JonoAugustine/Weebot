@@ -6,9 +6,9 @@
 package com.ampro.weebot.util
 
 import com.ampro.weebot.util.Emoji.*
-import net.dv8tion.jda.core.entities.Emote
-import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.MessageReaction.ReactionEmote
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.function.Consumer
 
 /**
@@ -54,6 +54,31 @@ fun Emote.toEmoji() = Emoji.values().find { it.unicode == this.name }
 fun ReactionEmote.toEmoji() = Emoji.values().find { it.unicode == name }
 
 infix fun ReactionEmote.`is`(emoji: Emoji) = toEmoji() == emoji
+
+/**
+ * Remove a reaction based on the given [predicate]
+ *
+ * @param predicate The conditions under which to remove the reaction
+ * @param user the User
+ * @param delayMili The queueAfter delay
+ */
+fun Message.removeUserReaction(user: User, delayMili: Long = 250,
+                               predicate: (MessageReaction) -> Boolean) {
+    reactions.firstOrNull { predicate(it) }?.removeReaction(user)
+        ?.queueAfter(delayMili, MILLISECONDS)
+}
+
+/**
+ * Remove a reaction of an [Emoji]
+ *
+ * @param emoji The emojii to remove
+ * @param user the User
+ * @param delayMili The queueAfter delay
+ */
+fun Message.removeUserReaction(user: User, emoji: Emoji, delayMili: Long = 250) {
+    reactions.firstOrNull { it.reactionEmote `is` emoji }?.removeReaction(user)
+        ?.queueAfter(delayMili, MILLISECONDS)
+}
 
 /** A list of 1-10 emojis */
 internal val EmojiNumbers = listOf(One, Two, Three, Four, Five, Six, Seven,

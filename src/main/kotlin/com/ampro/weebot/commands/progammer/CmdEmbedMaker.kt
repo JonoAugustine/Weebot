@@ -20,7 +20,7 @@ class CmdEmbedMaker : WeebotCommand("embedmaker",
         ""/*TODO args*/, "Sends a message embed with the provided content.",
         HelpBiConsumerBuilder("Embed Builder")
             .setDescription("Make a message embed (Like this message) straight from discord!\n\n")
-            .appendDesc("")
+            .addToDesc("")
             .addField("This is a Field Title", "This is a field content")
             .addField("This field is inline", "So it shares space with the next", true)
             .addField("This field is also inline", "It wont take a full line", true)

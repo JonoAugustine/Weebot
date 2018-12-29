@@ -5,14 +5,12 @@
 package com.ampro.weebot.listeners
 
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.moderation.TrackerInitPassive
-import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.getWeebot
-import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.database.*
+import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.Emoji.X_Red
 import com.ampro.weebot.util.Emoji.heavy_check_mark
-import net.dv8tion.jda.core.entities.MessageEmbed
-import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.Permission.ADMINISTRATOR
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.channel.priv.PrivateChannelCreateEvent
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
@@ -23,6 +21,7 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent
 import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent
 import net.dv8tion.jda.core.hooks.ListenerAdapter
+import java.util.concurrent.TimeUnit.MILLISECONDS
 
 /**
  * Event Dispatcher is a global Listener that distributes events
@@ -42,14 +41,19 @@ class EventDispatcher : ListenerAdapter() {
 
     /** Sends a message when the Bot joins a Guild */
     override fun onGuildJoin(event: GuildJoinEvent) {
+        val onOff = "Statistics Tracking can be turned on or off at anytime with " +
+                "the command ``w!skynet [on/off]``."
+        val acceptEmbed = strdEmbedBuilder.setTitle("Statistics Tracking Enabled!")
+        .setDescription("Thank you for helping Weebot's development!\n$onOff").build()
+        val denyEmbed = strdEmbedBuilder.setTitle("Keeping Statistics Tracking Off")
+        .setDescription("This can be turned on later\n$onOff").build()
+
         //Add the bot to the database
         val newBot = Weebot(event.guild)
         DAO.addBot(newBot)
 
         val c: TextChannel = event.guild.systemChannel
-                ?: event.guild.defaultChannel
-                ?: return //If there isnt a default channel to send to just wait till
-                          //The first usage of the bot TODO
+                ?: event.guild.defaultChannel ?: return
 
         val desc = "Thank you for adding **Weebot** to your server! You can use" +
                 " ``w!help`` or ``\\help`` to get help with using any of my shiny features."
@@ -64,14 +68,25 @@ class EventDispatcher : ListenerAdapter() {
                         "\n*Thank you for your support!*",
                 false)
 
-        c.sendMessage(strdEmbedBuilder
-            .setTitle("***Kicks in door*** The Weebot has arrived!")
-            .setDescription(desc).addField(gdpr).build())
-            .queue {
-                newBot.passives.add(TrackerInitPassive(it))
-                it.addReaction(heavy_check_mark.toString()).queue()
-                it.addReaction(X_Red.toString()).queue()
-            }
+        SelectableEmbed(event.guild.members.filter { it hasPerm ADMINISTRATOR }
+            .map { it.user }.toSet(),
+            timeout = 5L, messageEmbed = strdEmbedBuilder
+                .setTitle("***Kicks in door*** The Weebot has arrived!")
+                .setDescription(desc).addField(gdpr).build(), options =  listOf (
+                heavy_check_mark to { message: Message ->
+                    message.channel.sendMessage(acceptEmbed).queue()
+                    getWeebotOrNew(event.guild.idLong).settings.trackingEnabled = true
+                },
+                X_Red to { message: Message ->
+                    message.channel.sendMessage(denyEmbed).queue()
+                    getWeebotOrNew(event.guild.idLong).settings.trackingEnabled = false
+                }
+            )) {
+            it.clearReactions().queueAfter(250, MILLISECONDS)
+            it.channel.sendMessage(denyEmbed).queue()
+            getWeebotOrNew(event.guild.idLong).settings.trackingEnabled = false
+        }.display(c)
+
     }
 
     override fun onGuildLeave(event: GuildLeaveEvent) {

@@ -37,9 +37,7 @@ const val EMBED_MAX_FIELD_VAL = 1024
 const val EMBED_MAX_FOOTER_TEXT = 2048
 const val EMBED_MAX_AUTHOR = 256
 
-const val weebotAvatarUrl = "https://images-ext-2.discordapp" +
-        ".net/external/jd498W5p3OMMOdHS2F7HqFm0g0d9Lk0yPjJ0bzsguk0/https/cdn." +
-        "discordapp.com/avatars/437851896263213056/c00b298498bc546de4ad5512f53fc7d6.png"
+var weebotAvatar= "https://i1.sndcdn.com/avatars-000308662917-0cbsjo-t200x200.jpg"
 
 val STD_GREEN = Color(0x31FF00)
 
@@ -49,8 +47,8 @@ val STD_GREEN = Color(0x31FF00)
  */
 val strdEmbedBuilder: EmbedBuilder
     get() = EmbedBuilder().setColor(STD_GREEN)
-        .setAuthor("Weebot", null, weebotAvatarUrl)
-        .setFooter("Run by Weebot", weebotAvatarUrl)
+        .setAuthor("Weebot", null, weebotAvatar)
+        .setFooter("Run by Weebot", weebotAvatar)
         .setTimestamp(Instant.now())
 
 /**
@@ -61,9 +59,8 @@ val strdEmbedBuilder: EmbedBuilder
  * @param description The description that appears under the title
  * @return A Weebot-standard EmbedBuilder
  */
-fun makeEmbedBuilder(title: String, titleLink: String, description: String)
-        = strdEmbedBuilder.setTitle(title, titleLink)
-            .setDescription(description)!!
+fun makeEmbedBuilder(title: String, titleLink: String? = null, description: String = "")
+        = strdEmbedBuilder.setTitle(title, titleLink).setDescription(description)!!
 
 /**
  * Add a [Field] to the [EmbedBuilder] that has a blank value
@@ -124,7 +121,7 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                       val wrapPageEnds: Boolean = true,
                       val thumbnail: String = "",
                       val color: Color = STD_GREEN,
-                      val finalAction: (Message) -> Unit = { m ->
+                      val timeoutAction: (Message) -> Unit = { m ->
                               try {
                                   m.clearReactions().queueAfter(250, SECONDS)
                               } catch (ignored: Exception) {
@@ -254,7 +251,7 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
         waiter.waitForEvent(MessageReactionAddEvent::class.java,
             { event -> checkReaction(event, message.idLong) }, // Check Reaction
             { event -> handleMessageReactionAddAction(event, message, pageNum) },
-            timeout, unit, { finalAction(message) })
+            timeout, unit, { timeoutAction(message) })
     }
 
     // Private method that checks MessageReactionAddEvents
@@ -367,7 +364,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                           val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
                           val thumbnail: String = "", val color: Color = STD_GREEN,
                           val fields: List<Field> = emptyList(),
-                          val finalAction: (Message) -> Unit = { m ->
+                          val timeoutAction: (Message) -> Unit = { m ->
                               try {
                                   m.clearReactions().queueAfter(250, SECONDS)
                               } catch (ignored: Exception) {
@@ -494,7 +491,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         waiter.waitForEvent(MessageReactionAddEvent::class.java,
                 { event -> checkReaction(event, message.idLong) }, // Check Reaction
                 { event -> handleMessageReactionAddAction(event, message, pageNum) },
-                timeout, unit, { finalAction(message) })
+                timeout, unit, { timeoutAction(message) })
     }
 
     // Private method that handles MessageReactionAddEvents
@@ -527,7 +524,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                     i++
                 }
             }
-            EXIT -> finalAction(message)
+            EXIT -> timeoutAction(message)
             else -> {
                 val i = EmojiNumbers.indexOf(emoji) + ((pageNum - 1) * itemsPerPage)
                 when {
@@ -611,14 +608,14 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                       timeout: Long = 3L, unit: TimeUnit = MINUTES,
                       val messageEmbed: MessageEmbed,
                       val options: List<Pair<Emoji, (Message) -> Unit>>,
-                      val cancelEmoji: Emoji? = null, val finalAction: (Message) -> Unit)
+                      val cancelEmoji: Emoji? = null, val timoutAction: (Message) -> Unit)
     : Menu(WAITER, users, roles, timeout, unit) {
 
     constructor(user: User, messageEmbed: MessageEmbed,
                 options: List<Pair<Emoji, (Message) -> Unit>>,
                 cancelEmoji: Emoji? = null, finalAction: (Message) -> Unit)
             : this(setOf(user), messageEmbed = messageEmbed, options = options,
-        cancelEmoji = cancelEmoji, finalAction = finalAction)
+        cancelEmoji = cancelEmoji, timoutAction = finalAction)
 
     override fun display(channel: MessageChannel) {
         initialize(channel.sendMessage(messageEmbed))
@@ -647,7 +644,7 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                 val i = options.indexOfFirst { this == it.first }
                 if (i != -1) options[i].second(m)
             }
-        }, timeout, unit, { finalAction(m) })
+        }, timeout, unit, { timoutAction(m) })
     }
 
 }
