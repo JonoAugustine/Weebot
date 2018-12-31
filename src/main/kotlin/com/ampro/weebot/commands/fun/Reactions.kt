@@ -7,9 +7,9 @@ package com.ampro.weebot.commands.`fun`
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.main.RAND
 import com.ampro.weebot.util.Emoji.*
 import com.ampro.weebot.util.reactWith
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -93,6 +93,7 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
         val args = event.splitArgs()
         val bot = getWeebotOrNew(event.guild)
         val reactor = bot.getPassive<ThisReactor>()
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
 
         //Check for ThisReactor enabling
         // \thisreactor on
@@ -151,7 +152,7 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdHelloThere : WeebotCommand("HelloThere", arrayOf("droppingin"), CAT_FUN,
+class CmdHelloThere : WeebotCommand("hellothere", arrayOf("droppingin"), CAT_FUN,
     "[@Member]", "*GENERAL KENOBI!*", cooldown = 360,
     userPerms = arrayOf(MESSAGE_EMBED_LINKS), botPerms = arrayOf(MESSAGE_EMBED_LINKS)
 ) {
@@ -161,6 +162,7 @@ class CmdHelloThere : WeebotCommand("HelloThere", arrayOf("droppingin"), CAT_FUN
     }
 
     override fun execute(event: CommandEvent) {
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         val e = strdEmbedBuilder.apply {
             val sb = StringBuilder()
             event.message.mentionedUsers.forEach {
@@ -171,8 +173,7 @@ class CmdHelloThere : WeebotCommand("HelloThere", arrayOf("droppingin"), CAT_FUN
             }
             setDescription("Hello There $sb")
             }.setAuthor(event.member.effectiveName)
-            .setImage(HELLO_THERE_GIFS[RAND.nextInt(0, 2)])
-            .build()
+            .setImage(HELLO_THERE_GIFS.random()).build()
 
         event.reply(e) { event.message.delete().queueAfter(1, SECONDS) }
     }

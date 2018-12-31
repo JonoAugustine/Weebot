@@ -8,8 +8,7 @@ import com.ampro.weebot.bot.*
 import com.ampro.weebot.commands.developer.CmdSuggestion
 import com.ampro.weebot.commands.developer.Suggestion
 import com.ampro.weebot.database.constants.*
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.removeIf
+import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.MLOG
 import com.ampro.weebot.util.*
@@ -22,16 +21,15 @@ import net.dv8tion.jda.core.entities.User
 import org.discordbots.api.client.DiscordBotListAPI
 import java.io.*
 import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 
+/* ************************
+        Database
+ *************************/
+
 lateinit var DAO : Dao
-
-val DISCORD_BOTLIST_API = DiscordBotListAPI.Builder().token(BOTSONDISCORD_KEY)
-    .botId(CLIENT_WBT.toString()).build()
-
-infix fun User.hasVoted(handler: (Boolean, Throwable) -> Boolean) {
-    DISCORD_BOTLIST_API.hasVoted(this.id).handleAsync(handler)
-}
+lateinit var STAT: Statistics
 
 /**
  * Get a guild matching the ID given.
@@ -39,11 +37,13 @@ infix fun User.hasVoted(handler: (Boolean, Throwable) -> Boolean) {
  * @param id long ID
  * @return requested Guild <br></br> null if not found.
  */
-fun getGuild(id: Long): Guild? = JDA_SHARD_MNGR.guilds.find { it.idLong == id }
+fun getGuild(id: Long): Guild? {
+    return JDA_SHARD_MNGR.guilds.find { it.idLong == id }
+}
 
-fun getUser(id: Long): User? = JDA_SHARD_MNGR.getUserById(id)
+fun getUser(id: Long): User? { return JDA_SHARD_MNGR.getUserById(id) }
 
-fun getWeebot(guildID: Long) = DAO.WEEBOTS[guildID]
+fun getWeebot(guildID: Long): Weebot? { return DAO.WEEBOTS[guildID] }
 
 fun getWeebotOrNew(guild: Guild) = getWeebot(guild.idLong) ?: kotlin.run {
     val b = Weebot(guild); DAO.addBot(b);b
@@ -59,14 +59,13 @@ infix fun User.isBlocked(klass: Class<out WeebotCommand>)
 infix fun WeebotCommand.blocks(user: User)
         = DAO.blockedUsers[this.javaClass]?.contains(user.idLong) == true
 
-
 /**
  * A class to track the bot's usage.
  * TODO Stats
  * @author Jonathan Augustine
  * @since 2.0
  */
-data class Statistics(val initTime: String = NOW_STR_FILE) {
+data class Statistics(val initTime: OffsetDateTime = NOW()) {
 
     /**
      * A data class to hold tracked information about the state of a Weebot.
@@ -83,9 +82,11 @@ data class Statistics(val initTime: String = NOW_STR_FILE) {
     class WeebotInfo(weebot: Weebot) {
         val settings: WeebotSettings    = weebot.settings
         val init: OffsetDateTime        = weebot.initDate
-        val guildSize: Int              = getGuild(weebot.guildID)?.members?.size ?: -1
-        val passivesEnabled: Int        = weebot.passives.size
-        val disabledCommands: List<String>  = TODO()
+        val guildSize: Int              = getGuild(weebot.guildID)?.size ?: -1
+        val percentHuman: Double        = run {
+            val guild = getGuild(weebot.guildID)
+            guild?.trueSize?.div(guild.size.toDouble()) ?: 1.0
+        }
     }
 
     /**
@@ -97,26 +98,64 @@ data class Statistics(val initTime: String = NOW_STR_FILE) {
      * @author Jonathan Augustine
      * @since 2.0
      */
-    data class UserInfo(val mutualGuilds: Int)
+    data class UserInfo(val mutualGuilds: Int) {
+        constructor(user: User) : this(user.mutualGuilds.size)
+    }
 
     /**
      * A Unit of a [Command]'s usage, with information about the guild, invoking
      * user and corresponding Weebot.
      *
-     * @param cmd The name of the command
+     * @param guildID
+     * @param weebotInfo
+     * @param userInfo The [UserInfo] of the invoker User
      *
      * @author Jonathan Augustine
      * @since 2.0
      */
-    data class CommandUsage(val cmd: String, val guildID: Long,
-                            val weebotInfo: WeebotInfo, val userInfo: UserInfo)
+    data class CommandUsageEvent(val guildID: Long, val weebotInfo: WeebotInfo,
+                                 val userInfo: UserInfo)
 
     /**
      * A map of Command names to their useage statistics
      */
-    val commandUsage: ConcurrentHashMap<String, List<CommandUsage>>
+    val commandUsage: ConcurrentHashMap<String, MutableList<CommandUsageEvent>>
             = ConcurrentHashMap()
 
+    /**
+     * @param command
+     * @param weebot
+     * @param user
+     */
+    fun track(command: WeebotCommand, weebot: Weebot, user: User) {
+        if (weebot.settings.trackingEnabled && weebot !is GlobalWeebot) {
+        commandUsage.getOrPut(command.name) { mutableListOf() }
+            .add(CommandUsageEvent(weebot.guildID, WeebotInfo(weebot), UserInfo(user)))
+        }
+    }
+
+}
+
+fun List<Statistics.CommandUsageEvent>.summerize() : String {
+    val sizes = map { it.weebotInfo.guildSize }.sorted()
+    val medSize: Double = if (sizes.size % 2 == 0)
+        (sizes[sizes.size/2] + sizes[sizes.size/2 - 1])/2.0
+    else sizes[sizes.size/2].toDouble()
+
+    val pHumans = map { it.weebotInfo.percentHuman }.sorted()
+    val medPercentHuman: Double = if (pHumans.size % 2 == 0)
+        (pHumans[pHumans.size/2] + pHumans[pHumans.size/2 - 1])/2.0
+    else pHumans[sizes.size/2]
+
+    val ages = map { it.weebotInfo.init.until(NOW(), ChronoUnit.MINUTES) }
+    val medAge: Long = if (ages.size % 2 == 0)
+        (ages[ages.size/2] + ages[ages.size/2 - 1])/2
+    else ages[sizes.size/2]
+
+    return """Median Size: $medSize
+            Median Percent Human: $medPercentHuman
+            Median Age: ${(medAge * 60).formatTime()}
+        """.trimIndent()
 }
 
 data class PremiumUser(val userId: Long) { val joinDate = NOW() }
@@ -386,4 +425,13 @@ private fun corruptBackupWriteCheck(dao: Dao): Boolean = try {
     true
 }
 
+/* ************************
+     Discord Bot List API
+ *************************/
 
+val DISCORD_BOTLIST_API = DiscordBotListAPI.Builder().token(BOTSONDISCORD_KEY)
+    .botId(CLIENT_WBT.toString()).build()
+
+infix fun User.hasVoted(handler: (Boolean, Throwable) -> Boolean) {
+    DISCORD_BOTLIST_API.hasVoted(this.id).handleAsync(handler)
+}

@@ -4,3 +4,6 @@
 
 package com.ampro.weebot.commands.`fun`.memes
 
+/*
+TODO
+ */

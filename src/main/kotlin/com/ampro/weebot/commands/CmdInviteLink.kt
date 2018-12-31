@@ -1,9 +1,11 @@
 package com.ampro.weebot.commands
 
+import com.ampro.weebot.database.STAT
 import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.extensions.weebotAvatar
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.database.constants.LINK_INVITEBOT
+import com.ampro.weebot.database.getWeebotOrNew
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
 
@@ -21,6 +23,7 @@ class CmdInviteLink : WeebotCommand("invitelink", arrayOf("ilc", "inviteme", "in
         botPerms = arrayOf(MESSAGE_EMBED_LINKS), userPerms = arrayOf(MESSAGE_EMBED_LINKS)
 ) {
     override fun execute(event: CommandEvent) {
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         event.reply(strdEmbedBuilder.setTitle("Invite me to another server!")
             .setDescription(LINK_INVITEBOT).setThumbnail(
                 weebotAvatar).build())

@@ -5,6 +5,8 @@
 package com.ampro.weebot.commands.progammer
 
 import com.ampro.weebot.commands.CAT_PROG
+import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.WeebotCommand
 import com.jagrosh.jdautilities.command.CommandEvent
 
@@ -29,5 +31,6 @@ class CmdEmbedMaker : WeebotCommand("embedmaker",
     override fun execute(event: CommandEvent) {
         //-t [Title here] -d [description here] -f [Title Here] [Content Here] [inline]
         //-ft [footer content]
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
     }
 }

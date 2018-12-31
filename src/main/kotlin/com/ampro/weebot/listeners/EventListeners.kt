@@ -20,6 +20,7 @@ import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent
 import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent
+import net.dv8tion.jda.core.exceptions.InsufficientPermissionException
 import net.dv8tion.jda.core.hooks.ListenerAdapter
 import java.util.concurrent.TimeUnit.MILLISECONDS
 
@@ -68,7 +69,7 @@ class EventDispatcher : ListenerAdapter() {
                         "\n*Thank you for your support!*",
                 false)
 
-        SelectableEmbed(event.guild.members.filter { it hasPerm ADMINISTRATOR }
+        val se = SelectableEmbed(event.guild.members.filter { it hasPerm ADMINISTRATOR }
             .map { it.user }.toSet(),
             timeout = 5L, messageEmbed = strdEmbedBuilder
                 .setTitle("***Kicks in door*** The Weebot has arrived!")
@@ -85,7 +86,9 @@ class EventDispatcher : ListenerAdapter() {
             it.clearReactions().queueAfter(250, MILLISECONDS)
             it.channel.sendMessage(denyEmbed).queue()
             getWeebotOrNew(event.guild.idLong).settings.trackingEnabled = false
-        }.display(c)
+        }
+
+        try { se.display(c) } catch (e: InsufficientPermissionException) {}
 
     }
 

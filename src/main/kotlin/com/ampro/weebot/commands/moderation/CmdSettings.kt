@@ -7,6 +7,7 @@ package com.ampro.weebot.commands.moderation
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CAT_MOD
 import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
+import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.CHANNEL
@@ -49,6 +50,7 @@ class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"
 
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild.idLong)
+        STAT.track(this, bot, event.author)
         val config = bot.settings
         val log = if (config.logchannel == -1L) "not set" else {
             event.guild.getTextChannelById(config.logchannel).asMention
@@ -78,6 +80,7 @@ private class CmdSetName : WeebotCommand("nickname", arrayOf("name", "changename
     }
 
     override fun execute(event: CommandEvent) {
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         if (event.args.isBlank()) return
         val name = event.splitArgs().joinToString(" ")
         val old = getWeebotOrNew(event.guild).settings.nickname
@@ -102,10 +105,11 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
         val bot = getWeebotOrNew(event.guild)
         when {
             event.args.isBlank() -> {
+                STAT.track(this, bot, event.author)
                 SelectableEmbed(event.author, strdEmbedBuilder
                     .setTitle("Prefix").setDescription("""
                         My current prefixes are: ``${
-                    bot.settings.prefixs.joinToString(", ")}
+                    bot.settings.prefixs.joinToString(", ")}``
                         $A to add a prefix
                         $C to change the prefix
                     """.trimIndent())
@@ -157,6 +161,7 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
                         "(must be under 4 characters, e.g. pw!, w!, \\)*")
             }
             else -> {
+                STAT.track(this, bot, event.author)
                 bot.settings.prefixs.clear()
                 bot.settings.prefixs.add(event.args)
                 event.reply("You can now call me with ${event.args}")
@@ -179,6 +184,7 @@ private class CmdSetExplicit : WeebotCommand("explicit", arrayOf("expl", "cuss")
 
     override fun execute(event: CommandEvent) {
         TODO("Explicit Settings")
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
     }
 }
 
@@ -195,6 +201,7 @@ private class CmdSetNsfw : WeebotCommand("nsfw", arrayOf("naughty"), CAT_UNDER_C
 
     override fun execute(event: CommandEvent) {
         TODO("NSFW Setting")
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
     }
 }
 
@@ -211,6 +218,7 @@ private class CmdSetLogChannel : WeebotCommand("log",
 
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild)
+        STAT.track(this, bot, event.author)
         val channels = event.message.mentionedChannels
 
         when {
@@ -269,5 +277,6 @@ private class CmdSetTracking : WeebotCommand("skynet", arrayOf("track", "trackin
 
     override fun execute(event: CommandEvent) {
         TODO("Tracking setting")
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
     }
 }

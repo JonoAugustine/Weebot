@@ -11,8 +11,7 @@ import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.utilitycommands.NotePad.Note
 import com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit.EditType
 import com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit.EditType.*
-import com.ampro.weebot.database.getUser
-import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.*
 import com.ampro.weebot.main.*
@@ -480,7 +479,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
  * @author Jonathan Augustine
  * @since 1.0
  */
- class CmdNotePad : WeebotCommand("NotePad",
+ class CmdNotePad : WeebotCommand("notepad",
     arrayOf("notepads", "notes", "jotter", "todo", "note"), CAT_UTIL,
     """notes
         notes make [the name]
@@ -504,6 +503,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         makeArgs, "Make a new NotePad", cooldown = 20,
         cooldownScope = USER_GUILD) {
         public override fun execute(event: CommandEvent) {
+            STAT.track(this, getWeebotOrNew(event.guild), event.author)
             val args = event.splitArgs()
             if (args.isEmpty()) return
             val pads = getWeebotOrNew(event.guild).notePads
@@ -573,6 +573,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         "<notepad_id> <the note>", "Write to a NotePad", cooldown = 10,
         cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
+            STAT.track(this, getWeebotOrNew(event.guild), event.author)
             val args = event.splitArgs()
             if (args.size < 2) return
             val pads = getWeebotOrNew(event.guild).notePads
@@ -609,6 +610,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         "<notepad_id> <index> <TheMessage>", "Insert a Note into a NotePad",
         cooldown = 10, cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
+            STAT.track(this, getWeebotOrNew(event.guild), event.author)
             val args = event.splitArgs()
             if (args.size < 2) return
             val pads = getWeebotOrNew(event.guild).notePads
@@ -655,6 +657,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             val args = event.splitArgs()
             if (args.size < 2) return
             val bot = getWeebotOrNew(event.guild)
+            STAT.track(this, getWeebotOrNew(event.guild), event.author)
             val pads = bot.notePads
             /** User's Viewable notepads */
             val cv = pads.filter { event canRead it }
@@ -697,8 +700,9 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
     class CmdDeleteNote : WeebotCommand("scratch", arrayOf("erase"), CAT_UTIL,
         "<notepad_id> <note_id or number>", "Delete a Note.", cooldown = 30,
         cooldownScope = USER_CHANNEL) {
-        public override fun execute(event: CommandEvent?) {
+        public override fun execute(event: CommandEvent) {
             TODO("not implemented")
+            STAT.track(this, getWeebotOrNew(event.guild), event.author)
         }
     }
 
@@ -706,16 +710,18 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         "<notepad_id> [@/roles] [@/members] [#/channels]", "Lock access to a NotePad.",
         cooldown = 10, cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
+            STAT.track(this, getWeebotOrNew(event.guild), event.author)
             val args = event.splitArgs()
             val auth = event.author
             val pads = getWeebotOrNew(event.guild).notePads
             /** User's Viewable notepads */
             val cv = pads.filter { event canRead it }
 
+
             //<notepad_id> [@/roles] [@/members] [#/channels]
             val notePad = cv.find { it.id.equals(args[0], true) }
             if (notePad != null && event canWriteTo notePad) {
-
+                TODO()
             }
 
 
@@ -726,6 +732,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         CAT_UTIL, "<notepad_id> [notepad_id2..]", "Delete one or more NotePads",
         cooldown = 30, cooldownScope = USER_GUILD) {
         public override fun execute(event: CommandEvent) {
+            STAT.track(this, getWeebotOrNew(event.guild), event.author)
             val args = event.splitArgs()
             val pads = getWeebotOrNew(event.guild).notePads
             /** User's Viewable notepads */
@@ -782,10 +789,12 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
 
         override fun execute(event: CommandEvent) {
             TODO()
+            STAT.track(this, getWeebotOrNew(event.guild), event.author)
         }
     }
 
     override fun execute(event: CommandEvent) {
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         val args = event.splitArgs()
         val auth = event.author
         val pads = getWeebotOrNew(event.guild).notePads

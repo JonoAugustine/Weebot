@@ -8,6 +8,8 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
+val RAND = Random(420_69_98_4829 / NOW().minute)
+
 const val alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const val digi  = "0123456789"
 const val alphaDigi = alpha + digi
@@ -26,7 +28,7 @@ val REG_DEFAULT = Regex("(?i)(d+e+f+a+u+l+t+)")
  */
 open class IdGenerator(var idLeng: Long = 5L) {
     fun next() : String {
-        return Random().ints(idLeng, 0, alphaDigi.length)
+        return RAND.ints(idLeng, 0, alphaDigi.length)
             .asSequence().map(alphaDigi::get).joinToString("")
     }
 }

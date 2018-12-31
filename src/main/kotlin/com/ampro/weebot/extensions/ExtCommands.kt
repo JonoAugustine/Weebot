@@ -5,8 +5,6 @@
 package com.ampro.weebot.extensions
 
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.getWeebotOrNew
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -223,23 +221,6 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         }
     }
 
-    /**
-     * Send Tracking data to Dao.
-     *
-     * @param weebot
-     * @param event
-     */
-    fun track(weebot: Weebot, event: CommandEvent) {
-        val bot: Weebot = if (event.privateChannel != null) {
-            DAO.GLOBAL_WEEBOT
-        } else {
-            getWeebotOrNew(event.guild?.idLong ?: -1L)
-        }
-        if (bot.settings.trackingEnabled) {
-            TODO("Tracking")
-        }
-    }
-
-    public fun getHelpBiConsumer() = this.helpBiConsumer
+    fun getHelpBiConsumer() = this.helpBiConsumer
 
 }

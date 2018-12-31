@@ -7,6 +7,7 @@ package com.ampro.weebot.commands.moderation
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.*
+import com.ampro.weebot.database.STAT
 import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.WeebotCommand
@@ -155,6 +156,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
         val bot = getWeebotOrNew(event.guild)
         val args = event.splitArgs()
         if (args.isEmpty()) return
+        STAT.track(this, bot, event.author)
         val vcp = bot.getPassive<VCRoleManager>()
         when (args[0].toUpperCase()) {
             "ENABLE", "ON" -> {

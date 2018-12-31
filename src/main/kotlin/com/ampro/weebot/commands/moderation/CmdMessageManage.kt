@@ -5,6 +5,8 @@
 package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.commands.*
+import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.jagrosh.jdautilities.command.Command.CooldownScope.*
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -27,7 +29,7 @@ import java.util.concurrent.TimeUnit.SECONDS
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdSelfDestruct : WeebotCommand("SelfDestruct",
+class CmdSelfDestruct : WeebotCommand("selfdestruct",
     arrayOf("deleteme","cleanthis","deletethis","covertracks","whome?","podh","sdc"),
     CAT_MOD, "[-t delaySeconds] [message]",
     "Deletes the marked message after the given amount of time (30 sec by default)",
@@ -39,6 +41,7 @@ class CmdSelfDestruct : WeebotCommand("SelfDestruct",
         .build(), true, cooldown = 0, botPerms = arrayOf(MESSAGE_MANAGE)
 ) {
     override fun execute(event: CommandEvent) {
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         val args = event.splitArgs()
         val delay = try {
             if (args[0].matches(Regex("^-[t|T]$"))) {
@@ -56,7 +59,7 @@ class CmdSelfDestruct : WeebotCommand("SelfDestruct",
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdPurge : WeebotCommand("Purge", arrayOf("prune", "clean", "clear"), CAT_MOD,
+class CmdPurge : WeebotCommand("purge", arrayOf("prune", "clean", "clear"), CAT_MOD,
     "<number>", "Delete multiple messages, 2-1,000.", guildOnly = true,
     botPerms = arrayOf(MESSAGE_MANAGE), userPerms = arrayOf(MESSAGE_MANAGE),
     cooldown = 3, cooldownScope = GUILD
@@ -79,7 +82,7 @@ class CmdPurge : WeebotCommand("Purge", arrayOf("prune", "clean", "clear"), CAT_
             event.respondThenDelete("You must choose a number between 2 and 1,000.")
             return
         }
-
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         val list = mutableListOf<Int>()
         while (toDelete > 0) {
             if (toDelete >= 100) {

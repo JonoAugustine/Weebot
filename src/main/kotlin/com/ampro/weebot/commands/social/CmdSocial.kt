@@ -5,6 +5,8 @@ import com.ampro.weebot.commands.CAT_SOC
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.commands.social.GuildSocialSettings.*
+import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
@@ -147,7 +149,8 @@ class CmdSocial : WeebotCommand("Social", arrayOf(), CAT_SOC,
             .build(), true, cooldown = 30, userPerms = arrayOf(ADMINISTRATOR),
         botPerms = arrayOf(MESSAGE_READ)
 ) {
-    override fun execute(event: CommandEvent?) {
+    override fun execute(event: CommandEvent) {
         //TODO
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
     }
 }

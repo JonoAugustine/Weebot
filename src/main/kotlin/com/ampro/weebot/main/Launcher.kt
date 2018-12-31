@@ -25,10 +25,7 @@ import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
 import java.util.concurrent.Executors
 import javax.security.auth.login.LoginException
-import kotlin.random.Random
 import kotlin.system.measureTimeMillis
-
-val RAND = Random(128487621469)
 
 lateinit var SAVE_JOB: Job
 /** How ofter to asve to file in Seconds */
@@ -76,23 +73,17 @@ fun main(args_: Array<String>) = runBlocking {
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Consumer(Throwable::printStackTrace)
 
-    //LOGIN
-    val alt: String
-    if (args_.isNotEmpty() && args_[0].matches(Regex("(?i)(w|weebot|full)"))) {
-        JDA_SHARD_MNGR = jdaShardLogIn().build()
-        alt = "\\"
-    } else if (args_.isEmpty()) {
-        JDA_SHARD_MNGR = jdaDevShardLogIn().build()
-        alt = "t\\"
-    }
+
+    //LOGIN & LISTENERS
+    val reg_wbot = Regex("(?i)(w|weebot|full)")
+    val alt = if (args_.isNotEmpty() && args_[0].matches(reg_wbot)) "\\"
+    else if (args_.isEmpty()) "t\\"
     else {
         MLOG.elog("\n\nFailed to read args.")
         shutdown()
         return@runBlocking
     }
 
-    //DATABASE
-    setUpDatabase()
 
     //COMMAND CLIENT
     CMD_CLIENT = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
@@ -129,15 +120,15 @@ fun main(args_: Array<String>) = runBlocking {
             }
         }
         .setDiscordBotsKey(BOTSONDISCORD_KEY)
-        .setDiscordBotListKey(BOTLIST_KEY)
+        //.setDiscordBotListKey(BOTLIST_KEY)
         .build()
 
-    genSetup.joinAll() //Ensure all gensetup is finished
-
-    JDA_SHARD_MNGR.apply {
-        addEventListener(CMD_CLIENT)
-        addEventListener(EventDispatcher())
-        addEventListener(WAITER)
+    //LOGIN & LISTENERS
+    JDA_SHARD_MNGR =
+            if (args_.isNotEmpty() && args_[0].matches(Regex("(?i)(w|weebot|full)"))) {
+        jdaShardLogIn().addEventListeners(CMD_CLIENT).build()
+    } else {
+        jdaDevShardLogIn().addEventListeners(CMD_CLIENT).build()
     }
 
     //WAIT FOR SHARD CONNECT
@@ -147,6 +138,15 @@ fun main(args_: Array<String>) = runBlocking {
             Thread.sleep(500)
         }
     } / 1_000} seconds")
+
+    //DATABASE
+    setUpDatabase()
+    //Stats
+    setUpStatistics()
+
+    JDA_SHARD_MNGR.addEventListener(EventDispatcher(), WAITER)
+
+    genSetup.joinAll() //Ensure all gensetup is finished
 
     //SET SELF AND AVATAR URL
     SELF = JDA_SHARD_MNGR.shards[0].selfUser
@@ -160,6 +160,32 @@ fun main(args_: Array<String>) = runBlocking {
     MLOG.slog("Launch Complete!\n\n")
 
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!").queue()
+}
+
+/**
+ * Attempts to load Statistics data from file. Sets [STAT] to the loaded data
+ * or makes a new instance
+ */
+fun setUpStatistics() {
+    MLOG.slog("Setting up Statistics...")
+    MLOG.slog("\tLoading Statistics...")
+    val stat: Statistics? = loadJson<Statistics>(STAT_SAVE)
+    if (stat == null) {
+        MLOG.slog("\t\tUnable to load Statistics, creating new instance.")
+        STAT = Statistics()
+        if (STAT.saveJson(STAT_SAVE) == -1) {
+            MLOG.slog("\tFAILED")
+            return
+        }
+        MLOG.slog("\tStatistics instance created and saved to file.")
+    } else {
+        MLOG.slog("\tStatistics located.")
+        STAT = stat
+    }
+    MLOG.slog("\tBacking up Statistics.")
+    STAT.saveJson(STAT_BK)
+    MLOG.slog("\t...DONE")
+    MLOG.slog("...DONE")
 }
 
 /**
@@ -214,6 +240,7 @@ private fun saveTimer() = GlobalScope.launch {
     try {
         while (ON) {
             DAO.backUp()
+            STAT.saveJson(STAT_SAVE)
             if (i % 50 == 0) {
                 MLOG.slog("Database back up: $i")
             }

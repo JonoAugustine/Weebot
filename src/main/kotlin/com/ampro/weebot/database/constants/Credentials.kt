@@ -50,7 +50,8 @@ val data = KotlinEntityDataStore(configuration)
 const val BOTSONDISCORD_KEY = "cb54546df399c39238d263d5bcc41e18"
 const val BOTLIST_KEY     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQzNzg1MTg5NjI2MzIxMzA1NiIsImJvdCI6dHJ1ZSwiaWF0IjoxNTQ0NjM4MDAyfQ.gRBPSSymkwQenP8hgijV_npBUee3VEx8uEbVN0WvOjM"
 
-const val DISCORD_BOTS_LINK = "https://discordbots.org/bot/437851896263213056"
+const val LINK_DISCORD_BOTS = "https://discordbots.org/bot/437851896263213056"
+const val LINK_DISCORD_BOTS_LIST = "https://discordbotlist.com/bots/437851896263213056"
 
 val LINK_INVITEBOT = "https://discordapp.com/api/oauth2/authorize?client_id=437851896263213056&permissions=500296919&scope=bot"
 

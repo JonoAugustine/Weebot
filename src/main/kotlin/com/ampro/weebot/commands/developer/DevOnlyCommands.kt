@@ -9,10 +9,8 @@ package com.ampro.weebot.commands.developer
  */
 
 import com.ampro.weebot.commands.CAT_DEV
-import com.ampro.weebot.commands.CAT_GEN
+import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.PHONE_JONO
-import com.ampro.weebot.database.getGuild
-import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.*
 import com.ampro.weebot.util.*
@@ -30,23 +28,6 @@ import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit.*
 import kotlin.math.roundToInt
 
-/**
- * @author Jonathan Augustine
- * @since 1.0
- */
-class PingCommand : WeebotCommand("ping", arrayOf("pong"), CAT_GEN,
-    "", "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong", false)
-        .setDescription("Checks the bot's latency.").build(), false, cooldown = 10
-) {
-    override fun execute(event: CommandEvent) {
-        val r = if (event.getInvocation().toLowerCase() == "pong") "Ping" else "Pong"
-        event.reply("$r: ...") { m ->
-            val ping = event.message.creationTime.until(m.creationTime, ChronoUnit.MILLIS)
-            m.editMessage("$r! :ping_pong: Ping: " + ping + "ms | Websocket: "
-                    + event.jda.ping + "ms").queue()
-        }
-    }
-}
 
 /**
  * Shuts down the Weebots.
@@ -67,13 +48,36 @@ class CmdShutdown : WeebotCommand("shutdown", arrayOf("tite", "killbot", "devkil
     }
 }
 
+class CmdStatsView : WeebotCommand("stats", arrayOf("viewstats", "statsview",
+    "statview", "viewstat"), CAT_DEV, "[commandName...]", "View Weebot statistics",
+    hidden = true, ownerOnly = true) {
+    override fun execute(event: CommandEvent) {
+        val stats = if (event.args.isBlank()) STAT.commandUsage else {
+            STAT.commandUsage.filter {
+                event.splitArgs().map{it.toLowerCase()}.contains(it.key.toLowerCase())
+            }
+        }
+        if (stats.isEmpty()) {
+            event.reply("No Statistics available.")
+            return
+        }
+        strdPaginator.useNumberedItems(true).setText("${SELF.name} Usage Stats")
+            .setUsers(event.author).setItemsPerPage(6)
+            .apply {
+                stats.map { """${it.key}:
+                    ${it.value.summerize()}
+                """.trimIndent() }.forEach { addItems(it) }
+            }.build().display(event.channel)
+    }
+}
+
 /**
  *
  * @author John Grosh (jagrosh)
  * @since 2.0
  */
-class GuildlistCommand : WeebotCommand("guildlist",
-    arrayOf("guilds", "serverlist", "servers"), CAT_DEV, "[pagenum]",
+class CmdGuildList : WeebotCommand("guildlist",
+    arrayOf("guilds", "serverlist", "servers"), CAT_DEV, "[-s <[joindate][size]>]",
     "Gets a paginated list of the guilds the bot is on.",
         HelpBiConsumerBuilder("Guild List")
             .setDescription("Gets a paginated list of the guilds the bot is on.").build(),
@@ -81,18 +85,25 @@ class GuildlistCommand : WeebotCommand("guildlist",
         botPerms = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ADD_REACTION)
 ) {
 
+    val REG_DATE = Regex("(?i)-(d+a*t*e*)")
+
     override fun execute(event: CommandEvent) {
         val op = JDA_SHARD_MNGR.guilds
+        val sortByDate = event.args.matches(REG_DATE)
+
         SelectablePaginator(setOf(event.author),
             title = "All guilds housing ${SELF.name} (Total: ${op.size})",
             description = "``Name ~ member count (percentage non-bots) on shardID``",
-            items = op.sortedByDescending { it.trueSize }.map {
+            items = op.sortedByDescending { if (sortByDate)
+                it.selfMember.joinDate.until(NOW(), ChronoUnit.MINUTES) * -1
+            else it.trueSize.toLong() }.map {
                 "**${it.name}** ~ ${it.size} (${((
                         it.trueSize/it.size.toDouble())*100).roundToInt()}%)" +
                         " on ${getGuildShard(it)?.shardId ?: "N/A"}" to {
                         _: Int, _: Message -> it.infoEmbed(event).display(event.channel)
                 }
-            }, itemsPerPage = 10).display(event.channel)
+            }, itemsPerPage = 10)
+            .display(event.channel)
 
     }
 

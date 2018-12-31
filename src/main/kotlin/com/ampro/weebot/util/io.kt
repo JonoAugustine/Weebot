@@ -22,6 +22,9 @@ val DAO_SAVE = File(DIR_DAO, "database.wbot")
 val DAO_BKUP = File(DIR_DAO, "dbsBK.wbot")
 val DAO_BKBK = File(DIR_TEMP, "dbstemp.wbot")
 
+val STAT_SAVE = File(DIR_DAO, "stat.wbot")
+val STAT_BK   = File(DIR_DAO, "statBK.wbot")
+
 val DIR_RES = File(DIR_HOME, "res")
 
 val GSON = GsonBuilder().enableComplexMapKeySerialization()
@@ -73,18 +76,20 @@ fun List<Any>.toFile(name: String = "file") : File {
  */
 @Synchronized
 fun Any.saveJson(file: File): Int {
-    try {
-        val fw = FileWriter(file)
-        GSON.toJson(this, fw)
-        fw.close()
-    } catch (e: FileNotFoundException) {
-        System.err.println("File not found while writing gson to file.")
-        return -1
-    } catch (e: IOException) {
-        System.err.println("IOException while writing gson to file.")
-        return -1
-    }
-    return 0
+    return if (file.createNewFile()) {
+        return try {
+            val fw = FileWriter(file)
+            GSON.toJson(this, fw)
+            fw.close()
+            0
+        } catch (e: FileNotFoundException) {
+            System.err.println("File not found while writing gson to file.")
+            -1
+        } catch (e: IOException) {
+            System.err.println("IOException while writing gson to file.")
+            -1
+        }
+    } else -1
 }
 
 /**

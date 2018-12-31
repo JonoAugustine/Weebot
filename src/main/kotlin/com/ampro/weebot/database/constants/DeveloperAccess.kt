@@ -30,5 +30,5 @@ fun User.isDev() = isDev(this.idLong)
 const val PHONE_JONO = "+12404236950"
 
 const val NL_GUILD_ID = 139168039634468865
-val NL_GUILD = getGuild(NL_GUILD_ID)
+val NL_GUILD get() = getGuild(NL_GUILD_ID)
 const val NL_SUBSCRIBER = "Neptune's Army"

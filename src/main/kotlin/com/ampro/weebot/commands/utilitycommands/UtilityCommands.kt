@@ -7,9 +7,8 @@ package com.ampro.weebot.commands.utilitycommands
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.strdEmbedBuilder
-import com.ampro.weebot.database.getUser
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.JDA_SHARD_MNGR
 import com.ampro.weebot.main.ON
@@ -115,6 +114,9 @@ class CmdOutHouse : WeebotCommand("OutHouse", arrayOf("ohc"), CAT_UTIL,
 
     override fun execute(event: CommandEvent) {
         //ohc [hours] [message here]
+        val bot = if (event.isFromType(PRIVATE)) DAO.GLOBAL_WEEBOT
+        else getWeebotOrNew(event.guild)
+        STAT.track(this, bot, event.author)
 
         val pas = DAO.GLOBAL_WEEBOT.getUesrPassiveList(event.author)
             .firstOrNull { it is OutHouse } ?: run {
@@ -167,7 +169,7 @@ val remThreadPool = newFixedThreadPoolContext(1_000, "ReminderThreadPool")
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdReminder : WeebotCommand("Reminder", arrayOf("rc", "rem", "remindme"),
+class CmdReminder : WeebotCommand("reminder", arrayOf("rc", "rem", "remindme"),
     CAT_UTIL, "[-private] [-t phoneNum] [Xm] [Yh] [Zd] [Reminder Message]",
     "Set a Reminder from 1 minute to 30 days.", cooldown = 5
 ) {
@@ -269,6 +271,9 @@ class CmdReminder : WeebotCommand("Reminder", arrayOf("rc", "rem", "remindme"),
     //TODO send texts
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
+        val bot = if (event.isFromType(PRIVATE)) DAO.GLOBAL_WEEBOT
+        else getWeebotOrNew(event.guild)
+        STAT.track(this, bot, event.author)
 
         when {
             args.isEmpty() || args[0].matches(Regex("(?i)-s(e)*"))-> {
@@ -341,6 +346,7 @@ class CmdReminder : WeebotCommand("Reminder", arrayOf("rc", "rem", "remindme"),
                     "-p (-private) sends the reminder as a private message", true)
             .addField("See Your Reminders", "-s (-see)", true)
             .addField("Remove a Reminder", "-r (-remove) <Reminder IDs...>", true)
+            .setAliases(aliases)
             .build()
     }
 }

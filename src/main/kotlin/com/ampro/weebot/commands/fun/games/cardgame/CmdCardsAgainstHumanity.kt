@@ -8,8 +8,8 @@ import com.ampro.weebot.Restriction
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.`fun`.games.*
+import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.strdEmbedBuilder
-import com.ampro.weebot.database.getGuild
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.removeAll
 import com.ampro.weebot.main.MLOG
@@ -288,13 +288,13 @@ class CardsAgainstHumanity(guild: Guild, author: User,
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdCardsAgainstHumanity : WeebotCommand("CardsAgainstHumanity", arrayOf("cah"),
+class CmdCardsAgainstHumanity : WeebotCommand("cardsagainsthumanity", arrayOf("cah"),
     CAT_UNDER_CONSTRUCTION, "<command> [arguments]",
     "Start a game of CardsAgainstHumanity or make custom cards.", guildOnly = true
 ) {
 
     override fun execute(event: CommandEvent) {
-
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
     }
 
     init {

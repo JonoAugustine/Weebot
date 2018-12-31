@@ -4,15 +4,16 @@
 
 package com.ampro.weebot.commands
 
+import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
-import com.ampro.weebot.database.constants.DISCORD_BOTS_LINK
-import com.ampro.weebot.database.constants.LINK_INVITEBOT
-import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.database.*
+import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.main.*
 import com.ampro.weebot.util.WKDAY_MONTH_YEAR_TIME
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.menu.OrderedMenu
+import net.dv8tion.jda.core.entities.ChannelType
 import net.dv8tion.jda.core.entities.Role.DEFAULT_COLOR_RAW
 import java.util.concurrent.TimeUnit.MINUTES
 
@@ -32,7 +33,9 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
 ) {
     //"Weebot's little brother."
     override fun execute(event: CommandEvent) {
-        val bot = getWeebotOrNew(event.guild)
+        val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
+        else getWeebotOrNew(event.guild)
+        STAT.track(this, bot, event.author)
         val eb = strdEmbedBuilder.setTitle("All about Weebot")
             .setThumbnail(CmdHelloThere.HELLO_THERE_GIFS[0])
 
@@ -50,7 +53,8 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
             .append("***[`HQRegent`]($HQTWITCH)***, join the ")
             .append("[`Numberless Liquidator Discord`](https://discord.gg/VdbNyxr).")
             .append("\n\nPlease [`invite me to your server!`]($LINK_INVITEBOT) and")
-            .append(" vote for me on [`discordbots.org`]($DISCORD_BOTS_LINK)!")
+            .append(" vote for me on [`discordbots.org`]($LINK_DISCORD_BOTS) and ")
+            .append("[`DiscordBotList.com`]($LINK_DISCORD_BOTS_LIST)!")
             .append("\n\n*Use \"${SELF.asMention} help\" for info using my commands.*")
             .append("\n\n**__Weebot Commands__**\n\n")
 
@@ -102,6 +106,9 @@ class CmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
     "", "Get information about Weebot.", cooldown = 90, guildOnly = true
 ) {
     override fun execute(event: CommandEvent) {
+        val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
+        else getWeebotOrNew(event.guild)
+        STAT.track(this, bot, event.author)
         val roles = event.member.roles
         event.reply(
                 strdEmbedBuilder.apply {
@@ -133,10 +140,12 @@ class CmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
  */
 class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
         "[category] [command name]", "Get information about Weebot Commands and Usage.",
-        cooldown = 90
+        cooldown = 90, guildOnly = false
 ) {
-
     public override fun execute(event: CommandEvent) {
+        val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
+        else getWeebotOrNew(event.guild)
+        STAT.track(this, bot, event.author)
         OrderedMenu.Builder().setEventWaiter(WAITER).setUsers(event.author)
             .useCancelButton(true).setDescription("Weebot Help").apply {
                 addChoice("All")

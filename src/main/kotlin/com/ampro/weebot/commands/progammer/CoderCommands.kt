@@ -5,6 +5,8 @@
 package com.ampro.weebot.commands.progammer
 
 import com.ampro.weebot.commands.CAT_PROG
+import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.splitArgs
@@ -19,11 +21,12 @@ import javax.script.ScriptEngineManager
  * @author Nate Sedler
  * @since 2.0
  */
-class CmdEval : WeebotCommand("RunCode", arrayOf("eval", "java"), CAT_PROG,
+class CmdEval : WeebotCommand("eval", arrayOf("java"), CAT_PROG,
     "<method.call>", "Evaluates given code.", cooldown = 5) {
 
     override fun execute(event: CommandEvent) {
         if (event.message.contentRaw.contains("token", true)) return
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         val se = ScriptEngineManager().getEngineByName("Nashorn")
         se.put("event", event)
         se.put("jda", event.jda)
@@ -51,9 +54,9 @@ class CmdEval : WeebotCommand("RunCode", arrayOf("eval", "java"), CAT_PROG,
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdRegexTest : WeebotCommand(
-    "regex", arrayOf("regtest", "RegexTest"), CAT_PROG, "<regex> <word> [words...]",
-    "Test a Regex against one or more strings", cooldown = 10) {
+class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "RegexTest"),
+    CAT_PROG, "<regex> <word> [words...]","Test a Regex against one or more strings",
+    cooldown = 10) {
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Regex Tester")
@@ -61,7 +64,7 @@ class CmdRegexTest : WeebotCommand(
             .setThumbnail("https://i1.wp.com/digitalfortress" +
                     ".tech/wp-content/uploads/2018/05/regex1.png?fit=526%2C526&ssl=1")
             .addField("Arguments", "<regex> <word> [words...]", false)
-            .addField("Aliases", "$name, ${aliases[0]}, ${aliases[1]}", false)
+            .setAliases(aliases)
             .build()
     }
 
@@ -88,6 +91,7 @@ class CmdRegexTest : WeebotCommand(
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
         if (args.size < 2) return
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         val regex: Regex
         val strings: List<String>
         try {

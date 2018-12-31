@@ -5,6 +5,8 @@
 package com.ampro.weebot.commands.`fun`
 
 import com.ampro.weebot.commands.CAT_FUN
+import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.util.ApiLinkResponse
@@ -22,7 +24,7 @@ import net.dv8tion.jda.core.entities.MessageEmbed
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdCatFact : WeebotCommand("CatFact", arrayOf("cat"), CAT_FUN, "",
+class CmdCatFact : WeebotCommand("catfact", arrayOf("cat"), CAT_FUN, "",
     "Get a random fact about Cats and a cute picture.", cooldown = 10) {
 
     val FALLBACK_CAT_IMAGE = "https://www.readersdigest.ca/wp-content/uploads/sites/14/2011/01/4-ways-cheer-up-depressed-cat.jpg"
@@ -52,6 +54,7 @@ class CmdCatFact : WeebotCommand("CatFact", arrayOf("cat"), CAT_FUN, "",
     private val katFacts: List<KatFact> = mutableListOf()
 
     override fun execute(event: CommandEvent) {
+        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         GlobalScope.launch {
             val catFact = RAND_CAT_FACT.get<KatFact>().component1()
             if (catFact != null) {

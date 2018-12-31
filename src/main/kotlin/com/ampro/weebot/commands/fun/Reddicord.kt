@@ -7,6 +7,7 @@ package com.ampro.weebot.commands.`fun`
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.CHANNEL
@@ -184,7 +185,7 @@ class Reddicord(channels: MutableList<TextChannel> = mutableListOf()) : IPassive
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdReddicord : WeebotCommand("Reddicord", arrayOf("reddiscord", "redditcord",
+class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcord",
     "reddiscore", "reddiscores"), CAT_FUN, "[on/off/scores]",
     "Upvote and Downvote messages to gain points.",
     userPerms = arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
@@ -208,6 +209,7 @@ class CmdReddicord : WeebotCommand("Reddicord", arrayOf("reddiscord", "redditcor
             val bot = getWeebotOrNew(event.guild)
             val rCord = bot.getPassive<Reddicord>()
             val mentions = event.message.mentionedUsers
+            STAT.track(this, bot, event.author)
 
             when {
                 rCord == null -> {
@@ -228,16 +230,18 @@ class CmdReddicord : WeebotCommand("Reddicord", arrayOf("reddiscord", "redditcor
                     .setDescription("Keep posting in Reddiscore channels to increase")
                     .appendDescription(" your score!").build())
                 rCord.scoreMap.size > 0 -> {
-                    val scoreMap = if (mentions.isEmpty()) rCord.scoreMap else {
-                        rCord.scoreMap.filterKeys { k -> mentions.has { it.idLong == k } }
-                    }.toSortedMap()
+                    val mapped: List<Pair<AtomicInteger, String>>
+                            = (if (mentions.isEmpty()) rCord.scoreMap
+                    else rCord.scoreMap.filterKeys { k ->
+                        mentions.has { it.idLong == k} }).map {
+                        val name = event.guild.getMemberById(it.key)
+                            ?.effectiveName ?: "Uknown User"
+                        it.value to "$name: ${it.value}"
+                    }.sortedByDescending { it.first.get() }
+
                     strdPaginator.setText("Reddicord Leaderboard").setItemsPerPage(10)
                         .useNumberedItems(true).apply {
-                            scoreMap.forEach { id, score ->
-                                val name = event.guild.getMemberById(id)?.effectiveName
-                                        ?: "Uknown User"
-                                addItems("$name: $score")
-                            }
+                            mapped.forEach { addItems(it.second) }
                         }.build().display(event.textChannel)
                 }
             }
@@ -256,6 +260,7 @@ class CmdReddicord : WeebotCommand("Reddicord", arrayOf("reddiscord", "redditcor
         val rCord = bot.getPassive<Reddicord>()
         val args = event.splitArgs()
         val mentionedChannels = event.message.mentionedChannels
+        STAT.track(this, bot, event.author)
 
         when {
             args.isEmpty() -> {
