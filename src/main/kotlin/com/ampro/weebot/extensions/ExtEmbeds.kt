@@ -363,7 +363,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                           val waitOnSinglePage: Boolean = false,
                           val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
                           val thumbnail: String = "", val color: Color = STD_GREEN,
-                          val fields: List<Field> = emptyList(),
+                          val fieldList: List<Field> = emptyList(),
                           val timeoutAction: (Message) -> Unit = { m ->
                               try {
                                   m.clearReactions().queueAfter(250, SECONDS)
@@ -386,7 +386,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         if (title.isNotBlank()) setTitle(title)
         if (description.isNotBlank()) setDescription(description)
         if (thumbnail.isNotBlank()) setThumbnail(thumbnail)
-        if (fields.isNotEmpty()) fields.forEach { addField(it) }
+        if (fieldList.isNotEmpty()) fieldList.forEach { addField(it) }
         setColor(color)
     }
 
@@ -527,12 +527,8 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
             EXIT -> timeoutAction(message)
             else -> {
                 val i = EmojiNumbers.indexOf(emoji) + ((pageNum - 1) * itemsPerPage)
-                if (i >= 0) {
-                    try {
-                        items[i].second(i, message)
-                    } catch (e: IndexOutOfBoundsException) {
-                        elog(e.message)
-                    }
+                if (i in 0..items.size) {
+                    items[i].second(i, message)
                 }
             }
         }

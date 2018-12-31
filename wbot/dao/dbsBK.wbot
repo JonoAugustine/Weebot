@@ -21,7 +21,7 @@
           "totalSeconds": -18000
         }
       },
-      "state": "UNREVIEWED",
+      "state": "ACCEPTED",
       "votes": [],
       "suggestion": "For emote only text posts, find+replace emote with higher res picture"
     },
@@ -504,8 +504,78 @@
       "notePads": [
         {
           "id": "JU63D",
-          "notes": [],
-          "editHistory": [],
+          "notes": [
+            {
+              "id": "S22LJ0EF0I",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 12,
+                    "day": 31
+                  },
+                  "time": {
+                    "hour": 11,
+                    "minute": 38,
+                    "second": 6,
+                    "nano": 131000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 0,
+              "note": "The first note",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 12,
+                    "day": 31
+                  },
+                  "time": {
+                    "hour": 11,
+                    "minute": 38,
+                    "second": 6,
+                    "nano": 131000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            }
+          ],
+          "editHistory": [
+            {
+              "noteIDs": [
+                "S22LJ0EF0I"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 12,
+                    "day": 31
+                  },
+                  "time": {
+                    "hour": 11,
+                    "minute": 38,
+                    "second": 6,
+                    "nano": 131000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            }
+          ],
           "readRestriction": {
             "allowedUsers": [],
             "blockedUsers": [],

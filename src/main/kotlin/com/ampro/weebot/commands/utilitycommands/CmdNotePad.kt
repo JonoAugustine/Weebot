@@ -182,6 +182,10 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                                     nm.display(m1)
                                 } catch (ex: Exception) {
                                     nm.display(e.channel)
+                                } finally {
+                                    it.delete().queueAfter(250, MILLISECONDS) {
+                                        e.message.delete().queueAfter(250, MILLISECONDS)
+                                    }
                                 }
                             }, 2, MINUTES, {
                                 it.editMessage("~~${it.contentDisplay}~~ *timed out*")
@@ -192,7 +196,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                     Unlock to { m -> /*TODO Unlock*/ },
                     X_Red to { m ->
                         strdButtonMenu.setUsers(userSet.first())
-                            .setText("*Are you sure you want to delete note:${this.id}?*")
+                            .setText("*Are you sure you want to delete note: ${this.id}?*")
                             .setDescription("${Fire.unicode} = YES,* ***ignore this to cancel***")
                             .addChoice(Fire.unicode).setTimeout(30, SECONDS)
                             .setAction {
@@ -202,7 +206,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                                         m.channel.sendMessage(GENERIC_ERR_MESG).queue()
                                         return@setAction
                                     } else {
-                                        notePad.deleteNote(index, userSet.first(),
+                                        notePad.deleteNote(this, userSet.first(),
                                             m.creationTime)
                                         try {
                                             m.delete().queueAfter(250, MILLISECONDS)
@@ -264,8 +268,21 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         val guild = event.guild
         val mem = event.member
         val userSet = setOf(mem.user)
-        val items = List<Pair<String, (Int, Message) -> Unit>>(notes.size) {
-            "(${notes[it].id}) ${notes[it].note}" to { i, m ->
+        fun historyField() : MessageEmbed.Field {
+            val title = "Created: ${initTime.format(DD_MM_YYYY_HH_MM)}"
+            val sb = StringBuilder("Edits: ${editHistory.size}\n")
+            if (editHistory.isNotEmpty()) {
+                val last = editHistory[0]
+                val user = guild.getMemberById(editHistory[0].editorID)?.effectiveName
+                        ?: getUser(editHistory[0].editorID)?.name ?: "Unknown User"
+                sb.append("Last Edit: ${last.type.name} by $user")
+                val time = last.time.format(WKDAY_MONTH_YEAR)
+                val ids = last.noteIDs.joinToString(", ")
+                sb.append(" on $time on notes: $ids")
+            }
+            return Field(title, sb.toString(), true)
+        }
+        val items = notes.map { "(${it.id}) ${it.note}" to { i: Int, m: Message ->
                 try { m.clearReactions().queueAfter(250, MILLISECONDS)}
                 catch (e: PermissionException) {}
                 notes[i].toSelectableEmbed(userSet, guild, this) {
@@ -276,21 +293,14 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                         send(event, null, pads)
                         m.delete().queueAfter(1, SECONDS)
                     }
-                }.display(m)
+                }.display(m.channel)
             }
         }
         val notePad = SelectablePaginator(users = userSet, title = this.name,
-                itemsPerPage = 10, items = items, fields = listOf(
+                itemsPerPage = 10, items = items, fieldList = listOf(
                 //Field("Read Restrictions"), TODO NotePadView Restrictions
                 //Field("Write Restrictions", ),
-                Field("Created: ${initTime.format(DD_MM_YYYY_HH_MM)}","""
-                    Edits: ${editHistory.size}
-                    ${if(editHistory.isNotEmpty()) """
-                    Last edit: ${editHistory[0].type} by ${guild.getMemberById
-                    (editHistory[0].editorID) ?.effectiveName ?: getUser(editHistory[0].editorID)?.name ?: "Unknown User"
-                } at ${editHistory[0].time.format(DD_MM_YYYY_HH_MM)}""" else ""}
-                on notes [${editHistory[0].noteIDs.joinToString(", ")}]
-                """.trimIndent(), true)
+                historyField()
             )
         ) {
             //final action
@@ -419,6 +429,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         return if (index !in 0 until notes.size) false
         else {
             recordEdit(listOf(notes[index].id), editor, DELETE, time)
+            notes.removeAt(index)
             true
         }
     }
@@ -1087,18 +1098,10 @@ internal fun buildNotePadPaginator(event: CommandEvent, pads: List<NotePad>)
         : SelectablePaginator {
     val mem = event.member
     return SelectablePaginator(setOf(mem.user), title = "${mem.guild.name} NotePads",
-            description = "${mem.guild.name} NotePads available to ${mem.effectiveName}",
-            itemsPerPage = 10,
-            thumbnail = "https://47eaps32orgm24ec5k1dcrn1"
-                    + "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/"
-                    + "notepad-pen-sponsor.png",
-            items = List<Pair<String, (Int, Message) -> Unit>>(pads.size) {
-                (" ${pads[it].name} (${pads[it].id})") to { i, m ->
-                    pads[i].send(event, null, pads)
-                }
-            }) { m ->
-        try { m.clearReactions().queueAfter(250, MILLISECONDS) }
-        catch (ignored: Exception) { }
-        m.delete().queueAfter(2, SECONDS)
-    }
+        description = "${mem.guild.name} NotePads available to ${mem.effectiveName}",
+        itemsPerPage = 10, thumbnail = "https://47eaps32orgm24ec5k1dcrn1" +
+                "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/notepad-pen-sponsor.png",
+        items = pads.map { " ${it.name} (${it.id})" to { i: Int, m: Message ->
+            pads[i].send(event, null, pads)
+        }}) { it.delete().queueAfter(2, SECONDS) }
 }

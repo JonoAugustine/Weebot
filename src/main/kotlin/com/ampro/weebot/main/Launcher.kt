@@ -24,6 +24,7 @@ import net.dv8tion.jda.core.entities.Game.playing
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
 import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.security.auth.login.LoginException
 import kotlin.system.measureTimeMillis
 
@@ -159,7 +160,9 @@ fun main(args_: Array<String>) = runBlocking {
 
     MLOG.slog("Launch Complete!\n\n")
 
-    JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!").queue()
+    JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!").queueAfter(
+        850, MILLISECONDS
+    )
 }
 
 /**
