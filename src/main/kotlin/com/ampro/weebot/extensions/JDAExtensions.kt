@@ -6,11 +6,14 @@ package com.ampro.weebot.extensions
 
 import com.ampro.weebot.extensions.MentionType.*
 import com.jagrosh.jdautilities.command.CommandClientBuilder
+import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent
+import java.time.OffsetDateTime
 
 /*
  * Extension methods used for JDA elements
@@ -55,6 +58,11 @@ fun Long.asMention(mentionType: MentionType) : String = when (mentionType) {
     CHANNEL -> "<#$this>"
 }
 
+/** The user and bot count of the [Guild] */
+val Guild.size: Int get() = this.members.size
+/** The non-bot user count of the [Guild] */
+val Guild.trueSize: Int get() = this.members.filterNot { it.user.isBot }.size
+
 infix fun Member.outRanks(other: Member) : Boolean {
     var myhigh = -1
     this.roles.forEach { if (it.position > myhigh) myhigh = it.position }
@@ -85,6 +93,9 @@ fun Member.hasOneOfPerms(vararg p: Permission) : Boolean {
 
 infix fun Member.hasPerm(perm: Permission) = this.permissions.contains(perm)
 
+val CommandEvent.creationTime: OffsetDateTime
+    get() = this.message.creationTime
+
 fun MessageReceivedEvent.splitArgsRaw() = message.contentRaw.split("\\s+".toRegex())
 fun GuildMessageReceivedEvent.splitArgsRaw() = message.contentRaw.split("\\s+".toRegex())
 
@@ -101,6 +112,20 @@ fun CommandClientBuilder.addCommands(commands: Iterable<WeebotCommand>)
 }
 
 infix fun User.`is`(id: Long) = this.idLong == id
+
+fun MessageReceivedEvent.isValidUser(guild: Guild, users: Set<User> = emptySet(),
+                                     roles: Set<Role> = emptySet())
+        : Boolean {
+    return when {
+        !isFromType(TEXT) -> false
+        this.guild.id != guild.id -> false
+        author.isBot -> false
+        users.isEmpty() && roles.isEmpty() -> true
+        users.contains(author) -> true
+        !guild.isMember(author) -> false
+        else -> guild.getMember(author).roles.stream().anyMatch { roles.contains(it) }
+    }
+}
 
 fun GuildMessageReceivedEvent.isValidUser(guild: Guild, users: Set<User> = emptySet(),
                                           roles: List<Role> = emptyList()) : Boolean {

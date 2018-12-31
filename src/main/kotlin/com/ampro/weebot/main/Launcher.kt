@@ -77,8 +77,19 @@ fun main(args_: Array<String>) = runBlocking {
     //RestAction.DEFAULT_FAILURE = Consumer(Throwable::printStackTrace)
 
     //LOGIN
-    //JDA_SHARD_MNGR = jdaShardLogIn().build()
-    JDA_SHARD_MNGR = jdaDevShardLogIn().build()
+    val alt: String
+    if (args_.isNotEmpty() && args_[0].matches(Regex("(?i)(w|weebot|full)"))) {
+        JDA_SHARD_MNGR = jdaShardLogIn().build()
+        alt = "\\"
+    } else if (args_.isEmpty()) {
+        JDA_SHARD_MNGR = jdaDevShardLogIn().build()
+        alt = "t\\"
+    }
+    else {
+        MLOG.elog("\n\nFailed to read args.")
+        shutdown()
+        return@runBlocking
+    }
 
     //DATABASE
     setUpDatabase()
@@ -87,7 +98,7 @@ fun main(args_: Array<String>) = runBlocking {
     CMD_CLIENT = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
         .setCoOwnerIds(DEV_IDS[1].toString())
         .setGuildSettingsManager { getWeebotOrNew(it.idLong).settings }
-        .setAlternativePrefix("\\")
+        .setAlternativePrefix(alt)
         //.setGame(listening("@Weebot help"))
         .setGame(playing("Weebot 2.0 Kotlin!"))
         .addCommands(commands)
@@ -216,8 +227,9 @@ private fun saveTimer() = GlobalScope.launch {
 }
 
 /** Begin the shutdown sequence. Backup and save database.  */
-fun shutdown(user: User) {
-    MLOG.elog("Shutdown signal received from ${user.name} (${user.id}).")
+fun shutdown(user: User? = null) {
+    if (user != null)
+        MLOG.elog("Shutdown signal received from ${user.name} (${user.id}).")
 
     MLOG.elog("\tShutting down Global Weebot Reminder pools...")
     //DAO.GLOBAL_WEEBOT.reminderPools.forEach { _, pool -> pool.shutdown() }

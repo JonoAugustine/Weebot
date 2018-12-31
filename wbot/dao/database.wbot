@@ -24,6 +24,30 @@
       "state": "UNREVIEWED",
       "votes": [],
       "suggestion": "For emote only text posts, find+replace emote with higher res picture"
+    },
+    {
+      "id": "NV7EP",
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 30
+          },
+          "time": {
+            "hour": 7,
+            "minute": 10,
+            "second": 53,
+            "nano": 331000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "UNREVIEWED",
+      "votes": [],
+      "suggestion": "Viewing a note deletes itself"
     }
   ],
   "GLOBAL_WEEBOT": {
@@ -63,7 +87,6 @@
       ],
       "explicit": false,
       "nsfw": false,
-      "enablePassives": false,
       "logchannel": -1,
       "trackingEnabled": false,
       "guildID": -1
@@ -101,7 +124,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": -1
@@ -109,6 +131,41 @@
       "passives": [],
       "notePads": [],
       "guildID": -1
+    },
+    "264445053596991498": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 29
+          },
+          "time": {
+            "hour": 22,
+            "minute": 43,
+            "second": 15,
+            "nano": 377000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "explicit": false,
+        "nsfw": false,
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "disabledCommands": {},
+        "guildID": 264445053596991498
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 264445053596991498
     },
     "520640811583668255": {
       "initDate": {
@@ -136,7 +193,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 520640811583668255
@@ -171,7 +227,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 218979588716494848
@@ -206,7 +261,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 525317303726768138
@@ -241,7 +295,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": true,
         "guildID": 527270009584746496
@@ -276,7 +329,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 522406539798118419
@@ -311,7 +363,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 522375095826513931
@@ -346,7 +397,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 524778881652359174
@@ -382,7 +432,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": 493111883814010899,
         "trackingEnabled": false,
         "guildID": 139168039634468865
@@ -410,86 +459,17 @@
             ],
             "scoreMap": {
               "277593092561829889": -3,
-              "139167730237571072": 4
+              "139167730237571072": 4,
+              "383656411789524995": 2
             }
           }
         }
       ],
       "notePads": [
         {
-          "id": "O4Z27",
-          "notes": [
-            {
-              "id": "CKHKL5ZN4W",
-              "lastEditTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 17
-                  },
-                  "time": {
-                    "hour": 4,
-                    "minute": 10,
-                    "second": 14,
-                    "nano": 806000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": 0
-                }
-              },
-              "edits": 0,
-              "note": "This is a testNote",
-              "authorID": 139167730237571072,
-              "initTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 17
-                  },
-                  "time": {
-                    "hour": 4,
-                    "minute": 10,
-                    "second": 14,
-                    "nano": 806000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": 0
-                }
-              }
-            }
-          ],
-          "editHistory": [
-            {
-              "noteIDs": [
-                "CKHKL5ZN4W"
-              ],
-              "editorID": 139167730237571072,
-              "type": "ADD",
-              "info": "",
-              "time": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 17
-                  },
-                  "time": {
-                    "hour": 4,
-                    "minute": 10,
-                    "second": 14,
-                    "nano": 806000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": 0
-                }
-              }
-            }
-          ],
+          "id": "JU63D",
+          "notes": [],
+          "editHistory": [],
           "readRestriction": {
             "allowedUsers": [],
             "blockedUsers": [],
@@ -510,135 +490,20 @@
             "allowedVoiceChannels": [],
             "blockedVoiceChannels": []
           },
-          "name": "TEST 0",
+          "name": "NL Notes",
           "authorID": 139167730237571072,
           "initTime": {
             "dateTime": {
               "date": {
                 "year": 2018,
                 "month": 12,
-                "day": 17
+                "day": 30
               },
               "time": {
-                "hour": 4,
-                "minute": 10,
-                "second": 14,
-                "nano": 806000000
-              }
-            },
-            "offset": {
-              "totalSeconds": 0
-            }
-          }
-        },
-        {
-          "id": "IIFQN",
-          "notes": [
-            {
-              "id": "WS9TOZGBS9",
-              "lastEditTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 28
-                  },
-                  "time": {
-                    "hour": 1,
-                    "minute": 21,
-                    "second": 45,
-                    "nano": 384000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": 0
-                }
-              },
-              "edits": 0,
-              "note": "This is a testNote",
-              "authorID": 139167730237571072,
-              "initTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 28
-                  },
-                  "time": {
-                    "hour": 1,
-                    "minute": 21,
-                    "second": 45,
-                    "nano": 384000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": 0
-                }
-              }
-            }
-          ],
-          "editHistory": [
-            {
-              "noteIDs": [
-                "WS9TOZGBS9"
-              ],
-              "editorID": 139167730237571072,
-              "type": "ADD",
-              "info": "",
-              "time": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 28
-                  },
-                  "time": {
-                    "hour": 1,
-                    "minute": 21,
-                    "second": 45,
-                    "nano": 384000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": 0
-                }
-              }
-            }
-          ],
-          "readRestriction": {
-            "allowedUsers": [],
-            "blockedUsers": [],
-            "allowedRoles": [],
-            "blockedRoles": [],
-            "allowedTextChannels": [],
-            "blockedTextChannels": [],
-            "allowedVoiceChannels": [],
-            "blockedVoiceChannels": []
-          },
-          "writeRestriction": {
-            "allowedUsers": [],
-            "blockedUsers": [],
-            "allowedRoles": [],
-            "blockedRoles": [],
-            "allowedTextChannels": [],
-            "blockedTextChannels": [],
-            "allowedVoiceChannels": [],
-            "blockedVoiceChannels": []
-          },
-          "name": "TEST 2",
-          "authorID": 139167730237571072,
-          "initTime": {
-            "dateTime": {
-              "date": {
-                "year": 2018,
-                "month": 12,
-                "day": 28
-              },
-              "time": {
-                "hour": 1,
-                "minute": 21,
-                "second": 45,
-                "nano": 384000000
+                "hour": 3,
+                "minute": 49,
+                "second": 37,
+                "nano": 476000000
               }
             },
             "offset": {
@@ -675,7 +540,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 515978820118118426
@@ -710,7 +574,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 450100127256936458
@@ -745,7 +608,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 339842458458521634
@@ -780,7 +642,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 438231431215579137
@@ -815,7 +676,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 466047914419159061
@@ -850,7 +710,6 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "enablePassives": false,
         "logchannel": -1,
         "trackingEnabled": false,
         "guildID": 258020165785092113
@@ -903,27 +762,6 @@
       },
       "userId": 345728560033693696
     },
-    "260727858366906368": {
-      "joinDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 12
-          },
-          "time": {
-            "hour": 20,
-            "minute": 59,
-            "second": 42,
-            "nano": 833000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "userId": 260727858366906368
-    },
     "171748824816025600": {
       "joinDate": {
         "dateTime": {
@@ -944,6 +782,27 @@
         }
       },
       "userId": 171748824816025600
+    },
+    "260727858366906368": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 260727858366906368
     },
     "389937555853934593": {
       "joinDate": {
@@ -1260,27 +1119,6 @@
       },
       "userId": 187295900463398913
     },
-    "104213413487464448": {
-      "joinDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 12
-          },
-          "time": {
-            "hour": 20,
-            "minute": 59,
-            "second": 42,
-            "nano": 833000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "userId": 104213413487464448
-    },
     "430469541907267585": {
       "joinDate": {
         "dateTime": {
@@ -1301,6 +1139,27 @@
         }
       },
       "userId": 430469541907267585
+    },
+    "104213413487464448": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 104213413487464448
     },
     "130359538623709184": {
       "joinDate": {
@@ -2351,6 +2210,27 @@
         }
       },
       "userId": 327339164766961664
+    },
+    "396507242817519626": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 29
+          },
+          "time": {
+            "hour": 17,
+            "minute": 52,
+            "second": 44,
+            "nano": 537000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 396507242817519626
     },
     "302267586597355520": {
       "joinDate": {

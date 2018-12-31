@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.extensions
 
-import com.ampro.weebot.main.WAITER
+import com.ampro.weebot.main.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.menu.ButtonMenu
@@ -358,7 +358,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                           timeout: Long = 3L, unit: TimeUnit = MINUTES,
                           val title: String, val description: String = "",
                           /** The items to be listed with an [Emoji] and consumer */
-                          val items: List<Pair<String, (Int, Message) ->Unit>>,
+                          val items: List<Pair<String, (Int, Message) -> Unit>>,
                           val columns: Int = 1, val itemsPerPage: Int = 10,
                           val waitOnSinglePage: Boolean = false,
                           val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
@@ -395,7 +395,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
 
     init {
         if (this.itemsPerPage !in 1..EmojiNumbers.size) {
-            throw InvalidArgumentException(arrayOf("Items Per Page must be in 1..10"))
+            throw IllegalArgumentException("Items Per Page must be in 1..10")
         }
     }
 
@@ -527,16 +527,12 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
             EXIT -> timeoutAction(message)
             else -> {
                 val i = EmojiNumbers.indexOf(emoji) + ((pageNum - 1) * itemsPerPage)
-                when {
-                    i >= 0 -> {
-                        try {
-                            items[i].second(i, message)
-                        } catch (e: IndexOutOfBoundsException) {
-                            elog(e.message)
-                        }
-                        return
+                if (i >= 0) {
+                    try {
+                        items[i].second(i, message)
+                    } catch (e: IndexOutOfBoundsException) {
+                        elog(e.message)
                     }
-                    else -> return
                 }
             }
         }
@@ -608,14 +604,14 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                       timeout: Long = 3L, unit: TimeUnit = MINUTES,
                       val messageEmbed: MessageEmbed,
                       val options: List<Pair<Emoji, (Message) -> Unit>>,
-                      val cancelEmoji: Emoji? = null, val timoutAction: (Message) -> Unit)
+                      val timoutAction: (Message) -> Unit)
     : Menu(WAITER, users, roles, timeout, unit) {
 
     constructor(user: User, messageEmbed: MessageEmbed,
                 options: List<Pair<Emoji, (Message) -> Unit>>,
-                cancelEmoji: Emoji? = null, finalAction: (Message) -> Unit)
+                timeout: (Message) -> Unit)
             : this(setOf(user), messageEmbed = messageEmbed, options = options,
-        cancelEmoji = cancelEmoji, timoutAction = finalAction)
+        timoutAction = timeout)
 
     override fun display(channel: MessageChannel) {
         initialize(channel.sendMessage(messageEmbed))
@@ -626,14 +622,17 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
     }
 
     private fun initialize(action: RestAction<Message>) = action.queue { m ->
-        if (cancelEmoji != null) m reactWith cancelEmoji
         options.forEach {
             runBlocking { delay(250) }
             m reactWith it.first
         }
+        waitFor(m)
+    }
+
+    private fun waitFor(message: Message) {
         waiter.waitForEvent(MessageReactionAddEvent::class.java, { event ->
             when {
-                event.messageIdLong != m.idLong -> false
+                event.messageIdLong != message.idLong -> false
                 options.has { it.first == event.reactionEmote.toEmoji() } -> {
                     isValidUser(event.user, event.guild)
                 }
@@ -641,10 +640,11 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
             }
         }, { event ->
             event.reaction.reactionEmote.toEmoji()?.run {
-                val i = options.indexOfFirst { this == it.first }
-                if (i != -1) options[i].second(m)
+                options.first { this == it.first }.second(message)
+                message.removeUserReaction(message.author, this)
+                waitFor(message)
             }
-        }, timeout, unit, { timoutAction(m) })
+        }, timeout, unit, { timoutAction(message) })
     }
 
 }

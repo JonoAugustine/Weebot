@@ -11,19 +11,24 @@ package com.ampro.weebot.commands.developer
 import com.ampro.weebot.commands.CAT_DEV
 import com.ampro.weebot.commands.CAT_GEN
 import com.ampro.weebot.database.constants.PHONE_JONO
+import com.ampro.weebot.database.getGuild
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.main.WAITER
-import com.ampro.weebot.main.shutdown
-import com.ampro.weebot.util.sendSMS
+import com.ampro.weebot.main.*
+import com.ampro.weebot.util.*
+import com.ampro.weebot.util.Emoji.X_Red
 import com.jagrosh.jdautilities.command.CommandEvent
-import com.jagrosh.jdautilities.menu.Paginator
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
+import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
-import net.dv8tion.jda.core.exceptions.PermissionException
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.*
+import kotlin.math.roundToInt
 
 /**
  * @author Jonathan Augustine
@@ -76,39 +81,62 @@ class GuildlistCommand : WeebotCommand("guildlist",
         botPerms = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ADD_REACTION)
 ) {
 
-    private val pbuilder: Paginator.Builder
-
-    init {
-        pbuilder = Paginator.Builder().setColumns(1).setItemsPerPage(10)
-            .showPageNumbers(true).waitOnSinglePage(false).useNumberedItems(false)
-            .setFinalAction { m ->
-                try {
-                    m.clearReactions().queue()
-                } catch (ex: PermissionException) {
-                    m.delete().queue()
-                }
-            }.setEventWaiter(WAITER).setTimeout(1, TimeUnit.MINUTES)
-    }
-
     override fun execute(event: CommandEvent) {
-        var page = 1
-        if (!event.args.isEmpty()) {
-            page = try {
-                Integer.parseInt(event.args)
-            } catch (e: NumberFormatException) {
-                event.reply("${event.client.error} `${event.args}` is not a valid integer!")
-                return
-            }
-        }
-        pbuilder.clearItems() //TODO change to selectable paginator
-        event.jda.guilds.stream()
-            .map { g -> "**${g.name}** (ID:${g.id}) ~ ${g.members.size} Members" }
-            .forEach { pbuilder.addItems(it) }
-        strdPaginator
-            .setText("${event.client.success} Guilds that **${event.selfUser.name}**" +
-                    " is connected to ${if (event.jda.shardInfo == null) ":"
-                    else "(Shard ID " + event.jda.shardInfo.shardId + "):"}")
-            .setUsers(event.author).build().paginate(event.channel, page)
+        val op = JDA_SHARD_MNGR.guilds
+        SelectablePaginator(setOf(event.author),
+            title = "All guilds housing ${SELF.name} (Total: ${op.size})",
+            description = "``Name ~ member count (percentage non-bots) on shardID``",
+            items = op.sortedByDescending { it.trueSize }.map {
+                "**${it.name}** ~ ${it.size} (${((
+                        it.trueSize/it.size.toDouble())*100).roundToInt()}%)" +
+                        " on ${getGuildShard(it)?.shardId ?: "N/A"}" to {
+                        _: Int, _: Message -> it.infoEmbed(event).display(event.channel)
+                }
+            }, itemsPerPage = 10).display(event.channel)
+
     }
 
+    private fun getGuildShard(g: Guild): JDA.ShardInfo?
+        = JDA_SHARD_MNGR.shards.find { s -> s.guilds.has { it.id == g.id } }?.shardInfo
+
+}
+
+fun Guild.infoEmbed(event: CommandEvent): SelectableEmbed {
+    return SelectableEmbed(event.author, makeEmbedBuilder("Guild: $name", null, """
+        **Weebot Join Date:**   ${selfMember.joinDate.format(DD_MM_YYYY_HH_MM)}
+        **Size:**     $size
+        **TrueSize**: $trueSize (**Bot Count**: ${size - trueSize})
+        **Roles:**          ${roles.size}
+        **Text Channels:**  ${textChannels.size}
+        **Voice Channels:** ${voiceChannels.size}
+        **Custom Emotes:**  ${emotes.size}
+    """.trimIndent()).setThumbnail(iconUrl).addField("Options", """
+        $X_Red Remove Weebot from this guild""".trimIndent(), false)
+        .setColor(if (roles.isNotEmpty()) this.roles[0].color else STD_GREEN).build(),
+        listOf(X_Red to { _: Message ->
+            event.reply("Are you sure? (yes/no) (30 sec timeout)")
+            //TODO wait for confirm and then wait for reason
+            WAITER.waitForEvent(MessageReceivedEvent::class.java,
+                { e -> e.isValidUser(event.guild, setOf(event.author))}, {
+                    if (it.message.contentDisplay.matches(REG_YES)) {
+                        event.reply("Reason? (send ``null`` if nothing)")
+                        WAITER.waitForEvent(MessageReceivedEvent::class.java,
+                            { e -> e.isValidUser(event.guild, setOf(event.author))}, {
+                                if (!it.message.contentDisplay.matches(Regex("(?i)null"))) {
+                                    val g = getGuild(this.idLong)//update guild info
+                                    if (g != null) {
+                                        getWeebotOrNew(g).settings.sendLog(it.message)
+                                        g.leave().queue {
+                                            event.reply("*Weebot left ${g.name}*")
+                                        }
+                                    }
+                                }
+                            }, 2, MINUTES) {
+                            event.reply("*Removal cancelled (timed out)*")
+                        }
+                    } else if (it.message.contentDisplay.matches(REG_NO)) {
+                        event.reply("*Removal cancelled*")
+                    }
+                }, 30, SECONDS) { event.reply("*Removal cancelled (timed out)*") }
+        })) { it.clearReactions().queueAfter(250, MILLISECONDS) }
 }

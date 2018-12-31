@@ -11,8 +11,10 @@ import kotlin.streams.asSequence
 const val alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const val digi  = "0123456789"
 const val alphaDigi = alpha + digi
-val REG_YES = Regex("(?i)y+e+s+")
-val REG_NO  = Regex("(?i)n+o+")
+
+val REG_YES = Regex("(?i)(y+e+s+)")
+val REG_NO  = Regex("(?i)(n+o+)")
+val REG_DEFAULT = Regex("(?i)(d+e+f+a+u+l+t+)")
 
 /**
  * An random ID generator. 0-9, A-Z (caps)

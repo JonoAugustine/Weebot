@@ -67,6 +67,11 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
             ?.queue { consumer(it) }
     }
 
+    fun sendLog(message: Message, consumer: (Message) -> Unit = {}) {
+        getGuild(guildID)?.getTextChannelById(logchannel)?.sendMessage(message)
+            ?.queue { consumer(it) }
+    }
+
     override fun getPrefixes() = prefixs
 }
 
