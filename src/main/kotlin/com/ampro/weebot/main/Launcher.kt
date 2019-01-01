@@ -160,9 +160,8 @@ fun main(args_: Array<String>) = runBlocking {
 
     MLOG.slog("Launch Complete!\n\n")
 
-    JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!").queueAfter(
-        850, MILLISECONDS
-    )
+    JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
+        .queueAfter(850, MILLISECONDS)
 }
 
 /**

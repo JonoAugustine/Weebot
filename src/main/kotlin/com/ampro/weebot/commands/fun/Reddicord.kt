@@ -15,6 +15,7 @@ import com.ampro.weebot.main.SELF
 import com.ampro.weebot.main.WAITER
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
+import com.jagrosh.jdautilities.command.Command.CooldownScope.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.entities.*
@@ -202,14 +203,16 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
     class CmdLeaderBoard : WeebotCommand("leaderboard",
         arrayOf("ranks", "lb", "scores", "reddiscore"),
         CAT_FUN, "[@/member @/member2...]", "See the Reddicord leaderboard.",
-        guildOnly = true, ownerOnly = false, cooldown = 180,
-        cooldownScope = CooldownScope.USER_CHANNEL) {
+        guildOnly = true, ownerOnly = false, cooldown = 120,
+        cooldownScope = USER_CHANNEL) {
 
         override fun execute(event: CommandEvent) {
             val bot = getWeebotOrNew(event.guild)
             val rCord = bot.getPassive<Reddicord>()
             val mentions = event.message.mentionedUsers
             STAT.track(this, bot, event.author)
+
+            fun getScore(userID: Long) = rCord?.scoreMap!![userID]?.get()
 
             when {
                 rCord == null -> {
@@ -236,7 +239,7 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
                         mentions.has { it.idLong == k} }).map {
                         val name = event.guild.getMemberById(it.key)
                             ?.effectiveName ?: "Uknown User"
-                        it.value to "$name: ${it.value}"
+                        it.value to "$name: ${getScore(it.key)}"
                     }.sortedByDescending { it.first.get() }
 
                     strdPaginator.setText("Reddicord Leaderboard").setItemsPerPage(10)

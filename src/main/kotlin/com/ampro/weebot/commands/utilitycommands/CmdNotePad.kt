@@ -21,6 +21,7 @@ import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_GUILD
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
+import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
@@ -61,24 +62,17 @@ infix fun CommandEvent.canWriteTo(notePad: NotePad): Boolean {
     return when {
         //The Author can always edit
         member.user.idLong == notePad.authorID -> true
-
         //Admins are admins so ya know...they win
         member.permissions.contains(ADMINISTRATOR) -> true
-
         //Check Channel
         !notePad.writeRestriction.isAllowed(textChannel) -> false
-
         //Check Role
-        else -> {
-            for (r in this.member.roles) {
-                if (notePad.writeRestriction.isAllowed(r)) {
-                    return true
-                }
-            }
-            return notePad.writeRestriction.isAllowed(member.user)
-        }
+        !member.roles.has { notePad.writeRestriction.isAllowed(it) } -> false
+        //Check User
+        notePad.writeRestriction.isAllowed(member.user) -> true
+        //else
+        else -> false
     }
-
 }
 
 /**
@@ -93,24 +87,17 @@ infix fun CommandEvent.canRead(notePad: NotePad): Boolean {
     return when {
         //The Author can always edit
         member.user.idLong == notePad.authorID -> true
-
         //Admins are admins so ya know...they win
         member.permissions.contains(ADMINISTRATOR) -> true
-
         //Check Channel
         !notePad.readRestriction.isAllowed(textChannel) -> false
-
         //Check Role
-        else -> {
-            for (r in this.member.roles) {
-                if (notePad.readRestriction.isAllowed(r)) {
-                    return true
-                }
-            }
-            return notePad.readRestriction.isAllowed(member.user)
-        }
+        !member.roles.has { notePad.readRestriction.isAllowed(it) } -> false
+        //Check User
+        notePad.readRestriction.isAllowed(member.user) -> true
+        //else
+        else -> false
     }
-
 }
 
 /** @return the first [NotePad] of the list or null */
@@ -506,8 +493,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         notes # lockout <roles, members, or channels>
         """.trimIndent(), "Write in-discord notes and organize them into NotePds",
     cooldown = 5, guildOnly = true, children = arrayOf(CmdMake(), CmdWriteTo(),
-        CmdInsert(), CmdEdit(), CmdDeleteNote(), CmdLockTo(), CmdDeletePad(),
-        CmdToFile() )
+        CmdInsert(), CmdEdit(), CmdDeleteNote(), CmdLockTo(),CmdLockFrom(),
+        CmdDeletePad(), CmdToFile() )
 ) {
 
     class CmdMake : WeebotCommand("make", arrayOf("add", "new"), CAT_UTIL,
@@ -718,24 +705,80 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
     }
 
     class CmdLockTo : WeebotCommand("lockto", arrayOf("allow"), CAT_UTIL,
-        "<notepad_id> [@/roles] [@/members] [#/channels]", "Lock access to a NotePad.",
-        cooldown = 10, cooldownScope = USER_CHANNEL) {
+        "<notepad_id> [read/write] [@/roles] [@/members] [#/channels]",
+        "Lock access to a NotePad.", cooldown = 10, cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
             STAT.track(this, getWeebotOrNew(event.guild), event.author)
             val args = event.splitArgs()
-            val auth = event.author
-            val pads = getWeebotOrNew(event.guild).notePads
+            if (args.size < 2) return
             /** User's Viewable notepads */
-            val cv = pads.filter { event canRead it }
+            val cv = getWeebotOrNew(event.guild).notePads.filter { event canRead it }
 
+            //<notepad_id> [read/write] [@/roles] [@/members] [#/channels]
+            val notePad = cv.find { it.id.equals(args[0], true) } ?: run{
+                event.reply("No NotePad found with ID ${args[0]}")
+                return
+            }
+            val write = args[1].matches(Regex("(?i)-*(w+r*i*t*e*)"))
 
-            //<notepad_id> [@/roles] [@/members] [#/channels]
-            val notePad = cv.find { it.id.equals(args[0], true) }
-            if (notePad != null && event canWriteTo notePad) {
-                TODO()
+            if (event.message.mentionedMembers.isEmpty()
+                    && event.message.mentionedChannels.isEmpty()
+                    && event.message.mentionedRoles.isEmpty()) {
+                event.reply("*Please mention at least 1 Role, Channel, or Member.*")
+                return
             }
 
+            if (event canWriteTo notePad) {
+                val r = if (write) notePad.writeRestriction else notePad.readRestriction
+                val sb = mutableListOf<String>()
+                event.message.mentionedMembers.forEach {
+                    sb.add(it.effectiveName); r.allow(it.user)
+                }
+                event.message.mentionedChannels.forEach { sb.add(it.name); r.allow(it) }
+                event.message.mentionedRoles.forEach { sb.add(it.name); r.allow(it) }
+                event.reply("*NotePad ${notePad.name} locked to* ${sb.joinToString(", ")}")
+            } else {
+                event.reply("*You do not have permissions to edit this NotePad.*")
+            }
+        }
+    }
 
+    class CmdLockFrom: WeebotCommand("lockfrom", arrayOf("block", "lockout"), CAT_UTIL,
+        "<notepad_id> [read/write] [@/roles] [@/members] [#/channels]",
+        "Lock access to a NotePad.", cooldownScope = USER_CHANNEL, cooldown = 10) {
+        public override fun execute(event: CommandEvent) {
+            STAT.track(this, getWeebotOrNew(event.guild), event.author)
+            val args = event.splitArgs()
+            if (args.size < 2) return
+            /** User's Viewable notepads */
+            val cv = getWeebotOrNew(event.guild).notePads.filter { event canRead it }
+
+            //<notepad_id> [read/write] [@/roles] [@/members] [#/channels]
+            val notePad = cv.find { it.id.equals(args[0], true) } ?: run{
+                event.reply("No NotePad found with ID ${args[0]}")
+                return
+            }
+            val write = args[1].matches(Regex("(?i)-*(w+r*i*t*e*)"))
+
+            if (event.message.mentionedMembers.isEmpty()
+                    && event.message.mentionedChannels.isEmpty()
+                    && event.message.mentionedRoles.isEmpty()) {
+                event.reply("*Please mention at least 1 Role, Channel, or Member.*")
+                return
+            }
+
+            if (event canWriteTo notePad) {
+                val r = if (write) notePad.writeRestriction else notePad.readRestriction
+                val sb = mutableListOf<String>()
+                event.message.mentionedMembers.forEach {
+                    sb.add(it.effectiveName); r.block(it.user)
+                }
+                event.message.mentionedChannels.forEach { sb.add(it.name); r.block(it) }
+                event.message.mentionedRoles.forEach { sb.add(it.name); r.block(it) }
+                event.reply("${sb.joinToString(", ")} blocked from ${notePad.name} ")
+            } else {
+                event.reply("*You do not have permissions to edit this NotePad.*")
+            }
         }
     }
 
@@ -817,7 +860,6 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                 if (pads.isNotEmpty() && cv.contains(pads[0])) addEmptyField(
                     "Default NotePad: ${pads[0].name}")
             }.build(), listOf(Eyes to seeNotePads(event, pads, cv),
-                MagnifyingGlass to searchForNotePad(event, cv),
                 Notebook to addNotePad(event), Pencil to writeToDefault(event, pads),
                 EightSpokedAsterisk to setDefaultById(event, pads),
                 FileFolder to notePadToFileById(event, cv),
@@ -837,12 +879,6 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                 "see", "view", "list" -> seeNotePads(event, pads, cv)(event.message)
                 "clear" -> {
                     // ``clear <notepad_id>`` TODO
-                }
-                "allow", "lockto" -> {
-                    //``allow <notepad_id> [@/roles] [@/members] [#/channels]``TODO
-                }
-                "block", "lockfrom" -> {
-                    //block <notepad_id> [@/roles] [@/members] [#/channels] TODO
                 }
                 else -> {
                     //Check for notepad ID
@@ -874,12 +910,6 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                 else -> sendNotePads(event, viewable, event.textChannel)
             }
         }
-
-    fun searchForNotePad(event: CommandEvent, viewable: List<NotePad>)
-            : (Message) -> Unit = {
-        //TODO Send search criteria and wait for search request
-        event.reply("Under Construction")
-    }
 
     /**
      * Send dialogue for adding a new [NotePad]
@@ -920,9 +950,21 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    fun setDefaultById(event: CommandEvent, pads: List<NotePad>) : (Message) -> Unit
-            = {
+    fun setDefaultById(event: CommandEvent, pads: MutableList<NotePad>)
+            : (Message) -> Unit = {
         //TODO check if Moderator then ask for ID
+        if (event.member hasPerm Permission.ADMINISTRATOR) {
+            getNotePadByIdDialogue(event, pads, {
+                when {
+                    it.size == 1 -> {
+                        pads.remove(it[0])
+                        pads.add(0, it[0])
+                        event.reply("*Default NotePad set to ${it[0].name}*")
+                    }
+                    it.size > 1 ->  event.reply("*Only noe ID.*")
+                }
+            }, { event.reply("*Timed Out*") })
+        } else event.reply("*You must be an Admin to make this change.*")
     }
 
     fun notePadToFileById(event: CommandEvent, viewable: List<NotePad>)
@@ -967,7 +1009,6 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
     val mainMenuEmbed
         get() = strdEmbedBuilder.setTitle("Weebot NotePads").setDescription("""
             $Eyes to see NotePads
-            $MagnifyingGlass to search for a NotePad
             $Notebook to add a new NotePad
             $Pencil to write to the default NotePad
             $EightSpokedAsterisk to change the default NotePad (by ID)
@@ -997,9 +1038,9 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             .addField("Clear a NotePad of all Notes", "``clear <notepad_id>``")
             .addField("Delete a NotePad", "``del <notepad_id>``")
             .addField("Lock access to a NotePad",
-                "``allow <notepad_id> [@/roles] [@/members] [#/channels]``")
+                "``allow <notepad_id> [read/write] [@/roles] [@/members] [#/channels]``")
             .addField("Block a NotePad's access from Roles, Members, or Channels",
-                "``block <notepad_id> [@/roles] [@/members] [#/channels]``")
+                "``block <notepad_id> [read/write] [@/roles] [@/members] [#/channels]``")
             .addField("Get a NotePad as a text file", "``file <notepad_id>``")
             .build()
     }
