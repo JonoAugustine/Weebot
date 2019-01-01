@@ -20,14 +20,17 @@ import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_GUILD
 import com.jagrosh.jdautilities.command.CommandEvent
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.core.EmbedBuilder
-import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
+import net.dv8tion.jda.core.Permission.MESSAGE_ATTACH_FILES
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.exceptions.PermissionException
+import java.io.*
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit.*
@@ -457,7 +460,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
 
     /**
      * Edit a note.
-     * @param index The index of the note.
+     * @param note The note.
      * @param edit The new note.
      * @return The message previously held by the note.
      */
@@ -540,6 +543,142 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
     fun recordEdit(ids: List<String>, editor: User, type: EditType,
                    time: OffsetDateTime, info: String = "") {
         editHistory.add(0, NotePadEdit(ids, editor.idLong, type, info, time))
+    }
+
+    /**
+     * Make a file out of a notepad.
+     *
+     * {NotePadName EditionTime.txt}
+     * {NotePad Name (ID: NotePadID)}
+     * {Author Name (ID: AuthorID)}
+     * {Creation Date}
+     * {EditionDate}
+     * {Last Edit}
+     * {Read Restrictions}
+     * {Write Restrictions}
+     * #.) {ID: NoteID}
+     * {Note Content}
+     *{
+     *       Author (ID: AuthorID)
+     *      CreationDate
+     *      EditNum
+     *      LastEdit
+     * }
+     *
+     * @return A file of the notepad. Null if an err occurs.
+     *
+     */
+    fun toFile(guild: Guild, dateTime: OffsetDateTime): File? {
+        val nameOrUnknown: (Long) -> String = {
+            guild.getMemberById(it)?.effectiveName ?: guild.getRoleById(it)?.name
+            ?: guild.getTextChannelById(it)?.name ?: "Unknown"
+        }
+
+        val file = File(TEMP_OUT, "$name ${dateTime.format(DD_MM_YYYY_HH_MM)
+            .replace(":", "-")}.txt")
+        try {
+            BufferedWriter(FileWriter(file)).use { bw ->
+                val sb = StringBuilder("""
+                    $name (ID: $id)
+
+                    Author: ${nameOrUnknown(authorID)} (ID: $authorID)
+                    Creation Date: ${initTime.format(WKDAY_MONTH_YEAR_TIME)}
+                    File Edition: ${dateTime.format(WKDAY_MONTH_YEAR_TIME)}
+                    """.trimIndent())
+
+                if (editHistory.isNotEmpty()) {
+                    val last = editHistory[0]
+                    sb.append("\n\n").append("""
+                        Last Edit:
+                            Editor: ${nameOrUnknown(last.editorID)} (ID: ${last.editorID})
+                            Type: ${last.type}
+                            Notes: ${last.noteIDs.joinToString(", ")}
+                            Date: ${last.time.format(WKDAY_MONTH_YEAR_TIME)}
+                            ${if(last.info.isNotBlank()) "Info: ${last.info}" else ""}
+                    """.trimIndent())
+                }
+
+                fun restriction(name: String, restriction: Restriction) : String {
+                    val stringBuilder = StringBuilder("$name\n")
+                    val tList = mutableListOf<String>()
+                    if (restriction.allowedUsers.isNotEmpty()) {
+                        stringBuilder.append("Allowed Users: ``")
+                        restriction.allowedUsers.forEach {
+                            tList.add(nameOrUnknown(it))
+                        }
+                        stringBuilder.append(tList.joinToString(", ")).append("``\n")
+                        tList.clear()
+                    }
+                    if (restriction.blockedUsers.isNotEmpty()) {
+                        stringBuilder.append("Blocked Users: ``")
+                        restriction.blockedUsers.forEach {
+                            tList.add(nameOrUnknown(it))
+                        }
+                        stringBuilder.append(tList.joinToString(", ")).append("``\n")
+                        tList.clear()
+                    }
+                    if (restriction.allowedRoles.isNotEmpty()) {
+                        stringBuilder.append("Allowed Roles: ``")
+                        restriction.allowedRoles.forEach {
+                            tList.add(nameOrUnknown(it))
+                        }
+                        stringBuilder.append(tList.joinToString(", ")).append("``\n")
+                        tList.clear()
+                    }
+                    if (restriction.blockedRoles.isNotEmpty()) {
+                        stringBuilder.append("Blocked Roles: ``")
+                        restriction.blockedRoles.forEach {
+                            tList.add(nameOrUnknown(it))
+                        }
+                        stringBuilder.append(tList.joinToString(", ")).append("``\n")
+                        tList.clear()
+                    }
+                    if (restriction.allowedTextChannels.isNotEmpty()) {
+                        stringBuilder.append("Allowed TextChannels: ``")
+                        restriction.allowedTextChannels.forEach {
+                            tList.add(nameOrUnknown(it))
+                        }
+                        stringBuilder.append(tList.joinToString(", ")).append("``\n")
+                        tList.clear()
+                    }
+                    if (restriction.blockedTextChannels.isNotEmpty()) {
+                        stringBuilder.append("Blocked TextChannels: ``")
+                        restriction.blockedTextChannels.forEach {
+                            tList.add(nameOrUnknown(it))
+                        }
+                        stringBuilder.append(tList.joinToString(", ")).append("``\n")
+                        tList.clear()
+                    }
+                    return stringBuilder.toString()
+                }
+
+                if (readRestriction.restricted()) {
+                    sb.append("\n\n")
+                        .append(restriction("Read Restrictions", readRestriction))
+                }
+                if (writeRestriction.restricted()) {
+                    sb.append("\n\n")
+                        .append(restriction("Write Restrictions", writeRestriction))
+                }
+
+                notes.forEachIndexed { i, it ->
+                    sb.append("\n\n").append("""
+                        ${i + 1}.) ${it.note}
+                        ID: ${it.id}
+                        Author: ${nameOrUnknown(it.authorID)} (ID: ${it.authorID})
+                        Creation Date: ${it.initTime.format(WKDAY_MONTH_YEAR_TIME)}
+                        Edits: ${it.edits}
+                        Last Edit: ${it.lastEditTime.format(WKDAY_MONTH_YEAR_TIME)}
+                    """.trimIndent())
+                }
+
+                bw.write(sb.toString())
+                return file
+            }
+        } catch (e: IOException) {
+            MLOG.elog("IOException Making NotePad Note ${e.message ?: ""} ")
+            return null
+        }
     }
 
     override fun iterator() = notes.iterator()
@@ -968,10 +1107,30 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
     class CmdToFile : WeebotCommand("file", arrayOf("tofile", "txt", "asfile"),
         CAT_UNDER_CONSTRUCTION, "<notepad_id>", "Get the NotePad as a .txt file",
         guildOnly = true, cooldown = 90, cooldownScope = USER_GUILD) {
-
-        override fun execute(event: CommandEvent) {
-            TODO()
+        public override fun execute(event: CommandEvent) {
             STAT.track(this, getWeebotOrNew(event.guild), event.author)
+            val args = event.splitArgs()
+            val pads = getWeebotOrNew(event.guild).notePads
+            /** User's Viewable notepads */
+            val cv = pads.filter { event canRead it }
+
+            val notePad = cv.find { it.id.equals(args[0], true) } ?: run{
+                event.reply("No NotePad found with ID ${args[0]}")
+                return
+            }
+
+            val file: File = notePad.toFile(event.guild, event.creationTime) ?: run {
+                event.reply(
+                    "*Uhh I tripped and lost the file. I'll look for it, so try again later*"
+                )
+                return
+            }
+
+            if (event.guild.selfMember hasPerm MESSAGE_ATTACH_FILES) {
+                event.reply(file, file.name)
+            } else event.author.openPrivateChannel().queue {
+                it.sendFile(file, file.name).queueAfter(250, MILLISECONDS)
+            }
         }
     }
 
@@ -1079,8 +1238,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
 
     fun setDefaultById(event: CommandEvent, pads: MutableList<NotePad>)
             : (Message, User) -> Unit = { _, _ ->
-        //TODO check if Moderator then ask for ID
-        if (event.member hasPerm Permission.ADMINISTRATOR) {
+        if (event.member hasPerm ADMINISTRATOR) {
             getNotePadByIdDialogue(event, pads, {
                 when {
                     it.size == 1 -> {
@@ -1094,10 +1252,23 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         } else event.reply("*You must be an Admin to make this change.*")
     }
 
-    fun notePadToFileById(event: CommandEvent, viewable: List<NotePad>)
+    fun notePadToFileById(event: CommandEvent, viewable: MutableList<NotePad>)
             : (Message, User) -> Unit = { _, _ ->
-        //TODO ask for ID and then send file in DM
-        event.reply("Under Construction")
+        getNotePadByIdDialogue(event, viewable, { nps -> runBlocking {
+            nps.forEach { notePad ->
+                val file: File = notePad.toFile(event.guild, event.creationTime) ?: run {
+                    event.reply(
+                        "*Uhh I tripped and lost the file. I'll look for it, so try again later*")
+                    return@runBlocking
+                }
+                if (event.guild.selfMember hasPerm MESSAGE_ATTACH_FILES) {
+                    event.reply(file, file.name)
+                } else event.author.openPrivateChannel().queue {
+                    it.sendFile(file, file.name).queueAfter(250, MILLISECONDS)
+                }
+                delay(250)
+            }
+        }})
     }
 
     fun clearNotePadById(event: CommandEvent, viewable: List<NotePad>)
@@ -1230,7 +1401,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         event.reply("*Please provide the ID(s) of the NotePad(s):*")
         WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
             { e -> e.isValidUser(event.guild, setOf(event.author)) }, { e ->
-                val IDs = e.message.contentDisplay.split(Regex("\\s+"))
+                val IDs = e.message.contentDisplay.toUpperCase().split(Regex("\\s+"))
                 val notePads = viewable.filter { IDs.contains(it.id) }
                 when {
                     notePads.isNotEmpty() -> action(notePads)

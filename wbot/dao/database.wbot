@@ -64,15 +64,15 @@
           "lastTime": {
             "dateTime": {
               "date": {
-                "year": 2018,
-                "month": 12,
-                "day": 31
+                "year": 2019,
+                "month": 1,
+                "day": 1
               },
               "time": {
-                "hour": 20,
-                "minute": 55,
-                "second": 37,
-                "nano": 193000000
+                "hour": 0,
+                "minute": 5,
+                "second": 52,
+                "nano": 934000000
               }
             },
             "offset": {
@@ -81,7 +81,7 @@
           },
           "userID": 228574821590499329,
           "channel": 113743192305827841,
-          "minutes": 935,
+          "minutes": 745,
           "message": "508617764752064512#"
         },
         {
@@ -89,15 +89,15 @@
           "lastTime": {
             "dateTime": {
               "date": {
-                "year": 2018,
-                "month": 12,
-                "day": 31
+                "year": 2019,
+                "month": 1,
+                "day": 1
               },
               "time": {
-                "hour": 20,
-                "minute": 55,
-                "second": 37,
-                "nano": 193000000
+                "hour": 0,
+                "minute": 5,
+                "second": 52,
+                "nano": 934000000
               }
             },
             "offset": {
@@ -106,7 +106,7 @@
           },
           "userID": 228574821590499329,
           "channel": 113743192305827841,
-          "minutes": 1892,
+          "minutes": 1702,
           "message": "525116852830208028"
         },
         {
@@ -114,15 +114,15 @@
           "lastTime": {
             "dateTime": {
               "date": {
-                "year": 2018,
-                "month": 12,
-                "day": 31
+                "year": 2019,
+                "month": 1,
+                "day": 1
               },
               "time": {
-                "hour": 20,
-                "minute": 55,
-                "second": 37,
-                "nano": 193000000
+                "hour": 0,
+                "minute": 5,
+                "second": 52,
+                "nano": 934000000
               }
             },
             "offset": {
@@ -131,7 +131,7 @@
           },
           "userID": 228574821590499329,
           "channel": 132632676225122304,
-          "minutes": 1901,
+          "minutes": 1711,
           "message": "506314865137156096"
         }
       ],
@@ -638,6 +638,7 @@
                 }
               },
               "edits": 1,
+              "locked": false,
               "note": "The first note but cooler",
               "authorID": 139167730237571072,
               "initTime": {
@@ -680,6 +681,7 @@
                 }
               },
               "edits": 0,
+              "locked": false,
               "note": "Matt is a nerd",
               "authorID": 139167730237571072,
               "initTime": {
@@ -722,6 +724,7 @@
                 }
               },
               "edits": 0,
+              "locked": false,
               "note": "This was written from the home menu",
               "authorID": 139167730237571072,
               "initTime": {

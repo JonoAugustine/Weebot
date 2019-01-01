@@ -49,8 +49,10 @@ fun getWeebotOrNew(guild: Guild) = getWeebot(guild.idLong) ?: kotlin.run {
     val b = Weebot(guild); DAO.addBot(b);b
 }
 
-fun getWeebotOrNew(guildID: Long) = getWeebot(guildID) ?: kotlin.run {
-    val b = Weebot(guildID); DAO.addBot(b);b
+fun getWeebotOrNew(guildID: Long) : Weebot {
+    return getWeebot(guildID) ?: kotlin.run {
+        val b = Weebot(guildID); DAO.addBot(b);b
+    }
 }
 
 infix fun User.isBlocked(klass: Class<out WeebotCommand>)
