@@ -115,7 +115,7 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
                     """.trimIndent())
                     .build(),
                     listOf(
-                        A to { _ ->
+                        A to { _, _ ->
                             event.reply("What would you like to add? " +
                                     "*(must be under 4 characters, e.g. pw!, w!, \\)*")
                             WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
@@ -133,7 +133,7 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
                                         event_2.message.contentDisplay}``")
                                     }
                                 }, 1L, MINUTES) {}
-                        }, C to { _ ->
+                        }, C to { _, _ ->
                             event.reply("What would you like to change it to? " +
                                     "*(must be under 4 characters, e.g. pw!, w!, \\)*")
                             WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
@@ -231,7 +231,7 @@ private class CmdSetLogChannel : WeebotCommand("log",
                     } else "My logging channel has not been set."}
                      $C to set or change the logging channel
                     """.trimIndent())
-                    .build(), listOf(C to { _ ->
+                    .build(), listOf(C to { _, _ ->
                     event.reply("Which channel should I send log messages to?")
                     WAITER.waitForEvent(GuildMessageReceivedEvent::class.java, {
                         it.isValidUser(users = setOf(event.author), guild = event.guild)

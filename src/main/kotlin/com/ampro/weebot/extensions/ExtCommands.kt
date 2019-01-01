@@ -66,7 +66,7 @@ fun CommandEvent.respondThenDelete(reason: MessageEmbed, delay: Long = 10L) {
  * Delete the [Message] and an event
  *
  * @param reason The message to send
- * @param delay The delay in seconds between send & delete
+ * @param delay The delay in seconds
  */
 fun CommandEvent.delete(delay: Long = 0L) {
     if (!isFromType(PRIVATE)) {

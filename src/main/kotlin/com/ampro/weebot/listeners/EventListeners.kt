@@ -70,15 +70,14 @@ class EventDispatcher : ListenerAdapter() {
                 false)
 
         val se = SelectableEmbed(event.guild.members.filter { it hasPerm ADMINISTRATOR }
-            .map { it.user }.toSet(),
-            timeout = 5L, messageEmbed = strdEmbedBuilder
+            .map { it.user }.toSet(), timeout = 5L, messageEmbed = strdEmbedBuilder
                 .setTitle("***Kicks in door*** The Weebot has arrived!")
                 .setDescription(desc).addField(gdpr).build(), options =  listOf (
-                heavy_check_mark to { message: Message ->
+                heavy_check_mark to { message, user ->
                     message.channel.sendMessage(acceptEmbed).queue()
                     getWeebotOrNew(event.guild.idLong).settings.trackingEnabled = true
                 },
-                X_Red to { message: Message ->
+                X_Red to { message, user ->
                     message.channel.sendMessage(denyEmbed).queue()
                     getWeebotOrNew(event.guild.idLong).settings.trackingEnabled = false
                 }

@@ -599,12 +599,12 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
 class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet(),
                       timeout: Long = 3L, unit: TimeUnit = MINUTES,
                       val messageEmbed: MessageEmbed,
-                      val options: List<Pair<Emoji, (Message) -> Unit>>,
+                      val options: List<Pair<Emoji, (Message, User) -> Unit>>,
                       val timoutAction: (Message) -> Unit)
     : Menu(WAITER, users, roles, timeout, unit) {
 
     constructor(user: User, messageEmbed: MessageEmbed,
-                options: List<Pair<Emoji, (Message) -> Unit>>,
+                options: List<Pair<Emoji, (Message, User) -> Unit>>,
                 timeout: (Message) -> Unit)
             : this(setOf(user), messageEmbed = messageEmbed, options = options,
         timoutAction = timeout)
@@ -636,7 +636,7 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
             }
         }, { event ->
             event.reaction.reactionEmote.toEmoji()?.run {
-                options.first { this == it.first }.second(message)
+                options.first { this == it.first }.second(message, event.user)
                 message.removeUserReaction(message.author, this)
                 waitFor(message)
             }

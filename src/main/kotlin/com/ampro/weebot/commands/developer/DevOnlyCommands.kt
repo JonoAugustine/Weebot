@@ -124,7 +124,7 @@ fun Guild.infoEmbed(event: CommandEvent): SelectableEmbed {
     """.trimIndent()).setThumbnail(iconUrl).addField("Options", """
         $X_Red Remove Weebot from this guild""".trimIndent(), false)
         .setColor(if (roles.isNotEmpty()) this.roles[0].color else STD_GREEN).build(),
-        listOf(X_Red to { _: Message ->
+        listOf(X_Red to { _, _ ->
             event.reply("Are you sure? (yes/no) (30 sec timeout)")
             //TODO wait for confirm and then wait for reason
             WAITER.waitForEvent(MessageReceivedEvent::class.java,

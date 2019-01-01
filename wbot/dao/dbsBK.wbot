@@ -69,10 +69,10 @@
                 "day": 31
               },
               "time": {
-                "hour": 20,
-                "minute": 54,
-                "second": 37,
-                "nano": 103000000
+                "hour": 22,
+                "minute": 47,
+                "second": 47,
+                "nano": 527000000
               }
             },
             "offset": {
@@ -81,7 +81,7 @@
           },
           "userID": 228574821590499329,
           "channel": 113743192305827841,
-          "minutes": 936,
+          "minutes": 823,
           "message": "508617764752064512#"
         },
         {
@@ -94,10 +94,10 @@
                 "day": 31
               },
               "time": {
-                "hour": 20,
-                "minute": 54,
-                "second": 37,
-                "nano": 103000000
+                "hour": 22,
+                "minute": 47,
+                "second": 47,
+                "nano": 527000000
               }
             },
             "offset": {
@@ -106,7 +106,7 @@
           },
           "userID": 228574821590499329,
           "channel": 113743192305827841,
-          "minutes": 1893,
+          "minutes": 1780,
           "message": "525116852830208028"
         },
         {
@@ -119,10 +119,10 @@
                 "day": 31
               },
               "time": {
-                "hour": 20,
-                "minute": 54,
-                "second": 37,
-                "nano": 103000000
+                "hour": 22,
+                "minute": 47,
+                "second": 47,
+                "nano": 527000000
               }
             },
             "offset": {
@@ -131,7 +131,7 @@
           },
           "userID": 228574821590499329,
           "channel": 132632676225122304,
-          "minutes": 1902,
+          "minutes": 1789,
           "message": "506314865137156096"
         }
       ],
@@ -638,6 +638,7 @@
                 }
               },
               "edits": 1,
+              "locked": false,
               "note": "The first note but cooler",
               "authorID": 139167730237571072,
               "initTime": {
@@ -680,6 +681,7 @@
                 }
               },
               "edits": 0,
+              "locked": false,
               "note": "Matt is a nerd",
               "authorID": 139167730237571072,
               "initTime": {
@@ -722,6 +724,7 @@
                 }
               },
               "edits": 0,
+              "locked": false,
               "note": "This was written from the home menu",
               "authorID": 139167730237571072,
               "initTime": {
