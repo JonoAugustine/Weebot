@@ -4,18 +4,12 @@
 
 package com.ampro.weebot.extensions
 
-import com.ampro.weebot.main.*
+import com.ampro.weebot.main.WAITER
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
-import com.jagrosh.jdautilities.menu.ButtonMenu
-import com.jagrosh.jdautilities.menu.Menu
-import com.jagrosh.jdautilities.menu.OrderedMenu
-import com.jagrosh.jdautilities.menu.Paginator
+import com.jagrosh.jdautilities.menu.*
 import com.jagrosh.jdautilities.menu.Paginator.Builder
-import com.sun.javaws.exceptions.InvalidArgumentException
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.*
@@ -364,6 +358,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                           val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
                           val thumbnail: String = "", val color: Color = STD_GREEN,
                           val fieldList: List<Field> = emptyList(),
+                          val exitAction: (Message) -> Unit = {},
                           val timeoutAction: (Message) -> Unit = { m ->
                               try {
                                   m.clearReactions().queueAfter(250, SECONDS)
@@ -524,7 +519,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                     i++
                 }
             }
-            EXIT -> timeoutAction(message)
+            EXIT -> exitAction(message)
             else -> {
                 val i = EmojiNumbers.indexOf(emoji) + ((pageNum - 1) * itemsPerPage)
                 if (i in 0..items.size) {

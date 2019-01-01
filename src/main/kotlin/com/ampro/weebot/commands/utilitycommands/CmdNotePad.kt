@@ -370,11 +370,9 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             }
         }
         val notePad = SelectablePaginator(users = userSet, title = this.name,
-                itemsPerPage = 10, items = items, fieldList = fList
-        ) {
-            try { it.clearReactions().queueAfter(250, MILLISECONDS) }
-            catch (ignored: Exception) {}
-        }
+                itemsPerPage = 10, items = items, fieldList = fList,
+            exitAction = { it.delete().queueAfter(250, MILLISECONDS) }
+        )
 
         if (message != null) {
             notePad.display(message)
@@ -983,7 +981,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         val auth = event.author
         val pads = getWeebotOrNew(event.guild).notePads
         /** User's Viewable notepads */
-        val cv = pads.filter { event canRead it }
+        val cv = pads.filter { event canRead it }.toMutableList()
 
         if (args.isEmpty()) {
             SelectableEmbed(auth, mainMenuEmbed.apply {
@@ -1026,18 +1024,19 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
      * @param allPads All [NotePad]s in the guild
      * @param viewable The notepads that the uesr can view
      */
-    fun seeNotePads(event: CommandEvent, allPads: List<NotePad>,
-                    viewable: List<NotePad>) : (Message, User) -> Unit = { it, u ->
-            when {
-                allPads.isEmpty() -> event.respondThenDelete(strdEmbedBuilder.setTitle(
-                    "${event.guild.name} has no NotePads").setDescription(
-                    "Use ``make [Notepad Name]`` to make a new NotePad").build(), 30)
-                viewable.isEmpty() -> event.respondThenDelete(strdEmbedBuilder.setTitle(
-                    "${event.guild.name} has no NotePads you can view").setDescription(
-                    "Use ``make [Notepad Name]`` to make a new NotePad").build(), 30)
-                else -> sendNotePads(event, viewable, event.textChannel)
-            }
+    fun seeNotePads(event: CommandEvent, allPads: MutableList<NotePad>,
+                    viewable: MutableList<NotePad>) : (Message, User) -> Unit
+            = { it, u ->
+        when {
+            allPads.isEmpty() -> event.respondThenDelete(strdEmbedBuilder.setTitle(
+                "${event.guild.name} has no NotePads").setDescription(
+                "Use ``make [Notepad Name]`` to make a new NotePad").build(), 30)
+            viewable.isEmpty() -> event.respondThenDelete(strdEmbedBuilder.setTitle(
+                "${event.guild.name} has no NotePads you can view").setDescription(
+                "Use ``make [Notepad Name]`` to make a new NotePad").build(), 30)
+            else -> sendNotePads(event, viewable, event.textChannel)
         }
+    }
 
     /**
      * Send dialogue for adding a new [NotePad]
@@ -1220,93 +1219,121 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         """.trimIndent()
     }
 
-}
-
-/**
- *
- */
-fun getNotePadByIdDialogue(event: CommandEvent, viewable: List<NotePad>,
-                           action: (List<NotePad>) -> Unit, timeout: () -> Unit = {}) {
-    event.reply("*Please provide the ID(s) of the NotePad(s):*")
-    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
-        { e -> e.isValidUser(event.guild, setOf(event.author)) }, { e ->
-            val IDs = e.message.contentDisplay.split(Regex("\\s+"))
-            val notePads = viewable.filter { IDs.contains(it.id) }
-            when {
-                notePads.isNotEmpty() -> action(notePads)
-                IDs.isEmpty() -> event.reply("No NotePad ID was provided.")
-                notePads.isEmpty() -> event.reply(
-                    "No NotePad(s) could be found with the given ID(s).")
-            }
-            val unUsed = IDs.filterNot { viewable.has { np -> np.id.equals(it, true) } }
-            if (unUsed.isNotEmpty()) {
-                event.reply("I couldn't find any NotePad(s) matching: ${unUsed.joinToString(", ")}")
-            }
-        }, 1L, MINUTES, timeout)
-}
-
-/**
- *
- */
-fun getNoteByIdDialogue(event: CommandEvent, notes: List<Note>,
-                        action: (List<Note>) -> Unit, timeout: () -> Unit = {}) {
-    event.reply("Please provide the ID(s) of the Note(s):")
-    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
-        { e -> e.isValidUser(users = setOf(event.author), guild = event.guild) }, { e ->
-            val IDs = e.message.contentDisplay.split(Regex("\\s+"))
-            val notes_2 = notes.filter { IDs.contains(it.id) }
-            when {
-                notes_2.isNotEmpty() -> action(notes_2)
-                IDs.isEmpty() -> event.reply("No Note ID was provided.")
-                notes_2.isEmpty() -> event.reply("No Note(s) could be found with the given ID(s).")
-            }
-            val unUsed = IDs.filterNot { notes_2.has { np -> np.id.equals(it, true) } }
-            if (unUsed.isNotEmpty()) {
-                event.reply("I couldn't find any Note(s) matching: ${unUsed.joinToString(", ")}")
-            }
-        }, 1L, MINUTES, timeout)
-}
-
-/**
- * Send a list of [NotePad]s as a [ButtonPaginator] to the [textChannel]
- *
- * @param textChannel
- * @param pads
- * @param event
- */
-internal fun sendNotePads(event: CommandEvent, pads: List<NotePad>, textChannel: TextChannel) {
-    buildNotePadPaginator(event, pads).display(textChannel)
-}
-
-/**
- * Sends a [NotePad] [ButtonPaginator] as an edit of [message]
- *
- * @param message The message to replace
- */
-internal fun sendNotePads(event: CommandEvent, pads: List<NotePad> , message: Message) {
-    buildNotePadPaginator(event, pads).display(message)
-}
-
-/**
- * Builds a [ButtonPaginator] from the [NotePad] list
- *
- * @param event the inkoving event
- * @param pads The notepads to paginate
- *
- * @return a [ButtonPaginator] consisting of the [NotePad]s given
- */
-internal fun buildNotePadPaginator(event: CommandEvent, pads: List<NotePad>)
-        : SelectablePaginator {
-    val mem = event.member
-    return SelectablePaginator(setOf(mem.user), title = "${mem.guild.name} NotePads",
-        description = "${mem.guild.name} NotePads available to ${mem.effectiveName}",
-        itemsPerPage = 10, thumbnail = "https://47eaps32orgm24ec5k1dcrn1" +
-                "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/notepad-pen-sponsor.png",
-        items = pads.map { " ${it.name} (${it.id})" to { i: Int, m: Message ->
-            pads[i].send(event, null, pads)
-        }}) {
-        try {
-            it.clearReactions().queueAfter(2, SECONDS)
-        } catch (e: Exception) {}
+    /**
+     *
+     */
+    fun getNotePadByIdDialogue(event: CommandEvent, viewable: List<NotePad>,
+                               action: (List<NotePad>) -> Unit, timeout: () -> Unit = {
+                event.message.editMessage("~~${event.message.contentDisplay}~~ *Timed out*")
+                    .queue()
+            }) {
+        event.reply("*Please provide the ID(s) of the NotePad(s):*")
+        WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+            { e -> e.isValidUser(event.guild, setOf(event.author)) }, { e ->
+                val IDs = e.message.contentDisplay.split(Regex("\\s+"))
+                val notePads = viewable.filter { IDs.contains(it.id) }
+                when {
+                    notePads.isNotEmpty() -> action(notePads)
+                    IDs.isEmpty() -> event.reply("No NotePad ID was provided.")
+                    notePads.isEmpty() -> event.reply(
+                        "No NotePad(s) could be found with the given ID(s).")
+                }
+                val unUsed = IDs.filterNot { viewable.has { np -> np.id.equals(it, true) } }
+                if (unUsed.isNotEmpty()) {
+                    event.reply("I couldn't find any NotePad(s) matching: ${unUsed.joinToString(", ")}")
+                }
+            }, 1L, MINUTES, timeout)
     }
+
+    /**
+     *
+     */
+    private fun getNoteByIdDialogue(event: CommandEvent, notes: List<Note>,
+                            action: (List<Note>) -> Unit, timeout: () -> Unit = {}) {
+        event.reply("Please provide the ID(s) of the Note(s):")
+        WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+            { e -> e.isValidUser(users = setOf(event.author), guild = event.guild) }, { e ->
+                val IDs = e.message.contentDisplay.split(Regex("\\s+"))
+                val notes_2 = notes.filter { IDs.contains(it.id) }
+                when {
+                    notes_2.isNotEmpty() -> action(notes_2)
+                    IDs.isEmpty() -> event.reply("No Note ID was provided.")
+                    notes_2.isEmpty() -> event.reply("No Note(s) could be found with the given ID(s).")
+                }
+                val unUsed = IDs.filterNot { notes_2.has { np -> np.id.equals(it, true) } }
+                if (unUsed.isNotEmpty()) {
+                    event.reply("I couldn't find any Note(s) matching: ${unUsed.joinToString(", ")}")
+                }
+            }, 1L, MINUTES, timeout)
+    }
+
+    /**
+     * Send a list of [NotePad]s as a [ButtonPaginator] to the [textChannel]
+     *
+     * @param textChannel
+     * @param pads
+     * @param event
+     */
+    private fun sendNotePads(event: CommandEvent, pads: MutableList<NotePad>,
+                             textChannel:TextChannel) {
+        buildNotePadPaginator(event, pads).display(textChannel)
+    }
+
+    /**
+     * Sends a [NotePad] [ButtonPaginator] as an edit of [message]
+     *
+     * @param message The message to replace
+     */
+    private fun sendNotePads(event: CommandEvent, pads: MutableList<NotePad>,
+                             message:Message) {
+        buildNotePadPaginator(event, pads).display(message)
+    }
+
+    /**
+     * Builds a [ButtonPaginator] from the [NotePad] list
+     *
+     * @param event the inkoving event
+     * @param pads The notepads to paginate
+     *
+     * @return a [ButtonPaginator] consisting of the [NotePad]s given
+     */
+    private fun buildNotePadPaginator(event: CommandEvent, pads: MutableList<NotePad>)
+            : SelectablePaginator {
+        val mem = event.member
+        return SelectablePaginator(setOf(mem.user), title = "${mem.guild.name} NotePads",
+            description = "${mem.guild.name} NotePads available to ${mem.effectiveName}",
+            itemsPerPage = 10, thumbnail = "https://47eaps32orgm24ec5k1dcrn1" +
+                    "-wpengine.netdna-ssl.com/wp-content/uploads/2016/08/notepad-pen-sponsor.png",
+            items = pads.map { " ${it.name} (${it.id})" to { i: Int, m: Message ->
+                pads[i].send(event, null, pads)
+            }}, exitAction = {
+                val nn = SelectableEmbed(event.author, mainMenuEmbed.apply {
+                    if (pads.isNotEmpty() && pads.contains(pads[0])) addEmptyField(
+                        "Default NotePad: ${pads[0].name}")
+                }.build(), listOf(Eyes to seeNotePads(event, pads, pads),
+                    Notebook to addNotePad(event), Pencil to writeToDefault(event, pads),
+                    EightSpokedAsterisk to setDefaultById(event, pads),
+                    FileFolder to notePadToFileById(event, pads),
+                    C to clearNotePadById(event, pads),
+                    X_Red to deleteNotePadById(event, pads))) {
+                    try {
+                        it.delete().queue()
+                        event.delete()
+                    } catch (e: Exception) {
+                        try {
+                            it.clearReactions().queue()
+                        } catch (e: Exception) {
+                        }
+                    }
+                }
+                it.delete().queue({
+
+                    nn.display(event.message)
+                }, { nn.display(event.textChannel) })
+            }
+        )
+    }
+
 }
+
+
