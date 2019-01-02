@@ -9,7 +9,6 @@ import com.ampro.weebot.commands.`fun`.games.cardgame.CmdCardsAgainstHumanity
 import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.commands.miscellaneous.PingCommand
 import com.ampro.weebot.commands.moderation.*
-import com.ampro.weebot.commands.progammer.CmdEval
 import com.ampro.weebot.commands.progammer.CmdRegexTest
 import com.ampro.weebot.commands.utilitycommands.*
 
@@ -50,7 +49,6 @@ val CMD_VCR             = CmdVoiceChannelRole()
  *********************************/
 
 val CMD_REGEX           = CmdRegexTest()
-val CMD_EVAL            = CmdEval()
 
 /* *******************************
  *              Fun              *
@@ -67,7 +65,7 @@ val CMD_CAH             = CmdCardsAgainstHumanity()
 val commands = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
         CMD_PING, CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,
         CMD_SETTINGS, CMD_PURGE, CMD_SELFDESTRUCT,
-        CMD_REGEX, CMD_EVAL,
+        CMD_REGEX,
         CMD_OHC, CMD_REM, CMD_NOTE,
         CMD_VCR,
         CMD_CAH,

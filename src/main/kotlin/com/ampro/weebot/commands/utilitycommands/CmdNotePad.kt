@@ -663,7 +663,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
 
                 notes.forEachIndexed { i, it ->
                     sb.append("\n\n").append("""
-                        ${i + 1}.) ${it.note}
+                        ${i + 1}.) "${it.note}"
                         ID: ${it.id}
                         Author: ${nameOrUnknown(it.authorID)} (ID: ${it.authorID})
                         Creation Date: ${it.initTime.format(WKDAY_MONTH_YEAR_TIME)}

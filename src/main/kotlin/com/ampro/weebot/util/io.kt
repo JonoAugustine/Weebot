@@ -27,6 +27,8 @@ val STAT_BK   = File(DIR_DAO, "statBK.wbot")
 
 val DIR_RES = File(DIR_HOME, "res")
 
+val FILE_CONFIG = File(DIR_HOME, "config.wbot")
+
 val GSON = GsonBuilder().enableComplexMapKeySerialization()
     .setExclusionStrategies().setPrettyPrinting()
     .registerTypeAdapter(IPassive::class.java, InterfaceAdapter<IPassive>())
