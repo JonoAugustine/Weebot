@@ -185,7 +185,7 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
          * @return [HelpBiConsumerBuilder]
          */
         fun setAliases(aliases: Array<String>) : HelpBiConsumerBuilder {
-            addField("Aliases", aliases.joinToString(", "))
+            addField("Aliases", "``${aliases.joinToString(", ")}``")
             return this
         }
 

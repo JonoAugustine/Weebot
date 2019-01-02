@@ -60,58 +60,7 @@
     "REM_MAX": 10,
     "REM_MAX_PREM": 50,
     "userReminders": {
-      "228574821590499329": [
-        {
-          "id": "Y5SV2JB",
-          "lastTime": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 2
-              },
-              "time": {
-                "hour": 1,
-                "minute": 27,
-                "second": 11,
-                "nano": 62000000
-              }
-            },
-            "offset": {
-              "totalSeconds": -18000
-            }
-          },
-          "userID": 228574821590499329,
-          "channel": 113743192305827841,
-          "minutes": 184,
-          "message": "525116852830208028"
-        },
-        {
-          "id": "NST0FZS",
-          "lastTime": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 2
-              },
-              "time": {
-                "hour": 1,
-                "minute": 27,
-                "second": 11,
-                "nano": 62000000
-              }
-            },
-            "offset": {
-              "totalSeconds": -18000
-            }
-          },
-          "userID": 228574821590499329,
-          "channel": 132632676225122304,
-          "minutes": 193,
-          "message": "506314865137156096"
-        }
-      ],
+      "228574821590499329": [],
       "139167730237571072": []
     },
     "initDate": {
@@ -1247,6 +1196,27 @@
         }
       },
       "userId": 258715234586329089
+    },
+    "488786712206770196": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 2
+          },
+          "time": {
+            "hour": 4,
+            "minute": 57,
+            "second": 47,
+            "nano": 41000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 488786712206770196
     },
     "186930311261585408": {
       "joinDate": {

@@ -59,8 +59,6 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
 
         sBuilder.append(commands.sortedBy { it.name.toLowerCase() }
             .filterNot { it.isOwnerCommand }.joinToString(", ") { "*${it.name}*" })
-        sBuilder.setLength(sBuilder.length - 2)
-        sBuilder.append("\n\n")
         eb.setDescription(sBuilder.toString())
         sBuilder.setLength(0)
 

@@ -6,6 +6,7 @@ package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.moderation.VCGenerator.*
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.*
 import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
@@ -228,12 +229,18 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
     Personal Auto VC
  *********************/
 
+
+internal fun nameGen(member: Member) = "${member.effectiveName}'s Channel"
+
+internal fun nameGen(member: Member, format: String)
+        = format.replace(Regex("(?i)(\\{U+S+E+R+})"), member.effectiveName)
+
 /**
  * Creates a temp [VoiceChannel] for a User after they join a designated"[baseChannel]".
  * The [VoiceChannel] is deleted on empty.
  *
  * @author Jonathan Augustine
- * @since 2.0
+ * @since 2.1
  */
 class VCGenerator(var baseChannel: VoiceChannel) : IPassive {
     var dead = false
@@ -248,16 +255,20 @@ class VCGenerator(var baseChannel: VoiceChannel) : IPassive {
      *
      * @throws IllegalArgumentException if either param is not in the allowed range
      */
-    internal data class Settings(var limit: Int, var name: String) {
+    internal data class Settings(var limit: Int = 0, var name: String = "") {
         init {
             if (limit !in 0..99)
                 throw IllegalArgumentException(limit.toString())
-            if (name.length !in 1..99)
+            if (name.length > 99)
                 throw IllegalArgumentException(name)
         }
         fun asEmbed(member: Member) : MessageEmbed {
-            TODO()
-            return strdEmbedBuilder.setColor(member.color)
+            return makeEmbedBuilder("${member.effectiveName}'s Voice Channel Generator",
+                description = """
+                    **User limit:** ${if (limit == 0) "Infinity" else "$limit"}
+                    **Channel name:** ${ if (name.isNotBlank()) name else nameGen(member)}
+                """.trimIndent())
+                .setColor(member.color ?: STD_GREEN)
                 .build()
         }
     }
@@ -275,25 +286,23 @@ class VCGenerator(var baseChannel: VoiceChannel) : IPassive {
         TODO("not implemented")
     }
 
-    private fun nameGen(member: Member) = "${member.effectiveName}'s Channel"
-
-    private fun nameGen(member: Member, format: String)
-            = format.replace(Regex("(?i)(\\{U+S+E+R+})"), member.effectiveName)
-
     fun asEmbed(guild: Guild) : MessageEmbed {
         TODO()
     }
 }
 
 /**
- * A [WeebotCommand] to moderate a [Guild]'s [VCGenerator].
+ * A [WeebotCommand] to moderate a [Guild]'s [VCGenerator] or create temporary
+ * [VoiceChannel].
  *
+ * @author Jonathan Augustine
+ * @since 2.1
  */
 class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
     arrayOf("vcg", "vcgenerator", "vcgen"), CAT_UNDER_CONSTRUCTION, "",
     "Creates a temp VoiceChannel for a User after joining a designated Voice Channel",
-    guildOnly = true, children = arrayOf()
-) {
+    guildOnly = true, children = arrayOf(SubCmdEnable(), SubCmdServerDefaults(),
+        SubCmdBaseChannel(), SubCmdUserDefaults(), SubCmdManulTemp())) {
 
     /** Turn ON or OFF */
     internal class SubCmdEnable : WeebotCommand("enable",
@@ -304,7 +313,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
             val arg = event.getInvocation()
             when {
                 arg.matchesAny(REG_ON, REG_ENABLE) -> {
-                    TODO("Generate VCGen")
+                    TODO("Generate VCGen, use selectable paginator to choose genchannel")
                 }
                 arg.matchesAny(REG_OFF, REG_DISABLE) -> {
                     TODO("Set VCGen to shutdown mode.")
@@ -313,37 +322,80 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
         }
     }
 
+    /** Set Server Defaults */
     internal class SubCmdServerDefaults : WeebotCommand("def",
         arrayOf("serverdefaults", "sdef", "servdef"), CAT_MOD, "", "",
-        botPerms = arrayOf(MANAGE_CHANNEL), userPerms = arrayOf(MANAGE_CHANNEL),
+        userPerms = arrayOf(MANAGE_CHANNEL), guildOnly = true, cooldown = 30) {
+        override fun execute(event: CommandEvent) {
+            TODO("not implemented")
+        }
+    }
+
+    /** Set Base Channel */
+    internal class SubCmdBaseChannel : WeebotCommand("base", arrayOf("channel", "chan"),
+        CAT_MOD, "", "", userPerms = arrayOf(MANAGE_CHANNEL), cooldown = 30,
         guildOnly = true) {
         override fun execute(event: CommandEvent) {
             TODO("not implemented")
         }
     }
 
+    /** Set User Settings */
+    internal class SubCmdUserDefaults : WeebotCommand("set", arrayOf("mydef"), CAT_UTIL,
+        "", "", cooldown = 30, guildOnly = true) {
+        override fun execute(event: CommandEvent) {
+            val args = event.splitArgs()
+            val settings = getWeebotOrNew(event.guild).getPassive<VCGenerator>()
+                ?.userSettings?.getOrDefault(event.author.idLong, Settings())
+                    ?: Settings()
+
+            if (args.isEmpty()) {
+                event.reply(settings.asEmbed(event.member))
+                return
+            }
+            //set [-L userLimit] [channelName]
+            TODO("not implemented")
+        }
+    }
+
+    /** Manual Temp Channel */
+    internal class SubCmdManulTemp : WeebotCommand("set", arrayOf("mydef"), CAT_UTIL,
+        "", "", cooldown = 30, guildOnly = true) {
+        override fun execute(event: CommandEvent) {
+            //temp [-t hours] [-L userLimit] [name]
+            TODO("not implemented")
+        }
+    }
+
     override fun execute(event: CommandEvent) {
-        TODO()
+        TODO("not implemented")
     }
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Voice Channel Generator", """
-            Creates a temp VoiceChannel for a User after joining a designated Voice
-            Channel.
+            Creates a temp VoiceChannel for a User after joining a designated Voice Channel.
 
             **Changing Settings**
-            There are two settings for Generated Voice Channels: (User) Limit and Name
+            There are two settings for Generated Voice Channels: *(User) Limit* and *Name*
             When settings these, it is important to follow these guidelines.
-            **User Limit** can be any number from 0 to 99. 0 means there is no limit.
+            **User Limit** can be any number from 0 to 99 (0 means there is no limit).
             **Name** is the name of the generated channel and will replace ``{USER}``
             with the user's name. For example, ``{USER}'s room`` becomes ``Bill's Room``
         """.trimIndent())
             .setAliases(aliases)
-            .addField("Enable/Disable",
-                "``on/off``\n*Must have ${MANAGE_CHANNEL.name} permission.*", true)
-            .addField("Set/See Server Defaults","``def [-L userLimit] [-n channelName]``"
-                    + "\n*Must have ${MANAGE_CHANNEL.name} permission.*", true)
-            .addField("Set/See Your Defaults","``set [-L userLimit] [-n channelName]``", true)
+            .addField("Enable/Disable Auto Generator",
+                "``on/off``\n*Need ${MANAGE_CHANNEL.getName()} permission.*", true)
+            .addField("Set/See Server Defaults",
+                """``def [-L userLimit] [channelName]``
+                    *Need ${MANAGE_CHANNEL.getName()} permission.*""".trimIndent(),true)
+            .addField("Set Generator Voice Channel",
+                "``base``\n*Need ${MANAGE_CHANNEL.getName()} permission.*", true)
+            .addField("Set/See Your Defaults","``set [-L userLimit] [channelName]``",true)
+            .addField("Manually Create Temporary Voice Channel", """
+                ``temp [-t hours] [-L userLimit] [name]``
+                If ``hours`` is not set, the channel will delete on exit
+                *Must have ${MANAGE_CHANNEL.getName()} permission.*
+            """.trimIndent(), true)
             .build()
     }
 }

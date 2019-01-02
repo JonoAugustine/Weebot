@@ -8,3 +8,4 @@ build/
 /.flooignore
 /.floo
 *.flog
+/wbot/temp/dbstemp.wbot

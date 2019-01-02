@@ -153,8 +153,7 @@ fun main(args_: Array<String>) { runBlocking {
 
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
         .queueAfter(850, MILLISECONDS)
-}
-}
+}}
 
 /**
  * Attempts to load Statistics data from file. Sets [STAT] to the loaded data
