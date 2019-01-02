@@ -11,8 +11,8 @@ import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.CHANNEL
-import com.ampro.weebot.main.SELF
-import com.ampro.weebot.main.WAITER
+import com.ampro.weebot.SELF
+import com.ampro.weebot.WAITER
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.Command.CooldownScope.*

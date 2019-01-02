@@ -16,6 +16,10 @@ const val alphaDigi = alpha + digi
 
 val REG_YES = Regex("(?i)(y+e+s+)")
 val REG_NO  = Regex("(?i)(n+o+)")
+val REG_ON  = Regex("(?i)(o+n+)")
+val REG_ENABLE = Regex("(?i)(e+n+a+b+l+e+)")
+val REG_OFF = Regex("(?i)(o+f{2,})")
+val REG_DISABLE = Regex("(?i)(d+i+s+a+b+l+e+)")
 val REG_DEFAULT = Regex("(?i)(d+e+f+a+u+l+t+)")
 
 /**

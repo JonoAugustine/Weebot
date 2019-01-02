@@ -4,15 +4,12 @@
 
 package com.ampro.weebot.commands.`fun`.games.cardgame
 
-import com.ampro.weebot.Restriction
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.`fun`.games.*
 import com.ampro.weebot.database.*
-import com.ampro.weebot.extensions.strdEmbedBuilder
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.removeAll
-import com.ampro.weebot.main.MLOG
+import com.ampro.weebot.MLOG
+import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.*

@@ -1,8 +1,8 @@
 /*
- * Copyright Aquatic Mastery Productions (c) 2018.
+ * Copyright Aquatic Mastery Productions (c) 2019.
  */
 
-package com.ampro.weebot.listeners
+package com.ampro.weebot
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.database.*
@@ -15,8 +15,7 @@ import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.channel.priv.PrivateChannelCreateEvent
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
-import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
-import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
+import net.dv8tion.jda.core.events.guild.voice.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.react.GenericGuildMessageReactionEvent
 import net.dv8tion.jda.core.events.message.priv.GenericPrivateMessageEvent
@@ -102,12 +101,12 @@ class EventDispatcher : ListenerAdapter() {
 
     override fun onGenericGuildMessageReaction(event: GenericGuildMessageReactionEvent) {
         if (event.user.isBot) return
-        getWeebot(event.guild.idLong)?.feedPassives(event)
+        getWeebotOrNew(event.guild.idLong).feedPassives(event)
     }
 
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
         if (event.isWebhookMessage || event.author.isBot) return
-        getWeebot(event.guild.idLong)?.feedPassives(event)
+        getWeebotOrNew(event.guild.idLong).feedPassives(event)
     }
 
     override fun onPrivateChannelCreate(event: PrivateChannelCreateEvent) {
@@ -146,12 +145,17 @@ class EventDispatcher : ListenerAdapter() {
 
     override fun onGuildVoiceJoin(event: GuildVoiceJoinEvent) {
         if (event.member.user.isBot) return
-        getWeebot(event.guild.idLong)?.feedPassives(event)
+        getWeebotOrNew(event.guild.idLong).feedPassives(event)
     }
 
     override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
         if (event.member.user.isBot) return
-        getWeebot(event.guild.idLong)?.feedPassives(event)
+        getWeebotOrNew(event.guild.idLong).feedPassives(event)
+    }
+
+    override fun onGuildVoiceMove(event: GuildVoiceMoveEvent) {
+        if (event.member.user.isBot) return
+        getWeebotOrNew(event.guild.idLong).feedPassives(event)
     }
 
 }

@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.commands.utilitycommands
 
-import com.ampro.weebot.Restriction
+import com.ampro.weebot.*
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
 import com.ampro.weebot.commands.CAT_UTIL
@@ -14,7 +14,6 @@ import com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit.EditType.*
 import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.*
-import com.ampro.weebot.main.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
@@ -220,7 +219,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                                     if (it.toEmoji() == Fire) {
                                         val index = notePad.indexOf(this)
                                         if (index == -1) {
-                                            m.channel.sendMessage(GENERIC_ERR_MESG)
+                                            m.channel.sendMessage(
+                                                GENERIC_ERR_MESG)
                                                 .queue()
                                             return@setAction
                                         } else {
@@ -1208,7 +1208,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             WAITER.waitForEvent(MessageReceivedEvent::class.java,
                 { ev -> ev.isValidUser(event.guild, setOf(event.author)) }, { ev ->
                     (this.children.find { it is CmdMake } as CmdMake).execute(
-                        CommandEvent(ev, ev.message.contentDisplay, CMD_CLIENT))
+                        CommandEvent(ev, ev.message.contentDisplay,
+                            CMD_CLIENT))
                     m.delete().queueAfter(250, MILLISECONDS)
                 }, 3, MINUTES, { event.reply("*Timed Out*") })
         }

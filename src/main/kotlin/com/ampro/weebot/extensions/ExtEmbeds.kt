@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.extensions
 
-import com.ampro.weebot.main.WAITER
+import com.ampro.weebot.WAITER
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.menu.*

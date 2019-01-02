@@ -10,7 +10,7 @@ import com.ampro.weebot.commands.developer.Suggestion.State.*
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.OFFICIAL_CHATS
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.main.SELF
+import com.ampro.weebot.SELF
 import com.ampro.weebot.util.DD_MM_YYYY_HH_MM
 import com.ampro.weebot.util.IdGenerator
 import com.jagrosh.jdautilities.command.CommandEvent

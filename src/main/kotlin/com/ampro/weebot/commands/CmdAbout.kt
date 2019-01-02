@@ -4,12 +4,11 @@
 
 package com.ampro.weebot.commands
 
-import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.*
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.main.*
 import com.ampro.weebot.util.WKDAY_MONTH_YEAR_TIME
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.menu.OrderedMenu

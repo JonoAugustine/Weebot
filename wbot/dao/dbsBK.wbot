@@ -71,10 +71,10 @@
                 "day": 2
               },
               "time": {
-                "hour": 1,
-                "minute": 27,
-                "second": 11,
-                "nano": 62000000
+                "hour": 4,
+                "minute": 20,
+                "second": 49,
+                "nano": 667000000
               }
             },
             "offset": {
@@ -83,7 +83,7 @@
           },
           "userID": 228574821590499329,
           "channel": 113743192305827841,
-          "minutes": 184,
+          "minutes": 11,
           "message": "525116852830208028"
         },
         {
@@ -96,10 +96,10 @@
                 "day": 2
               },
               "time": {
-                "hour": 1,
-                "minute": 27,
-                "second": 11,
-                "nano": 62000000
+                "hour": 4,
+                "minute": 20,
+                "second": 49,
+                "nano": 667000000
               }
             },
             "offset": {
@@ -108,7 +108,7 @@
           },
           "userID": 228574821590499329,
           "channel": 132632676225122304,
-          "minutes": 193,
+          "minutes": 20,
           "message": "506314865137156096"
         }
       ],
@@ -1101,27 +1101,6 @@
       },
       "userId": 260727858366906368
     },
-    "389937555853934593": {
-      "joinDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 12
-          },
-          "time": {
-            "hour": 20,
-            "minute": 59,
-            "second": 42,
-            "nano": 830000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "userId": 389937555853934593
-    },
     "396824765261676554": {
       "joinDate": {
         "dateTime": {
@@ -1142,6 +1121,27 @@
         }
       },
       "userId": 396824765261676554
+    },
+    "389937555853934593": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 389937555853934593
     },
     "452607714041004032": {
       "joinDate": {
@@ -1416,27 +1416,6 @@
       },
       "userId": 329630845805789186
     },
-    "397551360674889738": {
-      "joinDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 12
-          },
-          "time": {
-            "hour": 20,
-            "minute": 59,
-            "second": 42,
-            "nano": 831000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "userId": 397551360674889738
-    },
     "110031510857338880": {
       "joinDate": {
         "dateTime": {
@@ -1457,6 +1436,27 @@
         }
       },
       "userId": 110031510857338880
+    },
+    "397551360674889738": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 397551360674889738
     },
     "433078185555656705": {
       "joinDate": {
@@ -2109,27 +2109,6 @@
       },
       "userId": 351227880153546754
     },
-    "397655940066705410": {
-      "joinDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 12
-          },
-          "time": {
-            "hour": 20,
-            "minute": 59,
-            "second": 42,
-            "nano": 833000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "userId": 397655940066705410
-    },
     "365975655608745985": {
       "joinDate": {
         "dateTime": {
@@ -2150,6 +2129,27 @@
         }
       },
       "userId": 365975655608745985
+    },
+    "397655940066705410": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 397655940066705410
     },
     "237082240327221248": {
       "joinDate": {

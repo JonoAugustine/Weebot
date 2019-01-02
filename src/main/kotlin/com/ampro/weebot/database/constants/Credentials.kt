@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.database.constants
 
-import com.ampro.weebot.main.MLOG
+import com.ampro.weebot.MLOG
 import com.twilio.type.PhoneNumber
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
 import net.dv8tion.jda.core.AccountType

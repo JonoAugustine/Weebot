@@ -8,15 +8,20 @@ import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.*
 import com.ampro.weebot.database.STAT
-import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.splitArgs
+import com.ampro.weebot.extensions.*
+import com.ampro.weebot.util.*
 import com.jagrosh.jdautilities.command.CommandEvent
-import net.dv8tion.jda.core.Permission
-import net.dv8tion.jda.core.entities.VoiceChannel
+import net.dv8tion.jda.core.Permission.*
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.events.guild.voice.*
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceUpdateEvent
+import java.util.concurrent.ConcurrentHashMap
+
+/* ***************
+    VC Roles
+ *****************/
 
 /**
  * The [IPassive] manager that creates, assigns, removes, and deletes
@@ -54,13 +59,13 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
      *
      * @param voiceChannel The [VoiceChannel] to check
      */
-    fun limitSafe(voiceChannel: VoiceChannel) = when (limit) {
+    private fun limitSafe(voiceChannel: VoiceChannel) = when (limit) {
         ALL -> true
         NONE -> false
         PUBLIC -> voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
-                    ?.allowed?.contains(Permission.VOICE_CONNECT) ?: true
+                    ?.allowed?.contains(VOICE_CONNECT) ?: true
                 || !(voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
-                ?.denied?.contains(Permission.VOICE_CONNECT) ?: true)
+                ?.denied?.contains(VOICE_CONNECT) ?: true)
     }
 
     /**
@@ -122,8 +127,8 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
 class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
     arrayOf("vcrc","vcr","vrc", "vcrole"), CAT_MOD, "[enable/disable] [limit] or [limit]",
     "A manager that creates, assigns, removes, and deletes VoiceChannel roles.",
-    cooldown = 10, userPerms = arrayOf(Permission.MANAGE_ROLES),
-    botPerms = arrayOf(Permission.MANAGE_ROLES)
+    cooldown = 10, userPerms = arrayOf(MANAGE_ROLES),
+    botPerms = arrayOf(MANAGE_ROLES)
 ) {
 
     init {
@@ -136,13 +141,12 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
             .addToDesc("channels or only channels public to @/everyone)")
             .addField("Arguments", "[enable/disable/on/off] [all/public]" +
                     "\n[all/public] (if already enabled)", false)
-            .addField("Aliases",
-                    "$name, ${aliases.contentToString().removeSurrounding("[","]")}", false)
+            .setAliases(aliases)
             .build()
     }
 
     companion object {
-        val activatedEmbed
+        val activatedEmbed: MessageEmbed
             get() = strdEmbedBuilder
                 .setTitle("Voice Channel Roles Activated!")
                 .setDescription("""
@@ -180,7 +184,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
             "DISABLE", "OFF" -> {
                 if (vcp != null) {
                     vcp.clean()
-                    bot.passives.remove(vcp)
+                    vcp.dead = true
                     event.reply("*VoiceChannelRoles are now disabled*")
                     return
                 } else {
@@ -218,4 +222,128 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
 
     }
 
+}
+
+/* *******************
+    Personal Auto VC
+ *********************/
+
+/**
+ * Creates a temp [VoiceChannel] for a User after they join a designated"[baseChannel]".
+ * The [VoiceChannel] is deleted on empty.
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+class VCGenerator(var baseChannel: VoiceChannel) : IPassive {
+    var dead = false
+    override fun dead() = dead
+
+    /** Whether the generator is set to shutdown (block incoming requests then die)*/
+    var inShutdown = false
+
+    /**
+     * @param limit the max users that can join the channel 1-99 (0 if no limit)
+     * @param name The name of the Generated [VoiceChannel]. 1-99 char
+     *
+     * @throws IllegalArgumentException if either param is not in the allowed range
+     */
+    internal data class Settings(var limit: Int, var name: String) {
+        init {
+            if (limit !in 0..99)
+                throw IllegalArgumentException(limit.toString())
+            if (name.length !in 1..99)
+                throw IllegalArgumentException(name)
+        }
+        fun asEmbed(member: Member) : MessageEmbed {
+            TODO()
+            return strdEmbedBuilder.setColor(member.color)
+                .build()
+        }
+    }
+
+    /** User default settings for their generated channel */
+    internal val userSettings = ConcurrentHashMap<Long, Settings>()
+
+    /** The Guild Settings for default Generated Channels */
+    internal val guildSettings = Settings(-1, "{USER}'s Channel ")
+
+    /** All active generated [VoiceChannel]s */
+    val generatedChannels = mutableListOf<Long>()
+
+    override fun accept(bot: Weebot, event: Event) {
+        TODO("not implemented")
+    }
+
+    private fun nameGen(member: Member) = "${member.effectiveName}'s Channel"
+
+    private fun nameGen(member: Member, format: String)
+            = format.replace(Regex("(?i)(\\{U+S+E+R+})"), member.effectiveName)
+
+    fun asEmbed(guild: Guild) : MessageEmbed {
+        TODO()
+    }
+}
+
+/**
+ * A [WeebotCommand] to moderate a [Guild]'s [VCGenerator].
+ *
+ */
+class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
+    arrayOf("vcg", "vcgenerator", "vcgen"), CAT_UNDER_CONSTRUCTION, "",
+    "Creates a temp VoiceChannel for a User after joining a designated Voice Channel",
+    guildOnly = true, children = arrayOf()
+) {
+
+    /** Turn ON or OFF */
+    internal class SubCmdEnable : WeebotCommand("enable",
+        arrayOf("on", "disable", "off"), CAT_MOD, "", "", guildOnly = true,
+        cooldown = 30,  botPerms = arrayOf(MANAGE_CHANNEL),
+        userPerms = arrayOf(MANAGE_CHANNEL)) {
+        public override fun execute(event: CommandEvent) {
+            val arg = event.getInvocation()
+            when {
+                arg.matchesAny(REG_ON, REG_ENABLE) -> {
+                    TODO("Generate VCGen")
+                }
+                arg.matchesAny(REG_OFF, REG_DISABLE) -> {
+                    TODO("Set VCGen to shutdown mode.")
+                }
+            }
+        }
+    }
+
+    internal class SubCmdServerDefaults : WeebotCommand("def",
+        arrayOf("serverdefaults", "sdef", "servdef"), CAT_MOD, "", "",
+        botPerms = arrayOf(MANAGE_CHANNEL), userPerms = arrayOf(MANAGE_CHANNEL),
+        guildOnly = true) {
+        override fun execute(event: CommandEvent) {
+            TODO("not implemented")
+        }
+    }
+
+    override fun execute(event: CommandEvent) {
+        TODO()
+    }
+
+    init {
+        helpBiConsumer = HelpBiConsumerBuilder("Voice Channel Generator", """
+            Creates a temp VoiceChannel for a User after joining a designated Voice
+            Channel.
+
+            **Changing Settings**
+            There are two settings for Generated Voice Channels: (User) Limit and Name
+            When settings these, it is important to follow these guidelines.
+            **User Limit** can be any number from 0 to 99. 0 means there is no limit.
+            **Name** is the name of the generated channel and will replace ``{USER}``
+            with the user's name. For example, ``{USER}'s room`` becomes ``Bill's Room``
+        """.trimIndent())
+            .setAliases(aliases)
+            .addField("Enable/Disable",
+                "``on/off``\n*Must have ${MANAGE_CHANNEL.name} permission.*", true)
+            .addField("Set/See Server Defaults","``def [-L userLimit] [-n channelName]``"
+                    + "\n*Must have ${MANAGE_CHANNEL.name} permission.*", true)
+            .addField("Set/See Your Defaults","``set [-L userLimit] [-n channelName]``", true)
+            .build()
+    }
 }

@@ -19,7 +19,6 @@ import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KClass
 
 /**
  * A store of settings for a Weebot. This class exists to make compliance with

@@ -8,11 +8,11 @@ package com.ampro.weebot.commands.developer
  * This file holds [WeebotCommand]s for Shutdown, GuildList, and Ping
  */
 
+import com.ampro.weebot.*
 import com.ampro.weebot.commands.CAT_DEV
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.PHONE_JONO
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.main.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.X_Red
 import com.jagrosh.jdautilities.command.CommandEvent

@@ -95,6 +95,8 @@ class CmdPurge : WeebotCommand("purge", arrayOf("prune", "clean", "clear"), CAT_
         }
 
         GlobalScope.launch {
+            event.delete(1)
+            delay(2)
             list.forEach { toDel ->
                 MessageHistory(event.textChannel).retrievePast(toDel).queue {
                     event.textChannel.deleteMessages(it).queue()
@@ -124,8 +126,8 @@ class CmdChatLock : WeebotCommand("chatlock",
     guildOnly = true, botPerms = arrayOf(MESSAGE_MANAGE, MANAGE_CHANNEL),
     userPerms = arrayOf(MANAGE_CHANNEL), cooldown = 20, cooldownScope = USER_CHANNEL
 ) {
-    override fun execute(event: CommandEvent?) {
-            //TODO Chatlock
+    override fun execute(event: CommandEvent) {
+        TODO("Chatlock")
     }
 
     init {

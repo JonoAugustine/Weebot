@@ -10,8 +10,8 @@ import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.main.JDA_SHARD_MNGR
-import com.ampro.weebot.main.ON
+import com.ampro.weebot.JDA_SHARD_MNGR
+import com.ampro.weebot.ON
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent

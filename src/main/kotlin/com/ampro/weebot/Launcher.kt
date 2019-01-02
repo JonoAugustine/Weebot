@@ -1,8 +1,8 @@
 /*
- * Copyright Aquatic Mastery Productions (c) 2018.
+ * Copyright Aquatic Mastery Productions (c) 2019.
  */
 
-package com.ampro.weebot.main
+package com.ampro.weebot
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CMD_HELP
@@ -11,7 +11,6 @@ import com.ampro.weebot.commands.utilitycommands.remThreadPool
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.listeners.EventDispatcher
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandClient
@@ -23,10 +22,8 @@ import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.entities.Game.playing
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
-import java.io.File
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit.MILLISECONDS
-import java.util.logging.Level.CONFIG
 import javax.security.auth.login.LoginException
 import kotlin.system.measureTimeMillis
 
@@ -57,111 +54,106 @@ lateinit var SELF: SelfUser
  * @throws RateLimitedException/
  * @throws InterruptedException
  */
-fun main(args_: Array<String>) {
-    runBlocking {
-        slog("Launching...")
-        slog("\tBuilding Directories...")
-        if (!buildDirs()) {
-            elog("\tFAILED: Build Dir | shutting down...")
-            System.exit(-1)
-        }
-        slog("\t...DONE")
-        slog("Initializing Main Logger")
-        MLOG = FileLogger("Launcher $NOW_STR_FILE")
-        slog("...DONE\n\n")
+fun main(args_: Array<String>) { runBlocking {
+    slog("Launching...")
+    slog("\tBuilding Directories...")
+    if (!buildDirs()) {
+        elog("\tFAILED: Build Dir | shutting down...")
+        System.exit(-1)
+    }
+    slog("\t...DONE")
+    slog("Initializing Main Logger")
+    MLOG = FileLogger("Launcher $NOW_STR_FILE")
+    slog("...DONE\n\n")
 
-        /** Setup for random methods and stuff that is needed before launch */
-        val genSetup = listOf(launch { setupWebFuel() })
+    /** Setup for random methods and stuff that is needed before launch */
+    val genSetup = listOf(launch { setupWebFuel() })
 
-        //Debug
-        //RestAction.setPassContext(true) // enable context by default
-        //RestAction.DEFAULT_FAILURE = Consumer(Throwable::printStackTrace)
-
-
-        //LOGIN & LISTENERS
-        val reg_wbot = Regex("(?i)(w|weebot|full)")
-        val weebot = (args_.isEmpty() || args_[0].matches(reg_wbot))
-                || (FILE_CONFIG.exists() && FILE_CONFIG.readLines()[0].matches(reg_wbot))
-
-        val alt = if (weebot) "\\" else "t\\"
+    //Debug
+    //RestAction.setPassContext(true) // enable context by default
+    //RestAction.DEFAULT_FAILURE = Consumer(Throwable::printStackTrace)
 
 
-        //COMMAND CLIENT
-        CMD_CLIENT = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
-            .setCoOwnerIds(DEV_IDS[1].toString())
-            .setGuildSettingsManager { getWeebotOrNew(it.idLong).settings }
-            .setAlternativePrefix(alt)
-            //.setGame(listening("@Weebot help"))
-            .setGame(playing("Weebot 2.0 Kotlin!"))
-            .addCommands(commands)
-            .setEmojis(heavy_check_mark.unicode, Warning.unicode, X_Red.unicode)
-            .setServerInvite(LINK_INVITEBOT)
-            .setHelpConsumer { event ->
-                //If the only argument is the command invoke
-                val args = event.splitArgs()
-                if (args.isEmpty()) {
-                    CMD_HELP.execute(event)
-                } else {
-                    commands.forEach { cmd ->
-                        if (cmd.isCommandFor(args[0]) && (!cmd.isHidden || event.isOwner)) {
-                            if (cmd.getHelpBiConsumer() != null) {
-                                cmd.getHelpBiConsumer().accept(event, cmd)
-                                return@setHelpConsumer
-                            } else if (!cmd.help.isNullOrBlank()) {
-                                event.reply("*${cmd.help}*")
-                                return@setHelpConsumer
-                            } else {
-                                event.reply("*Help is currently unavailable for this command." +
-                                        " You can use ``@Weebot sugg`` to send feedback to the" +
-                                        " Developers and remind them they have a job to do!* $Rage")
-                                return@setHelpConsumer
-                            }
+    //LOGIN & LISTENERS
+    val reg_wbot = Regex("(?i)(w|weebot|full)")
+    val reg_tBot = Regex("(?i)(t|tobeew|test)")
+
+    val weebot = !(args_.isNotEmpty() && args_[0].matches(reg_tBot))
+
+    val alt = if (weebot) "\\" else "t\\"
+
+    //COMMAND CLIENT
+    CMD_CLIENT = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
+        .setCoOwnerIds(DEV_IDS[1].toString())
+        .setGuildSettingsManager { getWeebotOrNew(it.idLong).settings }
+        .setAlternativePrefix(alt)
+        //.setGame(listening("@Weebot help"))
+        .setGame(playing("Weebot 2.1 Kotlin!")).addCommands(commands)
+        .setEmojis(heavy_check_mark.unicode, Warning.unicode, X_Red.unicode)
+        .setServerInvite(LINK_INVITEBOT).setHelpConsumer { event ->
+            //If the only argument is the command invoke
+            val args = event.splitArgs()
+            if (args.isEmpty()) {
+                CMD_HELP.execute(event)
+            } else {
+                commands.forEach { cmd ->
+                    if (cmd.isCommandFor(args[0]) && (!cmd.isHidden || event.isOwner)) {
+                        if (cmd.getHelpBiConsumer() != null) {
+                            cmd.getHelpBiConsumer().accept(event, cmd)
+                            return@setHelpConsumer
+                        } else if (!cmd.help.isNullOrBlank()) {
+                            event.reply("*${cmd.help}*")
+                            return@setHelpConsumer
+                        } else {
+                            event.reply(
+                                "*Help is currently unavailable for this command." + " You can use ``@Weebot sugg`` to send feedback to the" + " Developers and remind them they have a job to do!* $Rage")
+                            return@setHelpConsumer
                         }
                     }
                 }
             }
-            .setDiscordBotsKey(BOTSONDISCORD_KEY)
-            //.setDiscordBotListKey(BOTLIST_KEY)
-            .build()
+        }.setDiscordBotsKey(BOTSONDISCORD_KEY)
+        //.setDiscordBotListKey(BOTLIST_KEY)
+        .build()
 
-        //LOGIN & LISTENERS
-        JDA_SHARD_MNGR = if (weebot) {
-            jdaShardLogIn().addEventListeners(CMD_CLIENT).build()
-        } else {
-            jdaDevShardLogIn().addEventListeners(CMD_CLIENT).build()
-        }
-
-        //WAIT FOR SHARD CONNECT
-        MLOG.slog("Shard connected! ${measureTimeMillis {
-            while (JDA_SHARD_MNGR.shards[0].status != JDA.Status.CONNECTED) {
-                MLOG.slog("Waiting for shard to connect...")
-                Thread.sleep(500)
-            }
-        } / 1_000} seconds")
-
-        //DATABASE
-        setUpDatabase()
-        //Stats
-        setUpStatistics()
-
-        JDA_SHARD_MNGR.addEventListener(EventDispatcher(), WAITER)
-
-        genSetup.joinAll() //Ensure all gensetup is finished
-
-        //SET SELF AND AVATAR URL
-        SELF = JDA_SHARD_MNGR.shards[0].selfUser
-        weebotAvatar = SELF.avatarUrl
-
-        startupWeebots()
-
-        MLOG.slog("Starting Save Job...")
-        SAVE_JOB = saveTimer()
-
-        MLOG.slog("Launch Complete!\n\n")
-
-        JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
-            .queueAfter(850, MILLISECONDS)
+    //LOGIN & LISTENERS
+    JDA_SHARD_MNGR = if (weebot) {
+        jdaShardLogIn().addEventListeners(CMD_CLIENT).build()
+    } else {
+        jdaDevShardLogIn().addEventListeners(CMD_CLIENT).build()
     }
+
+    //WAIT FOR SHARD CONNECT
+    MLOG.slog("Shard connected! ${measureTimeMillis {
+        while (JDA_SHARD_MNGR.shards[0].status != JDA.Status.CONNECTED) {
+            MLOG.slog("Waiting for shard to connect...")
+            Thread.sleep(500)
+        }
+    } / 1_000} seconds")
+
+    //DATABASE
+    setUpDatabase()
+    //Stats
+    setUpStatistics()
+
+    JDA_SHARD_MNGR.addEventListener(EventDispatcher(), WAITER)
+
+    genSetup.joinAll() //Ensure all gensetup is finished
+
+    //SET SELF AND AVATAR URL
+    SELF = JDA_SHARD_MNGR.shards[0].selfUser
+    weebotAvatar = SELF.avatarUrl
+
+    startupWeebots()
+
+    MLOG.slog("Starting Save Job...")
+    SAVE_JOB = saveTimer()
+
+    MLOG.slog("Launch Complete!\n\n")
+
+    JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
+        .queueAfter(850, MILLISECONDS)
+}
 }
 
 /**
