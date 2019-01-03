@@ -2,8 +2,7 @@ package com.ampro.weebot.util
 
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.MLOG
-import com.google.gson.GsonBuilder
-import com.google.gson.JsonSyntaxException
+import com.google.gson.*
 import org.apache.commons.io.FileUtils
 import java.io.*
 import java.nio.file.FileAlreadyExistsException
@@ -29,7 +28,7 @@ val DIR_RES = File(DIR_HOME, "res")
 
 val FILE_CONFIG = File(DIR_HOME, "config.wbot")
 
-val GSON = GsonBuilder().enableComplexMapKeySerialization()
+val GSON: Gson = GsonBuilder().enableComplexMapKeySerialization()
     .setExclusionStrategies().setPrettyPrinting()
     .registerTypeAdapter(IPassive::class.java, InterfaceAdapter<IPassive>())
     .registerTypeAdapter(Class::class.java, CommandClassAdapter())

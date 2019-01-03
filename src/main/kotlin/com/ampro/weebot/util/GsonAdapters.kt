@@ -4,7 +4,6 @@
 
 package com.ampro.weebot.util
 
-import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.commands
 import com.google.gson.*
 import com.jagrosh.jdautilities.command.Command

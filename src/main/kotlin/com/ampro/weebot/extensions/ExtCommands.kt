@@ -4,7 +4,6 @@
 
 package com.ampro.weebot.extensions
 
-import com.ampro.weebot.bot.Weebot
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -221,6 +220,6 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         }
     }
 
-    fun getHelpBiConsumer() = this.helpBiConsumer
+    fun getHelpBiConsumer(): BiConsumer<CommandEvent, Command> = this.helpBiConsumer
 
 }

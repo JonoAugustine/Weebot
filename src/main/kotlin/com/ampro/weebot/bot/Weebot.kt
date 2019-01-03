@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.bot
 
+import com.ampro.weebot.SELF
 import com.ampro.weebot.commands.CMD_REM
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.utilitycommands.CmdReminder.Companion.remWatchJob
@@ -12,6 +13,7 @@ import com.ampro.weebot.commands.utilitycommands.NotePad
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.getGuild
 import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.makeEmbedBuilder
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -62,7 +64,8 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
      * Sneds a log message to the log channel if it is set
      */
     fun sendLog(message: String, consumer: (Message) -> Unit = {}) {
-        getGuild(guildID)?.getTextChannelById(logchannel)?.sendMessage(message)
+        getGuild(guildID)?.getTextChannelById(logchannel)
+            ?.sendMessage(makeEmbedBuilder("${SELF.name} Log",null,message).build())
             ?.queue { consumer(it) }
     }
 
@@ -160,6 +163,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
             = passives.filter { it::class == C::class && predicate(it as C) }
             as MutableList<*>
 
+    fun add(passive: IPassive) = this.passives.add(passive)
 
     /**
      * Removes dead [IPassive.dead] then
@@ -168,7 +172,9 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
      * @param event The event to distribute
      */
     open fun feedPassives(event: Event)
-            = passives.apply { removeIf(IPassive::dead) }.forEach{ it.accept(this, event) }
+            = passives.apply { removeIf(IPassive::dead) }.forEach{
+        GlobalScope.launch { it.accept(this@Weebot, event) }
+    }
 
     /**
      * Any startup settings or states that must be reloaded before launch.
@@ -206,8 +212,9 @@ class GlobalWeebot : Weebot(-1L) {
      * @return The list of [IPassive]s linked to this user. If one does not exist,
      *          it is created, added to the map and returned
      */
-    fun getUesrPassiveList(user: User)
-            = userPassives.getOrPut(user.idLong) { mutableListOf()}
+    fun getUesrPassiveList(user: User) = userPassives.getOrPut(user.idLong) {
+        mutableListOf()
+    }
 
 
     /**

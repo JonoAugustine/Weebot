@@ -76,7 +76,7 @@ class EventDispatcher : ListenerAdapter() {
                     message.channel.sendMessage(acceptEmbed).queue()
                     getWeebotOrNew(event.guild.idLong).settings.trackingEnabled = true
                 },
-                X_Red to { message, user ->
+                X_Red to { message, _ ->
                     message.channel.sendMessage(denyEmbed).queue()
                     getWeebotOrNew(event.guild.idLong).settings.trackingEnabled = false
                 }
@@ -157,5 +157,11 @@ class EventDispatcher : ListenerAdapter() {
         if (event.member.user.isBot) return
         getWeebotOrNew(event.guild.idLong).feedPassives(event)
     }
+
+    override fun onGuildVoiceUpdate(event: GuildVoiceUpdateEvent) {
+        if (event.member.user.isBot) return
+        getWeebotOrNew(event.guild.idLong).feedPassives(event)
+    }
+
 
 }

@@ -4,10 +4,8 @@
 
 package com.ampro.weebot.commands.`fun`.games.cardgame
 
-import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.`fun`.games.Game
 import com.ampro.weebot.commands.`fun`.games.Player
-import net.dv8tion.jda.core.entities.User
 
 /**
  * A card used in a `CardGame`.

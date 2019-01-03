@@ -20,6 +20,7 @@ import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
 import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 
@@ -27,7 +28,7 @@ import java.util.concurrent.ConcurrentHashMap
 class OutHouse(user: User, var remainingMin: Long, val message: String, val forward:Boolean)
     : IPassive {
 
-    var lastTime = NOW()
+    var lastTime: OffsetDateTime? = NOW()
     val userId = user.idLong
 
     override fun dead() = this.remainingMin <= 1
@@ -186,7 +187,7 @@ class CmdReminder : WeebotCommand("reminder", arrayOf("rc", "rem", "remindme"),
         companion object { val REM_ID_GEN = IdGenerator(7) }
 
         val id = REM_ID_GEN.next()
-        var lastTime = NOW()
+        var lastTime: OffsetDateTime? = NOW()
         /** Update the remaining time */
         fun update() {
             val diff = ChronoUnit.MINUTES.between(lastTime, NOW())

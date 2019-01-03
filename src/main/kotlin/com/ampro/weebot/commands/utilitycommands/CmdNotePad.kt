@@ -1144,8 +1144,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
 
         if (args.isEmpty()) {
             SelectableEmbed(auth, mainMenuEmbed.apply {
-                if (pads.isNotEmpty() && cv.contains(pads[0])) addEmptyField(
-                    "Default NotePad: ${pads[0].name}")
+                if (pads.isNotEmpty() && cv.contains(pads[0]))
+                    addEmptyField("Default NotePad: ${pads[0].name}")
             }.build(), listOf(Eyes to seeNotePads(event, pads, cv),
                 Notebook to addNotePad(event), Pencil to writeToDefault(event, pads),
                 EightSpokedAsterisk to setDefaultById(event, pads),
@@ -1337,7 +1337,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         })
     }
 
-    val mainMenuEmbed
+    val mainMenuEmbed: EmbedBuilder
         get() = strdEmbedBuilder.setTitle("Weebot NotePads").setDescription("""
             $Eyes to see NotePads
             $Notebook to add a new NotePad
@@ -1347,7 +1347,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             $FileFolder to get a NotePad as a file (by ID)
             $X_Red to delete a NotePad (by ID)
             """.trimIndent()
-    )
+    )!!
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Weebot NotePads", "Write and edit " +
@@ -1480,8 +1480,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                 pads[i].send(event, null, pads)
             }}, exitAction = {
                 val nn = SelectableEmbed(event.author, mainMenuEmbed.apply {
-                    if (pads.isNotEmpty() && pads.contains(pads[0])) addEmptyField(
-                        "Default NotePad: ${pads[0].name}")
+                    if (pads.isNotEmpty() && pads.contains(pads[0]))
+                        addEmptyField("Default NotePad: ${pads[0].name}")
                 }.build(), listOf(Eyes to seeNotePads(event, pads, pads),
                     Notebook to addNotePad(event), Pencil to writeToDefault(event, pads),
                     EightSpokedAsterisk to setDefaultById(event, pads),

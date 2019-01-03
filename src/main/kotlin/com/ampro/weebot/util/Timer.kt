@@ -10,12 +10,12 @@ package com.ampro.weebot.util
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 
-val DD_MM_YYYY_HH_MM_SS = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
-val DD_MM_YYYY_HH_MM    = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
-val WKDAY_MONTH_YEAR    = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy")
-val WKDAY_MONTH_YEAR_TIME    = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy @ HH:mm")
+val DD_MM_YYYY_HH_MM_SS: DateTimeFormatter? = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss")
+val DD_MM_YYYY_HH_MM: DateTimeFormatter? = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
+val WKDAY_MONTH_YEAR: DateTimeFormatter? = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy")
+val WKDAY_MONTH_YEAR_TIME: DateTimeFormatter? = DateTimeFormatter.ofPattern("EEEE, MMMM dd yyyy @ HH:mm")
 
-fun NOW() = OffsetDateTime.now()
+fun NOW(): OffsetDateTime = OffsetDateTime.now()
 
 /** @return The current local date and time. dd-MM-yyyy HH:mm:ss */
 val NOW_STR: String get() = OffsetDateTime.now().format(

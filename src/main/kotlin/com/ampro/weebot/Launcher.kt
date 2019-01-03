@@ -106,14 +106,14 @@ fun main(args_: Array<String>) { runBlocking {
                             return@setHelpConsumer
                         } else {
                             event.reply(
-                                "*Help is currently unavailable for this command." + " You can use ``@Weebot sugg`` to send feedback to the" + " Developers and remind them they have a job to do!* $Rage")
+                                "*Help is currently unavailable for this command. You can use ``@Weebot sugg`` to send feedback to the Developers and remind them they have a job to do!* $Rage")
                             return@setHelpConsumer
                         }
                     }
                 }
             }
-        }.setDiscordBotsKey(BOTSONDISCORD_KEY)
-        //.setDiscordBotListKey(BOTLIST_KEY)
+        }//.setDiscordBotsKey(BOTSONDISCORD_KEY)
+        .setDiscordBotListKey(BOTLIST_KEY)
         .build()
 
     //LOGIN & LISTENERS

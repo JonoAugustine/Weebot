@@ -60,10 +60,9 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
          *
          * @return The first message that doesnt match \^(t+h+i+s+|t+h+a+t+) or null
          */
-        fun getNonThis(messages: List<Message>, startDex: Int) : Message? {
+        fun getNonThis(messages: List<Message>, startDex: Int): Message? {
             for (i in startDex until messages.size) {
-                if (!messages[i].contentDisplay.matches(
-                            THIS_REG)) {
+                if (!messages[i].contentDisplay.matches(THIS_REG)) {
                     return messages[i]
                 }
             }
@@ -71,19 +70,21 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
         }
 
         override fun accept(bot: Weebot, event: Event) {
-            if (event is GuildMessageReceivedEvent) {
-                val args = event.message.contentDisplay.toLowerCase().split(Regex("\\s+"))
-                args.forEachIndexed { i, it ->
-                    if (it.matches(Regex("\\^(t+h+i+s+|t+h+a+t+)"))) {
-                        event.channel.getHistoryBefore(event.message, 100).queue {
-                            val dex = try { args[i + 1].toInt() - 1 }
-                            catch (e: Exception) { 0 }
-                            (getNonThis(it.retrievedHistory, dex)
-                                    ?: it.retrievedHistory[0])
-                                .reactWith(ArrowUp, T, H, I_lowercase, S)
+            if (event !is GuildMessageReceivedEvent) return
+            val args = event.message.contentDisplay.toLowerCase().split(Regex("\\s+"))
+            args.forEachIndexed { i, it ->
+                if (it.matches(Regex("\\^(t+h+i+s+|t+h+a+t+)"))) {
+                    event.channel.getHistoryBefore(event.message, 100).queue {
+                        val dex = try {
+                            args[i + 1].toInt() - 1
+                        } catch (e: Exception) {
+                            0
                         }
-                        return
+                        (getNonThis(it.retrievedHistory, dex)
+                                ?: it.retrievedHistory[0]).reactWith(ArrowUp, T, H,
+                            I_lowercase, S)
                     }
+                    return
                 }
             }
         }

@@ -172,7 +172,7 @@ class CAHPlayer(user: User) : Player(user) {
 
 }
 
-enum class GAME_STATE {
+enum class GameState {
     /** Players are choosing white cards  */
     CHOOSING,
     /** Czar is reading played white cards  */
@@ -201,9 +201,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
 
         var message: Message? = null
 
-        val bcEmbed = strdEmbedBuilder
-            .setAuthor("Cards Against ${getGuild(guildID)?.name}")
-            .setTitle("")
+        val bcEmbed = strdEmbedBuilder.setAuthor("Cards Against ${getGuild(guildID)?.name}").setTitle("")!!
 
         /** Sends the Black Card Message or Updates the last */
         fun sendOrUpdate() {

@@ -431,8 +431,8 @@ private fun corruptBackupWriteCheck(dao: Dao): Boolean = try {
      Discord Bot List API
  *************************/
 
-val DISCORD_BOTLIST_API = DiscordBotListAPI.Builder().token(BOTSONDISCORD_KEY)
-    .botId(CLIENT_WBT.toString()).build()
+val DISCORD_BOTLIST_API: DiscordBotListAPI = DiscordBotListAPI.Builder()
+    .token(BOTSONDISCORD_KEY).botId(CLIENT_WBT.toString()).build()
 
 infix fun User.hasVoted(handler: (Boolean, Throwable) -> Boolean) {
     DISCORD_BOTLIST_API.hasVoted(this.id).handleAsync(handler)

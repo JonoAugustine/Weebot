@@ -32,7 +32,7 @@ fun setupWebFuel() {
 }
 
 
-val TWILIO_CLIENT = TwilioRestClient.Builder(
+val TWILIO_CLIENT: TwilioRestClient? = TwilioRestClient.Builder(
     TWILIO_SID,
     TWILIO_TOKEN).build()
 

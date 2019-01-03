@@ -7,14 +7,11 @@ package com.ampro.weebot.commands.progammer
 import com.ampro.weebot.commands.CAT_PROG
 import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.strdEmbedBuilder
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.splitArgs
+import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.Emoji
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.entities.MessageEmbed
 import java.util.regex.PatternSyntaxException
-import javax.script.ScriptEngineManager
 
 /**
  * A Command that takes in a Regex string and Strings to test if it matches.

@@ -8,7 +8,7 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
-val RAND = Random(420_69_98_4829 / NOW().minute)
+val RAND = Random(420_69_98_4829 / (NOW().minute + 1))
 
 const val alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const val digi  = "0123456789"

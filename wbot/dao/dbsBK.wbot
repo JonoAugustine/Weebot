@@ -300,7 +300,7 @@
         ],
         "explicit": false,
         "nsfw": false,
-        "logchannel": -1,
+        "logchannel": 264915323877064706,
         "trackingEnabled": false,
         "guildID": 218979588716494848
       },
@@ -533,9 +533,23 @@
             "scoreMap": {
               "185063150557593600": 0,
               "277593092561829889": -3,
-              "139167730237571072": 9,
-              "383656411789524995": 5
+              "139167730237571072": 3,
+              "383656411789524995": 6
             }
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
+          "DATA": {
+            "dead": false,
+            "inShutdown": false,
+            "userSettings": {},
+            "guildSettings": {
+              "limit": 0,
+              "name": "{USER}\u0027s Channel"
+            },
+            "baseId": 197129868079661056,
+            "genChannels": {}
           }
         }
       ],
@@ -1203,13 +1217,13 @@
           "date": {
             "year": 2019,
             "month": 1,
-            "day": 2
+            "day": 3
           },
           "time": {
-            "hour": 4,
-            "minute": 57,
-            "second": 47,
-            "nano": 41000000
+            "hour": 3,
+            "minute": 34,
+            "second": 10,
+            "nano": 301000000
           }
         },
         "offset": {

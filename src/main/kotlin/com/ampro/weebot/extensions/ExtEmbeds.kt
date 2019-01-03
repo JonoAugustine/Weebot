@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.extensions
 
+import com.ampro.weebot.SELF
 import com.ampro.weebot.WAITER
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
@@ -354,7 +355,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                           /** The items to be listed with an [Emoji] and consumer */
                           val items: List<Pair<String, (Int, Message) -> Unit>>,
                           val columns: Int = 1, val itemsPerPage: Int = 10,
-                          val waitOnSinglePage: Boolean = false,
+                          /**Disallow multiple reactions*/ val singleUse: Boolean = false,
                           val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
                           val thumbnail: String = "", val color: Color = STD_GREEN,
                           val fieldList: List<Field> = emptyList(),
@@ -420,6 +421,19 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     override fun display(message: Message) = paginate(message, 1)
 
     /**
+     * Attempts to display the menu as an edit of [message], if that fails, it sends
+     * it as a new message to [channel].
+     */
+    fun displayOrDefault(message: Message, channel: MessageChannel) {
+        if (message.author.id == SELF.id) {
+            val msg = renderPage(1)
+            initialize(message.editMessage(msg), 1) {
+                initialize(channel.sendMessage(msg), 1)
+            }
+        }
+    }
+
+    /**
      * Begins waitFor as a new [Message][net.dv8tion.jda.core.entities.Message]
      * in the provided [MessageChannel][net.dv8tion.jda.core.entities.MessageChannel], starting
      * on whatever page number is provided.
@@ -446,18 +460,19 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
      * The page number to begin on
      */
     fun paginate(message: Message, pageNum: Int) {
-        var page = if (pageNum >= 1) pageNum else if (pageNum > pages) pages else 1
+        val page = if (pageNum >= 1) pageNum else if (pageNum > pages) pages else 1
         val msg = renderPage(page)
         initialize(message.editMessage(msg), page)
     }
 
-    private fun initialize(action: RestAction<Message>, pageNum: Int) {
+    private fun initialize(action: RestAction<Message>, pageNum: Int,
+                           failure: (Throwable) -> Unit = {}) {
         val start = (pageNum - 1) * itemsPerPage
         val end = when {
             items.size < pageNum * itemsPerPage -> items.size
             else -> pageNum * itemsPerPage
         }
-        action.queueAfter(250, MILLISECONDS) { m ->
+        action.queueAfter(250, MILLISECONDS, { m ->
             when {
                 pages > 1 -> {
                     if (bulkSkipNumber > 1) m.reactWith(BIG_LEFT)
@@ -479,7 +494,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                     waitFor(m, pageNum)
                 }
             }
-        }
+        }, failure)
     }
 
     private fun waitFor(message: Message, pageNum: Int) {
@@ -519,11 +534,25 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                     i++
                 }
             }
-            EXIT -> exitAction(message)
+            EXIT -> {
+                exitAction(message)
+                if (singleUse) {
+                    try {
+                        message.clearReactions().queueAfter(250, SECONDS)
+                    } catch (ignored: PermissionException) {}
+                    return
+                }
+            }
             else -> {
                 val i = EmojiNumbers.indexOf(emoji) + ((pageNum - 1) * itemsPerPage)
                 if (i in 0..items.size) {
                     items[i].second(i, message)
+                    if (singleUse) {
+                        try {
+                            message.clearReactions().queueAfter(250, SECONDS)
+                        } catch (ignored: PermissionException) {}
+                        return
+                    }
                 }
             }
         }
@@ -593,7 +622,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
  */
 class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet(),
                       timeout: Long = 3L, unit: TimeUnit = MINUTES,
-                      val messageEmbed: MessageEmbed,
+                      val singleUse: Boolean = false, val messageEmbed: MessageEmbed,
                       val options: List<Pair<Emoji, (Message, User) -> Unit>>,
                       val timoutAction: (Message) -> Unit)
     : Menu(WAITER, users, roles, timeout, unit) {
@@ -612,13 +641,25 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
         initialize(message.editMessage(messageEmbed))
     }
 
-    private fun initialize(action: RestAction<Message>) = action.queue { m ->
+    /**
+     * Attempts to display the menu as an edit of [message], if that fails, it sends
+     * it as a new message to [channel].
+     */
+    fun displayOrDefault(message: Message, channel: MessageChannel) {
+        if (message.author.id == SELF.id) {
+            initialize(message.editMessage(messageEmbed))
+            { initialize(channel.sendMessage(messageEmbed)) }
+        }
+    }
+
+    private fun initialize(action: RestAction<Message>, failure: (Throwable) -> Unit = {})
+            = action.queue({ m ->
         options.forEach {
             runBlocking { delay(250) }
             m reactWith it.first
         }
         waitFor(m)
-    }
+    }, failure)
 
     private fun waitFor(message: Message) {
         waiter.waitForEvent(MessageReactionAddEvent::class.java, { event ->
@@ -633,7 +674,7 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
             event.reaction.reactionEmote.toEmoji()?.run {
                 options.first { this == it.first }.second(message, event.user)
                 message.removeUserReaction(message.author, this)
-                waitFor(message)
+                if (!singleUse) waitFor(message)
             }
         }, timeout, unit, { timoutAction(message) })
     }
