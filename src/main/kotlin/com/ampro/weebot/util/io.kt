@@ -1,7 +1,7 @@
 package com.ampro.weebot.util
 
-import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.MLOG
+import com.ampro.weebot.commands.IPassive
 import com.google.gson.*
 import org.apache.commons.io.FileUtils
 import java.io.*

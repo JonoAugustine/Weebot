@@ -33,8 +33,6 @@ import java.util.concurrent.TimeUnit.MINUTES
  * The [IPassive] manager that creates, assigns, removes, and deletes
  * VoiceChannel roles.
  *
- * TODO: How to regulate which channels get roles when u can't mention voicechannels
- * TODO: Clean all roles on deletion
  *
  * @author Jonathan Augustine
  * @since 2.0
@@ -55,9 +53,13 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
     var dead = false
     override fun dead() = dead
 
-    /** TODO: Deletes all roles created for [VCRoleManager] */
-    fun clean() {
+    /** [VoiceChannel.getIdLong] mapped to [Role.getIdLong] */
+    private val genRoles = ConcurrentHashMap<Long, Long>()
 
+    /** Deletes all roles created for [VCRoleManager] */
+    fun clean(guild: Guild) {
+        genRoles.values.forEach { guild.getRoleById(it)?.delete()?.queue() }
+        genRoles.clear()
     }
 
     /**
@@ -87,38 +89,59 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
                 if (!limitSafe(channel)) return
                 val controller = guild.controller
                 //Check the voice channel for existing roles
-                guild.roles.forEach {
-                    if (it.name.equals(channel.name, true)) {
-                        controller.addRolesToMember(event.member, it).queue()
+                genRoles[event.channelJoined.idLong]?.also {
+                    guild.getRoleById(it)?.also { role ->
+                        controller.addSingleRoleToMember(event.member, role)
                         return
                     }
                 }
-                guild.controller.createRole().setName(channel.name)
-                    .setHoisted(false).setMentionable(true).queue({
+                guild.roles.find { it.name.equals(channel.name, true) }?.also { role ->
+                    controller.addRolesToMember(event.member, role).queue()
+                    genRoles[event.channelJoined.idLong] = role.idLong
+                } ?: guild.controller.createRole().setName(channel.name)
+                    .setHoisted(false).setMentionable(true)
+                    .setPermissions(guild.publicRole.permissions).queue({
                         controller.addRolesToMember(event.member, it).queue()
+                        genRoles[event.channelJoined.idLong] = it.idLong
                     }, {
-                        bot.settings.sendLog(strdEmbedBuilder.setTitle("Log Message")
-                            .setDescription(
-                                "Failed to assign VoiceChannel Role: ${channel.name}").build())
+                        bot.settings.sendLog(
+                            """Failed to assign VoiceChannel Role: ${channel.name}
+                            |To Member: ${event.member.effectiveName}
+                            """.trimMargin())
                     })
-
             }
             is GuildVoiceUpdateEvent-> {
                 val guild = event.guild
                 val channel = event.channelLeft
                 if (!limitSafe(channel)) return
                 val controller = guild.controller
-                guild.roles.forEach {
-                    if (it.name.equals(channel.name, true)) {
-                        controller.removeSingleRoleFromMember(event.member, it).queue()
-                        if (channel.members.isEmpty()) {
-                            it.delete().reason("VCRoleManager").queue()
-                        }
+                genRoles[channel.idLong]?.also { ID ->
+                    guild.getRoleById(ID)?.also { role ->
+                        controller.removeSingleRoleFromMember(event.member, role)
+                            .queue({}) {
+                                bot.settings.sendLog("""Failed to Remove VoiceChannel Role: ${channel.name}
+                                |From Member: ${event.member.effectiveName}
+                                |""".trimMargin())
+                            }
                         return
                     }
                 }
+                guild.roles.find {  it.name.equals(channel.name, true) }?.also { role ->
+                    controller.removeSingleRoleFromMember(event.member, role).queue({
+                        if (channel.members.isEmpty()) {
+                            role.delete().reason("VCRoleManager").queue({}) {
+                                bot.settings.sendLog("Failed to delete VoiceChannel Role: ${channel.name}")
+                            }
+                        }
+                    }, {
+                        bot.settings.sendLog(
+                            """Failed to Remove VoiceChannel Role: ${channel.name}
+                            |From Member: ${event.member.effectiveName}""".trimMargin())
+                    })
+                }
             }
         }
+
     }
 
 }
@@ -189,7 +212,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
             }
             "DISABLE", "OFF" -> {
                 if (vcp != null) {
-                    vcp.clean()
+                    vcp.clean(event.guild)
                     vcp.dead = true
                     event.reply("*VoiceChannelRoles are now disabled*")
                     return

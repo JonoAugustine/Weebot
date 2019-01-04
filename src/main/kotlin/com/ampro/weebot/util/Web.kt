@@ -31,7 +31,6 @@ fun setupWebFuel() {
     FuelManager.instance.baseParams  = listOf("Accept" to "application/json")
 }
 
-
 val TWILIO_CLIENT: TwilioRestClient? = TwilioRestClient.Builder(
     TWILIO_SID,
     TWILIO_TOKEN).build()

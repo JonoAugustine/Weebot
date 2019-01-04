@@ -304,7 +304,19 @@
         "trackingEnabled": false,
         "guildID": 218979588716494848
       },
-      "passives": [],
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCRoleManager",
+          "DATA": {
+            "dead": false,
+            "genRoles": {
+              "530290896118349834": 530537323633442825,
+              "530290994063867916": 530537299226787851
+            },
+            "limit": "ALL"
+          }
+        }
+      ],
       "notePads": [],
       "guildID": 218979588716494848
     },
@@ -520,6 +532,7 @@
           "CLASSNAME": "com.ampro.weebot.commands.moderation.VCRoleManager",
           "DATA": {
             "dead": false,
+            "genRoles": {},
             "limit": "ALL"
           }
         },
@@ -536,20 +549,6 @@
               "139167730237571072": 3,
               "383656411789524995": 6
             }
-          }
-        },
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
-          "DATA": {
-            "dead": false,
-            "inShutdown": false,
-            "userSettings": {},
-            "guildSettings": {
-              "limit": 0,
-              "name": "{USER}\u0027s Channel"
-            },
-            "baseId": 197129868079661056,
-            "genChannels": {}
           }
         }
       ],
@@ -1220,10 +1219,10 @@
             "day": 3
           },
           "time": {
-            "hour": 3,
-            "minute": 34,
-            "second": 10,
-            "nano": 301000000
+            "hour": 19,
+            "minute": 2,
+            "second": 58,
+            "nano": 695000000
           }
         },
         "offset": {
