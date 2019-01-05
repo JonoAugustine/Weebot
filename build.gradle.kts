@@ -14,7 +14,7 @@ group = "com.ampro"
 version = "2.1"
 
 application {
-    mainClassName = "com.ampro.weebot.main.LauncherKt"
+    mainClassName = "com.ampro.weebot.LauncherKt"
 }
 
 repositories {

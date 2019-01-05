@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.bot
 
+import com.ampro.weebot.CACHED_POOL
 import com.ampro.weebot.SELF
 import com.ampro.weebot.commands.CMD_REM
 import com.ampro.weebot.commands.IPassive
@@ -173,7 +174,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
      */
     open fun feedPassives(event: Event)
             = passives.apply { removeIf(IPassive::dead) }.forEach{
-        GlobalScope.launch { it.accept(this@Weebot, event) }
+        GlobalScope.launch(CACHED_POOL) { it.accept(this@Weebot, event) }
     }
 
     /**

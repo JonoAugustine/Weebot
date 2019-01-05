@@ -29,7 +29,7 @@ fun CommandEvent.getInvocation(): String = this.message.contentStripped
  * Send a response to a [CommandEvent] and then delete both messages.
  *
  * @param reason The message to send
- * @param delay The delay in seconds between send & delete
+ * @param delay The delay in seconds between send & delete (default 10)
  */
 fun CommandEvent.respondThenDelete(reason: String, delay: Long = 10L) {
     this.reply("*$reason*") { response ->

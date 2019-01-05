@@ -20,6 +20,7 @@ import com.ampro.weebot.commands.utilitycommands.*
 val CMD_SHUTDOWN        = CmdShutdown()
 val CMD_GUILDLIST       = CmdGuildList()
 val CMD_STATS           = CmdStatsView()
+val CMD_PASSIVES        = CmdViewPassivs() //Not Yet Public
 val CMD_PING            = PingCommand() //Public
 val CMD_SUGG            = CmdSuggestion() //Public
 
@@ -63,7 +64,7 @@ val CMD_CAH             = CmdCardsAgainstHumanity()
 
 
 
-val commands = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
+val commands = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS, CMD_PASSIVES,
         CMD_PING, CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,
         CMD_SETTINGS, CMD_PURGE, CMD_SELFDESTRUCT,
         CMD_REGEX,

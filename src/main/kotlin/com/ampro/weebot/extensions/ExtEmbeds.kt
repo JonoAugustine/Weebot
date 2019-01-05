@@ -627,11 +627,11 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                       val timoutAction: (Message) -> Unit)
     : Menu(WAITER, users, roles, timeout, unit) {
 
-    constructor(user: User, messageEmbed: MessageEmbed,
+    constructor(user: User, singleUse: Boolean = false, messageEmbed: MessageEmbed,
                 options: List<Pair<Emoji, (Message, User) -> Unit>>,
                 timeout: (Message) -> Unit)
             : this(setOf(user), messageEmbed = messageEmbed, options = options,
-        timoutAction = timeout)
+        timoutAction = timeout, singleUse = singleUse)
 
     override fun display(channel: MessageChannel) {
         initialize(channel.sendMessage(messageEmbed))

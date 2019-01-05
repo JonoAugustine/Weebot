@@ -21,6 +21,20 @@ import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
 
+class CmdViewPassivs : WeebotCommand("active", arrayOf("passives"), CAT_UNDER_CONSTRUCTION,
+    "[commandName]", "View all active Passives in the guild.", guildOnly = true) {
+    override fun execute(event: CommandEvent) {
+        val passives = getWeebotOrNew(event.guild).passives
+        if (passives.isEmpty()) {
+            event.reply("*No active commands.*")
+            return
+        }
+        strdPaginator.setText("Active Commands").setUsers(event.author).apply {
+            passives.forEach { this.addItems(it::class.simpleName) }
+        }.build().display(event.channel)
+    }
+}
+
 /**
  * Parent class for viewing and changing [Weebot] settings
  *
@@ -106,7 +120,7 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
         when {
             event.args.isBlank() -> {
                 STAT.track(this, bot, event.author)
-                SelectableEmbed(event.author, strdEmbedBuilder
+                SelectableEmbed(event.author, false, strdEmbedBuilder
                     .setTitle("Prefix").setDescription("""
                         My current prefixes are: ``${
                     bot.settings.prefixs.joinToString(", ")}``
@@ -223,7 +237,7 @@ private class CmdSetLogChannel : WeebotCommand("log",
 
         when {
             channels.isEmpty() -> {
-                SelectableEmbed(event.author, strdEmbedBuilder
+                SelectableEmbed(event.author, false, strdEmbedBuilder
                     .setTitle("Logging Channen").setDescription("""
                         ${if(bot.settings.logchannel != -1L) {
                         "My Logging channel is currently set to ${

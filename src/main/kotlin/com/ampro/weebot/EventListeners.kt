@@ -148,17 +148,12 @@ class EventDispatcher : ListenerAdapter() {
         getWeebotOrNew(event.guild.idLong).feedPassives(event)
     }
 
-    override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
-        if (event.member.user.isBot) return
-        getWeebotOrNew(event.guild.idLong).feedPassives(event)
-    }
-
     override fun onGuildVoiceMove(event: GuildVoiceMoveEvent) {
         if (event.member.user.isBot) return
         getWeebotOrNew(event.guild.idLong).feedPassives(event)
     }
 
-    override fun onGuildVoiceUpdate(event: GuildVoiceUpdateEvent) {
+    override fun onGuildVoiceLeave(event: GuildVoiceLeaveEvent) {
         if (event.member.user.isBot) return
         getWeebotOrNew(event.guild.idLong).feedPassives(event)
     }

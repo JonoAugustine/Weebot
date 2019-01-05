@@ -1143,7 +1143,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         val cv = pads.filter { event canRead it }.toMutableList()
 
         if (args.isEmpty()) {
-            SelectableEmbed(auth, mainMenuEmbed.apply {
+            SelectableEmbed(auth, false, mainMenuEmbed.apply {
                 if (pads.isNotEmpty() && cv.contains(pads[0]))
                     addEmptyField("Default NotePad: ${pads[0].name}")
             }.build(), listOf(Eyes to seeNotePads(event, pads, cv),
@@ -1479,7 +1479,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             items = pads.map { " ${it.name} (${it.id})" to { i: Int, m: Message ->
                 pads[i].send(event, null, pads)
             }}, exitAction = {
-                val nn = SelectableEmbed(event.author, mainMenuEmbed.apply {
+                val nn = SelectableEmbed(event.author, false, mainMenuEmbed.apply {
                     if (pads.isNotEmpty() && pads.contains(pads[0]))
                         addEmptyField("Default NotePad: ${pads[0].name}")
                 }.build(), listOf(Eyes to seeNotePads(event, pads, pads),

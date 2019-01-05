@@ -304,52 +304,7 @@
         "trackingEnabled": false,
         "guildID": 218979588716494848
       },
-      "passives": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
-          "DATA": {
-            "dead": false,
-            "inShutdown": false,
-            "userSettings": {},
-            "guildSettings": {
-              "limit": 0,
-              "name": "{USER}\u0027s Channel"
-            },
-            "baseId": 530290896118349834,
-            "genChannels": {
-              "139167730237571072": 530291428144709642
-            }
-          }
-        },
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
-          "DATA": {
-            "dead": false,
-            "inShutdown": false,
-            "userSettings": {},
-            "guildSettings": {
-              "limit": 0,
-              "name": "{USER}\u0027s Channel"
-            },
-            "baseId": 530290994063867916,
-            "genChannels": {}
-          }
-        },
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
-          "DATA": {
-            "dead": false,
-            "inShutdown": false,
-            "userSettings": {},
-            "guildSettings": {
-              "limit": 0,
-              "name": "{USER}\u0027s Channel"
-            },
-            "baseId": 530290896118349834,
-            "genChannels": {}
-          }
-        }
-      ],
+      "passives": [],
       "notePads": [],
       "guildID": 218979588716494848
     },
@@ -565,6 +520,7 @@
           "CLASSNAME": "com.ampro.weebot.commands.moderation.VCRoleManager",
           "DATA": {
             "dead": false,
+            "genRoles": {},
             "limit": "ALL"
           }
         },
@@ -576,11 +532,25 @@
               417176543903744001
             ],
             "scoreMap": {
-              "185063150557593600": 0,
+              "185063150557593600": 1,
               "277593092561829889": -3,
               "139167730237571072": 3,
-              "383656411789524995": 6
+              "383656411789524995": 3
             }
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
+          "DATA": {
+            "dead": false,
+            "inShutdown": false,
+            "userSettings": {},
+            "guildSettings": {
+              "limit": 0,
+              "name": "{USER}\u0027s Channel"
+            },
+            "baseId": 530923086401372160,
+            "genChannels": {}
           }
         }
       ],
@@ -1248,13 +1218,13 @@
           "date": {
             "year": 2019,
             "month": 1,
-            "day": 3
+            "day": 4
           },
           "time": {
-            "hour": 2,
-            "minute": 46,
-            "second": 23,
-            "nano": 591000000
+            "hour": 20,
+            "minute": 47,
+            "second": 0,
+            "nano": 613000000
           }
         },
         "offset": {

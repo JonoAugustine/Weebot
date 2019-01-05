@@ -408,3 +408,5 @@ class Restriction {
     }
 
 }
+
+fun TODO(event: CommandEvent) = event.reply("This action is still under construction.")

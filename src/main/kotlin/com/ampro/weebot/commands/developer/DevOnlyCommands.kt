@@ -21,8 +21,7 @@ import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
-import net.dv8tion.jda.core.entities.Guild
-import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit.*
@@ -113,7 +112,7 @@ class CmdGuildList : WeebotCommand("guildlist",
 }
 
 fun Guild.infoEmbed(event: CommandEvent): SelectableEmbed {
-    return SelectableEmbed(event.author, makeEmbedBuilder("Guild: $name", null, """
+    return SelectableEmbed(event.author, true, makeEmbedBuilder("Guild: $name", null, """
         **Weebot Join Date:**   ${selfMember.joinDate.format(DD_MM_YYYY_HH_MM)}
         **Size:**     $size
         **TrueSize**: $trueSize (**Bot Count**: ${size - trueSize})
@@ -124,9 +123,8 @@ fun Guild.infoEmbed(event: CommandEvent): SelectableEmbed {
     """.trimIndent()).setThumbnail(iconUrl).addField("Options", """
         $X_Red Remove Weebot from this guild""".trimIndent(), false)
         .setColor(if (roles.isNotEmpty()) this.roles[0].color else STD_GREEN).build(),
-        listOf(X_Red to { _, _ ->
+        listOf(X_Red to { _: Message, _: User ->
             event.reply("Are you sure? (yes/no) (30 sec timeout)")
-            //TODO wait for confirm and then wait for reason
             WAITER.waitForEvent(MessageReceivedEvent::class.java,
                 { e -> e.isValidUser(event.guild, setOf(event.author))}, {
                     if (it.message.contentDisplay.matches(REG_YES)) {
