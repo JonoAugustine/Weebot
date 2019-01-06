@@ -22,6 +22,7 @@ import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.reflect.KClass
 
 /**
  * A store of settings for a Weebot. This class exists to make compliance with
@@ -50,8 +51,21 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
     /** Allows Weebot to track usage for stats */
     var trackingEnabled: Boolean = false
 
-    /** Channel ID -> [MutableList]<Class<[WeebotCommand]> */ //TODO
-    val disabledCommands = ConcurrentHashMap<Long, MutableList<Class<WeebotCommand>>>()
+    /** [TextChannel.getIdLong] -> [Pair]<[MutableList]<Class<[WeebotCommand]>>
+     *     Pair<lockedTo, BlockedFrom>
+     */
+    var commandRestrictions = ConcurrentHashMap<Long,
+            Pair<MutableList<KClass<WeebotCommand>>,
+            MutableList<KClass<WeebotCommand>>>>()
+
+    fun isAllowed(cmd: WeebotCommand, textChannel: TextChannel) : Boolean {
+        if (commandRestrictions == null) commandRestrictions = ConcurrentHashMap()
+        val pair = commandRestrictions[textChannel.idLong]
+        return when {
+            pair?.first?.contains(cmd::class) != false -> true
+            else -> !pair.second.contains(cmd::class)
+        }
+    }
 
     /**
      * Sneds a log message to the log channel if it is set

@@ -105,7 +105,8 @@ class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "RegexTest"),
  */
 class CmdEmbedMaker : WeebotCommand("embedmaker",
     arrayOf("embedbuilder", "embed", "makeembed", "sendembed"), CAT_PROG,
-    "", ".", cooldown = 30, cooldownScope = CooldownScope.USER_CHANNEL) {
+    "", "Make a pretty MessageEmbed", cooldown = 30,
+    cooldownScope = CooldownScope.USER_CHANNEL) {
 
     val MAX_FIELDS = 10
 

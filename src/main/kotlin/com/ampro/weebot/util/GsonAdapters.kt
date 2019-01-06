@@ -8,6 +8,7 @@ import com.ampro.weebot.commands.commands
 import com.google.gson.*
 import com.jagrosh.jdautilities.command.Command
 import java.lang.reflect.Type
+import kotlin.reflect.KClass
 
 private val CLASSNAME = "CLASSNAME"
 private val DATA = "DATA"
@@ -41,6 +42,35 @@ class CommandClassAdapter : JsonSerializer<Class<out Command>>,
 
 }
 
+
+/**
+ * A Type Adapter to serialize [Command].class objects
+ */
+class CommandKClassAdapter : JsonSerializer<KClass<out Command>>,
+                            JsonDeserializer<KClass<out Command>> {
+
+    @Throws(JsonParseException::class)
+    override fun deserialize(jsonElement: JsonElement, type: Type,
+                             context: JsonDeserializationContext): KClass<out Command>? {
+        val jsonObject = jsonElement.asJsonObject
+        val prim = jsonObject.get(CLASSNAME) as JsonPrimitive
+        val className = prim.asString
+        for (command in commands) {
+            if (command::class.qualifiedName == className) {
+                return command::class
+            }
+        }
+        return null
+    }
+
+    override fun serialize(jsonElement: KClass<out Command>, type: Type,
+                           context: JsonSerializationContext): JsonElement {
+        val jsonObject = JsonObject()
+        jsonObject.addProperty(CLASSNAME, jsonElement::class.qualifiedName)
+        return jsonObject
+    }
+
+}
 
 class InterfaceAdapter<T: Any> : JsonSerializer<T>, JsonDeserializer<T> {
 

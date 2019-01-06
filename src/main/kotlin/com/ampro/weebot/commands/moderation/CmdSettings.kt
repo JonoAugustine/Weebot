@@ -12,6 +12,7 @@ import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.CHANNEL
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
+import com.jagrosh.jdautilities.command.Command.CooldownScope.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.entities.Message
@@ -30,7 +31,7 @@ import java.util.concurrent.TimeUnit.MINUTES
  */
 class CmdTaskManager : WeebotCommand("taskmanager", arrayOf("task", "tasks"),
     CAT_GEN, "[commandName]","View all active Passives in the guild.",
-    cooldown = 60, cooldownScope = CooldownScope.USER_GUILD,
+    cooldown = 60, cooldownScope = USER_GUILD,
     userPerms = arrayOf(ADMINISTRATOR)) {
     override fun execute(event: CommandEvent) {
         val passives = if (event.guild != null) getWeebotOrNew(event.guild).passives
@@ -90,6 +91,7 @@ class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"
             .addField(CmdSetName.normField).addField(CmdSetPrefix.normField)
             .addField(CmdSetExplicit.normField).addField(CmdSetNsfw.normField)
             .addField(CmdSetLogChannel.normField).addField(CmdSetTracking.normField)
+            .addField(CmdLock.normField).addField(CmdBlock.normField)
             .build()
     }
 
@@ -315,7 +317,7 @@ private class CmdSetTracking : WeebotCommand("skynet", arrayOf("track", "trackin
 
     companion object {
         val normField: Field = Field("Usage Tracking",
-            "Enable anonymous usage tracking for this server's Weebot\n``set skynet " +
+            "Enable anonymous usage tracking\n``set skynet " +
                     "[on/off]``\nAliases: track, tracking", true)
     }
 
@@ -339,5 +341,32 @@ private class CmdSetTracking : WeebotCommand("skynet", arrayOf("track", "trackin
                 event.reply("Anonymous Statistics Disabled.")
             }
         }
+    }
+}
+
+private class CmdLock : WeebotCommand("lock", arrayOf("lockto"), CAT_MOD,
+    "<commandName> [#textChannel]", "Lock a command to one or more TextChannels",
+    guildOnly = true, cooldown = 10, cooldownScope = USER_GUILD,
+    userPerms = arrayOf(ADMINISTRATOR)) {
+    companion object {
+        val normField = Field("Lock Command", "Lock a Command to a specific channel." +
+                "\n``set lock [#channelMention...]``", true)
+    }
+
+    override fun execute(event: CommandEvent) {
+        TODO(event)
+    }
+}
+
+private class CmdBlock : WeebotCommand("block", emptyArray(), CAT_MOD,
+    "<commandName> [#textChannel]", "Block a command from a TextChannel or server",
+    guildOnly = true, cooldown = 10, cooldownScope = USER_GUILD,
+    userPerms = arrayOf(ADMINISTRATOR)) {
+    companion object {
+        val normField = Field("Block Command", "Block a Command from a channel or " +
+                "entirely\n``set block [#channelMention...]``", true)
+    }
+    override fun execute(event: CommandEvent) {
+        TODO(event)
     }
 }

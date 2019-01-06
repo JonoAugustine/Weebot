@@ -197,7 +197,11 @@ private fun setUpDatabase() {
         MLOG.slog("\t\tUnable to loadDao database, creating new database.")
         tdao = Dao()
         MLOG.slog("\t\tLoading known Guilds")
-        JDA_SHARD_MNGR.guilds.forEach { tdao.addBot(Weebot(it)) }
+        JDA_SHARD_MNGR.guilds.filterNot { tdao.WEEBOTS.contains(it.idLong) }
+            .forEach {
+                tdao.addBot(Weebot(it))
+                askTracking(it)
+        }
         tdao.save()
         MLOG.slog("\tDatabase created and saved to file.")
         DAO = tdao
@@ -234,7 +238,7 @@ private fun saveTimer() = GlobalScope.launch {
     try {
         while (ON) {
             DAO.backUp()
-            STAT.saveJson(STAT_SAVE)
+            STAT.saveJson(STAT_BK)
             if (i % 50 == 0) {
                 MLOG.slog("Database back up: $i")
             }
@@ -263,6 +267,17 @@ fun shutdown(user: User? = null) {
             -1   -> MLOG.elog("\t\tCould not save backup due to file exception.")
             -2   -> MLOG.elog("\t\tCould not save backup due to corrupt Json.")
             else -> MLOG.elog("\t\tDatabase saved.")
+        }
+    }
+    MLOG.elog("\tBacking up Statistics...")
+    if (STAT.saveJson(STAT_BK) < 1)
+        MLOG.elog("\t\tFailed to backup Statistics!")
+    else {
+        MLOG.elog("\tSaving Statistics...")
+        when (STAT.saveJson(STAT_SAVE)) {
+            -1   -> MLOG.elog("\t\tCould not save due to file exception.")
+            -2   -> MLOG.elog("\t\tCould not save due to corrupt Json.")
+            else -> MLOG.elog("\t\tStatistics saved.")
         }
     }
 

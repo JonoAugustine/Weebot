@@ -4,14 +4,14 @@
 
 package com.ampro.weebot.extensions
 
+import com.ampro.weebot.database.getWeebotOrNew
 import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
-import net.dv8tion.jda.core.entities.Message
-import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.function.BiConsumer
@@ -218,6 +218,11 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
             embedBuilder.addBlankField(b)
             return this
         }
+    }
+
+    override fun isAllowed(channel: TextChannel): Boolean {
+        return getWeebotOrNew(channel.guild).settings.isAllowed(this, channel)
+                && super.isAllowed(channel)
     }
 
     fun getHelpBiConsumer(): BiConsumer<CommandEvent, Command>? = this.helpBiConsumer

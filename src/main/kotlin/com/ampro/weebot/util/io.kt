@@ -6,6 +6,7 @@ import com.google.gson.*
 import org.apache.commons.io.FileUtils
 import java.io.*
 import java.nio.file.FileAlreadyExistsException
+import kotlin.reflect.KClass
 
 
 val DIR_HOME = File("wbot")
@@ -32,6 +33,7 @@ val GSON: Gson = GsonBuilder().enableComplexMapKeySerialization()
     .setExclusionStrategies().setPrettyPrinting()
     .registerTypeAdapter(IPassive::class.java, InterfaceAdapter<IPassive>())
     .registerTypeAdapter(Class::class.java, CommandClassAdapter())
+    .registerTypeAdapter(KClass::class.java, CommandKClassAdapter())
     .create()
 
 

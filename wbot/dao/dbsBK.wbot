@@ -557,7 +557,7 @@
         "explicit": false,
         "nsfw": false,
         "logchannel": 493111883814010899,
-        "trackingEnabled": false,
+        "trackingEnabled": true,
         "guildID": 139168039634468865
       },
       "passives": [
