@@ -6,8 +6,6 @@ package com.ampro.weebot.commands
 
 import com.jagrosh.jdautilities.command.Command.Category
 
-//TODO Category predicates
-
 internal const val GEN_FAILURE_MESSAGE = "You do not have access to this command."
 
 val CAT_GEN     = Category("General", GEN_FAILURE_MESSAGE) {true}

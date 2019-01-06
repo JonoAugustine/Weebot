@@ -368,48 +368,5 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
 }
 
 /* ***************
-    Reddit API
+    TODO Reddit API
  *****************/
-
-/** [RedditClient] used to make requests
-internal val redditClient = OAuthHelper.automatic(OkHttpNetworkAdapter(
-        UserAgent("bot", "com.ampro.weebot", "v2.0", "Ventus_Aurelius")),
-        Credentials.webapp(REDDIT_ID, REDDIT_SEC, "https://discord.gg/VdbNyxr")
-).apply { rateLimiter = LeakyBucketRateLimiter(5, FixedIntervalRefillStrategy(60, MINUTES)) }
-
-/**
- *
- * @author Jonathan Augustine
- * @since 2.0
- */
-class RedditFeed: IPassive {
-    var dead: Boolean = false
-    override fun dead() = dead
-
-    val feeds = listOf<Any>() //TODO
-
-    override fun accept(bot: Weebot, event: Event) {
-        TODO("not implemented")
-    }
-
-}
-
-/**
- *
- * @since 1.0
- * @auhor Jonathan Augustine
- */
-class CmdRedditFeed: WeebotCommand("RedditFeed", arrayOf(), CAT_FUN,
-        ""/*TODO*/, "Get the best posts from your favorite subreddits.",
-        guildOnly = true
-) {
-    override fun execute(event: CommandEvent) {
-        TODO("not implemented")
-    }
-
-    init {
-        //TODO HelpBiconsumer
-    }
-
-}
-*/

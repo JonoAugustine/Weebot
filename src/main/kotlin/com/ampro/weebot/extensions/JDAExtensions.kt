@@ -14,7 +14,9 @@ import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent
+import net.dv8tion.jda.core.requests.RestAction
 import java.time.OffsetDateTime
+import java.util.concurrent.TimeUnit
 
 /*
  * Extension methods used for JDA elements
@@ -94,6 +96,11 @@ fun Member.hasOneOfPerms(vararg p: Permission) : Boolean {
 
 infix fun Member.hasPerm(perm: Permission) = this.permissions.contains(perm)
 
+/** Queue and ignore any result */
+fun <T> RestAction<T>.queueIgnore(secDelay: Long = 0) {
+    this.queueAfter(secDelay, TimeUnit.SECONDS, {},{})
+}
+
 val CommandEvent.creationTime: OffsetDateTime
     get() = this.message.creationTime
 
@@ -114,17 +121,17 @@ fun CommandClientBuilder.addCommands(commands: Iterable<WeebotCommand>)
 
 infix fun User.`is`(id: Long) = this.idLong == id
 
-fun MessageReceivedEvent.isValidUser(guild: Guild, users: Set<User> = emptySet(),
+fun MessageReceivedEvent.isValidUser(guild: Guild?, users: Set<User> = emptySet(),
                                      roles: Set<Role> = emptySet())
         : Boolean {
     return when {
-        !isFromType(TEXT) -> false
-        this.guild.id != guild.id -> false
+        guild != null && !isFromType(TEXT) -> false
+        this.guild?.id ?: -2 != guild?.id ?: -2 -> false
         author.isBot -> false
         users.isEmpty() && roles.isEmpty() -> true
         users.contains(author) -> true
-        !guild.isMember(author) -> false
-        else -> guild.getMember(author).roles.stream().anyMatch { roles.contains(it) }
+        !(guild?.isMember(author) ?: true) -> false
+        else -> guild?.getMember(author)?.roles?.has{ roles.contains(it) } ?: true
     }
 }
 

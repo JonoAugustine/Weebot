@@ -21,7 +21,6 @@ import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.guild.voice.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import java.lang.IndexOutOfBoundsException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
@@ -788,7 +787,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                     bot.add(this)
                     inShutdown = true
                 }
-                //[-L userLimit] [-c category] [name]
+                //[-L userLimit] [-c category-name] [name]
                 val args = event.splitArgs()
                 var name: String = nameGen(event.member,
                     vcg.userSettings[event.author.idLong]?.name ?: vcg.guildSettings.name)
@@ -822,7 +821,8 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                 }
                 if (catIndex != -1) {
                     cat = try {
-                        event.guild.getCategoriesByName(args[catIndex + 1], true)[0]
+                        val cName = args[catIndex + 1].replace('-', ' ')
+                        event.guild.getCategoriesByName(cName, true)[0]
                     } catch (e: IndexOutOfBoundsException) {
                         event.replyError("No Category could be found.")
                         return

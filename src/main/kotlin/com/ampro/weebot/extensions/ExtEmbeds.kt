@@ -26,6 +26,7 @@ import java.util.concurrent.TimeUnit.*
 
 const val EMBED_MAX_TITLE = 256
 const val EMBED_MAX_DESCRIPTION = 2048
+/** 25 */
 const val EMBED_MAX_FIELDS = 25
 const val EMBED_MAX_FIELD_NAME = 256
 const val EMBED_MAX_FIELD_VAL = 1024
@@ -627,14 +628,16 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                       timeout: Long = 3L, unit: TimeUnit = MINUTES,
                       val singleUse: Boolean = false, val messageEmbed: MessageEmbed,
                       val options: List<Pair<Emoji, (Message, User) -> Unit>>,
-                      val timoutAction: (Message) -> Unit)
+                      val timeoutAction: (Message) -> Unit)
     : Menu(WAITER, users, roles, timeout, unit) {
 
     constructor(user: User, singleUse: Boolean = false, messageEmbed: MessageEmbed,
-                options: List<Pair<Emoji, (Message, User) -> Unit>>,
-                timeout: (Message) -> Unit)
-            : this(setOf(user), messageEmbed = messageEmbed, options = options,
-        timoutAction = timeout, singleUse = singleUse)
+                options: List<Pair<Emoji, (Message, User) -> Unit>>, timeout: Long = 3L,
+                timeoutAction: (Message) -> Unit)
+            : this(setOf(user), emptySet<Role>(), timeout, MINUTES, singleUse,
+        messageEmbed, options, timeoutAction)
+
+
 
     override fun display(channel: MessageChannel) {
         initialize(channel.sendMessage(messageEmbed))
@@ -679,7 +682,7 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                 message.removeUserReaction(message.author, this)
                 if (!singleUse) waitFor(message)
             }
-        }, timeout, unit, { timoutAction(message) })
+        }, timeout, unit, { timeoutAction(message) })
     }
 
 }

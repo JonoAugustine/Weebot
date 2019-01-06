@@ -240,7 +240,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                                 .setFinalAction {}.build().display(m.channel)
                         } else m.channel.sendMessage("*This Note is locked.*").queue()
                     }
-                ), timoutAction = finalAction)
+                ), timeoutAction = finalAction)
         }
 
         override fun toString() = this.note
