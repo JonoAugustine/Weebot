@@ -220,6 +220,6 @@ abstract class WeebotCommand(name: String, aliases: Array<String>, category: Cat
         }
     }
 
-    fun getHelpBiConsumer(): BiConsumer<CommandEvent, Command> = this.helpBiConsumer
+    fun getHelpBiConsumer(): BiConsumer<CommandEvent, Command>? = this.helpBiConsumer
 
 }

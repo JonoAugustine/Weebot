@@ -131,8 +131,8 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
      */
     fun track(command: WeebotCommand, weebot: Weebot, user: User) {
         if (weebot.settings.trackingEnabled && weebot !is GlobalWeebot) {
-        commandUsage.getOrPut(command.name) { mutableListOf() }
-            .add(CommandUsageEvent(weebot.guildID, WeebotInfo(weebot), UserInfo(user)))
+            commandUsage.getOrPut(command.name) { mutableListOf() }
+                .add(CommandUsageEvent(weebot.guildID, WeebotInfo(weebot), UserInfo(user)))
         }
     }
 

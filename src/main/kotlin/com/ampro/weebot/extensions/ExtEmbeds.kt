@@ -94,6 +94,9 @@ val strdOrderedMenu: OrderedMenu.Builder
     get() = OrderedMenu.Builder().setEventWaiter(WAITER)
         .useCancelButton(true).setTimeout(3, MINUTES)
 
+/**
+ * [WAITER], [STD_GREEN], 3 [MINUTES]
+ */
 val strdButtonMenu: ButtonMenu.Builder
     get() = ButtonMenu.Builder().setEventWaiter(WAITER)
         .setColor(STD_GREEN).setTimeout(3, MINUTES)

@@ -92,7 +92,6 @@ class EventDispatcher : ListenerAdapter() {
 
     override fun onGuildLeave(event: GuildLeaveEvent) {
         DAO.removeBot(event.guild.idLong)
-        //TODO other on-leave actions
     }
 
     /* ************************
@@ -107,32 +106,6 @@ class EventDispatcher : ListenerAdapter() {
     override fun onGuildMessageReceived(event: GuildMessageReceivedEvent) {
         if (event.isWebhookMessage || event.author.isBot) return
         getWeebotOrNew(event.guild.idLong).feedPassives(event)
-    }
-
-    override fun onPrivateChannelCreate(event: PrivateChannelCreateEvent) {
-        /*if (event.user.isBot) return
-        //TODO bugged
-        val desc = "Hello there! You can use ``w!help`` or ``\\help`` to get help with using any " +
-                "of my shiny features."
-        val gdpr = MessageEmbed.Field("Enable Tracking?",
-                "Would you like to help Weebot's development by allowing your " +
-                        "Weebot to send anonymous usage stats back to our HQ?" +
-                        "\nAll data " +
-                        "is completely anonymous and cannot be tracked back to your " +
-                        "server.\nThis feature can be turned off at any point and is " +
-                        "turned off by default.\n(React with a check to accept " +
-                        "or an cross (X_Red) to keep it off. or type ``w!skynet on/off``)" +
-                        "\n*Thank you for your support!*",
-                false)
-
-        event.channel.sendMessage(strdEmbedBuilder
-            .setTitle("***Kicks in door*** The Weebot has arrived!")
-            .setDescription(desc).addField(gdpr).build())
-            .queue {
-                GLOBAL_WEEBOT.getUesrPassiveList(event.user).add(TrackerInitPassive(it))
-                it.addReaction(heavy_check_mark.toString()).queue()
-                it.addReaction(X_Red.toString()).queue()
-            }*/
     }
 
     override fun onGenericPrivateMessage(event: GenericPrivateMessageEvent) {

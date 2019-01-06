@@ -44,6 +44,9 @@ val WAITER: EventWaiter = EventWaiter()
 /** The bot's selfuser from */
 lateinit var SELF: SelfUser
 
+const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try that " +
+        "again later*"
+
 
 /**
  * Put bot online, setup listeners, and get full list of servers (Guilds)
@@ -51,7 +54,7 @@ lateinit var SELF: SelfUser
  *
  * @param args_
  * @throws LoginException
- * @throws RateLimitedException/
+ * @throws RateLimitedException
  * @throws InterruptedException
  */
 fun main(args_: Array<String>) { runBlocking {
@@ -99,7 +102,7 @@ fun main(args_: Array<String>) { runBlocking {
                 commands.forEach { cmd ->
                     if (cmd.isCommandFor(args[0]) && (!cmd.isHidden || event.isOwner)) {
                         if (cmd.getHelpBiConsumer() != null) {
-                            cmd.getHelpBiConsumer().accept(event, cmd)
+                            cmd.getHelpBiConsumer()!!.accept(event, cmd)
                             return@setHelpConsumer
                         } else if (!cmd.help.isNullOrBlank()) {
                             event.reply("*${cmd.help}*")
@@ -113,7 +116,7 @@ fun main(args_: Array<String>) { runBlocking {
                 }
             }
         }//.setDiscordBotsKey(BOTSONDISCORD_KEY)
-        .setDiscordBotListKey(BOTLIST_KEY)
+        //.setDiscordBotListKey(BOTLIST_KEY)
         .build()
 
     //LOGIN & LISTENERS
@@ -224,8 +227,6 @@ private fun startupWeebots() {
 /**
  * Starts a [Job] that saves a database backup each interval.
  * Listens for a shutdown event to save the the main file
- *
- * @param min The delay in minuets between saves.
  */
 @Synchronized
 private fun saveTimer() = GlobalScope.launch {
@@ -279,6 +280,3 @@ fun shutdown(user: User? = null) {
     MLOG.elog("Safely shutdown.")
     System.exit(0)
 }
-
-const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try that " +
-        "again later*"

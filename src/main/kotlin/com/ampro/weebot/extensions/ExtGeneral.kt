@@ -11,10 +11,24 @@ import kotlinx.coroutines.runBlocking
         Lists
  ***************/
 
+/**
+ * Splits an Iterable into two lists, one matching the [predicate] and the other not
+ * matching.
+ *
+ * @return [Pair] of mutable lists. First element contains those matching the predicate.
+ */
+infix fun <E> Iterable<E>.splitBy(predicate: (E) -> Boolean)
+        : Pair<MutableList<E>, MutableList<E>> {
+    return (filter(predicate).toMutableList() to filterNot(predicate).toMutableList())
+}
+
 
 /* ****************
         String
  *******************/
+
+operator fun Regex.plus(regex: Regex) = Regex(pattern + regex.pattern)
+operator fun Regex.plus(pattern: String) = Regex(this.pattern + pattern)
 
 /**
  * Remove all instances of the given regex

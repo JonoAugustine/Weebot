@@ -12,6 +12,7 @@ import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.PUBLIC
 import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
+import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
@@ -20,6 +21,7 @@ import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.guild.voice.*
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import java.lang.IndexOutOfBoundsException
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
@@ -63,13 +65,11 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
      *
      * @param voiceChannel The [VoiceChannel] to check
      */
-    private fun limitSafe(voiceChannel: VoiceChannel) = when (limit) {
-        ALL -> true
-        PUBLIC -> voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
-                    ?.allowed?.contains(VOICE_CONNECT) ?: true
-                || !(voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
-                ?.denied?.contains(VOICE_CONNECT) ?: true)
-    }
+    private fun limitSafe(voiceChannel: VoiceChannel) = if (limit == ALL) true
+    else voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)?.allowed
+        ?.contains(VOICE_CONNECT) ?: true
+            || !(voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
+        ?.denied?.contains(VOICE_CONNECT) ?: true)
 
     /**
      * When a user joins a voice channel, assign the Member a role named after
@@ -139,6 +139,15 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
 
     }
 
+    internal fun asEmbed(guild: Guild) : EmbedBuilder {
+        return makeEmbedBuilder("Voice Channel Role Manager", null, """
+            All live Voice Channel Roles in **${guild.name}:**```css
+            ${genRoles.map { "@ " + (guild.getRoleById(it.value)?.name ?: "") + "\n" }}
+        ```
+        ${if (limit != ALL) "(Limited to **Public** Channels)" else ""}
+        """.trimIndent())
+    }
+
 }
 
 /**
@@ -184,11 +193,15 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild)
         val args = event.splitArgs()
-        if (args.isEmpty()) return
         STAT.track(this, bot, event.author)
         val vcRoleManager = bot.getPassive<VCRoleManager>()
-        when (args[0].toUpperCase()) {
-            "ENABLE", "ON" -> {
+        when {
+            args.isEmpty() -> {
+                vcRoleManager?.asEmbed(event.guild)?.build()?.also {
+                    event.reply(it)
+                } ?: event.respondThenDelete("No Voice Channel Role Manager active.")
+            }
+            args[0].matchesAny(REG_ON, REG_ENABLE) -> {
                 if (vcRoleManager == null) {
                     val lim = if (args.size > 1) {
                         try {
@@ -206,7 +219,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
                     return
                 }
             }
-            "DISABLE", "OFF" -> {
+            args[0].matchesAny(REG_OFF, REG_DISABLE) -> {
                 if (vcRoleManager != null) {
                     vcRoleManager.clean(event.guild)
                     vcRoleManager.dead = true
@@ -217,7 +230,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
                     return
                 }
             }
-            ALL.name -> {
+            args[0].matches(Regex("(?i)-{0,2}al+")) -> {
                 vcRoleManager?.also {
                     it.limit = ALL
                     event.reply("*Voice Channel Role Manager set to watch All Channels.*")
@@ -225,7 +238,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
                     "There is no VCRole Manager active. Use ``vcr on``"
                 )
             }
-            PUBLIC.name -> {
+            args[0].matches(Regex("(?i)-{0,2}pub(lic)?")) -> {
                 vcRoleManager?.also {
                     it.limit = PUBLIC
                     event.reply(
@@ -264,12 +277,14 @@ internal fun nameGen(member: Member, format: String)
  * @author Jonathan Augustine
  * @since 2.1
  */
-class VCGenerator(baseChannel: VoiceChannel) : IPassive {
+class VCGenerator(baseChannel: Long) : IPassive {
+    constructor(baseChannel: VoiceChannel) : this(baseChannel.idLong)
+
     private var dead = false
     override fun dead() = dead
 
     /** Whether the generator is set to shutdown (block incoming requests then die)*/
-    var inShutdown = false
+    internal var inShutdown = false
 
     /**
      * @param limit the max users that can join the channel 1-99 (0 if no limit)
@@ -302,10 +317,10 @@ class VCGenerator(baseChannel: VoiceChannel) : IPassive {
     internal val guildSettings = Settings(0, "{USER}'s Channel")
 
     /** The generator Channel */
-    var baseId: Long = baseChannel.idLong
+    var baseId: Long = baseChannel
 
     /** All active generated [VoiceChannel]s mapped to user IDs */
-    private val genChannels = ConcurrentHashMap<Long, Long>()
+    internal val genChannels = ConcurrentHashMap<Long, Long>()
 
     override fun accept(bot: Weebot, event: Event) {
         fun onJoin(guild: Guild, member: Member, channel: VoiceChannel) : Boolean {
@@ -324,7 +339,7 @@ class VCGenerator(baseChannel: VoiceChannel) : IPassive {
                             guild.getCategoryById(guildSettings.categoryID!!) ?: base.parent
                         } else base.parent
                         if (tCat != null) setParent(tCat)
-                    }.queue { vc ->
+                    }.queue({ vc ->
                         genChannels[member.user.idLong] = vc.idLong
                         bot.settings.sendLog("AutoGen Channel created: ``${vc.name}``.")
                         if (guild.selfMember hasPerm VOICE_MOVE_OTHERS) {
@@ -338,7 +353,8 @@ class VCGenerator(baseChannel: VoiceChannel) : IPassive {
                                     "AutoGen Channel deleted: ``${vc.name}`` (Timed out).")
                             }
                         }
-                    }
+                    }, { bot.settings.sendLog("Failed to generate voice channel for: " +
+                                member.asMention)})
                 r = true
             }
             if (genChannels.isEmpty() && inShutdown) shutdown(guild)
@@ -347,8 +363,7 @@ class VCGenerator(baseChannel: VoiceChannel) : IPassive {
         fun onLeave(guild: Guild, member: Member, channel: VoiceChannel) : Boolean {
             clean(guild)
             var r = false
-            if (genChannels[member.user.idLong]?.equals(channel.idLong) == true
-                    && channel.members.isEmpty()) {
+            if (genChannels.containsValue(channel.idLong) && channel.members.isEmpty()) {
 
                 genChannels.remove(member.user.idLong)
                 val name = channel.name
@@ -423,7 +438,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
     arrayOf("vcg", "vcgenerator", "vcgen"), CAT_UTIL, "",
     "Creates a temp VoiceChannel for a User after joining a designated Voice Channel",
     guildOnly = true, children = arrayOf(SubCmdEnable(), SubCmdDisable(),
-        SubCmdServerSettings(), SubCmdUserDefaults(), SubCmdManulTemp())) {
+        SubCmdServerSettings(), SubCmdUserDefaults(), SubCedManualTemp())) {
 
     /** Turn ON  */
     internal class SubCmdEnable : WeebotCommand("enable", arrayOf("on"), CAT_MOD, "", "",
@@ -524,6 +539,8 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                 }
             }
 
+            STAT.track(this, bot, event.author)
+
             //Build new VCG
             event.reply("*Getting Things Ready...*") { m ->
                 //If there are no VCs, ask them to make one
@@ -541,13 +558,16 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
         "", "", guildOnly = true, cooldown = 30,  botPerms = arrayOf(MANAGE_CHANNEL),
         userPerms = arrayOf(MANAGE_CHANNEL)) {
         public override fun execute(event: CommandEvent) {
-            getWeebotOrNew(event.guild).getPassive<VCGenerator>()?.also {
-                it.shutdown(event.guild)
-                event.reply("""Voice Channel Generator has been placed in shutdown;
+            getWeebotOrNew(event.guild).also { bot ->
+                bot.getPassive<VCGenerator>()?.also {
+                    STAT.track(this, bot, event.author)
+                    it.shutdown(event.guild)
+                    event.reply("""Voice Channel Generator has been placed in shutdown;
                 |No more channels will be created, and all remaining channels will
                 |be closed on exit.
                 |""".trimMargin())
-            } ?: event.respondThenDelete("There is no VCGenerator active", 5)
+                } ?: event.respondThenDelete("There is no VCGenerator active", 5)
+            }
         }
     }
 
@@ -558,6 +578,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
         override fun execute(event: CommandEvent) {
             getWeebotOrNew(event.guild).also { bot ->
                 bot.getPassive<VCGenerator>()?.also { vcg ->
+                    STAT.track(this, bot, event.author)
                     SelectableEmbed(event.author, false,
                         vcg.asEmbed(event.guild).addField("Guide", """
                         $Speaker to change the VG Generator Channel
@@ -691,6 +712,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
         CAT_UTIL, "", "", cooldown = 30, guildOnly = true) {
         override fun execute(event: CommandEvent) {
             getWeebotOrNew(event.guild).also { bot ->
+                STAT.track(this, bot, event.author)
                 bot.getPassive<VCGenerator>()?.also { vcg ->
                     var set = vcg.userSettings[event.author.idLong] ?: vcg.guildSettings
                     SelectableEmbed(event.author, false,
@@ -756,11 +778,87 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
     }
 
     /** Manual Temp Channel */
-    internal class SubCmdManulTemp : WeebotCommand("temp", arrayOf("mydef"),
-        CAT_UNDER_CONSTRUCTION, "", "", cooldown = 30, guildOnly = true) {
+    internal class SubCedManualTemp : WeebotCommand("temp", arrayOf("manual"),
+        CAT_UTIL, "", "", cooldown = 30, guildOnly = true,
+        userPerms = arrayOf(MANAGE_CHANNEL), botPerms = arrayOf(MANAGE_CHANNEL)) {
         override fun execute(event: CommandEvent) {
-            //temp [-t hours] [-L userLimit] [-c category] [name]
-            TODO("not implemented")
+            getWeebotOrNew(event.guild).also { bot ->
+                STAT.track(this, bot, event.author)
+                val vcg = bot.getPassive() ?: VCGenerator(-1).apply {
+                    bot.add(this)
+                    inShutdown = true
+                }
+                //[-L userLimit] [-c category] [name]
+                val args = event.splitArgs()
+                var name: String = nameGen(event.member,
+                    vcg.userSettings[event.author.idLong]?.name ?: vcg.guildSettings.name)
+                var limit = 0
+                var cat = event.textChannel.parent ?: vcg.guildSettings.categoryID
+                            ?.let { event.guild.getCategoryById(it) }
+
+                var nameIndex = 0
+
+                val limitIndex = args.indexOfFirst {
+                    it.matches(REG_HYPHEN + "(l(imit)?|u(sers?)?)")
+                }
+                if (limitIndex != -1) {
+                    limit = try {
+                        val i = args[limitIndex + 1].toInt()
+                        if (i !in 0..99) throw NumberFormatException()
+                        i
+                    } catch (e: NumberFormatException) {
+                        event.replyError(
+                            "``${args[limitIndex + 1]}`` is not a number 0 to 99")
+                        return
+                    } catch (e: IndexOutOfBoundsException) {
+                        event.replyError("User limit is not specified")
+                        return
+                    }
+                    nameIndex += 2
+                }
+
+                val catIndex = args.indexOfFirst {
+                    it.matches(REG_HYPHEN + "c(at(egory)?)?")
+                }
+                if (catIndex != -1) {
+                    cat = try {
+                        event.guild.getCategoriesByName(args[catIndex + 1], true)[0]
+                    } catch (e: IndexOutOfBoundsException) {
+                        event.replyError("No Category could be found.")
+                        return
+                    }
+                    nameIndex += 2
+                }
+
+                if (nameIndex in 0 until args.size) {
+                    name = args.subList(nameIndex, args.size).joinToString(" ")
+                } else if (name.isBlank()) {
+                    name = nameGen(event.member)
+                }
+                val controller = event.guild.controller
+                controller.createVoiceChannel(name).apply {
+                    if (cat != null) setParent(cat)
+                    setUserlimit(limit)
+                }.queue({ vc ->
+                    vcg.genChannels[event.member.user.idLong] = vc.idLong
+                    bot.settings.sendLog("AutoGen Channel created: ``${vc.name}``.")
+                    if (event.guild.selfMember hasPerm VOICE_MOVE_OTHERS && event.member.voiceState.inVoiceChannel()) {
+                        controller.moveVoiceMember(event.member, vc as VoiceChannel)
+                            .queueAfter(205, MILLISECONDS)
+                    } else WAITER.waitForEvent(GuildVoiceJoinEvent::class.java,
+                        { it.channelJoined.id == vc.id }, {}, 2L, MINUTES) {
+                        //Timout Delete VC
+                        vc.delete().reason("Empty").queue {
+                            bot.settings.sendLog(
+                                "AutoGen Channel deleted: ``${vc.name}`` (Timed out).")
+                        }
+                    }
+                }, { bot.settings.sendLog("Failed to generate voice channel for: " +
+                        event.member.asMention)
+                })
+
+            }
+
         }
     }
 
@@ -791,8 +889,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                     *Need ${MANAGE_CHANNEL.getName()} permission.*""".trimIndent(),true)
             .addField("Set/See Your Defaults","``set`` or ``mydef``",true)
             .addField("Manually Create Temporary Voice Channel", """
-                ``temp [-t hours] [-L userLimit] [-c category] [name]``
-                If ``hours`` is not set, the channel will delete on exit
+                ``temp [-L userLimit] [-c category] [name]``
                 *Must have ${MANAGE_CHANNEL.getName()} permission.*
             """.trimIndent(), true)
             .build()

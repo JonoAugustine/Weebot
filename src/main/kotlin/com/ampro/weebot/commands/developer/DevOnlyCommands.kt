@@ -16,8 +16,7 @@ import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.X_Red
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
@@ -50,24 +49,29 @@ class CmdShutdown : WeebotCommand("shutdown", arrayOf("tite", "killbot", "devkil
 class CmdStatsView : WeebotCommand("stats", arrayOf("viewstats", "statsview",
     "statview", "viewstat"), CAT_DEV, "[commandName...]", "View Weebot statistics",
     hidden = true, ownerOnly = true) {
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: CommandEvent) { GlobalScope.launch(CACHED_POOL) {
         val stats = if (event.args.isBlank()) STAT.commandUsage else {
             STAT.commandUsage.filter {
-                event.splitArgs().map{it.toLowerCase()}.contains(it.key.toLowerCase())
+                event.splitArgs().map { it.toLowerCase() }.contains(it.key.toLowerCase())
             }
         }
         if (stats.isEmpty()) {
-            event.reply("No Statistics available.")
-            return
+            if (JDA_SHARD_MNGR.guilds.none {
+                        getWeebotOrNew(it).settings.trackingEnabled }) {
+                event.reply("No Weebots have Tracking Enabled.")
+            } else event.reply("No Statistics available.")
+            return@launch
         }
+
         strdPaginator.useNumberedItems(true).setText("${SELF.name} Usage Stats")
-            .setUsers(event.author).setItemsPerPage(6)
-            .apply {
-                stats.map { """${it.key}:
+            .setUsers(event.author).setItemsPerPage(6).apply {
+                stats.map {
+                    """${it.key}:
                     ${it.value.summerize()}
-                """.trimIndent() }.forEach { addItems(it) }
+                """.trimIndent()
+                }.forEach { addItems(it) }
             }.build().display(event.channel)
-    }
+    }}
 }
 
 /**
@@ -87,13 +91,13 @@ class CmdGuildList : WeebotCommand("guildlist",
     val REG_DATE = Regex("(?i)-(d+a*t*e*)")
 
     override fun execute(event: CommandEvent) {
-        val op = JDA_SHARD_MNGR.guilds
+        val gs = JDA_SHARD_MNGR.guilds
         val sortByDate = event.args.matches(REG_DATE)
 
         SelectablePaginator(setOf(event.author),
-            title = "All guilds housing ${SELF.name} (Total: ${op.size})",
+            title = "All guilds housing ${SELF.name} (Total: ${gs.size})",
             description = "``Name ~ member count (percentage non-bots) on shardID``",
-            items = op.sortedByDescending { if (sortByDate)
+            items = gs.sortedByDescending { if (sortByDate)
                 it.selfMember.joinDate.until(NOW(), ChronoUnit.MINUTES) * -1
             else it.trueSize.toLong() }.map {
                 "**${it.name}** ~ ${it.size} (${((

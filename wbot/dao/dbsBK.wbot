@@ -135,6 +135,57 @@
       "notePads": [],
       "guildID": -1
     },
+    "499672486854524948": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 5
+          },
+          "time": {
+            "hour": 20,
+            "minute": 23,
+            "second": 12,
+            "nano": 606000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "explicit": false,
+        "nsfw": false,
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "disabledCommands": {},
+        "guildID": 499672486854524948
+      },
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
+          "DATA": {
+            "dead": false,
+            "inShutdown": false,
+            "userSettings": {},
+            "guildSettings": {
+              "limit": 0,
+              "name": "{USER}\u0027s Channel",
+              "categoryID": 531281881820299274
+            },
+            "baseId": 531281947864072202,
+            "genChannels": {}
+          }
+        }
+      ],
+      "notePads": [],
+      "guildID": 499672486854524948
+    },
     "264445053596991498": {
       "initDate": {
         "dateTime": {
@@ -521,6 +572,7 @@
           "DATA": {
             "dead": false,
             "genRoles": {
+              "204663874010480641": 531231147942871050,
               "244833480846999552": 530926356645806090
             },
             "limit": "ALL"
@@ -536,7 +588,8 @@
             "scoreMap": {
               "185063150557593600": 1,
               "277593092561829889": -3,
-              "139167730237571072": 3,
+              "186130584693637131": 2,
+              "139167730237571072": 2,
               "383656411789524995": 3
             }
           }
@@ -561,49 +614,6 @@
           "id": "JU63D",
           "notes": [
             {
-              "id": "S22LJ0EF0I",
-              "lastEditTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 31
-                  },
-                  "time": {
-                    "hour": 11,
-                    "minute": 52,
-                    "second": 48,
-                    "nano": 679000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": 0
-                }
-              },
-              "edits": 1,
-              "locked": false,
-              "note": "The first note but cooler",
-              "authorID": 139167730237571072,
-              "initTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 31
-                  },
-                  "time": {
-                    "hour": 11,
-                    "minute": 38,
-                    "second": 6,
-                    "nano": 131000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": 0
-                }
-              }
-            },
-            {
               "id": "7BLLXR6VM0",
               "lastEditTime": {
                 "dateTime": {
@@ -624,7 +634,7 @@
                 }
               },
               "edits": 0,
-              "locked": false,
+              "locked": true,
               "note": "Matt is a nerd",
               "authorID": 139167730237571072,
               "initTime": {
@@ -645,52 +655,61 @@
                   "totalSeconds": 0
                 }
               }
-            },
+            }
+          ],
+          "editHistory": [
             {
-              "id": "C93YVWLKRI",
-              "lastEditTime": {
+              "noteIDs": [
+                "S22LJ0EF0I"
+              ],
+              "editorID": 139167730237571072,
+              "type": "DELETE",
+              "info": "",
+              "time": {
                 "dateTime": {
                   "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 31
+                    "year": 2019,
+                    "month": 1,
+                    "day": 5
                   },
                   "time": {
-                    "hour": 23,
-                    "minute": 46,
-                    "second": 50,
-                    "nano": 560000000
-                  }
-                },
-                "offset": {
-                  "totalSeconds": 0
-                }
-              },
-              "edits": 0,
-              "locked": false,
-              "note": "This was written from the home menu",
-              "authorID": 139167730237571072,
-              "initTime": {
-                "dateTime": {
-                  "date": {
-                    "year": 2018,
-                    "month": 12,
-                    "day": 31
-                  },
-                  "time": {
-                    "hour": 23,
-                    "minute": 46,
-                    "second": 50,
-                    "nano": 560000000
+                    "hour": 19,
+                    "minute": 22,
+                    "second": 12,
+                    "nano": 339000000
                   }
                 },
                 "offset": {
                   "totalSeconds": 0
                 }
               }
-            }
-          ],
-          "editHistory": [
+            },
+            {
+              "noteIDs": [
+                "C93YVWLKRI"
+              ],
+              "editorID": 139167730237571072,
+              "type": "DELETE",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 5
+                  },
+                  "time": {
+                    "hour": 19,
+                    "minute": 21,
+                    "second": 22,
+                    "nano": 625000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
             {
               "noteIDs": [
                 "C93YVWLKRI"

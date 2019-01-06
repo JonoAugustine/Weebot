@@ -48,7 +48,7 @@ internal val REDDIT_ICON = "https://www.redditstatic.com/new-icon.png"
  * @since 2.0
  */
 class Reddicord(channels: MutableList<TextChannel> = mutableListOf()) : IPassive {
-    var dead: Boolean = false
+    private var dead: Boolean = false
     override fun dead() = dead
 
     /** Enabled Channels (empty = all channels) */
@@ -191,7 +191,7 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
     "Upvote and Downvote messages to gain points.",
     userPerms = arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
     botPerms =  arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
-    guildOnly = true, children = arrayOf(CmdReddicord.CmdLeaderBoard())
+    guildOnly = true, children = arrayOf(SubCmdLeaderBoard(), SubCmdReset())
 ) {
 
     /**
@@ -200,7 +200,7 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
      * @author Jonathan Augustine
      * @since 2.0
      */
-    class CmdLeaderBoard : WeebotCommand("leaderboard",
+    class SubCmdLeaderBoard : WeebotCommand("leaderboard",
         arrayOf("ranks", "lb", "scores", "reddiscore"),
         CAT_FUN, "[@/member @/member2...]", "See the Reddicord leaderboard.",
         guildOnly = true, ownerOnly = false, cooldown = 120,
@@ -252,8 +252,25 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
 
     }
 
+    class SubCmdReset : WeebotCommand("reset", arrayOf("clear", "clearscores"), CAT_FUN,
+        "", "Set everyone's score to 0.", guildOnly = true, cooldown = 360,
+        userPerms = arrayOf(ADMINISTRATOR)) {
+        override fun execute(event: CommandEvent) {
+            val bot = getWeebotOrNew(event.guild)
+            bot.getPassive<Reddicord>()?.also { rCord ->
+                if (rCord.scoreMap.isNotEmpty()) {
+                    rCord.scoreMap.replaceAll { _, score -> AtomicInteger(0) }
+                }
+                event.reply("Scores reset to ``0``")
+            } ?: event.respondThenDelete(makeEmbedBuilder("Reddicord has not been " +
+                    "activated", description = "To activate Reddicord, use ``reddicord " +
+                    "on`` or try ``help reddicord`` for more info.").build(), 60)
+        }
+    }
+
     override fun execute(event: CommandEvent) {
 
+        //Check if \reddiSCORE
         if (children[0].isCommandFor(event.getInvocation())) {
             children[0].run(event)
             return
@@ -281,45 +298,53 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
                     .build())
             }
             args[0].toLowerCase().matches(Regex("^(on|enable)$"))   -> {
-                if (rCord == null) {
-                    bot.passives.add(Reddicord(mentionedChannels))
-                    event.reply(strdEmbedBuilder.setTitle("Reddicord Activated!").apply {
-                        descriptionBuilder.append("Each message in ${event.textChannel.asMention}")
-                            .append(" will get a $CHECK and $X_Red reaction; if you ")
-                            .append("want to post your message to Reddicord then react ")
-                            .append("with $CHECK, otherwise click $X_Red or ignore it. ")
-                            .append("Once a post is sent, anyone can react with ")
-                            .append("${UP.unicode} or ${DOWN.unicode} to cast their ")
-                            .append("vote! Each vote will add or detract to the author's ")
-                            .append("ReddiScore.\n*Bring your bestest memes and posts and ")
-                            .append("let the games begin!*")
-                        setThumbnail(REDDIT_ICON)
-                    }.build()) { it.reactWith(UP, DOWN) }
-                } else {
-                    event.respondThenDelete(
-                            "Reddicord is already active in ${event.textChannel.asMention}")
+                when {
+                    rCord == null -> {
+                        bot.passives.add(Reddicord(mentionedChannels))
+                        event.reply(strdEmbedBuilder.setTitle("Reddicord Activated!").apply {
+                            descriptionBuilder.append("Each message in ${event.textChannel.asMention}")
+                                .append(" will get a $CHECK and $X_Red reaction; if you ")
+                                .append("want to post your message to Reddicord then react ")
+                                .append("with $CHECK, otherwise click $X_Red or ignore it. ")
+                                .append("Once a post is sent, anyone can react with ").append("${UP.unicode} or ${DOWN.unicode} to cast their ")
+                                .append("vote! Each vote will add or detract to the author's ")
+                                .append("ReddiScore.\n*Bring your bestest memes and posts and ")
+                                .append("let the games begin!*")
+                            setThumbnail(REDDIT_ICON)
+                        }.build()) { it.reactWith(UP, DOWN) }
+                    }
+                    mentionedChannels.isNotEmpty() -> {
+                        val validToInvalid = mentionedChannels.splitBy {
+                            rCord.channelIDs.contains(it.idLong)
+                        }
+                        if (validToInvalid.first.isNotEmpty()) {
+                            rCord.channelIDs.addAll(validToInvalid.first.map { it.idLong })
+                            event.reply("Added channels to Reddicord: "
+                                    + validToInvalid.first.map { it.asMention })
+                        }
+                        if (validToInvalid.second.isNotEmpty()) {
+                            event.respondThenDelete("These channles are already " +
+                                    "enabled: " + validToInvalid.second.map { it.asMention })
+                        }
+                    }
+                    else -> event.respondThenDelete("Reddicord is already active in ${event.textChannel.asMention}")
                 }
             }
             args[0].toLowerCase().matches(Regex("^(off|disable)$")) -> {
-                if (rCord != null) {
-                    if (mentionedChannels.isNotEmpty()) {
+                when {
+                    rCord == null -> event.respondThenDelete("Reddicord is already off in ${event.textChannel.asMention}")
+                    mentionedChannels.isNotEmpty() -> {
                         rCord.channelIDs.removeAll { id ->
                             mentionedChannels.has { it.idLong == id }
                         }
-                        event.reply(strdEmbedBuilder.setTitle(
-                            "Reddicord has been deactivated in ${mentionedChannels
-                                .joinToString(", ") { it.name }}").setDescription(
-                            "Use ``reddicord on <channels>`` to turn it back on at any time.")
-                            .build())
-                    } else {
+                        event.reply(strdEmbedBuilder.setTitle("Reddicord has been deactivated in ${mentionedChannels.joinToString(", ") { it.name }}")
+                            .setDescription("Use ``reddicord on <channels>`` to turn it back on at any time.").build())
+                    }
+                    else -> {
                         bot.passives.remove(rCord)
-                        event.reply(strdEmbedBuilder.setTitle(
-                            "Reddicord has been deactivated.").setDescription(
+                        event.reply(strdEmbedBuilder.setTitle("Reddicord has been deactivated.").setDescription(
                             "Use ``reddicord on`` to turn it back on at any time.").build())
                     }
-                } else {
-                    event.respondThenDelete(
-                            "Reddicord is already off in ${event.textChannel.asMention}")
                 }
             }
             else -> event.respondThenDelete("Sorry, I had trouble understanding " +
@@ -328,7 +353,16 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
     }
 
     init {
-        helpBiConsumer = HelpBiConsumerBuilder("Reddicord") //TODO
+        helpBiConsumer = HelpBiConsumerBuilder("Reddicord", """
+            Run your own Reddit clone in Discord's text channels! Memebers can submit,
+            upvote, and downvote "posts" in the selected TextChannels.
+        """.trimIndent())
+            .setAliases(aliases)
+            .addField("Enable/Disable", """``on/off [#textchannel...]``
+                en/disables Reddicord entirely or in the mentioned TextChannels.
+            """.trimIndent(), true)
+            .addField("Score Board", "``scores [@:mention...]``", true)
+            .addField("Reset Scores", "``reset``", true)
             .build()
     }
 }

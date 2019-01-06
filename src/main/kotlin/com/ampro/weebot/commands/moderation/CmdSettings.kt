@@ -4,34 +4,65 @@
 
 package com.ampro.weebot.commands.moderation
 
+import com.ampro.weebot.WAITER
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.CAT_MOD
-import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
-import com.ampro.weebot.database.STAT
-import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.commands.*
+import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.CHANNEL
-import com.ampro.weebot.WAITER
+import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.*
+import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import java.awt.Color
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
 
-class CmdViewPassivs : WeebotCommand("active", arrayOf("passives"), CAT_UNDER_CONSTRUCTION,
-    "[commandName]", "View all active Passives in the guild.", guildOnly = true) {
+/**
+ * A [WeebotCommand] to view any running [IPassive]s
+ *
+ * @author Jonathan Augustine
+ * @since 2.1
+ */
+class CmdTaskManager : WeebotCommand("taskmanager", arrayOf("task", "tasks"),
+    CAT_GEN, "[commandName]","View all active Passives in the guild.",
+    cooldown = 60, cooldownScope = CooldownScope.USER_GUILD,
+    userPerms = arrayOf(ADMINISTRATOR)) {
     override fun execute(event: CommandEvent) {
-        val passives = getWeebotOrNew(event.guild).passives
+        val passives = if (event.guild != null) getWeebotOrNew(event.guild).passives
+        else DAO.GLOBAL_WEEBOT.getUesrPassiveList(event.author)
+
         if (passives.isEmpty()) {
             event.reply("*No active commands.*")
             return
         }
-        strdPaginator.setText("Active Commands").setUsers(event.author).apply {
-            passives.forEach { this.addItems(it::class.simpleName) }
-        }.build().display(event.channel)
+
+        SelectablePaginator(title = "Task manager",
+            description = "All running background Commands.",
+            color = event.guild?.roles?.get(0)?.color ?: STD_GREEN,
+            items = passives.map { passive ->
+                passive::class.java.simpleName!! to { _:Int, _: Message ->
+                    strdButtonMenu.setText("_").setDescription("""
+                        Click $Fire to end this command
+                    """.trimIndent()).setColor(Color.RED).addChoice(Fire.unicode)
+                        .setAction { emote ->
+                            if (emote.toEmoji()?.equals(Fire) == true) {
+                                if (passives.remove(passive)) {
+                                    event.reply("Removed.")
+                                } else {
+                                    event.reply(GEN_FAILURE_MESSAGE)
+                                }
+                            }
+                        }.setFinalAction { it.delete().queue({},{}) }
+                        .build().display(event.channel)
+                }
+            }, exitAction = {
+                it.clearReactions().queue({},{})
+            }).display(event.channel)
     }
 }
 
@@ -207,7 +238,6 @@ private class CmdSetNsfw : WeebotCommand("nsfw", arrayOf("naughty"), CAT_UNDER_C
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)){
 
     companion object {
-        //TODO
         val normField: Field = Field("NSFW", "this doesnt do anything....*yet*${Smirk
             .unicode}",
             true)
@@ -290,7 +320,24 @@ private class CmdSetTracking : WeebotCommand("skynet", arrayOf("track", "trackin
     }
 
     override fun execute(event: CommandEvent) {
-        TODO("Tracking setting")
         STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        val bot = getWeebotOrNew(event.guild)
+        STAT.track(this, bot, event.author)
+        val args = event.splitArgs()
+        val enabled = bot.settings.trackingEnabled
+
+        when {
+            args.isEmpty() -> event.reply(
+                "Anonymous Statistics ${if (enabled) "on" else "off"}"
+            )
+            args[0].matchesAny(REG_ON, REG_ENABLE) -> {
+                bot.settings.trackingEnabled = true
+                event.reply("Anonymous Statistics Enabled. Thank you for helping Weebot!")
+            }
+            args[0].matchesAny(REG_OFF, REG_DISABLE) -> {
+                bot.settings.trackingEnabled = false
+                event.reply("Anonymous Statistics Disabled.")
+            }
+        }
     }
 }
