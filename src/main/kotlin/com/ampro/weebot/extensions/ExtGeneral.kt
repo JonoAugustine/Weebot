@@ -76,6 +76,10 @@ fun <A, B> Iterable<A>.parMap(f: suspend (A) -> B): List<B> = runBlocking {
     map { async { f(it) } }.map { it.await() }
 }
 
+/**
+ * @param predicate Items matching will be removed
+ */
 fun <K, V> MutableMap<K, V>.removeIf(predicate: (K, V) -> Boolean) {
-    putAll( filter { predicate(it.key, it.value) } )
+    val targets = filter { predicate(it.key, it.value) }
+    targets.forEach { t -> this.remove(t.key) }
 }
