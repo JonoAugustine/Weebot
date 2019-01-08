@@ -40,31 +40,61 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
     /** Guild's command string to call the bot.*/
     var prefixs = mutableListOf("\\", "w!")
 
-    /** Whether the bot is able to use explicit language  */
-    var explicit: Boolean = false
-    /** Whether the bot is able to be nsfw */
-    var nsfw: Boolean = false
-
     /** The [TextChannel] to send logs to */
     var logchannel: Long = -1
 
     /** Allows Weebot to track usage for stats */
     var trackingEnabled: Boolean = false
 
+    /**
+     * @author Jonathan Augustine
+     * @since 2.1
+     */
+    class CommandRestriction {
+        /** True if the Command is blocked from the entire Guild */
+        var guildWide = false
+        val lockedTo = mutableListOf<Long>()
+        val blockedFrom = mutableListOf<Long>()
+        /** GuildWide Enable */
+        fun open() {
+            guildWide = false
+            lockedTo.clear()
+            blockedFrom.clear()
+        }
+        /** GuildWide Block */
+        fun close() {
+            guildWide = true
+            lockedTo.clear()
+            blockedFrom.clear()
+        }
+        /** Lock to [channels] */
+        fun lockTo(channels: Iterable<TextChannel>) {
+            val ids = channels.map { it.idLong }
+            lockedTo.addAll(ids)
+            blockedFrom.removeIf { ids.contains(it) }
+        }
+        /** Block from [channels] */
+        fun blockFrom(channels: Iterable<TextChannel>) {
+            val ids = channels.map { it.idLong }
+            blockedFrom.addAll(ids)
+            lockedTo.removeIf { ids.contains(it) }
+        }
+        fun allows(textChannel: TextChannel) = when {
+            guildWide -> false
+            lockedTo.isNotEmpty() -> lockedTo.contains(textChannel.idLong)
+            blockedFrom.isNotEmpty() -> !blockedFrom.contains(textChannel.idLong)
+            else -> true
+        }
+    }
+
     /** [TextChannel.getIdLong] -> [Pair]<[MutableList]<Class<[WeebotCommand]>>
      *     Pair<lockedTo, BlockedFrom>
      */
-    var commandRestrictions = ConcurrentHashMap<Long,
-            Pair<MutableList<KClass<WeebotCommand>>,
-                    MutableList<KClass<WeebotCommand>>>>()
+    var commandRestrictions: ConcurrentHashMap<KClass<out WeebotCommand>, CommandRestriction>
+            = ConcurrentHashMap()
 
-    fun isAllowed(cmd: WeebotCommand, textChannel: TextChannel) : Boolean {
-        val pair = commandRestrictions[textChannel.idLong]
-        return when {
-            pair?.first?.contains(cmd::class) != false -> true
-            else -> !pair.second.contains(cmd::class)
-        }
-    }
+    fun isAllowed(cmd: WeebotCommand, textChannel: TextChannel)
+        = commandRestrictions[cmd::class]?.allows(textChannel) != false
 
     /**
      * Sneds a log message to the log channel if it is set

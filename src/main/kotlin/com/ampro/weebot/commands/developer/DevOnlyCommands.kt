@@ -22,7 +22,6 @@ import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import java.time.chrono.ChronoPeriod
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit.*
 import kotlin.math.ceil
@@ -65,6 +64,8 @@ class CmdStatsView : WeebotCommand("stats", arrayOf("viewstats", "statsview",
 
         val size = enabled.filter { it }.size
         val perc = ceil((size / enabled.size.toDouble()) * 100)
+
+        //TODO Command Restriction Stats
 
         strdPaginator.useNumberedItems(true).setText("Usage Stats from $size ($perc)")
             .setUsers(event.author).setItemsPerPage(6).apply {
@@ -121,7 +122,6 @@ class CmdGuildList : WeebotCommand("guildlist",
 fun Guild.infoEmbed(event: CommandEvent): SelectableEmbed {
     val gAge = ChronoUnit.SECONDS.between(creationTime, event.creationTime)
     val wAge = ChronoUnit.SECONDS.between(selfMember.joinDate, event.creationTime)
-    //TODO guildlist guild info show weebot age under join date
     return SelectableEmbed(event.author, true, makeEmbedBuilder("Guild: $name", null, """
         **Weebot Join Date:**   ${selfMember.joinDate.format(DD_MM_YYYY_HH_MM)}
         **Weebot Age:** ${wAge.formatTime()}

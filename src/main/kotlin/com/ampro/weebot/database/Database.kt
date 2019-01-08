@@ -123,8 +123,8 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
     /**
      * A map of Command names to their useage statistics
      */
-    val commandUsage: ConcurrentHashMap<KClass<out WeebotCommand>,
-            MutableList<CommandUsageEvent>> = ConcurrentHashMap()
+    val commandUsage: ConcurrentHashMap<String, MutableList<CommandUsageEvent>>
+            = ConcurrentHashMap()
 
     /**
      * @param command
@@ -133,7 +133,7 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
      */
     fun track(command: WeebotCommand, weebot: Weebot, user: User, time: OffsetDateTime) {
         if (/*TODO weebot.settings.trackingEnabled &&*/ weebot !is GlobalWeebot) {
-            commandUsage.getOrPut(command::class) { mutableListOf() }
+            commandUsage.getOrPut(command.name) { mutableListOf() }
                 .add(CommandUsageEvent(weebot.guildID, WeebotInfo(weebot),
                     UserInfo(user), time))
         }
@@ -165,7 +165,7 @@ fun List<Statistics.CommandUsageEvent>.summarize() : String {
     return """
         Data Set Size: $size
         Median Size: $medSize
-        Median Time (hr): $hours:00
+        Median Time (hr): $medHours
         Median Percent Human: $medPercentHuman
         Median Age: ${(medAge * 60).formatTime()}
         """.trimIndent()
