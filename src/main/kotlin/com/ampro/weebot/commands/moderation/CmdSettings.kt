@@ -78,8 +78,8 @@ class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"
     CAT_MOD, "[settingName] [newSetting]", "View or Change your weebot's settings",
     guildOnly = true, cooldown = 30,
     children = arrayOf(
-        CmdSetName(), CmdSetPrefix(), CmdSetExplicit(), CmdSetLogChannel(),
-        CmdSetTracking(), CmdBlock(), CmdLock())
+        CmdSetName(), CmdSetPrefix(), CmdSetLogChannel(), CmdSetTracking(), CmdBlock(),
+        CmdLock())
 ) {
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Weebot Settings").setDescription(
@@ -212,23 +212,6 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
         }
     }
 
-}
-
-private class CmdSetExplicit : WeebotCommand("explicit", arrayOf("expl", "cuss"),
-    CAT_UNDER_CONSTRUCTION, "<expl> [newSetting]",
-    "View or Change your weebot's explicit setting",
-    guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)){
-
-    companion object {
-        val normField: Field = Field("Explicit",
-            "Enable explicit language\n``set expl [on/off]``\nAliases: explicit, cuss",
-            true)
-    }
-
-    override fun execute(event: CommandEvent) {
-        TODO("Explicit Settings")
-        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
-    }
 }
 
 private class CmdSetLogChannel : WeebotCommand("log",

@@ -41,8 +41,12 @@ class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "regextest"),
             .setThumbnail("https://i1.wp.com/digitalfortress" +
                     ".tech/wp-content/uploads/2018/05/regex1.png?fit=526%2C526&ssl=1")
             .setAliases(aliases)
-            .addField("Word Test", "<regex_pattern> <word> [words...]", true)
-            .addField("Phrase Test", "phrase <phrase here>", true)
+            .addField("Word Test", "``<regex_pattern> <word> [words...]``", true)
+            .addField("Phrase Test", """```css
+                |<-p> <regex_pattern> <phrase 1>
+                |[phrase 2...]
+                |[phrase 3...]
+                |```""".trimMargin(), true)
             .build()
     }
 
@@ -59,25 +63,26 @@ class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "regextest"),
     private fun regexEmbedBuilder(name: String, regex: String, strings: List<String>,
                                   matches: List<String>): MessageEmbed
             = strdEmbedBuilder.setTitle("$name's Regex Test")
-        .setDescription("Testing regex\n```\n$regex\n``` against ${strings.size} " +
-                "strings: ```$strings```" +
-            "\nFound ${matches.size} matches ${if (matches.isNotEmpty()) {
-            "!\n```\n${kotlin.run{var s="";matches.forEach {s+="$it\n"};s}}```"
+        .setDescription("Testing regex\n```css\n$regex\n``` against ${strings.size} " +
+                "strings: ```css\n${strings.joinToString(", ")}\n```" +
+            "\nFound ${matches.size} matches${if (matches.isNotEmpty()) {
+            "!\n```css\n${kotlin.run{var s="";matches.forEach {s+="$it\n"};s}}```"
         } else { FrowningFace.unicode }}")
         .build()
 
     override fun execute(event: CommandEvent) {
-        //TODO regex phrase by \newline char
         val args = event.splitArgs()
         if (args.size < 2) return
         STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
         val regex: Regex
         val strings: List<String>
         try {
-            if (args[0].toLowerCase() == "phrase") { //\regex phrase <phrase here>
+            if (args[0].matches(REG_HYPHEN + "p(hrase)?$")) {
+                //\regex phrase <regex> <phrase here>
                 if (args.size < 3) return
+                strings = event.args.substring(args[0].length + 1 + args[1].length)
+                    .split(Regex("\\n"))
                 regex = args[1].toRegex()
-                strings = listOf(args.subList(2, args.size).joinToString(" ", "", ""))
             } else { //\regex <regex> word word word
                 regex = args[0].toRegex()
                 strings = args.subList(1, args.size)

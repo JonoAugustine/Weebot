@@ -24,8 +24,10 @@ import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit.*
+import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.roundToInt
+import kotlin.reflect.KClass
 
 
 /**
@@ -52,9 +54,8 @@ class CmdStatsView : WeebotCommand("stats", arrayOf("viewstats", "statsview",
     hidden = true, ownerOnly = true) {
     override fun execute(event: CommandEvent) { GlobalScope.launch(CACHED_POOL) {
         val stats = STAT.commandUsage
-        val enabled: List<Boolean> = JDA_SHARD_MNGR.guilds.map {
-            getWeebotOrNew(it).settings.trackingEnabled
-        }
+        val bots = JDA_SHARD_MNGR.guilds.map { getWeebotOrNew(it) }
+        val enabled: List<Boolean> = bots.map { it.settings.trackingEnabled }
         if (stats.isEmpty()) {
             if (enabled.none { it }) {
                 event.reply("No Weebots have Tracking Enabled.")
@@ -62,10 +63,24 @@ class CmdStatsView : WeebotCommand("stats", arrayOf("viewstats", "statsview",
             return@launch
         }
 
+        val restrictions = HashMap<KClass<out WeebotCommand>, AtomicInteger>()
+
+        bots.map { it.settings.commandRestrictions.filter { it.value.guildWide }
+            .forEach { restrictions.getOrPut(it.key) {AtomicInteger(0)}.incrementAndGet() }
+        }
+
+        if (restrictions.isNotEmpty()) {
+            val rList = restrictions.map { it.key to it.value.get() }
+                .sortedBy { it.second }.map { "**${it.first.simpleName}:** ${it.second}" }
+
+            strdPaginator.useNumberedItems(true).setText("Blocked Command Stats")
+                .setUsers(event.author).setItemsPerPage(6).apply {
+                    rList.forEach { addItems(it) }
+                }.build().display(event.channel)
+        }
+
         val size = enabled.filter { it }.size
         val perc = ceil((size / enabled.size.toDouble()) * 100)
-
-        //TODO Command Restriction Stats
 
         strdPaginator.useNumberedItems(true).setText("Usage Stats from $size ($perc)")
             .setUsers(event.author).setItemsPerPage(6).apply {

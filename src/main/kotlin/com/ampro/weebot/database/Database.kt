@@ -16,6 +16,7 @@ import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
 import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.Command
+import kotlinx.coroutines.Job
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.User
 import org.discordbots.api.client.DiscordBotListAPI
@@ -24,7 +25,19 @@ import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.ceil
-import kotlin.reflect.KClass
+
+/* ************************
+     Discord Bot List API
+ *************************/
+
+val DISCORD_BOTLIST_API: DiscordBotListAPI = DiscordBotListAPI.Builder()
+    .token(KEY_DISCORD_BOT_COM).botId(CLIENT_WBT.toString()).build()
+
+lateinit var BOT_LIST_API_UPDATERS: Job
+
+infix fun User.hasVoted(handler: (Boolean, Throwable) -> Boolean) {
+    DISCORD_BOTLIST_API.hasVoted(this.id).handleAsync(handler)
+}
 
 /* ************************
         Database
@@ -425,13 +438,3 @@ private fun corruptBackupWriteCheck(dao: Dao): Boolean = try {
     true
 }
 
-/* ************************
-     Discord Bot List API
- *************************/
-
-val DISCORD_BOTLIST_API: DiscordBotListAPI = DiscordBotListAPI.Builder()
-    .token(BOTSONDISCORD_KEY).botId(CLIENT_WBT.toString()).build()
-
-infix fun User.hasVoted(handler: (Boolean, Throwable) -> Boolean) {
-    DISCORD_BOTLIST_API.hasVoted(this.id).handleAsync(handler)
-}

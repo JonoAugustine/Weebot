@@ -12,12 +12,14 @@ import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
+import com.github.kittinunf.fuel.httpPost
 import com.jagrosh.jdautilities.command.CommandClient
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import kotlinx.coroutines.*
 import net.dv8tion.jda.bot.sharding.ShardManager
-import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.JDA.Status.CONNECTED
+import net.dv8tion.jda.core.JDA.Status.SHUTDOWN
 import net.dv8tion.jda.core.entities.Game.playing
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
@@ -112,8 +114,7 @@ fun main(args_: Array<String>) { runBlocking {
                     }
                 }
             }
-        }//.setDiscordBotsKey(BOTSONDISCORD_KEY)
-        //.setDiscordBotListKey(BOTLIST_KEY)
+        }
         .build()
 
     //LOGIN & LISTENERS
@@ -124,25 +125,27 @@ fun main(args_: Array<String>) { runBlocking {
     }
 
     //WAIT FOR SHARD CONNECT
-    MLOG.slog("Shard connected! ${measureTimeMillis {
-        while (JDA_SHARD_MNGR.shards[0].status != JDA.Status.CONNECTED) {
-            MLOG.slog("Waiting for shard to connect...")
+    MLOG.slog("All Shards connected! ${measureTimeMillis {
+        while (JDA_SHARD_MNGR.shards.has { it.status != CONNECTED }) {
+            MLOG.slog("Waiting for all shards to connect...")
             Thread.sleep(500)
         }
     } / 1_000} seconds")
+
+    //SET SELF AND AVATAR URL
+    SELF = JDA_SHARD_MNGR.shards[0].selfUser
+    weebotAvatar = SELF.avatarUrl
 
     //DATABASE
     setUpDatabase()
     //Stats
     setUpStatistics()
+    //Bot List website APIs
+    setupBotListApis()
 
     JDA_SHARD_MNGR.addEventListener(EventDispatcher(), WAITER)
 
     genSetup.joinAll() //Ensure all gensetup is finished
-
-    //SET SELF AND AVATAR URL
-    SELF = JDA_SHARD_MNGR.shards[0].selfUser
-    weebotAvatar = SELF.avatarUrl
 
     startupWeebots()
 
@@ -216,6 +219,32 @@ private fun setUpDatabase() {
 }
 
 /**
+ * Sends data to the Discor Bot List Websites (in order)
+ * https://discordbots.org/bot/437851896263213056
+ * https://discordbotlist.com/bots/437851896263213056
+ *
+ * @since 2.1
+ */
+private fun setupBotListApis() {
+    BOT_LIST_API_UPDATERS = GlobalScope.launch(CACHED_POOL) {
+        while (ON) {
+            //discordbots.org
+            DISCORD_BOTLIST_API.setStats(JDA_SHARD_MNGR.shards.map { it.guilds.size })
+            //discordbotlist.com
+            JDA_SHARD_MNGR.shards.forEachIndexed { i, shard ->
+                "https://discordbotlist.com//api/bots/:${SELF.id}/stats"
+                    .httpPost(listOf(
+                        "shard_id" to i,
+                        "guilds" to shard.guilds.size,
+                        "users" to shard.users.size
+                    ))
+            }
+            delay(30 * 60 * 1_000)
+        }
+    }
+}
+
+/**
  * Calls the update method for each Weebot to setup NickNames
  * changed during downtime and initialize transient variables.
  */
@@ -283,7 +312,7 @@ fun shutdown(user: User? = null) {
 
     JDA_SHARD_MNGR.shutdown()
     JDA_SHARD_MNGR.statuses.forEach { _, status ->
-        while (status != JDA.Status.SHUTDOWN) {}
+        while (status != SHUTDOWN) {}
     }
 
     CACHED_POOL.close()

@@ -47,8 +47,11 @@ val data = KotlinEntityDataStore(configuration)
       Weebot & Tobeew
  **********************/
 
-const val BOTSONDISCORD_KEY = "cb54546df399c39238d263d5bcc41e18"
-const val BOTLIST_KEY     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQzNzg1MTg5NjI2MzIxMzA1NiIsImJvdCI6dHJ1ZSwiaWF0IjoxNTQ0NjM4MDAyfQ.gRBPSSymkwQenP8hgijV_npBUee3VEx8uEbVN0WvOjM"
+/** Key for https://discordbotlist.com/bots/437851896263213056 */
+const val KEY_DISCORD_BOT_COM = "6f499481ace429583babc6704c457a7b037f001a2f57df3ebc5b4ff383088b05 "
+/** Key for https://discordbots.org/bot/437851896263213056 */
+const val KEY_DISCORD_BOT_ORG     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" +
+        ".eyJpZCI6IjQzNzg1MTg5NjI2MzIxMzA1NiIsImJvdCI6dHJ1ZSwiaWF0IjoxNTQ0NjM4MDAyfQ.gRBPSSymkwQenP8hgijV_npBUee3VEx8uEbVN0WvOjM\n"
 
 const val LINK_DISCORD_BOTS = "https://discordbots.org/bot/437851896263213056"
 const val LINK_DISCORD_BOTS_LIST = "https://discordbotlist.com/bots/437851896263213056"
