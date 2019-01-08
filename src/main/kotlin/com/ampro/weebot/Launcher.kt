@@ -236,8 +236,8 @@ private fun saveTimer() = GlobalScope.launch {
         while (ON) {
             DAO.backUp()
             STAT.saveJson(STAT_BK)
-            if (i % 50 == 0) {
-                MLOG.slog("Database back up: $i")
+            if (i % 100 == 0) {
+                MLOG.slog("Database & Stats back up: $i")
             }
             i++
             delay(SAVE_INTER * 1_000L)

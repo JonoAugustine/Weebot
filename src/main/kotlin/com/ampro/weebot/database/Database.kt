@@ -4,13 +4,13 @@
 
 package com.ampro.weebot.database
 
+import com.ampro.weebot.JDA_SHARD_MNGR
+import com.ampro.weebot.MLOG
 import com.ampro.weebot.bot.*
 import com.ampro.weebot.commands.developer.CmdSuggestion
 import com.ampro.weebot.commands.developer.Suggestion
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.JDA_SHARD_MNGR
-import com.ampro.weebot.MLOG
 import com.ampro.weebot.util.*
 import com.google.gson.Gson
 import com.google.gson.JsonSyntaxException
@@ -23,6 +23,8 @@ import java.io.*
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
+import kotlin.math.ceil
+import kotlin.reflect.KClass
 
 /* ************************
         Database
@@ -121,8 +123,8 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
     /**
      * A map of Command names to their useage statistics
      */
-    val commandUsage: ConcurrentHashMap<String, MutableList<CommandUsageEvent>>
-            = ConcurrentHashMap()
+    val commandUsage: ConcurrentHashMap<KClass<out WeebotCommand>,
+            MutableList<CommandUsageEvent>> = ConcurrentHashMap()
 
     /**
      * @param command
@@ -131,7 +133,7 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
      */
     fun track(command: WeebotCommand, weebot: Weebot, user: User, time: OffsetDateTime) {
         if (/*TODO weebot.settings.trackingEnabled &&*/ weebot !is GlobalWeebot) {
-            commandUsage.getOrPut(command.name) { mutableListOf() }
+            commandUsage.getOrPut(command::class) { mutableListOf() }
                 .add(CommandUsageEvent(weebot.guildID, WeebotInfo(weebot),
                     UserInfo(user), time))
         }
@@ -146,9 +148,9 @@ fun List<Statistics.CommandUsageEvent>.summarize() : String {
     else sizes[sizes.size/2].toDouble()
 
     val pHumans = map { it.weebotInfo.percentHuman }.sorted()
-    val medPercentHuman: Double = if (pHumans.size % 2 == 0)
+    val medPercentHuman: Double = ceil((if (pHumans.size % 2 == 0)
         (pHumans[pHumans.size/2] + pHumans[pHumans.size/2 - 1])/2.0
-    else pHumans[sizes.size/2]
+    else pHumans[sizes.size/2]) * 100.0)
 
     val ages = map { it.weebotInfo.init.until(NOW(), ChronoUnit.MINUTES) }
     val medAge: Long = if (ages.size % 2 == 0)

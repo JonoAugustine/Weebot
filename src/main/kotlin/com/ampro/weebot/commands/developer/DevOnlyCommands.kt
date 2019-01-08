@@ -52,11 +52,7 @@ class CmdStatsView : WeebotCommand("stats", arrayOf("viewstats", "statsview",
     "statview", "viewstat"), CAT_DEV, "[commandName...]", "View Weebot statistics",
     hidden = true, ownerOnly = true) {
     override fun execute(event: CommandEvent) { GlobalScope.launch(CACHED_POOL) {
-        val stats = if (event.args.isBlank()) STAT.commandUsage else {
-            STAT.commandUsage.filter {
-                event.splitArgs().map { it.toLowerCase() }.contains(it.key.toLowerCase())
-            }
-        }
+        val stats = STAT.commandUsage
         val enabled: List<Boolean> = JDA_SHARD_MNGR.guilds.map {
             getWeebotOrNew(it).settings.trackingEnabled
         }
