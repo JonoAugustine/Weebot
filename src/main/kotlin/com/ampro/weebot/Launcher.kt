@@ -6,8 +6,7 @@ package com.ampro.weebot
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CMD_HELP
-import com.ampro.weebot.commands.commands
-import com.ampro.weebot.commands.utilitycommands.remThreadPool
+import com.ampro.weebot.commands.COMMANDS
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
@@ -54,7 +53,6 @@ const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try th
  *
  * @param args_
  * @throws LoginException
- * @throws RateLimitedException
  * @throws InterruptedException
  */
 fun main(args_: Array<String>) { runBlocking {
@@ -76,7 +74,6 @@ fun main(args_: Array<String>) { runBlocking {
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Consumer(Throwable::printStackTrace)
 
-
     //LOGIN & LISTENERS
     val reg_wbot = Regex("(?i)(w|weebot|full)")
     val reg_tBot = Regex("(?i)(t|tobeew|test)")
@@ -91,7 +88,7 @@ fun main(args_: Array<String>) { runBlocking {
         .setGuildSettingsManager { getWeebotOrNew(it.idLong).settings }
         .setAlternativePrefix(alt)
         //.setGame(listening("@Weebot help"))
-        .setGame(playing("Weebot 2.1 Kotlin!")).addCommands(commands)
+        .setGame(playing("Weebot 2.1 Kotlin!")).addCommandsWithCheck(COMMANDS)
         .setEmojis(heavy_check_mark.unicode, Warning.unicode, X_Red.unicode)
         .setServerInvite(LINK_INVITEBOT).setHelpConsumer { event ->
             //If the only argument is the command invoke
@@ -99,7 +96,7 @@ fun main(args_: Array<String>) { runBlocking {
             if (args.isEmpty()) {
                 CMD_HELP.execute(event)
             } else {
-                commands.forEach { cmd ->
+                COMMANDS.forEach { cmd ->
                     if (cmd.isCommandFor(args[0]) && (!cmd.isHidden || event.isOwner)) {
                         if (cmd.getHelpBiConsumer() != null) {
                             cmd.getHelpBiConsumer()!!.accept(event, cmd)
@@ -211,7 +208,7 @@ private fun setUpDatabase() {
         //Update the Weebots in the database after downtime.
         JDA_SHARD_MNGR.guilds.forEach { DAO.addBot(Weebot(it)) }
     }
-    DAO.updatePremiumUsers()
+    //DAO.updatePremiumUsers()
     MLOG.slog("\tBacking up database.")
     DAO.backUp()
     MLOG.slog("\t...DONE")
@@ -289,7 +286,6 @@ fun shutdown(user: User? = null) {
         while (status != JDA.Status.SHUTDOWN) {}
     }
 
-    remThreadPool.close()
     CACHED_POOL.close()
 
     MLOG.elog("Safely shutdown.")

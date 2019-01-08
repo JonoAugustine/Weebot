@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.extensions
 
+import com.ampro.weebot.MLOG
 import com.ampro.weebot.extensions.MentionType.*
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -21,6 +22,27 @@ import java.util.concurrent.TimeUnit
 /*
  * Extension methods used for JDA elements
  */
+
+fun TODO(event: CommandEvent) = event.reply("This action is still under construction.")
+
+fun CommandClientBuilder.addCommandsWithCheck(commands: Iterable<WeebotCommand>)
+        :  CommandClientBuilder {
+    var caped = false
+    commands.forEach {
+        if (it.name.toList().has { it.isUpperCase() }) {
+            MLOG.elog("Command name ${it.name} has is capitalized when it should not be.")
+            caped = true
+        }
+        it.aliases.forEach {
+            if (it.toList().has { it.isUpperCase() }) {
+                MLOG.elog("Command name $it has is capitalized when it should not be.")
+                caped = true
+            }
+        }
+    }
+    if (caped) System.exit(0)
+    return this.addCommands(commands)
+}
 
 enum class MentionType {USER, ROLE, CHANNEL}
 
@@ -125,9 +147,9 @@ fun MessageReceivedEvent.isValidUser(guild: Guild?, users: Set<User> = emptySet(
                                      roles: Set<Role> = emptySet())
         : Boolean {
     return when {
+        author.isBot -> false
         guild != null && !isFromType(TEXT) -> false
         this.guild?.id ?: -2 != guild?.id ?: -2 -> false
-        author.isBot -> false
         users.isEmpty() && roles.isEmpty() -> true
         users.contains(author) -> true
         !(guild?.isMember(author) ?: true) -> false
@@ -415,5 +437,3 @@ class Restriction {
     }
 
 }
-
-fun TODO(event: CommandEvent) = event.reply("This action is still under construction.")

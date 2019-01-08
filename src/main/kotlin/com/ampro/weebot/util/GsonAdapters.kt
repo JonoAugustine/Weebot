@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.util
 
-import com.ampro.weebot.commands.commands
+import com.ampro.weebot.commands.COMMANDS
 import com.google.gson.*
 import com.jagrosh.jdautilities.command.Command
 import java.lang.reflect.Type
@@ -25,7 +25,7 @@ class CommandClassAdapter : JsonSerializer<Class<out Command>>,
         val jsonObject = jsonElement.asJsonObject
         val prim = jsonObject.get(CLASSNAME) as JsonPrimitive
         val className = prim.asString
-        for (command in commands) {
+        for (command in COMMANDS) {
             if (command.javaClass.name == className) {
                 return command.javaClass
             }
@@ -55,7 +55,7 @@ class CommandKClassAdapter : JsonSerializer<KClass<out Command>>,
         val jsonObject = jsonElement.asJsonObject
         val prim = jsonObject.get(CLASSNAME) as JsonPrimitive
         val className = prim.asString
-        for (command in commands) {
+        for (command in COMMANDS) {
             if (command::class.qualifiedName == className) {
                 return command::class
             }

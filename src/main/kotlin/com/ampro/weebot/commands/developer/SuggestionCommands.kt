@@ -128,11 +128,11 @@ open class CmdSuggestion : WeebotCommand("suggest",
         val message = event.args.replace(userMentionRegex, "@/ User")
 
         when {
-            //Ignore empty commands
+            //Ignore empty COMMANDS
             args.isEmpty() -> return
             //When submitting
             args[0].matches(giveRegi) || !args[0].matchesAny(voteRegi, seeRegi) -> {
-                STAT.track(this, getWeebotOrNew(event.guild), event.author)
+                STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
                 when {
                     args.size < 4 -> {
                         event.reply(
@@ -162,7 +162,7 @@ open class CmdSuggestion : WeebotCommand("suggest",
                     event.respondThenDelete("*No suggestion ID was provided.*", 30)
                     return
                 }
-                STAT.track(this, getWeebotOrNew(event.guild), event.author)
+                STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
                 val sugg: Suggestion = getSuggById(args[1], event) ?: return
                 if (!sugg.votes.contains(event.author.idLong)) {
                     sugg.votes.add(event.author.idLong)
@@ -270,7 +270,7 @@ class CmdSeeSuggestions : WeebotCommand("see", arrayOf("-s"), CAT_DEV, "", "",
 
     // \sugg -s(ee) [-k <keyword>] [-r <accepted/unreviewed/completed/ignored>] [pagenum]
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
         val args = event.splitArgs()
         val keyWords = mutableListOf<String>()
         val reviewStates = mutableListOf<State>()

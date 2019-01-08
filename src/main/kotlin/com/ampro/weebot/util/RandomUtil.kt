@@ -12,7 +12,7 @@ val RAND = Random(420_69_98_4829 / (NOW().minute + 1))
 
 const val alpha = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 const val digi  = "0123456789"
-const val alphaDigi = alpha + digi
+const val alphaDigi = alpha + "123456789" //Exclued Zero
 
 /** (?i)-{0,2} */
 val REG_HYPHEN  = Regex("(?i)-{0,2}")

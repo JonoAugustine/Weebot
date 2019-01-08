@@ -38,7 +38,7 @@ class CmdTaskManager : WeebotCommand("taskmanager", arrayOf("task", "tasks"),
         else DAO.GLOBAL_WEEBOT.getUesrPassiveList(event.author)
 
         if (passives.isEmpty()) {
-            event.reply("*No active commands.*")
+            event.reply("*No active COMMANDS.*")
             return
         }
 
@@ -97,7 +97,7 @@ class CmdSettings : WeebotCommand("settings", arrayOf("setting", "config", "set"
 
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild.idLong)
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
         val config = bot.settings
         val log = if (config.logchannel == -1L) "not set" else {
             event.guild.getTextChannelById(config.logchannel).asMention
@@ -127,7 +127,7 @@ private class CmdSetName : WeebotCommand("nickname", arrayOf("name", "changename
     }
 
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
         if (event.args.isBlank()) return
         val name = event.splitArgs().joinToString(" ")
         val old = getWeebotOrNew(event.guild).settings.nickname
@@ -152,7 +152,7 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
         val bot = getWeebotOrNew(event.guild)
         when {
             event.args.isBlank() -> {
-                STAT.track(this, bot, event.author)
+                STAT.track(this, bot, event.author, event.creationTime)
                 SelectableEmbed(event.author, false, strdEmbedBuilder
                     .setTitle("Prefix").setDescription("""
                         My current prefixes are: ``${
@@ -208,7 +208,7 @@ private class CmdSetPrefix : WeebotCommand("prefix", emptyArray(), CAT_MOD,
                         "(must be under 4 characters, e.g. pw!, w!, \\)*")
             }
             else -> {
-                STAT.track(this, bot, event.author)
+                STAT.track(this, bot, event.author, event.creationTime)
                 bot.settings.prefixs.clear()
                 bot.settings.prefixs.add(event.args)
                 event.reply("You can now call me with ${event.args}")
@@ -231,7 +231,7 @@ private class CmdSetExplicit : WeebotCommand("explicit", arrayOf("expl", "cuss")
 
     override fun execute(event: CommandEvent) {
         TODO("Explicit Settings")
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
     }
 }
 
@@ -247,7 +247,7 @@ private class CmdSetNsfw : WeebotCommand("nsfw", arrayOf("naughty"), CAT_UNDER_C
 
     override fun execute(event: CommandEvent) {
         TODO("NSFW Setting")
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
     }
 }
 
@@ -264,7 +264,7 @@ private class CmdSetLogChannel : WeebotCommand("log",
 
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
         val channels = event.message.mentionedChannels
 
         when {
@@ -322,9 +322,8 @@ private class CmdSetTracking : WeebotCommand("skynet", arrayOf("track", "trackin
     }
 
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
         val bot = getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
         val args = event.splitArgs()
         val enabled = bot.settings.trackingEnabled
 
@@ -354,7 +353,14 @@ private class CmdLock : WeebotCommand("lock", arrayOf("lockto"), CAT_MOD,
     }
 
     override fun execute(event: CommandEvent) {
-        TODO(event)
+        val bot = getWeebotOrNew(event.guild)
+        val args = event.splitArgs()
+        if (args.isEmpty()) {
+            return event.respondThenDelete("No Command mentioned")
+        }
+        val cmd = COMMANDS.firstOrNull { it.isCommandFor(args[0]) }
+        STAT.track(this, bot, event.author, event.creationTime)
+
     }
 }
 

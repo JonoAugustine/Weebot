@@ -15,6 +15,7 @@ import com.jagrosh.jdautilities.menu.OrderedMenu
 import net.dv8tion.jda.core.entities.ChannelType
 import net.dv8tion.jda.core.entities.Role.DEFAULT_COLOR_RAW
 import java.util.concurrent.TimeUnit.MINUTES
+import kotlin.math.ceil
 
 const val HELLO_THERE = "https://www.youtube.com/watch?v=rEq1Z0bjdwc"
 const val AMPRO       = "https://www.aquaticmasteryproductions.com/"
@@ -28,13 +29,13 @@ const val HQTWITCH    = "https://www.twitch.tv/hqregent"
  */
 class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
     "[me/more]", "Get information about Weebot.",
-        children = arrayOf(CmdAboutUser(), CMD_HELP), cooldown = 90
-) {
-    //"Weebot's little brother."
+    children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP),
+    cooldown = 90) {
+
     override fun execute(event: CommandEvent) {
         val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
         else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
         val eb = strdEmbedBuilder.setTitle("All about Weebot")
             .setThumbnail(CmdHelloThere.HELLO_THERE_GIFS[0])
 
@@ -57,8 +58,10 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
             .append("\n\n*Use \"${SELF.asMention} help\" for info using my commands.*")
             .append("\n\n**__Weebot Commands__**\n\n")
 
-        sBuilder.append(commands.sortedBy { it.name.toLowerCase() }
-            .filterNot { it.isOwnerCommand }.joinToString(", ") { "*${it.name}*" })
+        sBuilder.append(COMMANDS.sortedBy { it.name.toLowerCase() }
+            .filterNot { it.isOwnerCommand || it.isHidden }.map {
+                "*${it.name[0].toUpperCase() + it.name.substring(1)}*"
+            }.joinToString(", "))
         eb.setDescription(sBuilder.toString())
         sBuilder.setLength(0)
 
@@ -90,6 +93,15 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
         event.reply(eb.build())
     }
 
+    init {
+        helpBiConsumer = HelpBiConsumerBuilder("About", """
+            Get information about Weebot, yourself, or a guild.
+            **About (Member):** "``me``"
+            **About (Guild):** "``guild`` or ``here``"
+        """.trimIndent())
+            .build()
+    }
+
 }
 
 
@@ -99,13 +111,13 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
-    "", "Get information about Weebot.", cooldown = 90, guildOnly = true
+class SubCmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
+    "", "Get information about yourself.", cooldown = 90, guildOnly = true
 ) {
     override fun execute(event: CommandEvent) {
         val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
         else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
         val roles = event.member.roles
         event.reply(
                 strdEmbedBuilder.apply {
@@ -128,6 +140,58 @@ class CmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
     }
 }
 
+class SubCmdAboutGuild : WeebotCommand("guild", arrayOf("here"), CAT_GEN, "", "",
+    cooldown = 90, cooldownScope = CooldownScope.USER_CHANNEL, guildOnly = true
+) {
+    override fun execute(event: CommandEvent) {
+        val g = event.guild
+        val roles = g.roles.filterNot { it.isPublicRole }
+
+        val e = makeEmbedBuilder("About ${g.name}", null, """
+            **ID:** ${g.id}
+            **Region:** ${g.region.getName()}
+            **Owner:** ${g.owner.effectiveName}
+        """.trimIndent())
+            .setAuthor(g.name, null, g.iconUrl).setThumbnail(g.iconUrl).apply {
+                if (g.roles.isNotEmpty() && g.roles[0].color != null)
+                    setColor(g.roles[0].color)
+            }.addField("Member Count", """
+                **Humans:** ${g.trueSize} (${ceil((g.trueSize/g.size.toDouble()) * 100)}%)
+                **Bots:** ${g.size.minus(g.trueSize)}
+                **Total:** ${g.size}
+            """.trimIndent(), true).addField("Channels", """
+                **Voice:** ${g.voiceChannels.size}
+                **Text:** ${g.textChannels.size}
+                **Categories:** ${g.categories.size}
+            """.trimIndent(), true).addField("Custom Emotes: ${g.emotes.size}",
+                kotlin.run {
+                    val sb = StringBuilder()
+                    for (i in 0 until g.emotes.size) {
+                        if (sb.length + g.emotes[i].asMention.length + 3
+                                > EMBED_MAX_FIELD_VAL) {
+                            sb.append("...")
+                            break
+                        }
+                        sb.append(g.emotes[i].asMention).append("")
+                    }
+                    sb.toString()
+                }, true).addField("Roles: ${roles.size}", kotlin.run {
+                val sb = StringBuilder()
+
+                for (i in 0 until roles.size) {
+                    if (sb.length + roles[i].name.length + 3 > EMBED_MAX_FIELD_VAL) {
+                        sb.append("...")
+                        break
+                    }
+                    sb.append(roles[i].name).append(", ")
+                }
+                "```css\n$sb\n```"
+            }, true)
+            .build()
+
+        event.reply(e)
+    }
+}
 
 /**
  * Send an [MessageEmbed] giving help with Weebot Commands.
@@ -142,23 +206,25 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
     public override fun execute(event: CommandEvent) {
         val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
         else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
         OrderedMenu.Builder().setEventWaiter(WAITER).setUsers(event.author)
             .useCancelButton(true).setDescription("Weebot Help").apply {
                 addChoice("All")
+                if (event.isOwner) addChoice("DEV ONLY")
                 categories.forEach { addChoice(it.name) }
             }.setTimeout(1, MINUTES).setSelection { _, i ->
                 event.delete()
                 if (i == 1) { //if ALL
                     strdPaginator.setText("All Weebot Commands").setUsers(event.author)
                         .apply {
-                            commands.filterNot { it.isHidden || it.isOwnerCommand }
+                            COMMANDS.filterNot { it.isHidden || it.isOwnerCommand }
                                 .sortedBy { it.name }
                                 .forEach {
                                     val ali = if (it.aliases.isNotEmpty()) {
                                         "\n*Aliases: ${it.aliases.joinToString(", ")}*"
                                     } else ""
-                                    addItems("**${it.name}**\n${it.help}$ali\n")
+                                    addItems("**${it.name}**\n${
+                                    it.help}$ali\nGuild Only: ${it.isGuildOnly}\n")
                                 }
                         }.build().apply {
                             event.author.openPrivateChannel().queue {
@@ -167,15 +233,35 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
                         }
                     return@setSelection
                 }
-                val cat = categories[i - 2]
+                if (i == 2) {
+                    strdPaginator.setText("Dev Commands").setUsers(event.author)
+                        .apply {
+                            COMMANDS.filter { it.isHidden || it.isOwnerCommand }
+                                .sortedBy { it.name }
+                                .forEach {
+                                    val ali = if (it.aliases.isNotEmpty()) {
+                                        "\n*Aliases: ${it.aliases.joinToString(", ")}*"
+                                    } else ""
+                                    addItems("**${it.name}**\n${
+                                    it.help}$ali\nGuild Only: ${it.isGuildOnly}\n")
+                                }
+                        }.build().apply {
+                            event.author.openPrivateChannel().queue {
+                                paginate(it, 1)
+                            }
+                        }
+                    return@setSelection
+                }
+                val cat = categories[i - 3]
                 strdPaginator.setText("Weebot's ${cat.name} Commands")
                     .setUsers(event.author).apply {
-                        commands.filter { it.category == cat && !it.isHidden }
+                        COMMANDS.filter { it.category == cat && !it.isHidden }
                             .sortedBy { it.name }.forEach {
                                 val ali = if (it.aliases.isNotEmpty()) {
                                     "\n*Aliases: ${it.aliases.joinToString(", ")}*"
                                 } else ""
-                                addItems("**${it.name}**\n${it.help}$ali\n")
+                                addItems("**${it.name}**\n${
+                                it.help}$ali\nGuild Only: ${it.isGuildOnly}\n")
                             }
                     }.build().apply {
                         event.author.openPrivateChannel().queue {

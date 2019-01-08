@@ -7,6 +7,7 @@ import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.commands.social.GuildSocialSettings.*
 import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.extensions.creationTime
 import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
@@ -151,6 +152,6 @@ class CmdSocial : WeebotCommand("Social", arrayOf(), CAT_SOC,
 ) {
     override fun execute(event: CommandEvent) {
         //TODO
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
     }
 }

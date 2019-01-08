@@ -31,17 +31,18 @@ import java.util.regex.PatternSyntaxException
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "RegexTest"),
+class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "regextest"),
     CAT_PROG, "<regex> <word> [words...]","Test a Regex against one or more strings",
     cooldown = 10) {
 
     init {
-        helpBiConsumer = HelpBiConsumerBuilder("Regex Tester")
-            .setDescription("Test a Regex against one or more strings.")
+        helpBiConsumer = HelpBiConsumerBuilder("Regex Tester",
+            "Test a Regex against one or more strings.")
             .setThumbnail("https://i1.wp.com/digitalfortress" +
                     ".tech/wp-content/uploads/2018/05/regex1.png?fit=526%2C526&ssl=1")
-            .addField("Arguments", "<regex> <word> [words...]", false)
             .setAliases(aliases)
+            .addField("Word Test", "<regex_pattern> <word> [words...]", true)
+            .addField("Phrase Test", "phrase <phrase here>", true)
             .build()
     }
 
@@ -66,9 +67,10 @@ class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "RegexTest"),
         .build()
 
     override fun execute(event: CommandEvent) {
+        //TODO regex phrase by \newline char
         val args = event.splitArgs()
         if (args.size < 2) return
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
         val regex: Regex
         val strings: List<String>
         try {
@@ -111,7 +113,8 @@ class CmdEmbedMaker : WeebotCommand("embedmaker",
     val MAX_FIELDS = 10
 
     override fun execute(event: CommandEvent) {
-        if (event.channelType == TEXT) STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        if (event.channelType == TEXT)
+            STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
 
         fun waitThen(predicate: (MessageReceivedEvent) -> Boolean = {true},
                      action: (MessageReceivedEvent) -> Unit) {

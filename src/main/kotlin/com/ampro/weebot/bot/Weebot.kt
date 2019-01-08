@@ -56,10 +56,9 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
      */
     var commandRestrictions = ConcurrentHashMap<Long,
             Pair<MutableList<KClass<WeebotCommand>>,
-            MutableList<KClass<WeebotCommand>>>>()
+                    MutableList<KClass<WeebotCommand>>>>()
 
     fun isAllowed(cmd: WeebotCommand, textChannel: TextChannel) : Boolean {
-        if (commandRestrictions == null) commandRestrictions = ConcurrentHashMap()
         val pair = commandRestrictions[textChannel.idLong]
         return when {
             pair?.first?.contains(cmd::class) != false -> true
@@ -119,7 +118,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     /** Whether the bot can accept commands or not */
     @Transient
-    private var locked: Boolean = false
+    var locked: Boolean = false
 
     /*************************************************
      *                  Settings                     *
@@ -193,9 +192,12 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     /**
      * Any startup settings or states that must be reloaded before launch.
+     *  Injects variables if anything null
      * TODO Startup
      */
     open fun startUp() {
+        if (settings.commandRestrictions == null) settings.commandRestrictions = ConcurrentHashMap()
+
     }
 
     override fun compareTo(other: Weebot) = (this.guildID - other.guildID).toInt()

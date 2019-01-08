@@ -186,71 +186,13 @@ class Reddicord(channels: MutableList<TextChannel> = mutableListOf()) : IPassive
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcord",
-    "reddiscore", "reddiscores"), CAT_FUN, "[on/off/scores]",
-    "Upvote and Downvote messages to gain points.",
+class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcord"),
+    CAT_FUN, "[on/off/scores]", "Upvote and Downvote messages to gain points.",
     userPerms = arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
     botPerms =  arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
-    guildOnly = true, children = arrayOf(SubCmdLeaderBoard(), SubCmdReset())
+    guildOnly = true, children = arrayOf(SubCmdReset(),
+        SubCmdLeaderBoard("leaderboard", arrayOf("lb", "scores", "reddiscore","reddiscores")))
 ) {
-
-    /**
-     * A command to view the guild [Reddicord] leaderboard
-     *
-     * @author Jonathan Augustine
-     * @since 2.0
-     */
-    class SubCmdLeaderBoard : WeebotCommand("leaderboard",
-        arrayOf("ranks", "lb", "scores", "reddiscore"),
-        CAT_FUN, "[@/member @/member2...]", "See the Reddicord leaderboard.",
-        guildOnly = true, ownerOnly = false, cooldown = 120,
-        cooldownScope = USER_CHANNEL) {
-
-        override fun execute(event: CommandEvent) {
-            val bot = getWeebotOrNew(event.guild)
-            val rCord = bot.getPassive<Reddicord>()
-            val mentions = event.message.mentionedUsers
-            STAT.track(this, bot, event.author)
-
-            fun getScore(userID: Long) = rCord?.scoreMap!![userID]?.get()
-
-            when {
-                rCord == null -> {
-                    event.respondThenDelete(makeEmbedBuilder("Reddicord has not been activated",
-                        description = "To activate Reddicord, use ``reddicord on`` or try "
-                                + "``help reddicord`` for more info.").build(), 60)
-                }
-                rCord.scoreMap.isEmpty() -> {
-                    event.respondThenDelete(makeEmbedBuilder(
-                        "Reddicord has been activated but no one has any points yet!",
-                        description = "To get started, post a meme in a Reddicord chat.")
-                        .build(), 60)
-                }
-                mentions.size == 1 -> event.reply(strdEmbedBuilder.setTitle(
-                    "${mentions[0].name}'s ReddiScore: ${
-                    rCord.scoreMap[mentions[0].idLong]?.get() ?: 0}")
-                    .setThumbnail(mentions[0].avatarUrl)
-                    .setDescription("Keep posting in Reddiscore channels to increase")
-                    .appendDescription(" your score!").build())
-                rCord.scoreMap.size > 0 -> {
-                    val mapped: List<Pair<AtomicInteger, String>>
-                            = (if (mentions.isEmpty()) rCord.scoreMap
-                    else rCord.scoreMap.filterKeys { k ->
-                        mentions.has { it.idLong == k} }).map {
-                        val name = event.guild.getMemberById(it.key)
-                            ?.effectiveName ?: "Uknown User"
-                        it.value to "$name: ${getScore(it.key)}"
-                    }.sortedByDescending { it.first.get() }
-
-                    strdPaginator.setText("Reddicord Leaderboard").setItemsPerPage(10)
-                        .useNumberedItems(true).apply {
-                            mapped.forEach { addItems(it.second) }
-                        }.build().display(event.textChannel)
-                }
-            }
-        }
-
-    }
 
     class SubCmdReset : WeebotCommand("reset", arrayOf("clear", "clearscores"), CAT_FUN,
         "", "Set everyone's score to 0.", guildOnly = true, cooldown = 360,
@@ -269,18 +211,11 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
     }
 
     override fun execute(event: CommandEvent) {
-
-        //Check if \reddiSCORE
-        if (children[0].isCommandFor(event.getInvocation())) {
-            children[0].run(event)
-            return
-        }
-
         val bot = getWeebotOrNew(event.guild)
         val rCord = bot.getPassive<Reddicord>()
         val args = event.splitArgs()
         val mentionedChannels = event.message.mentionedChannels
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
 
         when {
             args.isEmpty() -> {
@@ -365,6 +300,63 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
             .addField("Reset Scores", "``reset``", true)
             .build()
     }
+}
+
+/**
+ * A command to view the guild [Reddicord] leaderboard
+ *
+ * @author Jonathan Augustine
+ * @since 2.0
+ */
+class SubCmdLeaderBoard(name: String, alias: Array<String>)
+    : WeebotCommand(name, alias, CAT_FUN, "[@/member @/member2...]",
+    "See the Reddicord leaderboard.", guildOnly = true, cooldown = 120,
+    cooldownScope = USER_CHANNEL) {
+
+    override fun execute(event: CommandEvent) {
+        val bot = getWeebotOrNew(event.guild)
+        val rCord = bot.getPassive<Reddicord>()
+        val mentions = event.message.mentionedUsers
+        STAT.track(this, bot, event.author, event.creationTime)
+
+        fun getScore(userID: Long) = rCord?.scoreMap!![userID]?.get()
+
+        when {
+            rCord == null -> {
+                event.respondThenDelete(makeEmbedBuilder("Reddicord has not been activated",
+                    description = "To activate Reddicord, use ``reddicord on`` or try "
+                            + "``help reddicord`` for more info.").build(), 60)
+            }
+            rCord.scoreMap.isEmpty() -> {
+                event.respondThenDelete(makeEmbedBuilder(
+                    "Reddicord has been activated but no one has any points yet!",
+                    description = "To get started, post a meme in a Reddicord chat.")
+                    .build(), 60)
+            }
+            mentions.size == 1 -> event.reply(strdEmbedBuilder.setTitle(
+                "${mentions[0].name}'s ReddiScore: ${
+                rCord.scoreMap[mentions[0].idLong]?.get() ?: 0}")
+                .setThumbnail(mentions[0].avatarUrl)
+                .setDescription("Keep posting in Reddiscore channels to increase")
+                .appendDescription(" your score!").build())
+            rCord.scoreMap.size > 0 -> {
+                val mapped: List<Pair<AtomicInteger, String>>
+                        = (if (mentions.isEmpty()) rCord.scoreMap
+                else rCord.scoreMap.filterKeys { k ->
+                    mentions.has { it.idLong == k} }).map {
+                    val name = event.guild.getMemberById(it.key)
+                        ?.effectiveName ?: "Uknown User"
+                    it.value to "$name: ${getScore(it.key)}"
+                }.sortedByDescending { it.first.get() }
+
+                strdPaginator.setText("Reddicord Leaderboard").setItemsPerPage(10)
+                    .useNumberedItems(true).apply {
+                        mapped.forEach { addItems(it.second) }
+                    }.build().display(event.textChannel)
+            }
+        }
+    }
+
 }
 
 /* ***************

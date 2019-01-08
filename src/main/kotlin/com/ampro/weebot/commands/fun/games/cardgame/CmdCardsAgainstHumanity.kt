@@ -289,7 +289,7 @@ class CmdCardsAgainstHumanity : WeebotCommand("cardsagainsthumanity", arrayOf("c
 ) {
 
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
     }
 
     init {

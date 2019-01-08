@@ -94,7 +94,7 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
         val args = event.splitArgs()
         val bot = getWeebotOrNew(event.guild)
         val reactor = bot.getPassive<ThisReactor>()
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
 
         //Check for ThisReactor enabling
         // \thisreactor on
@@ -163,7 +163,7 @@ class CmdHelloThere : WeebotCommand("hellothere", arrayOf("droppingin"), CAT_FUN
     }
 
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
         val e = strdEmbedBuilder.apply {
             val sb = StringBuilder()
             event.message.mentionedUsers.forEach {

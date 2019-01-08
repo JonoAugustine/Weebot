@@ -22,8 +22,10 @@ import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import java.time.chrono.ChronoPeriod
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit.*
+import kotlin.math.ceil
 import kotlin.math.roundToInt
 
 
@@ -55,19 +57,24 @@ class CmdStatsView : WeebotCommand("stats", arrayOf("viewstats", "statsview",
                 event.splitArgs().map { it.toLowerCase() }.contains(it.key.toLowerCase())
             }
         }
+        val enabled: List<Boolean> = JDA_SHARD_MNGR.guilds.map {
+            getWeebotOrNew(it).settings.trackingEnabled
+        }
         if (stats.isEmpty()) {
-            if (JDA_SHARD_MNGR.guilds.none {
-                        getWeebotOrNew(it).settings.trackingEnabled }) {
+            if (enabled.none { it }) {
                 event.reply("No Weebots have Tracking Enabled.")
             } else event.reply("No Statistics available.")
             return@launch
         }
 
-        strdPaginator.useNumberedItems(true).setText("${SELF.name} Usage Stats")
+        val size = enabled.filter { it }.size
+        val perc = ceil((size / enabled.size.toDouble()) * 100)
+
+        strdPaginator.useNumberedItems(true).setText("Usage Stats from $size ($perc)")
             .setUsers(event.author).setItemsPerPage(6).apply {
                 stats.map {
                     """${it.key}:
-                    ${it.value.summerize()}
+                    ${it.value.summarize()}
                 """.trimIndent()
                 }.forEach { addItems(it) }
             }.build().display(event.channel)
@@ -116,8 +123,13 @@ class CmdGuildList : WeebotCommand("guildlist",
 }
 
 fun Guild.infoEmbed(event: CommandEvent): SelectableEmbed {
+    val gAge = ChronoUnit.SECONDS.between(creationTime, event.creationTime)
+    val wAge = ChronoUnit.SECONDS.between(selfMember.joinDate, event.creationTime)
+    //TODO guildlist guild info show weebot age under join date
     return SelectableEmbed(event.author, true, makeEmbedBuilder("Guild: $name", null, """
         **Weebot Join Date:**   ${selfMember.joinDate.format(DD_MM_YYYY_HH_MM)}
+        **Weebot Age:** ${wAge.formatTime()}
+        **Guild Age:** ${gAge.formatTime()}
         **Size:**     $size
         **TrueSize**: $trueSize (**Bot Count**: ${size - trueSize})
         **Roles:**          ${roles.size}

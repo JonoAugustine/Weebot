@@ -65,10 +65,8 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
      * @param voiceChannel The [VoiceChannel] to check
      */
     private fun limitSafe(voiceChannel: VoiceChannel) = if (limit == ALL) true
-    else voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)?.allowed
-        ?.contains(VOICE_CONNECT) ?: true
-            || !(voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)
-        ?.denied?.contains(VOICE_CONNECT) ?: true)
+    else voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)?.allowed?.contains(VOICE_CONNECT) != false
+            || voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)?.denied?.contains(VOICE_CONNECT) == false
 
     /**
      * When a user joins a voice channel, assign the Member a role named after
@@ -139,10 +137,15 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
     }
 
     internal fun asEmbed(guild: Guild) : EmbedBuilder {
+        val list = if (genRoles.isNotEmpty())
+            """All live Voice Channel Roles in **${guild.name}:**
+                ```css
+                ${genRoles.map { guild.getRoleById(it.value)?.name ?: ""}
+                .filterNot { it.isBlank() }.joinToString(", ")}
+                ```""".trimIndent()
+        else "No Roles Yet"
         return makeEmbedBuilder("Voice Channel Role Manager", null, """
-            All live Voice Channel Roles in **${guild.name}:**```css
-            ${genRoles.map { "@ " + (guild.getRoleById(it.value)?.name ?: "") + "\n" }}
-        ```
+            $list
         ${if (limit != ALL) "(Limited to **Public** Channels)" else ""}
         """.trimIndent())
     }
@@ -192,7 +195,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild)
         val args = event.splitArgs()
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
         val vcRoleManager = bot.getPassive<VCRoleManager>()
         when {
             args.isEmpty() -> {
@@ -229,7 +232,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
                     return
                 }
             }
-            args[0].matches(Regex("(?i)-{0,2}al+")) -> {
+            args[0].matches(REG_HYPHEN + "al+") -> {
                 vcRoleManager?.also {
                     it.limit = ALL
                     event.reply("*Voice Channel Role Manager set to watch All Channels.*")
@@ -237,11 +240,19 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
                     "There is no VCRole Manager active. Use ``vcr on``"
                 )
             }
-            args[0].matches(Regex("(?i)-{0,2}pub(lic)?")) -> {
+            args[0].matches(REG_HYPHEN + "pub(lic)?") -> {
                 vcRoleManager?.also {
                     it.limit = PUBLIC
                     event.reply(
                         "*Voice Channel Role Manager set to only watch Public Channels.*")
+                } ?: event.respondThenDelete(
+                    "There is no VCRole Manager active. Use ``vcr on``"
+                )
+            }
+            args[0].matches(REG_HYPHEN + "c(lear)?") -> {
+                vcRoleManager?.apply {
+                    clean(event.guild)
+                    event.respondThenDelete("VCRoles Cleared")
                 } ?: event.respondThenDelete(
                     "There is no VCRole Manager active. Use ``vcr on``"
                 )
@@ -538,7 +549,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                 }
             }
 
-            STAT.track(this, bot, event.author)
+            STAT.track(this, bot, event.author, event.creationTime)
 
             //Build new VCG
             event.reply("*Getting Things Ready...*") { m ->
@@ -559,7 +570,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
         public override fun execute(event: CommandEvent) {
             getWeebotOrNew(event.guild).also { bot ->
                 bot.getPassive<VCGenerator>()?.also {
-                    STAT.track(this, bot, event.author)
+                    STAT.track(this, bot, event.author, event.creationTime)
                     it.shutdown(event.guild)
                     event.reply("""Voice Channel Generator has been placed in shutdown;
                 |No more channels will be created, and all remaining channels will
@@ -577,7 +588,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
         override fun execute(event: CommandEvent) {
             getWeebotOrNew(event.guild).also { bot ->
                 bot.getPassive<VCGenerator>()?.also { vcg ->
-                    STAT.track(this, bot, event.author)
+                    STAT.track(this, bot, event.author, event.creationTime)
                     SelectableEmbed(event.author, false,
                         vcg.asEmbed(event.guild).addField("Guide", """
                         $Speaker to change the VG Generator Channel
@@ -711,7 +722,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
         CAT_UTIL, "", "", cooldown = 30, guildOnly = true) {
         override fun execute(event: CommandEvent) {
             getWeebotOrNew(event.guild).also { bot ->
-                STAT.track(this, bot, event.author)
+                STAT.track(this, bot, event.author, event.creationTime)
                 bot.getPassive<VCGenerator>()?.also { vcg ->
                     var set = vcg.userSettings[event.author.idLong] ?: vcg.guildSettings
                     SelectableEmbed(event.author, false,
@@ -782,7 +793,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
         userPerms = arrayOf(MANAGE_CHANNEL), botPerms = arrayOf(MANAGE_CHANNEL)) {
         override fun execute(event: CommandEvent) {
             getWeebotOrNew(event.guild).also { bot ->
-                STAT.track(this, bot, event.author)
+                STAT.track(this, bot, event.author, event.creationTime)
                 val vcg = bot.getPassive() ?: VCGenerator(-1).apply {
                     bot.add(this)
                     inShutdown = true

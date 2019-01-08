@@ -63,9 +63,9 @@ infix fun WeebotCommand.blocks(user: User)
 
 /**
  * A class to track the bot's usage.
- * TODO Stats
+ *
  * @author Jonathan Augustine
- * @since 2.0
+ * @since 2.1
  */
 data class Statistics(val initTime: OffsetDateTime = NOW()) {
 
@@ -116,7 +116,7 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
      * @since 2.0
      */
     data class CommandUsageEvent(val guildID: Long, val weebotInfo: WeebotInfo,
-                                 val userInfo: UserInfo)
+                                 val userInfo: UserInfo, val time: OffsetDateTime?)
 
     /**
      * A map of Command names to their useage statistics
@@ -129,16 +129,17 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
      * @param weebot
      * @param user
      */
-    fun track(command: WeebotCommand, weebot: Weebot, user: User) {
-        if (weebot.settings.trackingEnabled && weebot !is GlobalWeebot) {
+    fun track(command: WeebotCommand, weebot: Weebot, user: User, time: OffsetDateTime) {
+        if (/*TODO weebot.settings.trackingEnabled &&*/ weebot !is GlobalWeebot) {
             commandUsage.getOrPut(command.name) { mutableListOf() }
-                .add(CommandUsageEvent(weebot.guildID, WeebotInfo(weebot), UserInfo(user)))
+                .add(CommandUsageEvent(weebot.guildID, WeebotInfo(weebot),
+                    UserInfo(user), time))
         }
     }
 
 }
 
-fun List<Statistics.CommandUsageEvent>.summerize() : String {
+fun List<Statistics.CommandUsageEvent>.summarize() : String {
     val sizes = map { it.weebotInfo.guildSize }.sorted()
     val medSize: Double = if (sizes.size % 2 == 0)
         (sizes[sizes.size/2] + sizes[sizes.size/2 - 1])/2.0
@@ -154,9 +155,17 @@ fun List<Statistics.CommandUsageEvent>.summerize() : String {
         (ages[ages.size/2] + ages[ages.size/2 - 1])/2
     else ages[sizes.size/2]
 
-    return """Median Size: $medSize
-            Median Percent Human: $medPercentHuman
-            Median Age: ${(medAge * 60).formatTime()}
+    val hours = mapNotNull { it.time?.hour }
+    val medHours = if (hours.size % 2 == 0)
+        (hours[hours.size/2] + hours[hours.size/2 - 1])/2
+    else hours[hours.size/2]
+
+    return """
+        Data Set Size: $size
+        Median Size: $medSize
+        Median Time (hr): $hours:00
+        Median Percent Human: $medPercentHuman
+        Median Age: ${(medAge * 60).formatTime()}
         """.trimIndent()
 }
 
@@ -166,7 +175,7 @@ data class PremiumUser(val userId: Long) { val joinDate = NOW() }
  * A database for storing all the information about the Weebot program
  * between downtime.
  *
- * TODO: Put each Guild/Weebot into it's own file
+ * TODO: Put each Guild/Weebot into it's own file?
  *
  * @author Jonathan Augustine
  * @since 1.0
@@ -318,20 +327,7 @@ class Dao {
     fun premiumUsers() = PREMIUM_USERS.toMap()
 
     @Synchronized
-    fun updatePremiumUsers() {
-        PREMIUM_USERS.removeIf { id, _ ->
-            if (getUser(id)?.mutualGuilds?.contains(NL_GUILD) == true) {
-                NL_GUILD?.getMemberById(id)?.roles?.none { it.name == NL_SUBSCRIBER }
-                        ?: false
-            } else false
-        }
-        JDA_SHARD_MNGR.users.forEach { u ->
-            if (u.mutualGuilds?.contains(NL_GUILD) == true
-                    && NL_GUILD?.getMember(u)?.roles?.none { it.name == NL_SUBSCRIBER } == true) {
-                PREMIUM_USERS.putIfAbsent(u.idLong, PremiumUser(u.idLong))
-            }
-        }
-    }
+    fun updatePremiumUsers() { TODO() }
 
     @Synchronized
     fun addPremiumUser(user: User,

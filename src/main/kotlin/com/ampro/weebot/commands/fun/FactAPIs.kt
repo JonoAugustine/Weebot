@@ -7,8 +7,7 @@ package com.ampro.weebot.commands.`fun`
 import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.ApiLinkResponse
 import com.ampro.weebot.util.get
 import com.google.gson.annotations.SerializedName
@@ -54,7 +53,7 @@ class CmdCatFact : WeebotCommand("catfact", arrayOf("cat"), CAT_FUN, "",
     private val katFacts: List<KatFact> = mutableListOf()
 
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
         GlobalScope.launch {
             val catFact = RAND_CAT_FACT.get<KatFact>().component1()
             if (catFact != null) {

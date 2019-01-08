@@ -4,14 +4,13 @@
 
 package com.ampro.weebot.commands.utilitycommands
 
+import com.ampro.weebot.*
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.JDA_SHARD_MNGR
-import com.ampro.weebot.ON
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -96,7 +95,7 @@ class OutHouse(user: User, var remainingMin: Long, val message: String, val forw
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdOutHouse : WeebotCommand("OutHouse", arrayOf("ohc"), CAT_UTIL,
+class CmdOutHouse : WeebotCommand("outhouse", arrayOf("ohc"), CAT_UTIL,
     "[Zd] [Xh] [Ym] [-f] [activity]",
     "Have the bot respond to anyone who mentions you for the given time.",
     cooldown = 30) {
@@ -117,7 +116,7 @@ class CmdOutHouse : WeebotCommand("OutHouse", arrayOf("ohc"), CAT_UTIL,
         //ohc [hours] [message here]
         val bot = if (event.isFromType(PRIVATE)) DAO.GLOBAL_WEEBOT
         else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
 
         val pas = DAO.GLOBAL_WEEBOT.getUesrPassiveList(event.author)
             .firstOrNull { it is OutHouse } ?: run {
@@ -161,8 +160,6 @@ class CmdOutHouse : WeebotCommand("OutHouse", arrayOf("ohc"), CAT_UTIL,
 
 }
 
-
-val remThreadPool = newFixedThreadPoolContext(1_000, "ReminderThreadPool")
 
 /**
  * A Command to set a Reminder for up to 30 Days.
@@ -227,7 +224,7 @@ class CmdReminder : WeebotCommand("reminder", arrayOf("rc", "rem", "remindme"),
 
     val remJobMap = ConcurrentHashMap<Long, Job>()
 
-    val remCleaner: Job = GlobalScope.launch(remThreadPool) {
+    val remCleaner: Job = GlobalScope.launch(CACHED_POOL) {
         while (ON) {
             delay(60 * 60 * 1_000)
             synchronized(remJobMap) { remJobMap.removeIf { _, v -> !v.isActive } }
@@ -242,7 +239,7 @@ class CmdReminder : WeebotCommand("reminder", arrayOf("rc", "rem", "remindme"),
          *
          * @return The [Job] launched
          */
-        fun remWatchJob(list: MutableList<Reminder>) = GlobalScope.launch(remThreadPool) {
+        fun remWatchJob(list: MutableList<Reminder>) = GlobalScope.launch(CACHED_POOL) {
             while (list.isNotEmpty()) {
                 list.forEach { it.update() }
                 list.filter { it.isDone() }.forEach { it.send() }
@@ -274,7 +271,7 @@ class CmdReminder : WeebotCommand("reminder", arrayOf("rc", "rem", "remindme"),
         val args = event.splitArgs()
         val bot = if (event.isFromType(PRIVATE)) DAO.GLOBAL_WEEBOT
         else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author)
+        STAT.track(this, bot, event.author, event.creationTime)
 
         when {
             args.isEmpty() || args[0].matches(Regex("(?i)-s(e)*"))-> {

@@ -7,8 +7,7 @@ package com.ampro.weebot.commands.miscellaneous
 import com.ampro.weebot.commands.CAT_GEN
 import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.extensions.getInvocation
+import com.ampro.weebot.extensions.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import java.time.temporal.ChronoUnit
 
@@ -21,7 +20,7 @@ class PingCommand : WeebotCommand("ping", arrayOf("pong"), CAT_GEN,
         .setDescription("Checks the bot's latency.").build(), false, cooldown = 10
 ) {
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author)
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
         val r = if (event.getInvocation().toLowerCase() == "pong") "Ping" else "Pong"
         event.reply("$r: ...") { m ->
             val ping = event.message.creationTime.until(m.creationTime, ChronoUnit.MILLIS)
