@@ -189,7 +189,7 @@ fun main(args_: Array<String>) { runBlocking {
             }
     }
     //Watch HQTwitter
-    launch(CACHED_POOL) {
+    /*launch(CACHED_POOL) {
         val stream = TwitterStreamFactory(TWITTER_CONFIG).instance
             .addListener(object :
                 StatusListener {
@@ -230,7 +230,7 @@ fun main(args_: Array<String>) { runBlocking {
         }).filter(FilterQuery().follow(1059304575956606976))
         stream.sample("java")
 
-    }
+    }*/
 }}
 
 /**

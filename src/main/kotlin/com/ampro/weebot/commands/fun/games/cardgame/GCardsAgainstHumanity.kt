@@ -66,13 +66,9 @@ internal val DECK_STRD = loadJson<CAHDeck>(FILE_D_STRD_JSON) ?: run {
             .forEach {
                 val pick = it.count { char -> char == '_' }
                 C_BLACK_BASE.add(BlackCard(
-                    it.apply {
-                        replace("_", "____")
-                        replace("<i>", "*")
-                        replace("</i>", "* ")
-                        replace(Regex("</?br>"), "\n")
-                    }, if (pick == 0) 1 else pick
-                ))
+                    it.replace(Regex("_+"), "[___]").replace("<i>", "*")
+                        .replace("</i>","* ").replace(Regex("</?br>"), "\n"),
+                    if (pick == 0) 1 else pick))
             }
     } catch (e: IOException) {
         MLOG.elog("Loading CAH BlackCards - FAILED\n${e.message}")
@@ -188,15 +184,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                            decks: List<CAHDeck> = listOf(DECK_STRD),
                            val handSize: Int = HAND_SIZE_DEF,
                            val winCondition: WinCondition = WINS(7))
-    : CardGame<CAHPlayer>(guild.idLong, author.idLong) {
-
-    companion object {
-        val howToPlayField = Field("How to Play:", """
-            Select your cards from the private chat I sent you by reacting with the
-            cards you want to play. Use ``cah resend`` or ``cah myhand`` to have the
-            message resent.
-            """.trimIndent(), false)
-    }
+    : CardGame<CAHPlayer>(guild, author) {
 
     val guildName = guild.name
     val name: (User) -> String = {
@@ -229,6 +217,13 @@ class CardsAgainstHumanity(guild: Guild, author: User,
         activeCardsBlack.addAll(decks.collect { it.blackCards })
     }
 
+    companion object {
+        val howToPlayField = Field("How to Play:",
+            "Select your cards from the private chat I sent you by reacting with the " +
+                    "cards you want to play. Use ``cah resend`` or ``cah myhand`` " +
+                    "to have the message resent.)", true)
+    }
+
     /**
      * Send the black card to [channel]
      */
@@ -237,7 +232,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
             CMD_CAH.displayName!! else "Cards Against $guildName") + " | round $round"
 
         val baseEmbed: () -> EmbedBuilder = {makeEmbedBuilder(title, LINK_CAH)
-            .setAuthor("Czar: ${name(czar.user)}")
+            .setAuthor("Czar: ${name(czar.user)}", czar.user.avatarUrl)
             .addField("Black Card (Pick ${blackCard.pick})", blackCard.text, false)
             .addField(howToPlayField).setThumbnail(LINK_CAH_THUMBNAIL)}
 
@@ -246,6 +241,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
             fun reloadBlackCard() {
                 this.activeCardsBlack.remove(this.blackCard)
                 this.blackCard = this.activeCardsBlack.random()
+                blackCardMessage?.delete()?.queueAfter(250, MILLISECONDS)
                 sendBlackCard()
             }
             val e = baseEmbed().addField("Guide", """
@@ -253,16 +249,23 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                 $Warning to report this Black Card and load a new one
             """.trimIndent(), true).build()
             SelectableEmbed(czar.user, false, e, listOf(
-                ArrowsCounterclockwise to {  _, _ ->
+                ArrowsCounterclockwise to {  m, _ ->
                     this.usedCardsBlack.add(this.blackCard)
-                    blackCardMessage?.delete()?.queueAfter(250, MILLISECONDS)
                     reloadBlackCard()
-                }, Warning to { _, _ ->
-                    reloadBlackCard()
-                    channel.sendMessage(
-                        "Card Reported, thank you for helping our moderation efforts!")
-                        .queue { it.delete().queueAfter(5, SECONDS) }
-                }), -1) {}.display(channel)
+                    m.delete().queueAfter(250, MILLISECONDS)
+                }, Warning to { m, _ ->
+                    try {
+                        reloadBlackCard()
+                        channel.sendMessage(
+                            "Card Reported, thank you for helping our moderation efforts!")
+                            .queue { it.delete().queueAfter(5, SECONDS) }
+                        m.delete().queueAfter(250, MILLISECONDS)
+                    } catch (e: NoSuchElementException) {
+                        channel.sendMessage(
+                            "You have removed all the Black Cards from the deck..."
+                        ).queue { endGame() }
+                    }
+                }), 2) { blackCardMessage = it }.display(channel)
         } else { //If this is the Choosing Embed
             val embed = baseEmbed().addField("Czar, choose your victor!",
                 "Select a victor by reacting with the corresponding number.", true)
@@ -280,7 +283,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
             }.shuffled()
             if (playersIn.isEmpty()) TODO("This should not happen")
             SelectablePaginator(setOf(czar.user), emptySet(), -1, MINUTES, embed,
-                playersIn, singleUse = true).display(channel)
+                playersIn, singleUse = true) {blackCardMessage = it}.display(channel)
         }
 
     }
@@ -328,9 +331,19 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                 if (winners.isNotEmpty()) endGame()
             }
         }
+
         this.activeCardsBlack.remove(this.blackCard)
         this.usedCardsBlack.add(this.blackCard)
+        if (activeCardsBlack.isEmpty()) {
+            activeCardsBlack.addAll(usedCardsBlack)
+            usedCardsBlack.clear()
+        }
         this.blackCard = activeCardsBlack.random()
+
+        if (activeCardsWhite.isEmpty()) {
+            activeCardsWhite.addAll(usedCardsWhite)
+            usedCardsWhite.clear()
+        }
         this.playerList.forEach { dealCards(it) }
         sendBlackCard()
         sendWhiteCards()
@@ -412,6 +425,11 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
 ) {
 
     override fun execute(event: CommandEvent) {
+        val c = CardsAgainstHumanity(event.guild, event.author, event.textChannel)
+            .apply {
+                event.message.mentionedUsers.forEach { addUser(it) }
+            }.startGame()
+
         TODO(event)
         //STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
     }

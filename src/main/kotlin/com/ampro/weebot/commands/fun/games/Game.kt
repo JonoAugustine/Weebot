@@ -4,7 +4,6 @@
 
 package com.ampro.weebot.commands.`fun`.games
 
-import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.database.constants.DEV_IDS
 import net.dv8tion.jda.core.entities.*
 import java.util.concurrent.ConcurrentHashMap
@@ -109,27 +108,22 @@ enum class WinCondition(var score: Int) {
  *
  * @param P A class that extends [Player]
  */
-abstract class Game<P : Player> (
-        /** The ID of the hosting bot  */
-        val guildID: Long,
-        /** User ID of the User who started the game. */
-        val authorID: Long,
-        /** List of all the Players */
-        val players: ConcurrentHashMap<Long, P> = ConcurrentHashMap(),
-        /** Is the game currently running? Starts false */
-        var isRunning: Boolean = false
-) {
+abstract class Game<P : Player> (guild: Guild, author: User) {
+    /** The ID of the hosting bot  */
+    val guildID: Long = guild.idLong
+    /** User ID of the User who started the game. */
+    val authorID: Long = author.idLong
+    /** List of all the Players */
+    val players: ConcurrentHashMap<Long, P> = ConcurrentHashMap()
+    /** Is the game currently running? Starts false */
+    var isRunning: Boolean = false
 
     protected val playerList = mutableListOf<P>()
 
-    /**
-     * Create a game with.
-     *
-     * @param bot Weebot hosting the game
-     * @param author The [User] who started the game
-     */
-    protected constructor(bot: Weebot, author: User)
-            : this(bot.guildID, author.idLong) { this.addUser(author) }
+    init {
+        this.addUser(author)
+    }
+
 
     /**
      * Create a game with an initial set of `Player`s
@@ -137,12 +131,9 @@ abstract class Game<P : Player> (
      * @param bot Weebot hosting game
      * @param players `Players` to add to the game
      */
-    protected constructor(bot: Weebot, author: User, vararg players: P) :
-            this (bot, author) {
-        players.forEach { p ->
-            this.players.putIfAbsent(p.user.idLong, p)
-            playerList.add(p)
-        }
+    protected constructor(guild: Guild, author: User, vararg players: P)
+            : this (guild, author) {
+        players.forEach { addPlayer(it) }
         this.addUser(author)
     }
 
@@ -164,7 +155,7 @@ abstract class Game<P : Player> (
      *
      * @return false if the player is already in the game
      */
-    open fun addPlayer(player: P) = if (this.players[player.user.idLong] == null) {
+    protected open fun addPlayer(player: P) = if (this.players[player.user.idLong] == null) {
         this.players[player.user.idLong] = player
         this.playerList.add(player)
         true

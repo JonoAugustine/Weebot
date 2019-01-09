@@ -220,18 +220,20 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
                     val sb = StringBuilder()
                     return COMMANDS.filter(predicate)
                         .sortedBy { it.displayName ?: it.name }.map {
+                            sb.clear()
                             sb.append("**").append(it.displayName ?: it.name)
                                 .append("**\n")
                             if (!it.help.isNullOrBlank()) sb.append(it.help).append("\n")
                             if (it.aliases.isNotEmpty()) sb.append(
-                                "*Aliases: ${it.aliases.joinToString(", ")}*\n")
+                                "*Aliases: ${(it.aliases + it.name).joinToString(", ")}*\n")
                             sb.append("Guild Only: ${it.isGuildOnly}\n\n").toString()
                         }
                 }
                 event.delete()
                 when (i) {
                     1 -> //if ALL
-                        strdPaginator.setText("All Weebot Commands").setUsers(event.author).apply {
+                        strdPaginator.setText("All Weebot Commands").setUsers(event.author)
+                            .setItemsPerPage(6).apply {
                             filterAndMap { !(it.isHidden || it.isOwnerCommand) }.forEach { s ->
                                 addItems(s)
                             }
@@ -245,7 +247,9 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
                     }
                     else -> {
                         val cat = categories[i - 3]
-                        strdPaginator.setText("Weebot's ${cat.name} Commands").setUsers(event.author).apply {
+                        strdPaginator.setText("Weebot's ${cat.name} Commands")
+                            .setItemsPerPage(6)
+                            .setUsers(event.author).apply {
                             filterAndMap { it.category == cat && !it.isHidden }.forEach { s -> addItems(s) }
                         }.build().apply {
                             event.author.openPrivateChannel().queue { paginate(it, 1) }

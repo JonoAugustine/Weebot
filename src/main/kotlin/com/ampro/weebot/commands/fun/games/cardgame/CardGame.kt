@@ -6,6 +6,8 @@ package com.ampro.weebot.commands.`fun`.games.cardgame
 
 import com.ampro.weebot.commands.`fun`.games.Game
 import com.ampro.weebot.commands.`fun`.games.Player
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.User
 
 /**
  * A card used in a `CardGame`.
@@ -28,8 +30,7 @@ abstract class Card {
  * @author Jonathan Augustine
  * @since 2.0
  */
-abstract class CardGame<P: Player>(guildId: Long, authorID: Long)
-    : Game<P>(guildId, authorID) {
+abstract class CardGame<P: Player>(guild: Guild, author: User) : Game<P>(guild, author) {
 
     /**
      * Deal cards to a player
