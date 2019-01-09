@@ -19,7 +19,7 @@ import kotlin.math.ceil
 
 const val HELLO_THERE = "https://www.youtube.com/watch?v=rEq1Z0bjdwc"
 const val AMPRO       = "https://www.aquaticmasteryproductions.com/"
-const val HQTWITCH    = "https://www.twitch.tv/hqregent"
+const val LINK_HQTWITCH    = "https://www.twitch.tv/hqregent"
 
 /**
  * Send an [MessageEmbed] giving information about Weebot's.
@@ -27,7 +27,7 @@ const val HQTWITCH    = "https://www.twitch.tv/hqregent"
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
+class CmdAbout : WeebotCommand("about", "About", emptyArray(), CAT_GEN,
     "[me/more]", "Get information about Weebot.",
     children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP),
     cooldown = 90) {
@@ -45,12 +45,12 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
             .append("is certainly not a weeb, no sir. No weebs here.\n")
             .append("I Have a bunch of fun, useful, and sometimes random commands ")
             .append("that aim to make life on Discord easy, fun, and intuitive!\n\n")
-            .append("I was made by ***[`HQRegent`]($HQTWITCH)***, ")
+            .append("I was made by ***[`HQRegent`]($LINK_HQTWITCH)***, ")
             .append("using [`Kotlin`](https://kotlinlang.org) and the ")
             .append("[`JDA library`](https://github.com/DV8FromTheWorld/JDA).")
             .append("\nIf you need more Help using Weebot, want help ")
             .append("using JDA to make your own bot, or just want to say hi to ")
-            .append("***[`HQRegent`]($HQTWITCH)***, join the ")
+            .append("***[`HQRegent`]($LINK_HQTWITCH)***, join the ")
             .append("[`Numberless Liquidator Discord`](https://discord.gg/VdbNyxr).")
             .append("\n\nPlease [`invite me to your server!`]($LINK_INVITEBOT) and")
             .append(" vote for me on [`discordbots.org`]($LINK_DISCORD_BOTS) and ")
@@ -111,7 +111,7 @@ class CmdAbout : WeebotCommand("about", emptyArray(), CAT_GEN,
  * @author Jonathan Augustine
  * @since 2.0
  */
-class SubCmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
+class SubCmdAboutUser : WeebotCommand("me", null, arrayOf("aboutme"), CAT_GEN,
     "", "Get information about yourself.", cooldown = 90, guildOnly = true
 ) {
     override fun execute(event: CommandEvent) {
@@ -140,7 +140,7 @@ class SubCmdAboutUser : WeebotCommand("aboutme", arrayOf("me"), CAT_GEN,
     }
 }
 
-class SubCmdAboutGuild : WeebotCommand("guild", arrayOf("here"), CAT_GEN, "", "",
+class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, "", "",
     cooldown = 90, cooldownScope = CooldownScope.USER_CHANNEL, guildOnly = true
 ) {
     override fun execute(event: CommandEvent) {
@@ -199,7 +199,7 @@ class SubCmdAboutGuild : WeebotCommand("guild", arrayOf("here"), CAT_GEN, "", ""
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
+class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), CAT_GEN,
         "[category] [command name]", "Get information about Weebot Commands and Usage.",
         cooldown = 90, guildOnly = false
 ) {
@@ -213,61 +213,43 @@ class CmdHelp : WeebotCommand("help", arrayOf("helpo", "more"), CAT_GEN,
                 if (event.isOwner) addChoice("DEV ONLY")
                 categories.forEach { addChoice(it.name) }
             }.setTimeout(1, MINUTES).setSelection { _, i ->
+                fun filterAndMap(predicate: (WeebotCommand) -> Boolean): List<String> {
+                    val sb = StringBuilder()
+                    return COMMANDS.filter(predicate)
+                        .sortedBy { it.displayName ?: it.name }.map {
+                            sb.append("**").append(it.displayName ?: it.name)
+                                .append("**\n")
+                            if (!it.help.isNullOrBlank()) sb.append(it.help).append("\n")
+                            if (it.aliases.isNotEmpty()) sb.append(
+                                "*Aliases: ${it.aliases.joinToString(", ")}*\n")
+                            sb.append("Guild Only: ${it.isGuildOnly}\n\n").toString()
+                        }
+                }
                 event.delete()
-                if (i == 1) { //if ALL
-                    strdPaginator.setText("All Weebot Commands").setUsers(event.author)
-                        .apply {
-                            COMMANDS.filterNot { it.isHidden || it.isOwnerCommand }
-                                .sortedBy { it.name }
-                                .forEach {
-                                    val ali = if (it.aliases.isNotEmpty()) {
-                                        "\n*Aliases: ${it.aliases.joinToString(", ")}*"
-                                    } else ""
-                                    addItems("**${it.name}**\n${
-                                    it.help}$ali\nGuild Only: ${it.isGuildOnly}\n")
-                                }
+                when (i) {
+                    1 -> //if ALL
+                        strdPaginator.setText("All Weebot Commands").setUsers(event.author).apply {
+                            filterAndMap { !(it.isHidden || it.isOwnerCommand) }.forEach { s ->
+                                addItems(s)
+                            }
                         }.build().apply {
-                            event.author.openPrivateChannel().queue {
-                                paginate(it, 1)
-                            }
+                            event.author.openPrivateChannel().queue { paginate(it, 1) }
                         }
-                    return@setSelection
-                }
-                if (i == 2) {
-                    strdPaginator.setText("Dev Commands").setUsers(event.author)
-                        .apply {
-                            COMMANDS.filter { it.isHidden || it.isOwnerCommand }
-                                .sortedBy { it.name }
-                                .forEach {
-                                    val ali = if (it.aliases.isNotEmpty()) {
-                                        "\n*Aliases: ${it.aliases.joinToString(", ")}*"
-                                    } else ""
-                                    addItems("**${it.name}**\n${
-                                    it.help}$ali\nGuild Only: ${it.isGuildOnly}\n")
-                                }
-                        }.build().apply {
-                            event.author.openPrivateChannel().queue {
-                                paginate(it, 1)
-                            }
-                        }
-                    return@setSelection
-                }
-                val cat = categories[i - 3]
-                strdPaginator.setText("Weebot's ${cat.name} Commands")
-                    .setUsers(event.author).apply {
-                        COMMANDS.filter { it.category == cat && !it.isHidden }
-                            .sortedBy { it.name }.forEach {
-                                val ali = if (it.aliases.isNotEmpty()) {
-                                    "\n*Aliases: ${it.aliases.joinToString(", ")}*"
-                                } else ""
-                                addItems("**${it.name}**\n${
-                                it.help}$ali\nGuild Only: ${it.isGuildOnly}\n")
-                            }
+                    2 -> strdPaginator.setText("Dev Commands").setUsers(event.author).apply {
+                        filterAndMap { it.isHidden || it.isOwnerCommand }.forEach { s -> addItems(s) }
                     }.build().apply {
-                        event.author.openPrivateChannel().queue {
-                            paginate(it, 1)
+                        event.author.openPrivateChannel().queue { paginate(it, 1) }
+                    }
+                    else -> {
+                        val cat = categories[i - 3]
+                        strdPaginator.setText("Weebot's ${cat.name} Commands").setUsers(event.author).apply {
+                            filterAndMap { it.category == cat && !it.isHidden }.forEach { s -> addItems(s) }
+                        }.build().apply {
+                            event.author.openPrivateChannel().queue { paginate(it, 1) }
                         }
                     }
+                }
             }.build().display(event.channel)
     }
+
 }

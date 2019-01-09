@@ -13,6 +13,7 @@ import net.dv8tion.jda.core.JDABuilder
 import net.dv8tion.jda.core.entities.Game
 import javax.security.auth.login.LoginException
 
+const val TWITCH_HQR_ID = 127416768L
 
 /* *****************
         API Keys
@@ -50,11 +51,14 @@ val data = KotlinEntityDataStore(configuration)
 /** Key for https://discordbotlist.com/bots/437851896263213056 */
 const val KEY_DISCORD_BOT_COM = "6f499481ace429583babc6704c457a7b037f001a2f57df3ebc5b4ff383088b05 "
 /** Key for https://discordbots.org/bot/437851896263213056 */
-const val KEY_DISCORD_BOT_ORG     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" +
-        ".eyJpZCI6IjQzNzg1MTg5NjI2MzIxMzA1NiIsImJvdCI6dHJ1ZSwiaWF0IjoxNTQ0NjM4MDAyfQ.gRBPSSymkwQenP8hgijV_npBUee3VEx8uEbVN0WvOjM\n"
+const val KEY_DISCORD_BOTS_ORG     = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjQzNzg1MTg5NjI2MzIxMzA1NiIsImJvdCI6dHJ1ZSwiaWF0IjoxNTQ2OTI4NzI5fQ.wnbwJc1D4pzFNEo7hbHOT_0jFi-6vFcbtO6PRQW_jzY"
+const val KEY_DISCORD_BOTS_GG = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcGkiOnRydWUsImlkIjoiMTM5MTY3NzMwMjM3NTcxMDcyIiwiaWF0IjoxNTQ2OTI3NTMyfQ.200ymKmtqiRNFubFUT-yxLJ_O60jxMM1S3v7GAujt5c"
+val KEY_BOTS_ON_DISCORD_XYZ = {TODO()}
+
 
 const val LINK_DISCORD_BOTS = "https://discordbots.org/bot/437851896263213056"
 const val LINK_DISCORD_BOTS_LIST = "https://discordbotlist.com/bots/437851896263213056"
+
 
 val LINK_INVITEBOT = "https://discordapp.com/api/oauth2/authorize?client_id=437851896263213056&permissions=500296919&scope=bot"
 

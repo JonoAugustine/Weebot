@@ -31,6 +31,28 @@ operator fun Regex.plus(regex: Regex) = Regex(pattern + regex.pattern)
 operator fun Regex.plus(pattern: String) = Regex(this.pattern + pattern)
 
 /**
+ * @param set a [Regex] paired to the [String] with which to replace it with
+ */
+fun String.replace(vararg set: Pair<Regex, String>) : String {
+    var s = this
+    set.forEach {
+        s = s.replace(it.first, it.second)
+    }
+    return s
+}
+
+/**
+ * @param set a [Regex] paired to the [String] with which to replace it with
+ */
+fun String.replaceSet(vararg set: Pair<String, String>) : String {
+    var s = this
+    set.forEach {
+        s = s.replace(it.first.toRegex(), it.second)
+    }
+    return s
+}
+
+/**
  * Remove all instances of the given regex
  *
  * @param The [Regex] to remove

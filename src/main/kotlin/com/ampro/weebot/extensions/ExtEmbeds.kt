@@ -372,6 +372,25 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                           })
     : Menu(WAITER, users, roles, timeout, unit) {
 
+    constructor(users: Set<User> = emptySet(), roles: Set<Role> = emptySet(),
+                timeout: Long = 3L, unit: TimeUnit = MINUTES,
+                baseEmbed: MessageEmbed,
+                /** The items to be listed with an [Emoji] and consumer */
+                items: List<Pair<String, (Int, Message) -> Unit>>,
+                columns: Int = 1, itemsPerPage: Int = 10,
+                /**Disallow multiple reactions*/ singleUse: Boolean = false,
+                bulkSkipNumber: Int = 0, wrapPageEnds: Boolean = true,
+                color: Color = STD_GREEN, exitAction: (Message) -> Unit = {},
+                timeoutAction: (Message) -> Unit = { m ->
+                    try {
+                        m.clearReactions().queueAfter(250, SECONDS)
+                    } catch (ignored: Exception) {
+                    }
+                })
+            : this(users, roles, timeout, unit, baseEmbed.title, baseEmbed.description,
+        items, columns, itemsPerPage, singleUse, bulkSkipNumber, wrapPageEnds,
+        baseEmbed.thumbnail.url, color, baseEmbed.fields, exitAction, timeoutAction)
+
     companion object {
         val BIG_LEFT = Rewind
         val LEFT = ArrowBackward
@@ -428,9 +447,10 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
      * Attempts to display the menu as an edit of [message], if that fails, it sends
      * it as a new message to [channel].
      */
-    fun displayOrDefault(message: Message, channel: MessageChannel) {
-        if (message.author.id == SELF.id) {
-            val msg = renderPage(1)
+    fun displayOrDefault(message: Message?, channel: MessageChannel) {
+        val msg = renderPage(1)
+        if (message == null) initialize(channel.sendMessage(msg), 1)
+        else if (message.author.id == SELF.id) {
             initialize(message.editMessage(msg), 1) {
                 initialize(channel.sendMessage(msg), 1)
             }
@@ -651,8 +671,9 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
      * Attempts to display the menu as an edit of [message], if that fails, it sends
      * it as a new message to [channel].
      */
-    fun displayOrDefault(message: Message, channel: MessageChannel) {
-        if (message.author.id == SELF.id) {
+    fun displayOrDefault(message: Message?, channel: MessageChannel) {
+        if (message == null) initialize(channel.sendMessage(messageEmbed))
+        else if (message.author.id == SELF.id) {
             initialize(message.editMessage(messageEmbed))
             { initialize(channel.sendMessage(messageEmbed)) }
         }

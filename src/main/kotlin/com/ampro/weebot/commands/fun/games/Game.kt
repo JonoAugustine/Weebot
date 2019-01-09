@@ -7,7 +7,6 @@ package com.ampro.weebot.commands.`fun`.games
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.database.constants.DEV_IDS
 import net.dv8tion.jda.core.entities.*
-import java.util.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.function.Consumer
 
@@ -31,8 +30,14 @@ class ModificationWhileRunningException : Exception {
  * @author Jonathan Augustine
  * @since 2.0
  */
-open class LeaderBoard(val scoredUsers: MutableList<Pair<Long, Int>> = mutableListOf()) {
-    fun addUser(user: User, score: Int = 0) = scoredUsers.add(Pair(user.idLong, score))
+open class LeaderBoard(protected val scoredUsers: MutableList<Pair<Long, Int>>
+                       = mutableListOf()) {
+    fun addUser(user: User, score: Int = 0) {
+        scoredUsers.add(Pair(user.idLong, score))
+    }
+    fun get() = scoredUsers.sortedBy { it.second }
+    operator fun get(int: Int) = scoredUsers[int]
+    operator fun get(user: User) = scoredUsers.firstOrNull { user.idLong == it.first }
 }
 
 /**
@@ -84,6 +89,21 @@ abstract class Player(/** User this Player is wrapped around*/ val user: User)
 }
 
 /**
+ * Under what conditions should the game end?
+ *
+ * @author Jonathan Augustine
+ * @since 2.1
+ */
+enum class WinCondition(var score: Int) {
+    /** End Game by Max Rounds */ ROUNDS(-1),
+    /** End Game by Max Wins */ WINS(-1);
+    operator fun invoke(score: Int) : WinCondition {
+        this.score = score
+        return this
+    }
+}
+
+/**
  * Basis of a Weebot Game.
  * Must be connected to a single type of Player.
  *
@@ -96,9 +116,11 @@ abstract class Game<P : Player> (
         val authorID: Long,
         /** List of all the Players */
         val players: ConcurrentHashMap<Long, P> = ConcurrentHashMap(),
-        /** Is the game currently running? */
+        /** Is the game currently running? Starts false */
         var isRunning: Boolean = false
 ) {
+
+    protected val playerList = mutableListOf<P>()
 
     /**
      * Create a game with.
@@ -117,7 +139,10 @@ abstract class Game<P : Player> (
      */
     protected constructor(bot: Weebot, author: User, vararg players: P) :
             this (bot, author) {
-        players.forEach { p -> this.players.putIfAbsent(p.user.idLong, p) }
+        players.forEach { p ->
+            this.players.putIfAbsent(p.user.idLong, p)
+            playerList.add(p)
+        }
         this.addUser(author)
     }
 
@@ -127,34 +152,30 @@ abstract class Game<P : Player> (
     abstract fun endGame(): Boolean
 
     /**
-     * Add a user to the game, wrapping the [User] in a new [Player]
-     * implementation.
+     * Add a user to the game, wrapping the [User] in a new [Player] implementation.
+     *
      * @param user The user to add.
      * @return false if the user could not be added.
      */
-    abstract fun addUser(user: User): Boolean
+    abstract fun addUser(user: User) : Boolean
 
     /**
-     * Add `Player` to the `Game`.
-     * This method only attempts to add the player, any more action
-     * should be implemented in a class-specific implementation.
-     * @param player The player to add
-     * @return  false if player is already in the Game. <br></br>
-     * true if player was added to the Game.
+     * Adds a player to the [players] map and the [playerList]
+     *
+     * @return false if the player is already in the game
      */
-    protected open fun joinGame(player: P): Boolean {
-        return this.players.putIfAbsent(player.user.idLong, player) == null
-    }
-
-    /** Get an Iterable Arraylist of the players  */
-    fun playerIterable(): ArrayList<P> = ArrayList(this.players.values)
+    open fun addPlayer(player: P) = if (this.players[player.user.idLong] == null) {
+        this.players[player.user.idLong] = player
+        this.playerList.add(player)
+        true
+    } else false
 
     /**
      * Get a player.
      * @param user The user who's player to get.
      * @return The player or null if no player is found.
      */
-    fun getPlayer(user: User): P? = this.players[user.idLong]
+    operator fun get(user: User) : P? = this.players[user.idLong]
 
     /** @return true if the game has a dev as a player */
     fun hasDev() = players.count { DEV_IDS.contains(it.key) } != 0

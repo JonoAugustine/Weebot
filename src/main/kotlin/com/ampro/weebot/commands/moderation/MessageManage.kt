@@ -40,7 +40,7 @@ import kotlin.system.measureTimeMillis
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdSelfDestruct : WeebotCommand("selfdestruct",
+class CmdSelfDestruct : WeebotCommand("selfdestruct", "Self Destruct Message",
     arrayOf("deleteme","cleanthis","deletethis","covertracks","whome?","podh","sdc"),
     CAT_MOD, "[-t delaySeconds] [message]",
     "Deletes the marked message after the given amount of time (30 sec by default)",
@@ -70,11 +70,10 @@ class CmdSelfDestruct : WeebotCommand("selfdestruct",
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdPurge : WeebotCommand("purge", arrayOf("prune", "clean", "clear"), CAT_MOD,
-    "<number>", "Delete multiple messages, 2-1,000.", guildOnly = true,
+class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", "clear"),
+    CAT_MOD, "<number>", "Delete multiple messages, 2-1,000.", guildOnly = true,
     botPerms = arrayOf(MESSAGE_MANAGE), userPerms = arrayOf(MESSAGE_MANAGE),
-    cooldown = 3, cooldownScope = GUILD
-) {
+    cooldown = 3, cooldownScope = GUILD) {
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Chat Purge", false).setDescription(
@@ -129,7 +128,7 @@ class CmdPurge : WeebotCommand("purge", arrayOf("prune", "clean", "clear"), CAT_
  * @author Jonathan Augustine
  * @since 2.1
  */
-class CmdChatLock : WeebotCommand("chatlock",
+class CmdChatLock : WeebotCommand("chatlock", "Chat Lock",
     arrayOf("lockchat", "pausechat", "blockchat"), CAT_UNDER_CONSTRUCTION,
     "<[-s seconds] [-m minutes]> [from @/Roles @/Members]",
     "Block messages to the TextChannel for a given time.",

@@ -22,6 +22,7 @@ repositories {
     jcenter()
     maven ( url = "https://jitpack.io" )
     maven ( url = "http://jcenter.bintray.com" )
+    maven ( url =  "https://oss.jfrog.org/artifactory/libs-release" )
 }
 
 dependencies {
@@ -55,13 +56,14 @@ dependencies {
     implementation("org.discordbots:DBL-Java-Library:2.0.1")
 
     //Tools & APIs
-    //implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.1.1")
     implementation("me.sargunvohra.lib:pokekotlin:2.3.0")
+    implementation("com.twilio.sdk:twilio:7.9.0")
+    implementation("com.github.twitch4j:twitch4j:1.0.0-alpha.5")
+    //implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.1.1")
     //implementation("net.dean.jraw:JRAW:1.1.0")
     //implementation("ca.pjer:chatter-bot-api:1.4.7")
     //implementation("org.springframework.boot:spring-boot-gradle-plugin:1.4.3.RELEASE")
     //implementation("org.springframework.boot:spring-boot-starter-web:1.4.3.RELEASE")
-    implementation("com.twilio.sdk:twilio:7.9.0")
 }
 
 configure<JavaPluginConvention> {

@@ -186,22 +186,23 @@ class Reddicord(channels: MutableList<TextChannel> = mutableListOf()) : IPassive
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcord"),
-    CAT_FUN, "[on/off/scores]", "Upvote and Downvote messages to gain points.",
+class CmdReddicord : WeebotCommand("reddicord", "Redicord",
+    arrayOf("reddiscord", "redditcord"), CAT_FUN,  "[on/off/scores]",
+    "Upvote and Downvote messages to gain points.",
     userPerms = arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
     botPerms =  arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
     guildOnly = true, children = arrayOf(SubCmdReset(),
         SubCmdLeaderBoard("leaderboard", arrayOf("lb", "scores", "reddiscore","reddiscores")))
 ) {
 
-    class SubCmdReset : WeebotCommand("reset", arrayOf("clear", "clearscores"), CAT_FUN,
-        "", "Set everyone's score to 0.", guildOnly = true, cooldown = 360,
+    class SubCmdReset : WeebotCommand("reset", null, arrayOf("clear", "clearscores"),
+        CAT_FUN, "", "Set everyone's score to 0.", guildOnly = true, cooldown = 360,
         userPerms = arrayOf(ADMINISTRATOR)) {
         override fun execute(event: CommandEvent) {
             val bot = getWeebotOrNew(event.guild)
             bot.getPassive<Reddicord>()?.also { rCord ->
                 if (rCord.scoreMap.isNotEmpty()) {
-                    rCord.scoreMap.replaceAll { _, score -> AtomicInteger(0) }
+                    rCord.scoreMap.replaceAll { _, _ -> AtomicInteger(0) }
                 }
                 event.reply("Scores reset to ``0``")
             } ?: event.respondThenDelete(makeEmbedBuilder("Reddicord has not been " +
@@ -309,8 +310,8 @@ class CmdReddicord : WeebotCommand("reddicord", arrayOf("reddiscord", "redditcor
  * @since 2.0
  */
 class SubCmdLeaderBoard(name: String, alias: Array<String>)
-    : WeebotCommand(name, alias, CAT_FUN, "[@/member @/member2...]",
-    "See the Reddicord leaderboard.", guildOnly = true, cooldown = 120,
+    : WeebotCommand(name, null, alias, CAT_FUN, "[@/member @/member2...]",
+    "See the Reddicord leaderboard.", guildOnly = true, cooldown = 120, hidden = true,
     cooldownScope = USER_CHANNEL) {
 
     override fun execute(event: CommandEvent) {

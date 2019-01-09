@@ -83,7 +83,8 @@ fun CommandEvent.delete(delay: Long = 0L) {
  * @author Jonathan Augustine
  * @since 2.0
  */
-abstract class WeebotCommand(name: String, aliases: Array<String>, category: Category,
+abstract class WeebotCommand(name: String, val displayName: String?,
+                             aliases: Array<String>, category: Category,
                              arguments: String, help: String,
                              helpBiConsumer: BiConsumer<CommandEvent, Command>? = null,
                              guildOnly: Boolean = false, ownerOnly: Boolean = false,

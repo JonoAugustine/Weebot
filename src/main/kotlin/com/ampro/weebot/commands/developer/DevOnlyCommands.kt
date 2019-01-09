@@ -36,7 +36,7 @@ import kotlin.reflect.KClass
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdShutdown : WeebotCommand("shutdown", arrayOf("tite", "killbot", "devkill"),
+class CmdShutdown : WeebotCommand("shutdown", null, arrayOf("tite", "killbot", "devkill"),
     CAT_DEV, "", "Shutdown the weebot", hidden = true, ownerOnly = true
 ) {
 
@@ -49,7 +49,7 @@ class CmdShutdown : WeebotCommand("shutdown", arrayOf("tite", "killbot", "devkil
     }
 }
 
-class CmdStatsView : WeebotCommand("stats", arrayOf("viewstats", "statsview",
+class CmdStatsView : WeebotCommand("stats", null, arrayOf("viewstats", "statsview",
     "statview", "viewstat"), CAT_DEV, "[commandName...]", "View Weebot statistics",
     hidden = true, ownerOnly = true) {
     override fun execute(event: CommandEvent) { GlobalScope.launch(CACHED_POOL) {
@@ -98,8 +98,8 @@ class CmdStatsView : WeebotCommand("stats", arrayOf("viewstats", "statsview",
  * @author John Grosh (jagrosh)
  * @since 2.0
  */
-class CmdGuildList : WeebotCommand("guildlist",
-    arrayOf("guilds", "serverlist", "servers"), CAT_DEV, "[-s <[joindate][size]>]",
+class CmdGuildList : WeebotCommand("guildlist", null, arrayOf("guilds", "servers"),
+    CAT_DEV, "[-s <[joindate][size]>]",
     "Gets a paginated list of the guilds the bot is on.",
         HelpBiConsumerBuilder("Guild List")
             .setDescription("Gets a paginated list of the guilds the bot is on.").build(),

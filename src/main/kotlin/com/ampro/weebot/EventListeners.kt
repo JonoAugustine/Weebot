@@ -120,7 +120,7 @@ fun askTracking(guild: Guild) {
         .map { it.user }.toSet(), timeout = 5L, messageEmbed = strdEmbedBuilder
         .setTitle("***Kicks in door*** The Weebot has arrived!")
         .setDescription(desc).addField(gdpr).build(), options =  listOf (
-        heavy_check_mark to { message, user ->
+        heavy_check_mark to { message, _ ->
             message.channel.sendMessage(acceptEmbed).queue()
             getWeebotOrNew(guild.idLong).settings.trackingEnabled = true
         },

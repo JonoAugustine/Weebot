@@ -693,7 +693,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
  * @author Jonathan Augustine
  * @since 1.0
  */
- class CmdNotePad : WeebotCommand("notepad",
+ class CmdNotePad : WeebotCommand("notepad", "NotePads",
     arrayOf("notepads", "notes", "jotter", "todo", "note"), CAT_UTIL,
     """notes
         notes make [the name]
@@ -713,7 +713,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         CmdClear(), CmdDeletePad(), CmdToFile() )
 ) {
 
-    class CmdMake : WeebotCommand("make", arrayOf("add", "new"), CAT_UTIL,
+    class CmdMake : WeebotCommand("make", null,arrayOf("add", "new"), CAT_UTIL,
         makeArgs, "Make a new NotePad", cooldown = 20,
         cooldownScope = USER_GUILD) {
         public override fun execute(event: CommandEvent) {
@@ -783,7 +783,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    class CmdWriteTo : WeebotCommand("writeto", arrayOf("write"), CAT_UTIL,
+    class CmdWriteTo : WeebotCommand("writeto",null, arrayOf("write"), CAT_UTIL,
         "<notepad_id> <the note>", "Write to a NotePad", cooldown = 10,
         cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
@@ -820,7 +820,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    class CmdInsert : WeebotCommand("insert", emptyArray(), CAT_UTIL,
+    class CmdInsert : WeebotCommand("insert", null,emptyArray(), CAT_UTIL,
         "<notepad_id> <index> <TheMessage>", "Insert a Note into a NotePad",
         cooldown = 10, cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
@@ -864,7 +864,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    class CmdEdit : WeebotCommand("edit", emptyArray(), CAT_UTIL,
+    class CmdEdit : WeebotCommand("edit", null,emptyArray(), CAT_UTIL,
         "<notepad_id> <note_id or num> <TheMessage>", "Edit a note.", cooldown = 10,
         cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
@@ -911,7 +911,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    class CmdDeleteNote : WeebotCommand("scratch", arrayOf("erase"), CAT_UTIL,
+    class CmdDeleteNote : WeebotCommand("scratch",null, arrayOf("erase"), CAT_UTIL,
         "<notepad_id> <note_id or number>", "Delete a Note.", cooldown = 30,
         cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
@@ -920,7 +920,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    class CmdLockTo : WeebotCommand("lockto", arrayOf("allow"), CAT_UTIL,
+    class CmdLockTo : WeebotCommand("lockto", null,arrayOf("allow"), CAT_UTIL,
         "<notepad_id> [read/write] [@/roles] [@/members] [#/channels]",
         "Lock access to a NotePad.", cooldown = 10, cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
@@ -959,8 +959,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    class CmdLockFrom: WeebotCommand("lockfrom", arrayOf("block", "lockout"), CAT_UTIL,
-        "<notepad_id> [read/write] [@/roles] [@/members] [#/channels]",
+    class CmdLockFrom: WeebotCommand("lockfrom", null,arrayOf("block", "lockout"),
+        CAT_UTIL, "<notepad_id> [read/write] [@/roles] [@/members] [#/channels]",
         "Lock access to a NotePad.", cooldownScope = USER_CHANNEL, cooldown = 10) {
         public override fun execute(event: CommandEvent) {
             STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
@@ -998,7 +998,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    class CmdClear : WeebotCommand("clear", arrayOf("wipe"), CAT_UTIL, "<notepad_id>",
+    class CmdClear : WeebotCommand("clear",null, arrayOf("wipe"), CAT_UTIL, "<notepad_id>",
         "Clear a NotePad of all Notes", cooldown = 30, cooldownScope = USER_CHANNEL) {
         public override fun execute(event: CommandEvent) {
             STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
@@ -1049,9 +1049,9 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    class CmdDeletePad : WeebotCommand("delete", arrayOf("del", "rem", "remove", "bin"),
-        CAT_UTIL, "<notepad_id> [notepad_id2..]", "Delete one or more NotePads",
-        cooldown = 30, cooldownScope = USER_GUILD) {
+    class CmdDeletePad : WeebotCommand("delete", null,
+        arrayOf("del", "rem", "remove", "bin"),CAT_UTIL, "<notepad_id> [notepad_id2..]",
+        "Delete one or more NotePads", cooldown = 30, cooldownScope = USER_GUILD) {
         public override fun execute(event: CommandEvent) {
             STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
             val args = event.splitArgs()
@@ -1104,7 +1104,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         }
     }
 
-    class CmdToFile : WeebotCommand("file", arrayOf("tofile", "txt", "asfile"),
+    class CmdToFile : WeebotCommand("file",null, arrayOf("tofile", "txt", "asfile"),
         CAT_UNDER_CONSTRUCTION, "<notepad_id>", "Get the NotePad as a .txt file",
         guildOnly = true, cooldown = 90, cooldownScope = USER_GUILD) {
         public override fun execute(event: CommandEvent) {

@@ -102,7 +102,7 @@ fun getSuggById(id: String, event: CommandEvent): Suggestion? {
  * @author Jonathan Augustine
  * @since 1.0
  */
-open class CmdSuggestion : WeebotCommand("suggest",
+open class CmdSuggestion : WeebotCommand("suggest", "Suggest",
     arrayOf("suggestion", "sugg"), CAT_DEV, "See help embed.",
     "Submit and Vote for anonymous suggestions for the Weebot devs.",
     HelpBiConsumerBuilder("Weebot Suggestions", false).setDescription(
@@ -265,7 +265,7 @@ fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boole
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdSeeSuggestions : WeebotCommand("see", arrayOf("-s"), CAT_DEV, "", "",
+class CmdSeeSuggestions : WeebotCommand("see", null, arrayOf("-s"), CAT_DEV, "", "",
     cooldown = 5) {
 
     // \sugg -s(ee) [-k <keyword>] [-r <accepted/unreviewed/completed/ignored>] [pagenum]
@@ -341,7 +341,7 @@ class CmdSeeSuggestions : WeebotCommand("see", arrayOf("-s"), CAT_DEV, "", "",
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdDevSuggestions : WeebotCommand("dev", emptyArray(), CAT_DEV, "",
+class CmdDevSuggestions : WeebotCommand("dev", null, emptyArray(), CAT_DEV, "",
     "", HelpBiConsumerBuilder("Weebot Suggestions", false).setDescription(
         "Commands for devs to control suggestions"
     ).addField("", "", false)

@@ -31,7 +31,7 @@ import kotlin.math.ceil
  *************************/
 
 val DISCORD_BOTLIST_API: DiscordBotListAPI = DiscordBotListAPI.Builder()
-    .token(KEY_DISCORD_BOT_COM).botId(CLIENT_WBT.toString()).build()
+    .token(KEY_DISCORD_BOTS_ORG).botId(CLIENT_WBT.toString()).build()
 
 lateinit var BOT_LIST_API_UPDATERS: Job
 

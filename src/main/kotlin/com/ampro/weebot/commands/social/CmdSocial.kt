@@ -142,7 +142,7 @@ data class GuildSocialSettings(val guildID: Long, var profiles: ProfileSettings?
 }
 
 
-class CmdSocial : WeebotCommand("Social", arrayOf(), CAT_SOC,
+class CmdSocial : WeebotCommand("social", null, arrayOf(), CAT_SOC,
         "[feature] /new setting/",
         "Control Social features like Currency, Profiles, & Levels",
         HelpBiConsumerBuilder("Social Features", false)

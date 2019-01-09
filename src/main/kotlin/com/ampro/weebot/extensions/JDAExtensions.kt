@@ -27,20 +27,27 @@ fun TODO(event: CommandEvent) = event.reply("This action is still under construc
 
 fun CommandClientBuilder.addCommandsWithCheck(commands: Iterable<WeebotCommand>)
         :  CommandClientBuilder {
-    var caped = false
-    commands.forEach {
-        if (it.name.toList().has { it.isUpperCase() }) {
-            MLOG.elog("Command name ${it.name} has is capitalized when it should not be.")
-            caped = true
+    var err = false
+    commands.forEach { c ->
+        if (c.name.toList().has { it.isUpperCase() }) {
+            MLOG.elog("Command name ${c.name} has is capitalized when it should not be!")
+            err = true
         }
-        it.aliases.forEach {
-            if (it.toList().has { it.isUpperCase() }) {
-                MLOG.elog("Command name $it has is capitalized when it should not be.")
-                caped = true
+        c.aliases.forEach { a ->
+            if (a.toList().has { it.isUpperCase() }) {
+                MLOG.elog("Command name $a has is capitalized when it should not be!")
+                err = true
+            }
+        }
+        commands.filter { it != c }.forEach { c2 ->
+            if ((c2.aliases + listOf(c2.name)).map { it.toLowerCase() }
+                        .contains(c.name.toLowerCase())) {
+                MLOG.elog("${c.name} shares a name with ${c2.name}!")
+                err = true
             }
         }
     }
-    if (caped) System.exit(0)
+    if (err) System.exit(0)
     return this.addCommands(commands)
 }
 

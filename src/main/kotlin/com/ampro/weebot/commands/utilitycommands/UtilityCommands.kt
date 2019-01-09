@@ -95,7 +95,7 @@ class OutHouse(user: User, var remainingMin: Long, val message: String, val forw
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdOutHouse : WeebotCommand("outhouse", arrayOf("ohc"), CAT_UTIL,
+class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UTIL,
     "[Zd] [Xh] [Ym] [-f] [activity]",
     "Have the bot respond to anyone who mentions you for the given time.",
     cooldown = 30) {
@@ -167,7 +167,7 @@ class CmdOutHouse : WeebotCommand("outhouse", arrayOf("ohc"), CAT_UTIL,
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdReminder : WeebotCommand("reminder", arrayOf("rc", "rem", "remindme"),
+class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remindme"),
     CAT_UTIL, "[-private] [-t phoneNum] [Xm] [Yh] [Zd] [Reminder Message]",
     "Set a Reminder from 1 minute to 30 days.", cooldown = 5
 ) {

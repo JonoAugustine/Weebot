@@ -23,7 +23,7 @@ import net.dv8tion.jda.core.entities.MessageEmbed
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdCatFact : WeebotCommand("catfact", arrayOf("cat"), CAT_FUN, "",
+class CmdCatFact : WeebotCommand("catfact", "Cat Facts", arrayOf("cat"), CAT_FUN, "",
     "Get a random fact about Cats and a cute picture.", cooldown = 10) {
 
     val FALLBACK_CAT_IMAGE = "https://www.readersdigest.ca/wp-content/uploads/sites/14/2011/01/4-ways-cheer-up-depressed-cat.jpg"

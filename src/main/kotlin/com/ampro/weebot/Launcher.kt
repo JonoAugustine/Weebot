@@ -5,14 +5,13 @@
 package com.ampro.weebot
 
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.CMD_HELP
-import com.ampro.weebot.commands.COMMANDS
+import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.developer.CLIENT_TWTICH_PUB
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
-import com.github.kittinunf.fuel.httpPost
 import com.jagrosh.jdautilities.command.CommandClient
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
@@ -20,7 +19,7 @@ import kotlinx.coroutines.*
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA.Status.CONNECTED
 import net.dv8tion.jda.core.JDA.Status.SHUTDOWN
-import net.dv8tion.jda.core.entities.Game.playing
+import net.dv8tion.jda.core.entities.Game.*
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
 import java.util.concurrent.Executors
@@ -58,6 +57,8 @@ const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try th
  * @throws InterruptedException
  */
 fun main(args_: Array<String>) { runBlocking {
+    val games = listOf(listening("@Weebot Help"), playing("with wires"),
+        watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.1 Kotlin!"))
     slog("Launching...")
     slog("\tBuilding Directories...")
     if (!buildDirs()) {
@@ -90,9 +91,10 @@ fun main(args_: Array<String>) { runBlocking {
         .setGuildSettingsManager { getWeebotOrNew(it.idLong).settings }
         .setAlternativePrefix(alt)
         //.setGame(listening("@Weebot help"))
-        .setGame(playing("Weebot 2.1 Kotlin!")).addCommandsWithCheck(COMMANDS)
+        .setGame(games.random()).addCommandsWithCheck(COMMANDS)
         .setEmojis(heavy_check_mark.unicode, Warning.unicode, X_Red.unicode)
-        .setServerInvite(LINK_INVITEBOT).setHelpConsumer { event ->
+        .setServerInvite(LINK_INVITEBOT)
+        .setHelpConsumer { event ->
             //If the only argument is the command invoke
             val args = event.splitArgs()
             if (args.isEmpty()) {
@@ -125,9 +127,9 @@ fun main(args_: Array<String>) { runBlocking {
     }
 
     //WAIT FOR SHARD CONNECT
-    MLOG.slog("All Shards connected! ${measureTimeMillis {
+    MLOG.slog("All ${JDA_SHARD_MNGR.shards.size} Shards connected! ${measureTimeMillis {
+        MLOG.slog("Waiting for all ${JDA_SHARD_MNGR.shards.size} shards to connect...")
         while (JDA_SHARD_MNGR.shards.has { it.status != CONNECTED }) {
-            MLOG.slog("Waiting for all shards to connect...")
             Thread.sleep(500)
         }
     } / 1_000} seconds")
@@ -156,6 +158,26 @@ fun main(args_: Array<String>) { runBlocking {
 
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
         .queueAfter(850, MILLISECONDS)
+
+    launch(CACHED_POOL) {
+        delay(20 * 60 * 1_000)
+        CLIENT_TWTICH_PUB.helix
+            .getStreams("","",null,null,null,null, listOf("127416768"),null)
+            .observe().subscribe { streamList ->
+                streamList.streams.firstOrNull { it.userId == TWITCH_HQR_ID }
+                    ?.also {
+                        JDA_SHARD_MNGR.setGame(streaming(it.title, LINK_HQTWITCH))
+                    }
+            }
+        delay(20 * 60 * 1_000)
+        CLIENT_TWTICH_PUB.helix
+            .getStreams("","",null,null,null,null, listOf("127416768"),null)
+            .observe().subscribe { streamList ->
+                if (streamList.streams.none { it.userId == TWITCH_HQR_ID }) {
+                    JDA_SHARD_MNGR.setGame(games.random())
+                }
+            }
+    }
 }}
 
 /**
@@ -229,16 +251,38 @@ private fun setupBotListApis() {
     BOT_LIST_API_UPDATERS = GlobalScope.launch(CACHED_POOL) {
         while (ON) {
             //discordbots.org
+            MLOG.slog("Sending Stats to discordbots.org...")
             DISCORD_BOTLIST_API.setStats(JDA_SHARD_MNGR.shards.map { it.guilds.size })
             //discordbotlist.com
+            /*MLOG.slog("Sending Stats to discordbotlist.com && discord.bots.gg...")
             JDA_SHARD_MNGR.shards.forEachIndexed { i, shard ->
-                "https://discordbotlist.com//api/bots/:${SELF.id}/stats"
-                    .httpPost(listOf(
-                        "shard_id" to i,
-                        "guilds" to shard.guilds.size,
-                        "users" to shard.users.size
+                "https://discordbotlist.com/api/bots/${SELF.id}/stats".httpPost(
+                    listOf("shard_id" to i, "guilds" to shard.guilds.size,
+                        "users" to shard.users.size))
+                    .apply { headers.clear() }
+                    .header("Authorization" to "Bot $KEY_DISCORD_BOT_COM")
+                    .response { _, _, result ->
+                        result.component2()?.apply {
+                            MLOG.elog("Failed to POST to discordbotlist.com")
+                            MLOG.elog(response.responseMessage)
+                        }
+                    }
+                //https://discord.bots.gg
+                "https://discord.bots.gg/api/v1/bots/${SELF.id}/stats".httpPost(
+                    listOf("guildCount" to shard.guilds.size,
+                        "shardCount" to JDA_SHARD_MNGR.shards.size, "shardId" to i
+                        ,"Content-Type" to "application/json"
                     ))
-            }
+                    .apply { headers.clear() }
+                    .header("Authorization" to KEY_DISCORD_BOTS_GG)
+                    .response { _, _, result ->
+                        result.component2()?.apply {
+                            MLOG.elog("Failed to POST to discord.bots.gg")
+                            MLOG.elog(response.responseMessage)
+                        }
+                    }
+            }*/
+            MLOG.slog("done")
             delay(30 * 60 * 1_000)
         }
     }

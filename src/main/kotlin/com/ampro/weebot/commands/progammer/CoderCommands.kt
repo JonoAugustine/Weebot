@@ -31,7 +31,7 @@ import java.util.regex.PatternSyntaxException
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "regextest"),
+class CmdRegexTest : WeebotCommand("regex", null,arrayOf("regtest", "regextest"),
     CAT_PROG, "<regex> <word> [words...]","Test a Regex against one or more strings",
     cooldown = 10) {
 
@@ -81,7 +81,7 @@ class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "regextest"),
                 //\regex phrase <regex> <phrase here>
                 if (args.size < 3) return
                 strings = event.args.substring(args[0].length + 1 + args[1].length)
-                    .split(Regex("\\n"))
+                    .trim().split(Regex("\\n"))
                 regex = args[1].toRegex()
             } else { //\regex <regex> word word word
                 regex = args[0].toRegex()
@@ -110,7 +110,7 @@ class CmdRegexTest : WeebotCommand("regex", arrayOf("regtest", "regextest"),
  * @author Jonathan Augustine
  * @since 2.1
  */
-class CmdEmbedMaker : WeebotCommand("embedmaker",
+class CmdEmbedMaker : WeebotCommand("embedmaker", "Embed Maker",
     arrayOf("embedbuilder", "embed", "makeembed", "sendembed"), CAT_PROG,
     "", "Make a pretty MessageEmbed", cooldown = 30,
     cooldownScope = CooldownScope.USER_CHANNEL) {

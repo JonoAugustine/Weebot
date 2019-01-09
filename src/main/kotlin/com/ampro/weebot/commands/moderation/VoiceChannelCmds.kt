@@ -159,7 +159,7 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdVoiceChannelRole : WeebotCommand("voicechannelrole",
+class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Roles",
     arrayOf("vcr", "vcrole"), CAT_UTIL, "[enable/disable] [limit] or [limit]",
     "A manager that creates, assigns, removes, and deletes VoiceChannel roles.",
     cooldown = 10, userPerms = arrayOf(MANAGE_ROLES),
@@ -445,15 +445,15 @@ class VCGenerator(baseChannel: Long) : IPassive {
  * @since 2.1
  */
 class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
-    arrayOf("vcg", "vcgenerator", "vcgen"), CAT_UTIL, "",
+    "Voice Channel Generator", arrayOf("vcg", "vcgenerator", "vcgen"), CAT_UTIL, "",
     "Creates a temp VoiceChannel for a User after joining a designated Voice Channel",
     guildOnly = true, children = arrayOf(SubCmdEnable(), SubCmdDisable(),
         SubCmdServerSettings(), SubCmdUserDefaults(), SubCedManualTemp())) {
 
     /** Turn ON  */
-    internal class SubCmdEnable : WeebotCommand("enable", arrayOf("on"), CAT_MOD, "", "",
-                guildOnly = true, cooldown = 30, botPerms = arrayOf(MANAGE_CHANNEL),
-                userPerms = arrayOf(MANAGE_CHANNEL)) {
+    internal class SubCmdEnable : WeebotCommand("enable", null, arrayOf("on"),
+        CAT_MOD, "", "",guildOnly = true, cooldown = 30,
+        botPerms = arrayOf(MANAGE_CHANNEL), userPerms = arrayOf(MANAGE_CHANNEL)) {
         public override fun execute(event: CommandEvent) {
             val bot = getWeebotOrNew(event.guild)
             fun newChannel(message: Message, action: () -> Unit) {
@@ -564,7 +564,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
     }
 
     /** Turn OFF */
-    internal class SubCmdDisable : WeebotCommand("disable", arrayOf("off"), CAT_MOD,
+    internal class SubCmdDisable : WeebotCommand("disable",null, arrayOf("off"), CAT_MOD,
         "", "", guildOnly = true, cooldown = 30,  botPerms = arrayOf(MANAGE_CHANNEL),
         userPerms = arrayOf(MANAGE_CHANNEL)) {
         public override fun execute(event: CommandEvent) {
@@ -582,7 +582,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
     }
 
     /** Set Server Defaults */
-    internal class SubCmdServerSettings : WeebotCommand("def",
+    internal class SubCmdServerSettings : WeebotCommand("def",null,
         arrayOf("serverdefaults", "sdef", "servdef"), CAT_MOD, "", "",
         userPerms = arrayOf(MANAGE_CHANNEL), guildOnly = true, cooldown = 30) {
         override fun execute(event: CommandEvent) {
@@ -718,7 +718,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
     }
 
     /** Set User Settings */
-    internal class SubCmdUserDefaults : WeebotCommand("set", arrayOf("mydef", "my"),
+    internal class SubCmdUserDefaults : WeebotCommand("set",null, arrayOf("mydef", "my"),
         CAT_UTIL, "", "", cooldown = 30, guildOnly = true) {
         override fun execute(event: CommandEvent) {
             getWeebotOrNew(event.guild).also { bot ->
@@ -788,7 +788,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
     }
 
     /** Manual Temp Channel */
-    internal class SubCedManualTemp : WeebotCommand("temp", arrayOf("manual"),
+    internal class SubCedManualTemp : WeebotCommand("temp", null,arrayOf("manual"),
         CAT_UTIL, "", "", cooldown = 30, guildOnly = true,
         userPerms = arrayOf(MANAGE_CHANNEL), botPerms = arrayOf(MANAGE_CHANNEL)) {
         override fun execute(event: CommandEvent) {

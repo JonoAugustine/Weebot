@@ -38,17 +38,4 @@ abstract class CardGame<P: Player>(guildId: Long, authorID: Long)
      */
     protected abstract fun dealCards(player: P): Boolean
 
-    /**
-     * Adds `player` to games.
-     * If the game is running they are dealt `Card cards`.
-     *
-     * @param player The player to add to the game
-     */
-    override fun joinGame(player: P): Boolean {
-        return if (super.joinGame(player)) {
-            if (this.isRunning) { this.dealCards(player) }
-            true
-        } else false
-    }
-
 }

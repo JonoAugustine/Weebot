@@ -13,8 +13,8 @@ import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdInviteLink : WeebotCommand("invitelink", arrayOf("ilc", "inviteme", "invite"),
-        CAT_GEN, "", "Get an invite link for Weebot.",
+class CmdInviteLink : WeebotCommand("invitelink", "Invite Link" ,
+    arrayOf("ilc", "inviteme", "invite"), CAT_GEN, "", "Get an invite link for Weebot.",
         HelpBiConsumerBuilder("Get an invite link for Weebot")
             .setDescription("[`Or just invite me with this link I guess`]($LINK_INVITEBOT)")
             .setThumbnail(weebotAvatar).build(), cooldown = 360,

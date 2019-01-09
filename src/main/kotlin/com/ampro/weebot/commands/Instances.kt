@@ -61,10 +61,11 @@ val CMD_EMBED           = CmdEmbedMaker()
 
 val CMD_CATFACT         = CmdCatFact()
 val CMD_HELLOTHERE      = CmdHelloThere()
-val CMD_THIS            = CmdThis()
 val CMD_REDDICORD       = CmdReddicord()
-        val CMD_REDDICORD_SCORE = SubCmdLeaderBoard("reddiscore", emptyArray())
+val CMD_REDDICORD_SCORE = SubCmdLeaderBoard("reddiscore", emptyArray())
 val CMD_CAH             = CmdCardsAgainstHumanity()
+val CMD_THIS            = CmdThis()
+val CMD_EMOJIFY         = CmdEmojify()
 
 
 val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
@@ -74,4 +75,5 @@ val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
         CMD_OHC, CMD_REM, CMD_NOTE,
         CMD_VCR, CMD_VCGEN,
         CMD_CAH,
-        CMD_THIS, CMD_HELLOTHERE, CMD_CATFACT, CMD_REDDICORD, CMD_REDDICORD_SCORE)
+        CMD_THIS, CMD_HELLOTHERE, CMD_CATFACT, CMD_EMOJIFY,
+        CMD_REDDICORD, CMD_REDDICORD_SCORE)

@@ -10,8 +10,8 @@ import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
+import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
-import com.ampro.weebot.util.reactWith
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
@@ -29,7 +29,7 @@ import java.util.concurrent.TimeUnit.SECONDS
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
+class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
     "[on/off]", "React with \"THiS\" to a message or enable an auto-reactor for This",
     cooldown = 10, guildOnly = true,userPerms = arrayOf(MESSAGE_ADD_REACTION),
     botPerms = arrayOf(MESSAGE_ADD_REACTION),
@@ -146,6 +146,25 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
 
 }
 
+class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN, "",
+    "Turn any sentence into Emoji", cooldown = 5) {
+
+    private val numberSet = digi.mapIndexed { i, _ ->
+        Regex("(?i)$i") to (listOf(Zero) + EmojiNumbers)[i].unicode
+    }.toTypedArray()
+
+    override fun execute(event: CommandEvent) {
+        if (event.args.isNullOrBlank()) return
+        if (event.args.length * 6 > EMBED_MAX_DESCRIPTION)
+            return event.respondThenDelete("Too long", 5)
+
+        val s = event.args.replace(Regex("\\s"), "\t")
+            .replace(Regex("(?i)[A-z]")) { ":regional_indicator_${it.value.toLowerCase()}:"
+        }.replace(*numberSet)
+
+        event.reply(s)
+    }
+}
 
 /**
  * Sends a General Kenobi Hello There gif.
@@ -153,8 +172,8 @@ class CmdThis : WeebotCommand("^this", arrayOf("^that"), CAT_FUN,
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdHelloThere : WeebotCommand("hellothere", arrayOf("droppingin"), CAT_FUN,
-    "[@Member]", "*GENERAL KENOBI!*", cooldown = 360,
+class CmdHelloThere : WeebotCommand("hellothere", "Hello There",arrayOf("droppingin"),
+    CAT_FUN, "[@Member]", "*GENERAL KENOBI!*", cooldown = 360,
     userPerms = arrayOf(MESSAGE_EMBED_LINKS), botPerms = arrayOf(MESSAGE_EMBED_LINKS)
 ) {
     companion object {

@@ -15,7 +15,7 @@ import java.time.temporal.ChronoUnit
  * @author Jonathan Augustine
  * @since 1.0
  */
-class PingCommand : WeebotCommand("ping", arrayOf("pong"), CAT_GEN,
+class PingCommand : WeebotCommand("ping", null, arrayOf("pong"), CAT_GEN,
     "", "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong", false)
         .setDescription("Checks the bot's latency.").build(), false, cooldown = 10
 ) {

@@ -8,6 +8,7 @@ import com.ampro.weebot.CACHED_POOL
 import com.ampro.weebot.SELF
 import com.ampro.weebot.commands.CMD_REM
 import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.commands.`fun`.games.cardgame.CahGuildInfo
 import com.ampro.weebot.commands.utilitycommands.CmdReminder.Companion.remWatchJob
 import com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder
 import com.ampro.weebot.commands.utilitycommands.NotePad
@@ -170,6 +171,9 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     @get:Synchronized
     val notePads = mutableListOf<NotePad>()
 
+    @get:Synchronized
+    var cahGuildInfo: CahGuildInfo? = null
+
 
     /*************************************************
         *               INIT                       *
@@ -227,7 +231,6 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
      */
     open fun startUp() {
         if (settings.commandRestrictions == null) settings.commandRestrictions = ConcurrentHashMap()
-
     }
 
     override fun compareTo(other: Weebot) = (this.guildID - other.guildID).toInt()
