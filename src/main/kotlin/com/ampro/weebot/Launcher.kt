@@ -6,7 +6,7 @@ package com.ampro.weebot
 
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.commands.developer.CLIENT_TWTICH_PUB
+import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
@@ -22,10 +22,15 @@ import net.dv8tion.jda.core.JDA.Status.SHUTDOWN
 import net.dv8tion.jda.core.entities.Game.*
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
+import twitter4j.*
+import java.lang.Exception
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.security.auth.login.LoginException
 import kotlin.system.measureTimeMillis
+import twitter4j.FilterQuery
+
+
 
 lateinit var SAVE_JOB: Job
 /** How ofter to asve to file in Seconds */
@@ -47,6 +52,9 @@ lateinit var SELF: SelfUser
 const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try that " +
         "again later*"
 
+val games = listOf(listening("@Weebot Help"), playing("with wires"),
+    watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.1 Kotlin!"))
+
 
 /**
  * Put bot online, setup listeners, and get full list of servers (Guilds)
@@ -57,8 +65,6 @@ const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try th
  * @throws InterruptedException
  */
 fun main(args_: Array<String>) { runBlocking {
-    val games = listOf(listening("@Weebot Help"), playing("with wires"),
-        watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.1 Kotlin!"))
     slog("Launching...")
     slog("\tBuilding Directories...")
     if (!buildDirs()) {
@@ -90,8 +96,8 @@ fun main(args_: Array<String>) { runBlocking {
         .setCoOwnerIds(DEV_IDS[1].toString())
         .setGuildSettingsManager { getWeebotOrNew(it.idLong).settings }
         .setAlternativePrefix(alt)
-        //.setGame(listening("@Weebot help"))
-        .setGame(games.random()).addCommandsWithCheck(COMMANDS)
+        .setGame(games.random())
+        .addCommandsWithCheck(COMMANDS)
         .setEmojis(heavy_check_mark.unicode, Warning.unicode, X_Red.unicode)
         .setServerInvite(LINK_INVITEBOT)
         .setHelpConsumer { event ->
@@ -119,12 +125,21 @@ fun main(args_: Array<String>) { runBlocking {
         }
         .build()
 
+    //DATABASE
+    setUpDatabase()
     //LOGIN & LISTENERS
-    JDA_SHARD_MNGR = if (weebot) {
-        jdaShardLogIn().addEventListeners(CMD_CLIENT).build()
-    } else {
-        jdaDevShardLogIn().addEventListeners(CMD_CLIENT).build()
+    JDA_SHARD_MNGR = (if (weebot) jdaShardLogIn() else jdaDevShardLogIn())
+        .addEventListeners(EventDispatcher(), CMD_CLIENT, WAITER).build()
+    launch(CACHED_POOL) {
+        delay(20_000)
+        JDA_SHARD_MNGR.setGame(games.random())
+        while (ON) {
+            delay(10 * 60_000)
+            JDA_SHARD_MNGR.setGame(games.random())
+        }
     }
+    //WEEBOTS
+    startupWeebots()
 
     //WAIT FOR SHARD CONNECT
     MLOG.slog("All ${JDA_SHARD_MNGR.shards.size} Shards connected! ${measureTimeMillis {
@@ -138,18 +153,12 @@ fun main(args_: Array<String>) { runBlocking {
     SELF = JDA_SHARD_MNGR.shards[0].selfUser
     weebotAvatar = SELF.avatarUrl
 
-    //DATABASE
-    setUpDatabase()
     //Stats
     setUpStatistics()
     //Bot List website APIs
     setupBotListApis()
 
-    JDA_SHARD_MNGR.addEventListener(EventDispatcher(), WAITER)
-
     genSetup.joinAll() //Ensure all gensetup is finished
-
-    startupWeebots()
 
     MLOG.slog("Starting Save Job...")
     SAVE_JOB = saveTimer()
@@ -159,6 +168,7 @@ fun main(args_: Array<String>) { runBlocking {
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
         .queueAfter(850, MILLISECONDS)
 
+    //Watch HQStream
     launch(CACHED_POOL) {
         delay(20 * 60 * 1_000)
         CLIENT_TWTICH_PUB.helix
@@ -177,6 +187,49 @@ fun main(args_: Array<String>) { runBlocking {
                     JDA_SHARD_MNGR.setGame(games.random())
                 }
             }
+    }
+    //Watch HQTwitter
+    launch(CACHED_POOL) {
+        val stream = TwitterStreamFactory(TWITTER_CONFIG).instance
+            .addListener(object :
+                StatusListener {
+            /**
+             * This notice will be sent each time a limited stream becomes unlimited.<br></br>
+             * If this number is high and or rapidly increasing, it is an indication that your predicate is too broad, and you should consider a predicate with higher selectivity.
+             *
+             * @param numberOfLimitedStatuses an enumeration of statuses that matched the track predicate but were administratively limited.
+             * @see [Streaming API Concepts - Filter Limiting | Twitter Developers](https://dev.twitter.com/docs/streaming-api/concepts.filter-limiting)
+             *
+             * @see [Streaming API Concepts - Parsing Responses | Twitter Developers](https://dev.twitter.com/docs/streaming-api/concepts.parsing-responses)
+             *
+             * @see [Twitter Development Talk - Track API Limit message meaning](http://groups.google.co.jp/group/twitter-development-talk/browse_thread/thread/15d0504b3dd7b939)
+             *
+             * @since Twitter4J 2.1.0
+             */
+            override fun onTrackLimitationNotice(numberOfLimitedStatuses: Int) {
+                slog(numberOfLimitedStatuses)
+            }
+
+            override fun onStallWarning(warning: StallWarning) {
+                slog(warning)
+            }
+
+            override fun onException(ex: Exception?) { ex?.printStackTrace() }
+
+            override fun onDeletionNotice(statusDeletionNotice: StatusDeletionNotice) {
+                slog(statusDeletionNotice)
+            }
+
+            override fun onStatus(status: Status) {
+                slog(status)
+            }
+
+            override fun onScrubGeo(userId: Long, upToStatusId: Long) {
+                slog(userId to upToStatusId)
+            }
+        }).filter(FilterQuery().follow(1059304575956606976))
+        stream.sample("java")
+
     }
 }}
 
@@ -219,19 +272,12 @@ private fun setUpDatabase() {
         MLOG.slog("\t\tUnable to loadDao database, creating new database.")
         tdao = Dao()
         MLOG.slog("\t\tLoading known Guilds")
-        JDA_SHARD_MNGR.guilds.filterNot { tdao.WEEBOTS.contains(it.idLong) }
-            .forEach {
-                tdao.addBot(Weebot(it))
-                askTracking(it)
-        }
         tdao.save()
         MLOG.slog("\tDatabase created and saved to file.")
         DAO = tdao
     } else {
         MLOG.slog("\tDatabase located. Updating registered Guilds.")
         DAO = tdao
-        //Update the Weebots in the database after downtime.
-        JDA_SHARD_MNGR.guilds.forEach { DAO.addBot(Weebot(it)) }
     }
     //DAO.updatePremiumUsers()
     MLOG.slog("\tBacking up database.")
@@ -294,6 +340,12 @@ private fun setupBotListApis() {
  */
 private fun startupWeebots() {
     MLOG.slog("Starting Weebots...")
+    //Update the Weebots in the database after downtime.
+    JDA_SHARD_MNGR.guilds.filterNot { DAO.WEEBOTS.contains(it.idLong) }
+        .forEach {
+            DAO.addBot(Weebot(it))
+            askTracking(it)
+        }
     DAO.GLOBAL_WEEBOT.startUp()
     DAO.WEEBOTS.values.forEach { bot -> bot.startUp() }
 }

@@ -25,12 +25,18 @@ val CMD_PING            = PingCommand() //Public
 val CMD_SUGG            = CmdSuggestion() //Public
 
 /* *******************************
+ *         About Commands        *
+ ********************************/
+
+val CMD_ABOUT           = CmdAbout()
+val CMD_WATCHADOIN      = CmdWatchaDoin()
+
+/* *******************************
  *       Utility Commands      *
  ********************************/
 
 val CMD_INVITEBOT       = CmdInviteLink()
 val CMD_HELP            = CmdHelp()
-val CMD_ABOUT           = CmdAbout()
 val CMD_OHC             = CmdOutHouse()
 val CMD_REM             = CmdReminder()
 val CMD_NOTE            = CmdNotePad()
@@ -69,7 +75,7 @@ val CMD_EMOJIFY         = CmdEmojify()
 
 
 val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
-        CMD_PING, CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT,
+        CMD_PING, CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT, CMD_WATCHADOIN,
         CMD_SETTINGS, CMD_PURGE, CMD_SELFDESTRUCT, CMD_TASKS, CMD_CHATLOCK,
         CMD_REGEX, CMD_EMBED,
         CMD_OHC, CMD_REM, CMD_NOTE,

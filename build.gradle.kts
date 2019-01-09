@@ -59,6 +59,7 @@ dependencies {
     implementation("me.sargunvohra.lib:pokekotlin:2.3.0")
     implementation("com.twilio.sdk:twilio:7.9.0")
     implementation("com.github.twitch4j:twitch4j:1.0.0-alpha.5")
+    implementation("org.twitter4j:twitter4j-stream:4.0.7")
     //implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.1.1")
     //implementation("net.dean.jraw:JRAW:1.1.0")
     //implementation("ca.pjer:chatter-bot-api:1.4.7")

@@ -220,12 +220,6 @@ class Dao {
     /** Build an empty `Database`. */
     init {
         WEEBOTS.putIfAbsent(-1L, GLOBAL_WEEBOT)
-        JDA_SHARD_MNGR.users.forEach { u ->
-            if (u.mutualGuilds?.contains(NL_GUILD) == true
-                    && NL_GUILD?.getMember(u)?.roles?.none { it.name == NL_SUBSCRIBER } == true) {
-                PREMIUM_USERS.putIfAbsent(u.idLong, PremiumUser(u.idLong))
-            }
-        }
     }
 
     /**

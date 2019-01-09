@@ -30,6 +30,11 @@ const val REDDIT_SEC = "WRLTL6bEdgtSELdw_3a79QoRAA0"
 const val REDDIT_USR = "Ventus_Aurelius"
 const val REDDIT_PAS = "G3lassenheit"
 
+/** Twitter */
+const val KEY_TWITTER_API = "RX7LWmYZ4HjWZVdTbTrUzgz5e"
+const val KEY_TWITTER_API_SEC = "oGnGZ5h3CEiiZRsPEyOVayABH8pZY9d9QVq3IUGBgmApyYTyDA"
+const val TOKEN_TWITTER = "1059304575956606976-pD8d1K3B2T3g7W5TlXvycDoo2gUgDV"
+const val TOKEN_TWITTER_SEC = "y9lswGdRAI3gRiZ0GRdl20HRobngTpDapSj3nNT7kMU0m"
 /* *********************
       SQL
  **********************
@@ -109,10 +114,8 @@ fun jdaDevLogIn() : JDA {
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaShardLogIn() : DefaultShardManagerBuilder {
     MLOG.slog("Logging in to Weebot JDA shards...")
-    return DefaultShardManagerBuilder().setToken(
-        TOKEN_WBT)
-            .setShardsTotal(-1).setGame(Game.playing("@Weebot help"))
-            .setCorePoolSize(50)
+    return DefaultShardManagerBuilder().setToken(TOKEN_WBT)
+        .setShardsTotal(-1).setCorePoolSize(50)
 }
 
 /**
@@ -122,6 +125,5 @@ fun jdaShardLogIn() : DefaultShardManagerBuilder {
 fun jdaDevShardLogIn() : DefaultShardManagerBuilder {
     MLOG.slog("Logging in to TestBot JDA shards...")
     return DefaultShardManagerBuilder().setToken(TOKEN_TEST)
-            .setShardsTotal(-1)
-            .setGame(Game.playing("Genocide")).setCorePoolSize(10)
+            .setShardsTotal(-1).setCorePoolSize(10)
 }

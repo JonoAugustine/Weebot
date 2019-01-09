@@ -146,6 +146,12 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
 
 }
 
+/**
+ * Converts a sentence to letter/number emojis
+ *
+ * @author Jonathan Augustine
+ * @since 2.1
+ */
 class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN, "",
     "Turn any sentence into Emoji", cooldown = 5) {
 

@@ -10,9 +10,12 @@ import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.WKDAY_MONTH_YEAR_TIME
+import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
+import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
 import com.jagrosh.jdautilities.command.CommandEvent
 import com.jagrosh.jdautilities.menu.OrderedMenu
 import net.dv8tion.jda.core.entities.ChannelType
+import net.dv8tion.jda.core.entities.Game.GameType.*
 import net.dv8tion.jda.core.entities.Role.DEFAULT_COLOR_RAW
 import java.util.concurrent.TimeUnit.MINUTES
 import kotlin.math.ceil
@@ -141,7 +144,7 @@ class SubCmdAboutUser : WeebotCommand("me", null, arrayOf("aboutme"), CAT_GEN,
 }
 
 class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, "", "",
-    cooldown = 90, cooldownScope = CooldownScope.USER_CHANNEL, guildOnly = true
+    cooldown = 90, cooldownScope = USER_CHANNEL, guildOnly = true
 ) {
     override fun execute(event: CommandEvent) {
         val g = event.guild
@@ -252,4 +255,19 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
             }.build().display(event.channel)
     }
 
+}
+
+class CmdWatchaDoin : WeebotCommand("watchadoin", "Whatcha Doin'?", arrayOf(), CAT_GEN,
+    "","What am I up to?", cooldown = 0, cooldownScope = USER_SHARD,
+    guildOnly = true) {
+    override fun execute(event: CommandEvent) {
+        val game = event.selfMember.game ?: games.random()
+        val s: String = when (game.type) {
+            DEFAULT -> "I'm playing ${game.name}"
+            STREAMING -> "I'm watching my creator's Live Stream! $LINK_HQTWITCH"
+            LISTENING -> "I'm listening to ${game.name ?: "...something"}"
+            WATCHING -> "I'm watching ${game.name ?: "...something"}."
+        }
+        event.reply(s)
+    }
 }
