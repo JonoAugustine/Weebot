@@ -4,9 +4,7 @@
 
 package com.ampro.weebot.database
 
-import com.ampro.weebot.JDA_SHARD_MNGR
-import com.ampro.weebot.MLOG
-import com.ampro.weebot.bot.*
+import com.ampro.weebot.*
 import com.ampro.weebot.commands.developer.CmdSuggestion
 import com.ampro.weebot.commands.developer.Suggestion
 import com.ampro.weebot.database.constants.*
@@ -97,7 +95,7 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
      * @since 2.0
      */
     class WeebotInfo(weebot: Weebot) {
-        val settings: WeebotSettings    = weebot.settings
+        val settings: WeebotSettings = weebot.settings
         val init: OffsetDateTime        = weebot.initDate
         val guildSize: Int              = getGuild(weebot.guildID)?.size ?: -1
         val percentHuman: Double        = run {
@@ -146,7 +144,7 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
      */
     fun track(command: WeebotCommand, weebot: Weebot, user: User, time: OffsetDateTime) {
         if (/*TODO weebot.settings.trackingEnabled &&*/ weebot !is GlobalWeebot) {
-            commandUsage.getOrPut(command.name) { mutableListOf() }
+            commandUsage.getOrPut(command.displayName ?: command.name) { mutableListOf() }
                 .add(CommandUsageEvent(weebot.guildID, WeebotInfo(weebot),
                     UserInfo(user), time))
         }

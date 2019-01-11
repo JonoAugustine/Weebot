@@ -63,7 +63,8 @@ class CmdAbout : WeebotCommand("about", "About", emptyArray(), CAT_GEN,
 
         sBuilder.append(COMMANDS.sortedBy { it.name.toLowerCase() }
             .filterNot { it.isOwnerCommand || it.isHidden }.map {
-                "*${it.name[0].toUpperCase() + it.name.substring(1)}*"
+                "*" + (it.displayName
+                        ?: it.name[0].toUpperCase() + it.name.substring(1)) + "*"
             }.joinToString(", "))
         eb.setDescription(sBuilder.toString())
         sBuilder.setLength(0)
@@ -197,7 +198,7 @@ class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, 
 }
 
 /**
- * Send an [MessageEmbed] giving help with Weebot Commands.
+ * Send an [SelectablePaginator] giving help with Weebot Commands.
  *
  * @author Jonathan Augustine
  * @since 2.0
@@ -261,8 +262,8 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
 
 }
 
-class CmdWatchaDoin : WeebotCommand("watchadoin", "Whatcha Doin'?", arrayOf(), CAT_GEN,
-    "","What am I up to?", cooldown = 0, cooldownScope = USER_SHARD,
+class CmdWatchaDoin : WeebotCommand("watchadoin", "Whatcha Doin'?", arrayOf("whatsup"),
+    CAT_GEN, "","What am I up to?", cooldown = 0, cooldownScope = USER_SHARD,
     guildOnly = true) {
     override fun execute(event: CommandEvent) {
         val game = event.selfMember.game ?: games.random()

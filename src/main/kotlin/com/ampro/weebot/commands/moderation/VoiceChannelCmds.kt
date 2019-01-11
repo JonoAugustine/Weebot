@@ -5,7 +5,7 @@
 package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.WAITER
-import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.ALL
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.PUBLIC
@@ -20,7 +20,7 @@ import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.guild.voice.*
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
@@ -458,9 +458,9 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
             val bot = getWeebotOrNew(event.guild)
             fun newChannel(message: Message, action: () -> Unit) {
                 event.reply("Please enter a name for the new voice channel:") { sm ->
-                    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java, {
-                        if (it.isValidUser(event.guild, setOf(
-                                    event.author))) if (it.message.contentDisplay.length !in 1..99) {
+                    WAITER.waitForEvent(MessageReceivedEvent::class.java, {
+                        if (it.isValidUser(event.guild, event.author, event.channel))
+                            if (it.message.contentDisplay.length !in 1..99) {
                             event.reply("The name must be under 99 characters.")
                             false
                         } else true
@@ -601,9 +601,10 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                                 fun newChannel() = event.reply(
                                     "Please enter a name for the new voice channel:"
                                 ) { sm ->
-                                WAITER.waitForEvent(
-                                    GuildMessageReceivedEvent::class.java, {
-                                        if (it.isValidUser(event.guild, setOf(event.author))) if (it.message.contentDisplay.length !in 1..99) {
+                                WAITER.waitForEvent(MessageReceivedEvent::class.java, {
+                                        if (it.isValidUser(event.guild, event.author,
+                                                    event.channel))
+                                            if (it.message.contentDisplay.length !in 1..99) {
                                             event.reply("The name must be under 99 characters.")
                                             false
                                         } else true
@@ -670,9 +671,9 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                                 }
                             }, NoEntry to { _: Message, _: User ->
                                 event.reply("Enter a number, 0 to 99. 0 = no limit")
-                                WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                                WAITER.waitForEvent(MessageReceivedEvent::class.java,
                                     { e ->
-                                        e.isValidUser(event.guild,setOf(event.author))
+                                        e.isValidUser(event.guild, event.author, event.channel)
                                                 && try {
                                             if (e.message.contentDisplay.toInt() !in 0..99) {
                                                 event.reply(
@@ -696,9 +697,9 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                                     ``{USER}`` will be replaced with the user's name.
                                     For example, ``{USER}'s room`` becomes ``Bill's Room``
                                 """.trimIndent())
-                                WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                                WAITER.waitForEvent(MessageReceivedEvent::class.java,
                                     { e ->
-                                        e.isValidUser(event.guild, setOf(event.author))
+                                        e.isValidUser(event.guild, event.author, event.channel)
                                         && if (e.message.contentDisplay.length !in 1..99) {
                                             event.reply(
                                                 """The name must be under 99 characters (including spaces). Please try again.""")
@@ -732,9 +733,9 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                     """.trimIndent(), true).build(),listOf(
                             NoEntry to { _: Message, _: User ->
                                 event.reply("Enter a number, 0 to 99. 0 = no limit")
-                                WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                                WAITER.waitForEvent(MessageReceivedEvent::class.java,
                                     { e ->
-                                        e.isValidUser(event.guild,setOf(event.author))
+                                        e.isValidUser(event.guild, event.author, event.channel)
                                                 && try {
                                             if (e.message.contentDisplay.toInt() !in 0..99) {
                                                 event.reply(
@@ -763,9 +764,9 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                                     For example, ``{USER}'s room`` becomes ``${event
                                     .member.effectiveName}'s Room``
                                 """.trimIndent())
-                                WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                                WAITER.waitForEvent(MessageReceivedEvent::class.java,
                                     { e ->
-                                        e.isValidUser(event.guild, setOf(event.author))
+                                        e.isValidUser(event.guild, event.author, event.channel)
                                                 && if (e.message.contentDisplay.length !in 1..99) {
                                             event.reply(
                                                 """The name must be under 99 characters (including spaces). Please try again.""")

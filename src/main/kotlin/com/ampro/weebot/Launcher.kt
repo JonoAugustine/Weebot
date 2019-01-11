@@ -4,7 +4,6 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.developer.*
 import com.ampro.weebot.database.*
@@ -22,14 +21,10 @@ import net.dv8tion.jda.core.JDA.Status.SHUTDOWN
 import net.dv8tion.jda.core.entities.Game.*
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
-import twitter4j.*
-import java.lang.Exception
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import javax.security.auth.login.LoginException
 import kotlin.system.measureTimeMillis
-import twitter4j.FilterQuery
-
 
 
 lateinit var SAVE_JOB: Job
@@ -53,7 +48,7 @@ const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try th
         "again later*"
 
 val games = listOf(listening("@Weebot Help"), playing("with wires"),
-    watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.1 Kotlin!"))
+    watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.1.1"))
 
 
 /**

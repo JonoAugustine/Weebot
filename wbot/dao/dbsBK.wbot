@@ -69,7 +69,7 @@
           "totalSeconds": -18000
         }
       },
-      "state": "UNREVIEWED",
+      "state": "ACCEPTED",
       "votes": [],
       "suggestion": "automatically change a message to emoji letters"
     },
@@ -93,7 +93,7 @@
           "totalSeconds": -18000
         }
       },
-      "state": "UNREVIEWED",
+      "state": "ACCEPTED",
       "votes": [],
       "suggestion": "report command fur mini mods to report people to be kicked"
     }
@@ -103,6 +103,7 @@
     "PASSIVE_MAX": 10,
     "PASSIVE_MAX_PREM": 50,
     "userPassives": {
+      "113450820942487552": [],
       "139167730237571072": []
     },
     "REM_MAX": 10,
@@ -295,55 +296,6 @@
       "notePads": [],
       "guildID": 528665849423200276
     },
-    "515264149308309514": {
-      "initDate": {
-        "dateTime": {
-          "date": {
-            "year": 2019,
-            "month": 1,
-            "day": 6
-          },
-          "time": {
-            "hour": 13,
-            "minute": 30,
-            "second": 7,
-            "nano": 885000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "settings": {
-        "prefixs": [
-          "\\",
-          "w!"
-        ],
-        "logchannel": -1,
-        "trackingEnabled": false,
-        "commandRestrictions": {},
-        "guildID": 515264149308309514
-      },
-      "passives": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
-          "DATA": {
-            "dead": false,
-            "inShutdown": false,
-            "userSettings": {},
-            "guildSettings": {
-              "limit": 0,
-              "name": "{USER}\u0027s Channel",
-              "categoryID": 531539888252780544
-            },
-            "baseId": 531539940006428689,
-            "genChannels": {}
-          }
-        }
-      ],
-      "notePads": [],
-      "guildID": 515264149308309514
-    },
     "110373943822540800": {
       "initDate": {
         "dateTime": {
@@ -376,39 +328,6 @@
       "passives": [],
       "notePads": [],
       "guildID": 110373943822540800
-    },
-    "520640811583668255": {
-      "initDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 28
-          },
-          "time": {
-            "hour": 6,
-            "minute": 38,
-            "second": 20,
-            "nano": 459000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "settings": {
-        "prefixs": [
-          "\\",
-          "w!"
-        ],
-        "logchannel": -1,
-        "trackingEnabled": false,
-        "commandRestrictions": {},
-        "guildID": 520640811583668255
-      },
-      "passives": [],
-      "notePads": [],
-      "guildID": 520640811583668255
     },
     "218979588716494848": {
       "initDate": {
@@ -542,39 +461,6 @@
       "notePads": [],
       "guildID": 527270009584746496
     },
-    "531533646616854558": {
-      "initDate": {
-        "dateTime": {
-          "date": {
-            "year": 2019,
-            "month": 1,
-            "day": 6
-          },
-          "time": {
-            "hour": 13,
-            "minute": 9,
-            "second": 37,
-            "nano": 694000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "settings": {
-        "prefixs": [
-          "\\",
-          "w!"
-        ],
-        "logchannel": -1,
-        "trackingEnabled": false,
-        "commandRestrictions": {},
-        "guildID": 531533646616854558
-      },
-      "passives": [],
-      "notePads": [],
-      "guildID": 531533646616854558
-    },
     "522406539798118419": {
       "initDate": {
         "dateTime": {
@@ -607,39 +493,6 @@
       "passives": [],
       "notePads": [],
       "guildID": 522406539798118419
-    },
-    "532236202720493589": {
-      "initDate": {
-        "dateTime": {
-          "date": {
-            "year": 2019,
-            "month": 1,
-            "day": 8
-          },
-          "time": {
-            "hour": 19,
-            "minute": 22,
-            "second": 45,
-            "nano": 902000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "settings": {
-        "prefixs": [
-          "\\",
-          "w!"
-        ],
-        "logchannel": -1,
-        "trackingEnabled": false,
-        "commandRestrictions": {},
-        "guildID": 532236202720493589
-      },
-      "passives": [],
-      "notePads": [],
-      "guildID": 532236202720493589
     },
     "522375095826513931": {
       "initDate": {
@@ -707,6 +560,220 @@
       "notePads": [],
       "guildID": 524778881652359174
     },
+    "450100127256936458": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 27
+          },
+          "time": {
+            "hour": 19,
+            "minute": 39,
+            "second": 45,
+            "nano": 617000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 450100127256936458
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 450100127256936458
+    },
+    "515264149308309514": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 6
+          },
+          "time": {
+            "hour": 13,
+            "minute": 30,
+            "second": 7,
+            "nano": 885000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 515264149308309514
+      },
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
+          "DATA": {
+            "dead": false,
+            "inShutdown": false,
+            "userSettings": {},
+            "guildSettings": {
+              "limit": 0,
+              "name": "{USER}\u0027s Channel",
+              "categoryID": 531539888252780544
+            },
+            "baseId": 531539940006428689,
+            "genChannels": {}
+          }
+        }
+      ],
+      "notePads": [],
+      "guildID": 515264149308309514
+    },
+    "520640811583668255": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 459000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 520640811583668255
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 520640811583668255
+    },
+    "531533646616854558": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 6
+          },
+          "time": {
+            "hour": 13,
+            "minute": 9,
+            "second": 37,
+            "nano": 694000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 531533646616854558
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 531533646616854558
+    },
+    "532236202720493589": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 8
+          },
+          "time": {
+            "hour": 19,
+            "minute": 22,
+            "second": 45,
+            "nano": 902000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 532236202720493589
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 532236202720493589
+    },
+    "391642284694962187": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 10
+          },
+          "time": {
+            "hour": 5,
+            "minute": 4,
+            "second": 24,
+            "nano": 210000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 391642284694962187
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 391642284694962187
+    },
     "139168039634468865": {
       "initDate": {
         "dateTime": {
@@ -750,7 +817,8 @@
             "dead": false,
             "genRoles": {
               "204663874010480641": 531990530377121792,
-              "244833480846999552": 532380350635048960
+              "244833480846999552": 532380350635048960,
+              "530923086401372160": 530923450089472000
             },
             "limit": "PUBLIC"
           }
@@ -766,8 +834,8 @@
               "185063150557593600": 0,
               "277593092561829889": 0,
               "186130584693637131": 2,
-              "139167730237571072": 9,
-              "383656411789524995": 0
+              "139167730237571072": 4,
+              "383656411789524995": 2
             }
           }
         },
@@ -1259,9 +1327,173 @@
                   "totalSeconds": 0
                 }
               }
+            },
+            {
+              "id": "9DPHZ4432U",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 8,
+                    "second": 8,
+                    "nano": 822000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 1,
+              "locked": false,
+              "note": "Should there be an end",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 2,
+                    "second": 39,
+                    "nano": 614000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "id": "N7XABY2M4F",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 10,
+                    "second": 41,
+                    "nano": 282000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 0,
+              "locked": false,
+              "note": "what should the setting be? Future, fantasy, mixture, modern?",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 10,
+                    "second": 41,
+                    "nano": 282000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
             }
           ],
           "editHistory": [
+            {
+              "noteIDs": [
+                "N7XABY2M4F"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 10,
+                    "second": 41,
+                    "nano": 282000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "9DPHZ4432U"
+              ],
+              "editorID": 139167730237571072,
+              "type": "EDIT",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 8,
+                    "second": 8,
+                    "nano": 822000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "9DPHZ4432U"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 2,
+                    "second": 39,
+                    "nano": 614000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
             {
               "noteIDs": [
                 "M691KK46VA"
@@ -1447,39 +1679,6 @@
       "passives": [],
       "notePads": [],
       "guildID": 515978820118118426
-    },
-    "450100127256936458": {
-      "initDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 27
-          },
-          "time": {
-            "hour": 19,
-            "minute": 39,
-            "second": 45,
-            "nano": 617000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "settings": {
-        "prefixs": [
-          "\\",
-          "w!"
-        ],
-        "logchannel": -1,
-        "trackingEnabled": false,
-        "commandRestrictions": {},
-        "guildID": 450100127256936458
-      },
-      "passives": [],
-      "notePads": [],
-      "guildID": 450100127256936458
     },
     "339842458458521634": {
       "initDate": {

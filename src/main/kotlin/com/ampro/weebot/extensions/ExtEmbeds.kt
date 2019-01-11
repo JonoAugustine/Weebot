@@ -36,6 +36,7 @@ const val EMBED_MAX_AUTHOR = 256
 var weebotAvatar= "https://i1.sndcdn.com/avatars-000308662917-0cbsjo-t200x200.jpg"
 
 val STD_GREEN = Color(0x31FF00)
+val STD_RED   = Color(0xFF2400)
 
 /**
  * @return EmbedBuilder with the standard green, Author set to "Weebot"

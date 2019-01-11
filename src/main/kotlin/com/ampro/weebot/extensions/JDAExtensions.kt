@@ -150,29 +150,22 @@ fun CommandClientBuilder.addCommands(commands: Iterable<WeebotCommand>)
 
 infix fun User.`is`(id: Long) = this.idLong == id
 
-fun MessageReceivedEvent.isValidUser(guild: Guild?, users: Set<User> = emptySet(),
-                                     roles: Set<Role> = emptySet())
-        : Boolean {
-    return when {
-        author.isBot -> false
-        guild != null && !isFromType(TEXT) -> false
-        this.guild?.id ?: -2 != guild?.id ?: -2 -> false
-        users.isEmpty() && roles.isEmpty() -> true
-        users.contains(author) -> true
-        !(guild?.isMember(author) ?: true) -> false
-        else -> guild?.getMember(author)?.roles?.has{ roles.contains(it) } ?: true
-    }
-}
 
-fun GuildMessageReceivedEvent.isValidUser(guild: Guild, users: Set<User> = emptySet(),
-                                          roles: List<Role> = emptyList()) : Boolean {
-    return when {
-        author.isBot -> false
-        users.isEmpty() && roles.isEmpty() -> true
-        users.contains(author) -> true
-        !guild.isMember(author) -> false
-        else -> guild.getMember(author).roles.stream().anyMatch { roles.contains(it) }
-    }
+fun MessageReceivedEvent.isValidUser(guild: Guild?, user: User,
+                                     channel: MessageChannel? = null)
+        = this.isValidUser(guild, setOf(user), emptySet(), channel)
+
+fun MessageReceivedEvent.isValidUser(guild: Guild?, users: Set<User> = emptySet(),
+                                     roles: Set<Role> = emptySet(),
+                                     channel: MessageChannel? = null) = when {
+    author.isBot -> false
+    channel != null && channel.idLong != this.channel.idLong -> false
+    guild != null && !isFromType(TEXT) -> false
+    this.guild?.id ?: -2 != guild?.id ?: -2 -> false
+    users.isEmpty() && roles.isEmpty() -> true
+    users.contains(author) -> true
+    !(guild?.isMember(author) ?: true) -> false
+    else -> guild?.getMember(author)?.roles?.has { roles.contains(it) } ?: true
 }
 
 fun GuildMessageReactionAddEvent.isValidUser(roles: List<Role> = emptyList(),

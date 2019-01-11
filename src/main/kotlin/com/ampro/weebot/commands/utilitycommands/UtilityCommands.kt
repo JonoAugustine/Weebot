@@ -5,7 +5,7 @@
 package com.ampro.weebot.commands.utilitycommands
 
 import com.ampro.weebot.*
-import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.*

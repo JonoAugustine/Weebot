@@ -1,6 +1,6 @@
 package com.ampro.weebot.commands.social
 
-import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_SOC
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.extensions.WeebotCommand

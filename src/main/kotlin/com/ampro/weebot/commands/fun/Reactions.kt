@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.commands.`fun`
 
-import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.STAT

@@ -5,7 +5,6 @@
 package com.ampro.weebot.commands.utilitycommands
 
 import com.ampro.weebot.*
-import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.utilitycommands.NotePad.Note
@@ -27,7 +26,6 @@ import net.dv8tion.jda.core.Permission.MESSAGE_ATTACH_FILES
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import net.dv8tion.jda.core.exceptions.PermissionException
 import java.io.*
 import java.time.OffsetDateTime
@@ -156,13 +154,13 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             .addField("Guide", "To Edit: $Pencil\nTo Lock: $Lock\nTo Unlock: $Unlock" +
                     "\nTo delete: $X_Red", true)
 
-        fun toSelectableEmbed(userSet: Set<User>, guild: Guild, notePad: NotePad,
+        fun toSelectableEmbed(user: User, guild: Guild, notePad: NotePad,
                               finalAction: (Message) -> Unit) : SelectableEmbed {
-            return SelectableEmbed(userSet, messageEmbed = toEmbed(guild).build(),
-                options = listOf(Pencil to { m1, u ->
+            return SelectableEmbed(user, false, toEmbed(guild).build(),
+                listOf(Pencil to { m1, u ->
                     m1.textChannel.sendMessage("To Edit, send the new note:").queue {
-                        WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
-                            { e -> e.isValidUser(users = userSet, guild = e.guild) },
+                        WAITER.waitForEvent(MessageReceivedEvent::class.java,
+                            { e -> e.isValidUser(guild, user) },
                             { e ->
                                 if (this.locked) {
                                     return@waitForEvent e.channel
@@ -170,8 +168,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                                 }
                                 notePad.editNote(this, e.message.contentDisplay, e.author,
                                     e.message.creationTime)
-                                val nm = toSelectableEmbed(userSet, guild, notePad,
-                                    finalAction)
+                                val nm = toSelectableEmbed(user, guild, notePad,finalAction)
                                 try {
                                     nm.display(m1)
                                 } catch (ex: Exception) {
@@ -190,7 +187,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                     if ((u.idLong == authorID || guild.getMember(u).hasPerm(ADMINISTRATOR))
                             && !locked) {
                         this.locked = true
-                        val nm = toSelectableEmbed(userSet, guild, notePad, finalAction)
+                        val nm = toSelectableEmbed(user, guild, notePad, finalAction)
                         try {
                             nm.display(m)
                         } catch (ex: Exception) {
@@ -201,7 +198,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                     if ((u.idLong == authorID || guild.getMember(u).hasPerm(ADMINISTRATOR))
                             && locked) {
                         this.locked = false
-                        val nm = toSelectableEmbed(userSet, guild, notePad, finalAction)
+                        val nm = toSelectableEmbed(user, guild, notePad, finalAction)
                         try {
                             nm.display(m)
                         } catch (ex: Exception) {
@@ -210,7 +207,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                     } else m.channel.sendMessage("*You do not have permission.*")
                 }, X_Red to { m, u ->
                         if (!this.locked || guild.getMember(u)?.hasPerm(ADMINISTRATOR)!!) {
-                            strdButtonMenu.setUsers(userSet.first())
+                            strdButtonMenu.setUsers(user)
                                 .setText("Confirmation").setDescription("""
                                 *Are you sure you want to delete note: ${this.id}?*
                                 ${Fire.unicode} = YES,* ***ignore this to cancel***
@@ -224,8 +221,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                                                 .queue()
                                             return@setAction
                                         } else {
-                                            notePad.deleteNote(this, userSet.first(),
-                                                m.creationTime)
+                                            notePad.deleteNote(this, user, m.creationTime)
                                             try {
                                                 m.delete().queueAfter(250, MILLISECONDS)
                                                 m.channel.sendMessage("*Note deleted.*")
@@ -287,7 +283,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
     fun send(event: CommandEvent, message: Message?, pads: List<NotePad>) {
         val guild = event.guild
         val mem = event.member
-        val userSet = setOf(mem.user)
+
         val nameOrUnknown: (Long) -> String = {
             guild.getMemberById(it)?.effectiveName ?: guild.getRoleById(it)?.name
             ?: guild.getTextChannelById(it)?.name ?: "Unknown"
@@ -361,7 +357,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
         val items = notes.map { "(${it.id}) ${it.note}" to { i: Int, m: Message ->
                 try { m.clearReactions().queueAfter(250, MILLISECONDS)}
                 catch (e: PermissionException) {}
-                notes[i].toSelectableEmbed(userSet, guild, this) {
+                notes[i].toSelectableEmbed(event.author, guild, this) {
                     //final
                     try {
                         send(event, m, pads)
@@ -372,7 +368,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                 }.display(m.channel)
             }
         }
-        val notePad = SelectablePaginator(users = userSet, title = this.name,
+        val notePad = SelectablePaginator(setOf(event.author), title = this.name,
                 itemsPerPage = 10, items = items, fieldList = fList,
             exitAction = { it.delete().queueAfter(250, MILLISECONDS) }
         )
@@ -1015,8 +1011,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                         "Are you sure you want to clear NotePad(s): ${
                         notePads.joinToString(", ") { "${it.name} (${it.id})"
                         }}? *(say ``yes`` or ``no``)*")
-                    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
-                        { it.isValidUser(event.guild, setOf(event.author)) }, {
+                    WAITER.waitForEvent(MessageReceivedEvent::class.java,
+                        { it.isValidUser(event.guild, event.author, event.channel) }, {
                             if (it.message.contentDisplay.matches(REG_YES)) {
                                 notePads.forEach { np ->
                                     np.clear(event.author, event.creationTime)
@@ -1068,8 +1064,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                             ", ") {
                             "${it.name} (${it.id})"
                         }}*? *(say ``yes`` or ``no``)*")
-                    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
-                        { it.isValidUser(event.guild, setOf(event.author)) },
+                    WAITER.waitForEvent(MessageReceivedEvent::class.java,
+                        { it.isValidUser(event.guild, event.author, event.channel) },
                         {
                             if (it.message.contentDisplay.matches(REG_YES)) {
                                 if (pads.removeAll(notePads)) {
@@ -1282,8 +1278,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                         "Are you sure you want to clear NotePad(s): ${
                         cw.joinToString(", ") { "${it.name} (${it.id})"
                         }}? *(say ``yes`` or ``no``)*")
-                    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
-                        { it.isValidUser(event.guild, setOf(event.author)) }, {
+                    WAITER.waitForEvent(MessageReceivedEvent::class.java,
+                        { it.isValidUser(event.guild, event.author, event.channel) }, {
                             if (it.message.contentDisplay.matches(REG_YES)) {
                                 cw.forEach { np ->
                                     np.clear(event.author, event.creationTime)
@@ -1322,9 +1318,9 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             }
             event.reply("*Are you sure you want to delete NotePad(s):* ${
             it.joinToString(", ") { "${it.name} (${it.id})" }}? *(say ``yes`` or ``no``)*")
-            WAITER.waitForEvent(GuildMessageReceivedEvent::class.java, { e ->
-                e.isValidUser(users = setOf(event.author), guild = event.guild)
-            }, { event_2 ->
+            WAITER.waitForEvent(MessageReceivedEvent::class.java,
+                { it.isValidUser(event.guild, event.author, event.channel) },
+            { event_2 ->
                 if (event_2.message.contentDisplay.matches(Regex("(?i)y+e+s+"))) {
                     if (getWeebotOrNew(event.guild).notePads.removeAll(it)) {
                         event.reply("*NotePad(s) deleted.* $heavy_check_mark")
@@ -1402,8 +1398,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                     .queue()
             }) {
         event.reply("*Please provide the ID(s) of the NotePad(s):*")
-        WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
-            { e -> e.isValidUser(event.guild, setOf(event.author)) }, { e ->
+        WAITER.waitForEvent(MessageReceivedEvent::class.java,
+            { e -> e.isValidUser(event.guild, event.author, event.channel) }, { e ->
                 val IDs = e.message.contentDisplay.toUpperCase().split(Regex("\\s+"))
                 val notePads = viewable.filter { IDs.contains(it.id) }
                 when {
@@ -1425,8 +1421,8 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
     private fun getNoteByIdDialogue(event: CommandEvent, notes: List<Note>,
                             action: (List<Note>) -> Unit, timeout: () -> Unit = {}) {
         event.reply("Please provide the ID(s) of the Note(s):")
-        WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
-            { e -> e.isValidUser(users = setOf(event.author), guild = event.guild) }, { e ->
+        WAITER.waitForEvent(MessageReceivedEvent::class.java,
+            { e -> e.isValidUser(event.guild, event.author, event.channel) }, { e ->
                 val IDs = e.message.contentDisplay.split(Regex("\\s+"))
                 val notes_2 = notes.filter { IDs.contains(it.id) }
                 when {

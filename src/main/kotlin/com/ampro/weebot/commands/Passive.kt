@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.commands
 
-import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.Weebot
 import net.dv8tion.jda.core.events.Event
 
 /**

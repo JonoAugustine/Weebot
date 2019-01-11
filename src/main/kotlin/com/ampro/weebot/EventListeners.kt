@@ -4,7 +4,6 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.Emoji.X_Red
@@ -12,7 +11,6 @@ import com.ampro.weebot.util.Emoji.heavy_check_mark
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.events.channel.priv.PrivateChannelCreateEvent
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.events.guild.voice.*

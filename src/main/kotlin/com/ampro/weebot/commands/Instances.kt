@@ -49,6 +49,9 @@ val CMD_SELFDESTRUCT    = CmdSelfDestruct()
  ********************************/
 
 val CMD_SETTINGS        = CmdSettings()
+val CMD_WELCOME         = CmdWelcomeMsg()
+val CMD_MODERATION      = CmdModeration()
+val CMD_REPORT          = CmdReport()
 val CMD_PURGE           = CmdPurge()
 val CMD_CHATLOCK        = CmdChatLock()
 val CMD_TASKS           = CmdTaskManager()
@@ -75,8 +78,9 @@ val CMD_EMOJIFY         = CmdEmojify()
 
 
 val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
-        CMD_PING, CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT, CMD_WATCHADOIN,
-        CMD_SETTINGS, CMD_PURGE, CMD_SELFDESTRUCT, CMD_TASKS, CMD_CHATLOCK,
+        CMD_PING, CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT, CMD_WATCHADOIN, CMD_WELCOME,
+        CMD_SETTINGS, CMD_PURGE, CMD_MODERATION, CMD_REPORT, CMD_TASKS, CMD_CHATLOCK,
+        CMD_SELFDESTRUCT,
         CMD_REGEX, CMD_EMBED,
         CMD_OHC, CMD_REM, CMD_NOTE,
         CMD_VCR, CMD_VCGEN,

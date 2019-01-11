@@ -5,8 +5,8 @@
 package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.WAITER
-import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.bot.WeebotSettings
+import com.ampro.weebot.Weebot
+import com.ampro.weebot.WeebotSettings
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
@@ -19,6 +19,7 @@ import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.awt.Color
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -161,10 +162,10 @@ private class CmdSetPrefix : WeebotCommand("prefix", null,emptyArray(), CAT_MOD,
                         A to { _, _ ->
                             event.reply("What would you like to add? " +
                                     "*(must be under 4 characters, e.g. pw!, w!, \\)*")
-                            WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                            WAITER.waitForEvent(MessageReceivedEvent::class.java,
                                 { event_2 ->
-                                    event_2.isValidUser(users = setOf(event.author),
-                                        guild = event.guild)
+                                    event_2.isValidUser(event.guild, setOf(event.author),
+                                        channel = event.channel)
                                 }, { event_2 ->
                                     if (event_2.message.contentDisplay.length > 3) {
                                         event.reply("*That prefix is too long*")
@@ -179,7 +180,7 @@ private class CmdSetPrefix : WeebotCommand("prefix", null,emptyArray(), CAT_MOD,
                         }, C to { _, _ ->
                             event.reply("What would you like to change it to? " +
                                     "*(must be under 4 characters, e.g. pw!, w!, \\)*")
-                            WAITER.waitForEvent(GuildMessageReceivedEvent::class.java,
+                            WAITER.waitForEvent(MessageReceivedEvent::class.java,
                                 { event_2 ->
                                     event_2.isValidUser(users = setOf(event.author),
                                         guild = event.guild)
@@ -242,8 +243,9 @@ private class CmdSetLogChannel : WeebotCommand("log",null,
                     """.trimIndent())
                     .build(), listOf(C to { _, _ ->
                     event.reply("Which channel should I send log messages to?")
-                    WAITER.waitForEvent(GuildMessageReceivedEvent::class.java, {
-                        it.isValidUser(users = setOf(event.author), guild = event.guild)
+                    WAITER.waitForEvent(MessageReceivedEvent::class.java, {
+                        it.isValidUser(event.guild, setOf(event.author),
+                            channel = event.channel)
                     }, { event_2 ->
                         val channels_2 = event_2.message.mentionedChannels
                         if (channels_2.isEmpty() || channels_2.size > 1) event.reply(
@@ -334,8 +336,8 @@ private class CmdLock : WeebotCommand("lock", null,arrayOf("lockto", "open"), CA
         if (channels.isEmpty()) {
             event.reply("No channels were mentioned, do you want to open this command " +
                     "to all TextChannels? (``yes`` or ``no``)")
-            WAITER.waitForEvent(GuildMessageReceivedEvent::class.java, {
-                it.isValidUser(event.guild, setOf(event.author))
+            WAITER.waitForEvent(MessageReceivedEvent::class.java, {
+                it.isValidUser(event.guild, setOf(event.author), channel = event.channel)
                         && it.message.contentDisplay.matchesAny(REG_YES, REG_NO)
             }, {
                 if (it.message.contentDisplay.matches(REG_YES)) {
@@ -380,8 +382,8 @@ private class CmdBlock : WeebotCommand("block", null,emptyArray(), CAT_MOD,
         if (channels.isEmpty()) {
             event.reply("No channels were mentioned, do you want to block this command" +
                     " from ${event.guild.name}? (``yes`` or ``no``)")
-            WAITER.waitForEvent(GuildMessageReceivedEvent::class.java, {
-                it.isValidUser(event.guild, setOf(event.author))
+            WAITER.waitForEvent(MessageReceivedEvent::class.java, {
+                it.isValidUser(event.guild, setOf(event.author), channel = event.channel)
                         && it.message.contentDisplay.matchesAny(REG_YES, REG_NO)
             }, {
                 if (it.message.contentDisplay.matches(REG_YES)) {
