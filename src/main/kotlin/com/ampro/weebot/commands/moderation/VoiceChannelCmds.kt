@@ -21,6 +21,7 @@ import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.guild.voice.*
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
@@ -264,7 +265,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
 }
 
 /* *******************
-    Personal Auto VC
+    Personal Auto VCGen
  *********************/
 
 /**
@@ -338,7 +339,10 @@ class VCGenerator(baseChannel: Long) : IPassive {
             clean(guild)
             var r = false
             if (channel.idLong == baseId
-                    && !genChannels.containsKey(member.user.idLong)) {
+                    && !genChannels.containsKey(member.user.idLong)
+                    && ChronoUnit.MINUTES.between(
+                        channel.creationTime.atZoneSameInstant(NOW().offset), NOW()) > 0) {
+
                 val base = guild.getVoiceChannelById(baseId)
                 val settings = userSettings
                     .getOrDefault(member.user.idLong, guildSettings)
@@ -583,7 +587,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
 
     /** Set Server Defaults */
     internal class SubCmdServerSettings : WeebotCommand("def",null,
-        arrayOf("serverdefaults", "sdef", "servdef"), CAT_MOD, "", "",
+        arrayOf("serverdefaults", "sdef"), CAT_MOD, "", "",
         userPerms = arrayOf(MANAGE_CHANNEL), guildOnly = true, cooldown = 30) {
         override fun execute(event: CommandEvent) {
             getWeebotOrNew(event.guild).also { bot ->
@@ -904,6 +908,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                 ``temp [-L userLimit] [-c category] [name]``
                 *Must have ${MANAGE_CHANNEL.getName()} permission.*
             """.trimIndent(), true)
+            .addField("There is a 1 minute cooldown on auto-gen channels", "", false)
             .build()
     }
 }

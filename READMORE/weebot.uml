@@ -1,0 +1,892 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Diagram>
+  <ID>JAVA</ID>
+  <OriginalElement>com.ampro.weebot</OriginalElement>
+  <nodes>
+    <node x="4346.4093954248365" y="3198.0">com.ampro.weebot.commands.social.GuildSocialSettings.ProfileSettings</node>
+    <node x="3080.0" y="5587.0">com.ampro.weebot.commands.utilitycommands.CmdNotePadKt</node>
+    <node x="12954.865196078432" y="2657.5">com.ampro.weebot.commands.moderation.CmdVoiceChannelRole</node>
+    <node x="6093.7843954248365" y="2669.0">com.ampro.weebot.commands.miscellaneous.PingCommand</node>
+    <node x="8353.0" y="5587.0">com.ampro.weebot.EventListenersKt</node>
+    <node x="11786.865196078432" y="2657.5">com.ampro.weebot.commands.fun.CmdEmojify</node>
+    <node x="7916.999999999999" y="4453.0">com.ampro.weebot.commands.fun.games.cardgame.BlackCard.Companion</node>
+    <node x="445.0" y="4836.0">com.ampro.weebot.commands.utilitycommands.NotePad.Note</node>
+    <node x="10316.0" y="3852.0">com.ampro.weebot.commands.fun.games.cardgame.CAHDeck</node>
+    <node x="10519.865196078432" y="2646.0">com.ampro.weebot.commands.progammer.CmdEmbedMaker</node>
+    <node x="11548.365196078432" y="3254.0">com.ampro.weebot.commands.moderation.CmdSetLogChannel.Companion</node>
+    <node x="7285.0" y="4352.0">com.ampro.weebot.commands.developer.Suggestion.Companion</node>
+    <node x="7304.365196078432" y="2669.0">com.ampro.weebot.commands.fun.CmdThis</node>
+    <node x="9536.865196078432" y="2669.0">com.ampro.weebot.commands.moderation.CmdTaskManager</node>
+    <node x="9131.708333333332" y="3254.0">com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdUserDefaults</node>
+    <node x="7260.615196078432" y="3655.0">com.ampro.weebot.commands.fun.CmdThis.ThisReactor.Companion</node>
+    <node x="5315.9093954248365" y="3577.0">com.ampro.weebot.commands.moderation.VCGenerator.Settings</node>
+    <node x="2173.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdWriteTo</node>
+    <node x="6123.4093954248365" y="3132.0">com.ampro.weebot.commands.moderation.GateKeeper</node>
+    <node x="8671.708333333332" y="3254.0">com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdEnable</node>
+    <node x="5252.0" y="3852.0">com.ampro.weebot.extensions.Restriction</node>
+    <node x="10896.0" y="3852.0">com.ampro.weebot.database.Dao</node>
+    <node x="158.0" y="5358.0">com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit.EditType</node>
+    <node x="10993.865196078432" y="2646.5">com.ampro.weebot.commands.moderation.CmdSetTracking</node>
+    <node x="4012.458333333333" y="2481.0">com.ampro.weebot.commands.social.GuildSocialSettings</node>
+    <node x="2638.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdInsert</node>
+    <node x="2309.0" y="5587.0">com.ampro.weebot.commands.social.UserProfile</node>
+    <node x="5079.0" y="5587.0">com.ampro.weebot.commands.fun.games.WinCondition</node>
+    <node x="1320.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdDeleteNote</node>
+    <node x="8183.999999999999" y="3852.0">com.ampro.weebot.commands.fun.games.cardgame.Card</node>
+    <node x="6007.0" y="4286.5">com.ampro.weebot.database.Statistics.WeebotInfo</node>
+    <node x="11462.865196078432" y="2635.5">com.ampro.weebot.commands.moderation.CmdSetLogChannel</node>
+    <node x="9254.0" y="3852.0">com.ampro.weebot.database.constants.CredentialsKt</node>
+    <node x="12293.0" y="3852.0">com.ampro.weebot.extensions.ExtEmbedsKt</node>
+    <node x="12690.865196078432" y="3242.5">com.ampro.weebot.commands.utilitycommands.CmdReminder.Companion</node>
+    <node x="3347.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdLockTo</node>
+    <node x="10749.865196078432" y="3254.0">com.ampro.weebot.commands.fun.CmdHelloThere.Companion</node>
+    <node x="2806.0" y="2669.0">com.ampro.weebot.commands.SubCmdAboutUser</node>
+    <node x="7094.4093954248365" y="1985.0">com.ampro.weebot.extensions.WeebotCommand</node>
+    <node x="11960.0" y="3852.0">com.ampro.weebot.commands.CategoriesKt</node>
+    <node x="6783.7843954248365" y="2669.0">com.ampro.weebot.commands.moderation.CmdWelcomeMsg</node>
+    <node x="8395.5" y="4475.5">com.ampro.weebot.commands.fun.games.cardgame.Card.InvalidCardException.Companion</node>
+    <node x="4562.4093954248365" y="3132.0">com.ampro.weebot.commands.social.GuildSocialSettings.CurrencySettings</node>
+    <node x="6553.7843954248365" y="2669.0">com.ampro.weebot.commands.CmdAbout</node>
+    <node x="9305.865196078432" y="2669.0">com.ampro.weebot.commands.social.CmdSocial</node>
+    <node x="2849.0" y="5587.0">com.ampro.weebot.commands.fun.games.cardgame.CahGuildInfo</node>
+    <node x="9767.865196078432" y="2437.0">com.ampro.weebot.extensions.WeebotCommand.HelpBiConsumerBuilder</node>
+    <node x="13184.865196078432" y="2669.0">com.ampro.weebot.commands.moderation.CmdPurge</node>
+    <node x="5868.5" y="3852.0">com.ampro.weebot.database.Statistics</node>
+    <node x="0.0" y="4814.0">com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit</node>
+    <node x="7828.708333333333" y="3254.0">com.ampro.weebot.commands.fun.CmdReddicord.SubCmdReset</node>
+    <node x="3701.0" y="5587.0">com.ampro.weebot.EventDispatcher</node>
+    <node x="5310.0" y="5587.0">com.ampro.weebot.commands.moderation.GateKeeperKt</node>
+    <node x="8480.208333333332" y="2646.5">com.ampro.weebot.commands.moderation.CmdSetPrefix</node>
+    <node x="13414.865196078432" y="2669.0">com.ampro.weebot.commands.developer.CmdShutdown</node>
+    <node x="5008.6593954248365" y="2646.5">com.ampro.weebot.commands.moderation.CmdChatLock</node>
+    <node x="12261.865196078432" y="2669.0">com.ampro.weebot.commands.fun.SubCmdLeaderBoard</node>
+    <node x="6207.0" y="4286.0">com.ampro.weebot.database.Statistics.UserInfo</node>
+    <node x="5580.0" y="5587.0">com.ampro.weebot.extensions.ExtCommandsKt</node>
+    <node x="12533.865196078432" y="2580.0">com.ampro.weebot.commands.utilitycommands.CmdReminder</node>
+    <node x="7102.5" y="4520.0">com.ampro.weebot.commands.developer.Suggestion.State.Companion</node>
+    <node x="5037.4093954248365" y="3644.0">com.ampro.weebot.commands.moderation.VCRoleManager.Limit</node>
+    <node x="7085.0" y="4308.0">com.ampro.weebot.commands.developer.Suggestion.State</node>
+    <node x="386.0" y="335.0">com.ampro.weebot.commands.fun.games.cardgame.CAHPlayer</node>
+    <node x="11223.865196078432" y="2635.0">com.ampro.weebot.commands.developer.CmdGuildList</node>
+    <node x="7873.999999999999" y="3953.0">com.ampro.weebot.commands.fun.games.cardgame.BlackCard</node>
+    <node x="6359.0" y="5587.0">com.ampro.weebot.commands.moderation.VoiceChannelCmdsKt</node>
+    <node x="7168.615196078432" y="3187.0">com.ampro.weebot.commands.fun.CmdThis.ThisReactor</node>
+    <node x="6323.7843954248365" y="2669.0">com.ampro.weebot.commands.CmdHelp</node>
+    <node x="6502.4093954248365" y="3121.0">com.ampro.weebot.commands.fun.Reddicord</node>
+    <node x="0.0" y="2669.0">com.ampro.weebot.commands.developer.CmdSuggestion</node>
+    <node x="0.0" y="236.0">com.ampro.weebot.commands.fun.games.Game</node>
+    <node x="0.0" y="5587.0">com.ampro.weebot.extensions.ExtGeneralKt</node>
+    <node x="10289.865196078432" y="2646.5">com.ampro.weebot.commands.moderation.CmdBlock</node>
+    <node x="8122.999999999999" y="4019.0">com.ampro.weebot.commands.fun.games.cardgame.WhiteCard</node>
+    <node x="281.75" y="3852.0">com.ampro.weebot.commands.utilitycommands.NotePad</node>
+    <node x="4778.6593954248365" y="2669.0">com.ampro.weebot.commands.developer.CmdSeeSuggestions</node>
+    <node x="1090.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdToFile</node>
+    <node x="11032.365196078432" y="3254.0">com.ampro.weebot.commands.moderation.CmdSetTracking.Companion</node>
+    <node x="10749.865196078432" y="2646.5">com.ampro.weebot.commands.fun.CmdHelloThere</node>
+    <node x="9036.015196078431" y="2669.0">com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator</node>
+    <node x="8518.708333333332" y="3254.0">com.ampro.weebot.commands.moderation.CmdSetPrefix.Companion</node>
+    <node x="2571.0" y="5587.0">com.ampro.weebot.database.constants.DeveloperAccessKt</node>
+    <node x="9613.0" y="3852.0">com.ampro.weebot.extensions.JDAExtensionsKt</node>
+    <node x="3782.458333333333" y="2669.0">com.ampro.weebot.commands.CmdInviteLink</node>
+    <node x="4191.0" y="5587.0">com.ampro.weebot.commands.fun.games.LeaderBoard</node>
+    <node x="322.45238095238096" y="736.0">com.ampro.weebot.commands.fun.games.cardgame.CardGame</node>
+    <node x="1122.0" y="3852.0">com.ampro.weebot.extensions.SelectablePaginator</node>
+    <node x="1383.0" y="2503.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad</node>
+    <node x="8250.208333333332" y="2669.0">com.ampro.weebot.commands.moderation.CmdSelfDestruct</node>
+    <node x="8576.0" y="5587.0">com.ampro.weebot.util</node>
+    <node x="8058.708333333333" y="3254.0">com.ampro.weebot.commands.moderation.CmdSetName.Companion</node>
+    <node x="10328.365196078432" y="3254.0">com.ampro.weebot.commands.moderation.CmdBlock.Companion</node>
+    <node x="5907.4093954248365" y="3220.0">com.ampro.weebot.commands.Brokerage</node>
+    <node x="12947.865196078432" y="3254.0">com.ampro.weebot.commands.moderation.CmdVoiceChannelRole.Companion</node>
+    <node x="8901.708333333332" y="3254.0">com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdServerSettings</node>
+    <node x="4829.5" y="5733.0">com.ampro.weebot.commands.fun.games.ModificationWhileRunningException.Companion</node>
+    <node x="12435.865196078432" y="3055.0">com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder</node>
+    <node x="7225.0" y="5587.0">com.ampro.weebot.commands.CmdAboutKt</node>
+    <node x="2408.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdEdit</node>
+    <node x="4937.4093954248365" y="3143.0">com.ampro.weebot.commands.moderation.VCRoleManager</node>
+    <node x="12727.0" y="3852.0">com.ampro.weebot.commands.developer.SuggestionCommandsKt</node>
+    <node x="5247.4093954248365" y="3077.0">com.ampro.weebot.commands.moderation.VCGenerator</node>
+    <node x="5633.4093954248365" y="3121.0">com.ampro.weebot.commands.utilitycommands.OutHouse</node>
+    <node x="3577.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdLockFrom</node>
+    <node x="5662.4093954248365" y="2669.5">com.ampro.weebot.commands.IPassive</node>
+    <node x="13644.865196078432" y="2646.5">com.ampro.weebot.commands.moderation.CmdLock</node>
+    <node x="11451.0" y="3852.0">com.ampro.weebot.database.DatabaseKt</node>
+    <node x="6577.5" y="4308.0">com.ampro.weebot.bot.WeebotSettings.CommandRestriction</node>
+    <node x="2341.0" y="2669.0">com.ampro.weebot.commands.fun.games.cardgame.CmdCardsAgainstHumanity</node>
+    <node x="4829.0" y="4440.0">com.ampro.weebot.bot.GlobalWeebot</node>
+    <node x="3818.9920479302864" y="3198.5">com.ampro.weebot.commands.social.GuildSocialSettings.LevelSettings</node>
+    <node x="1920.0" y="4990.0">com.ampro.weebot.extensions.SelectablePaginator.Companion</node>
+    <node x="7175.0" y="3852.0">com.ampro.weebot.commands.developer.Suggestion</node>
+    <node x="2905.0" y="3852.0">com.ampro.weebot.commands.InstancesKt</node>
+    <node x="8606.0" y="3852.0">com.ampro.weebot.commands.fun.games.cardgame.CmdCardsAgainstHumanityKt</node>
+    <node x="3036.0" y="2658.0">com.ampro.weebot.commands.progammer.CmdRegexTest</node>
+    <node x="4854.5" y="3852.0">com.ampro.weebot.bot.Weebot</node>
+    <node x="3962.5" y="4814.0">com.ampro.weebot.extensions.ButtonPaginator.Companion</node>
+    <node x="7448.0" y="5587.0">com.ampro.weebot.commands.developer.TwitchKt</node>
+    <node x="922.0" y="2669.0">com.ampro.weebot.commands.utilitycommands.CmdOutHouse</node>
+    <node x="8355.0" y="4130.0">com.ampro.weebot.commands.fun.games.cardgame.Card.InvalidCardException</node>
+    <node x="13683.365196078432" y="3254.0">com.ampro.weebot.commands.moderation.CmdLock.Companion</node>
+    <node x="168.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdMake</node>
+    <node x="7764.365196078432" y="2658.0">com.ampro.weebot.commands.developer.CmdDevSuggestions</node>
+    <node x="327.45238095238096" y="1866.0">com.ampro.weebot.commands.fun.games.cardgame.CardsAgainstHumanity.Companion</node>
+    <node x="3472.0" y="5587.0">com.ampro.weebot.database.PremiumUser</node>
+    <node x="859.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdClear</node>
+    <node x="1666.5" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.Companion</node>
+    <node x="7510.0" y="3852.0">com.ampro.weebot.LauncherKt</node>
+    <node x="3283.0" y="3852.0">com.ampro.weebot.extensions.ButtonPaginator</node>
+    <node x="2110.0" y="2669.0">com.ampro.weebot.commands.SubCmdAboutGuild</node>
+    <node x="229.47619047619045" y="0.0">com.ampro.weebot.commands.fun.games.Player</node>
+    <node x="8127.0" y="5587.0">com.ampro.weebot.commands.StockMarketKt</node>
+    <node x="6192.0" y="5587.0">com.ampro.weebot.commands.fun.games.cardgame.GameState</node>
+    <node x="4519.0" y="5587.0">com.ampro.weebot.commands.fun.ReddicordKt</node>
+    <node x="8020.208333333333" y="2646.5">com.ampro.weebot.commands.moderation.CmdSetName</node>
+    <node x="9599.865196078432" y="3254.0">com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCedManualTemp</node>
+    <node x="5554.0" y="4198.0">com.ampro.weebot.database.Statistics.CommandUsageEvent</node>
+    <node x="7534.365196078432" y="2669.0">com.ampro.weebot.commands.fun.CmdReddicord</node>
+    <node x="2031.0" y="5587.0">com.ampro.weebot.commands.social.LevelRank</node>
+    <node x="12031.865196078432" y="2613.0">com.ampro.weebot.commands.fun.CmdCatFact</node>
+    <node x="12460.365196078432" y="3655.0">com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder.Companion</node>
+    <node x="6428.0" y="3852.0">com.ampro.weebot.bot.WeebotSettings</node>
+    <node x="5329.5" y="4594.0">com.ampro.weebot.extensions.Restriction.Status</node>
+    <node x="4750.0" y="5587.0">com.ampro.weebot.commands.fun.games.ModificationWhileRunningException</node>
+    <node x="6015.0" y="5587.0">com.ampro.weebot.extensions.MentionType</node>
+    <node x="9956.365196078432" y="3254.0">com.ampro.weebot.extensions.WeebotCommand.HelpBiConsumerBuilder.Companion</node>
+    <node x="9368.865196078432" y="3254.0">com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdDisable</node>
+    <node x="155.45238095238096" y="860.0">com.ampro.weebot.commands.fun.games.cardgame.CardsAgainstHumanity</node>
+    <node x="12049.365196078432" y="3231.5">com.ampro.weebot.commands.fun.CmdCatFact.KatFact</node>
+    <node x="697.0" y="5587.0">com.ampro.weebot.extensions.SelectableEmbed</node>
+    <node x="231.0" y="2669.0">com.ampro.weebot.commands.developer.CmdStatsView</node>
+    <node x="461.0" y="2669.0">com.ampro.weebot.commands.moderation.CmdSettings</node>
+    <node x="7754.0" y="5587.0">com.ampro.weebot.commands.developer.DevOnlyCommandsKt</node>
+    <node x="629.0" y="3254.0">com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdDeletePad</node>
+  </nodes>
+  <notes />
+  <edges>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.Card.InvalidCardException.Companion" target="com.ampro.weebot.commands.fun.games.cardgame.Card.InvalidCardException">
+      <point x="0.0" y="-25.5" />
+      <point x="0.0" y="48.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder" target="com.ampro.weebot.commands.utilitycommands.CmdReminder">
+      <point x="0.0" y="-236.0" />
+      <point x="12553.365196078432" y="3035.0" />
+      <point x="12607.615196078432" y="3035.0" />
+      <point x="-73.75" y="126.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.developer.CmdGuildList" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-71.0" />
+      <point x="11333.365196078432" y="2237.0" />
+      <point x="8070.9093954248365" y="2237.0" />
+      <point x="388.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.extensions.WeebotCommand.HelpBiConsumerBuilder" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-269.0" />
+      <point x="10018.865196078432" y="2287.0" />
+      <point x="7965.9093954248365" y="2287.0" />
+      <point x="283.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.SubCmdAboutGuild" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="2215.0" y="2247.0" />
+      <point x="7314.9093954248365" y="2247.0" />
+      <point x="-367.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdClear" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="-52.5" y="-37.0" />
+      <point x="911.5" y="2197.0" />
+      <point x="7209.9093954248365" y="2197.0" />
+      <point x="-472.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdTaskManager" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="9641.865196078432" y="2307.0" />
+      <point x="7923.9093954248365" y="2307.0" />
+      <point x="241.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.extensions.ButtonPaginator.Companion" target="com.ampro.weebot.extensions.ButtonPaginator">
+      <point x="0.0" y="-81.0" />
+      <point x="0.0" y="456.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdThis.ThisReactor" target="com.ampro.weebot.commands.fun.CmdThis">
+      <point x="80.25" y="-104.0" />
+      <point x="0.0" y="37.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdWriteTo" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="-52.5" y="-37.0" />
+      <point x="2225.5" y="3035.0" />
+      <point x="1800.772727272727" y="3035.0" />
+      <point x="64.27272727272702" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSetTracking" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-59.5" />
+      <point x="11098.865196078432" y="2247.0" />
+      <point x="8049.9093954248365" y="2247.0" />
+      <point x="367.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSetName.Companion" target="com.ampro.weebot.commands.moderation.CmdSetName">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="59.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.social.GuildSocialSettings.CurrencySettings" target="com.ampro.weebot.commands.IPassive">
+      <point x="88.75" y="-159.0" />
+      <point x="4828.6593954248365" y="3015.0" />
+      <point x="5695.076062091504" y="3015.0" />
+      <point x="-65.33333333333303" y="36.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.developer.Suggestion.State" target="com.ampro.weebot.commands.developer.Suggestion">
+      <point x="0.0" y="-81.0" />
+      <point x="7175.0" y="4283.0" />
+      <point x="7225.0" y="4283.0" />
+      <point x="-50.0" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.progammer.CmdEmbedMaker" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-60.0" />
+      <point x="10624.865196078432" y="2267.0" />
+      <point x="8007.9093954248365" y="2267.0" />
+      <point x="325.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.VCGenerator.Settings" target="com.ampro.weebot.commands.moderation.VCGenerator">
+      <point x="0.0" y="-115.0" />
+      <point x="0.0" y="214.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.developer.CmdSuggestion" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="105.0" y="2147.0" />
+      <point x="7104.9093954248365" y="2147.0" />
+      <point x="-577.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdCatFact" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-93.0" />
+      <point x="12136.865196078432" y="2207.0" />
+      <point x="8133.9093954248365" y="2207.0" />
+      <point x="451.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdUserDefaults" target="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator">
+      <point x="-52.5" y="-37.0" />
+      <point x="9184.208333333332" y="3035.0" />
+      <point x="9143.015196078431" y="3035.0" />
+      <point x="0.0" y="37.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.VCGenerator" target="com.ampro.weebot.commands.IPassive">
+      <point x="0.0" y="-214.0" />
+      <point x="5430.4093954248365" y="3035.0" />
+      <point x="5738.631617647059" y="3035.0" />
+      <point x="-21.777777777777374" y="36.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.CmdAbout" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="6658.7843954248365" y="2387.0" />
+      <point x="7608.9093954248365" y="2387.0" />
+      <point x="-73.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSetLogChannel.Companion" target="com.ampro.weebot.commands.moderation.CmdSetLogChannel">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="70.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCedManualTemp" target="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator">
+      <point x="-52.5" y="-37.0" />
+      <point x="9652.365196078432" y="3015.0" />
+      <point x="9228.615196078432" y="3015.0" />
+      <point x="85.60000000000036" y="37.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.Brokerage" target="com.ampro.weebot.commands.IPassive">
+      <point x="0.0" y="-71.0" />
+      <point x="6005.4093954248365" y="3035.0" />
+      <point x="5782.187173202614" y="3035.0" />
+      <point x="21.777777777777374" y="36.5" />
+    </edge>
+    <edge source="com.ampro.weebot.extensions.SelectablePaginator.Companion" target="com.ampro.weebot.extensions.SelectablePaginator">
+      <point x="0.0" y="-81.0" />
+      <point x="0.0" y="544.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.developer.CmdStatsView" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="336.0" y="2167.0" />
+      <point x="7146.9093954248365" y="2167.0" />
+      <point x="-535.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdDeletePad" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="-52.5" y="-37.0" />
+      <point x="681.5" y="2187.0" />
+      <point x="7188.9093954248365" y="2187.0" />
+      <point x="-493.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.VCRoleManager.Limit" target="com.ampro.weebot.commands.moderation.VCRoleManager">
+      <point x="0.0" y="-48.0" />
+      <point x="0.0" y="148.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.VCRoleManager" target="com.ampro.weebot.commands.IPassive">
+      <point x="0.0" y="-148.0" />
+      <point x="5082.4093954248365" y="3025.0" />
+      <point x="5716.853839869282" y="3025.0" />
+      <point x="-43.55555555555566" y="36.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdReminder" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-126.0" />
+      <point x="12681.365196078432" y="2187.0" />
+      <point x="8175.9093954248365" y="2187.0" />
+      <point x="493.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.WhiteCard" target="com.ampro.weebot.commands.fun.games.cardgame.Card">
+      <point x="0.0" y="-159.0" />
+      <point x="0.0" y="25.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.CmdInviteLink" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="3887.458333333333" y="2337.0" />
+      <point x="7503.9093954248365" y="2337.0" />
+      <point x="-178.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.database.Statistics.CommandUsageEvent" target="com.ampro.weebot.database.Statistics">
+      <point x="0.0" y="-203.0" />
+      <point x="5770.5" y="4173.0" />
+      <point x="5944.666666666667" y="4173.0" />
+      <point x="-152.33333333333303" y="148.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdLockTo" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="-52.5" y="-37.0" />
+      <point x="3399.5" y="3005.0" />
+      <point x="1993.590909090908" y="3005.0" />
+      <point x="257.09090909090855" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.NotePad.Note" target="com.ampro.weebot.commands.utilitycommands.NotePad">
+      <point x="0.0" y="-225.0" />
+      <point x="761.0" y="4789.0" />
+      <point x="589.25" y="4789.0" />
+      <point x="102.5" y="456.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdServerSettings" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="-52.5" y="-37.0" />
+      <point x="8954.208333333332" y="3015.0" />
+      <point x="8969.358333333334" y="3015.0" />
+      <point x="8969.358333333334" y="2357.0" />
+      <point x="7818.9093954248365" y="2357.0" />
+      <point x="136.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdEmojify" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-48.5" />
+      <point x="11899.365196078432" y="2217.0" />
+      <point x="8112.9093954248365" y="2217.0" />
+      <point x="430.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdThis.ThisReactor.Companion" target="com.ampro.weebot.commands.fun.CmdThis.ThisReactor">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="104.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdDisable" target="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator">
+      <point x="-52.5" y="-37.0" />
+      <point x="9421.365196078432" y="3025.0" />
+      <point x="9185.81519607843" y="3025.0" />
+      <point x="42.79999999999927" y="37.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSetPrefix" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-59.5" />
+      <point x="8585.208333333332" y="2377.0" />
+      <point x="7776.9093954248365" y="2377.0" />
+      <point x="94.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.extensions.WeebotCommand.HelpBiConsumerBuilder.Companion" target="com.ampro.weebot.extensions.WeebotCommand.HelpBiConsumerBuilder">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="269.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.SubCmdAboutUser" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="2911.0" y="2297.0" />
+      <point x="7419.9093954248365" y="2297.0" />
+      <point x="-262.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder.Companion" target="com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="236.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSetPrefix.Companion" target="com.ampro.weebot.commands.moderation.CmdSetPrefix">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="59.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.CardsAgainstHumanity" target="com.ampro.weebot.commands.fun.games.cardgame.CardGame">
+      <point x="0.0" y="-478.0" />
+      <point x="0.0" y="37.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelRole" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-48.5" />
+      <point x="13059.865196078432" y="2177.0" />
+      <point x="8196.909395424836" y="2177.0" />
+      <point x="514.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdLockFrom" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="-52.5" y="-37.0" />
+      <point x="3629.5" y="2995.0" />
+      <point x="2057.863636363636" y="2995.0" />
+      <point x="321.3636363636365" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit" target="com.ampro.weebot.commands.utilitycommands.NotePad">
+      <point x="0.0" y="-247.0" />
+      <point x="212.5" y="4789.0" />
+      <point x="384.25" y="4789.0" />
+      <point x="-102.5" y="456.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.BlackCard" target="com.ampro.weebot.commands.fun.games.cardgame.Card">
+      <point x="0.0" y="-225.0" />
+      <point x="7988.499999999999" y="3928.0" />
+      <point x="8199.0" y="3928.0" />
+      <point x="-30.0" y="25.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdWriteTo" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="52.5" y="-37.0" />
+      <point x="2330.5" y="2257.0" />
+      <point x="7335.9093954248365" y="2257.0" />
+      <point x="-346.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.Card.InvalidCardException" target="com.ampro.weebot.commands.fun.games.cardgame.Card">
+      <point x="0.0" y="-48.0" />
+      <point x="8458.0" y="3928.0" />
+      <point x="8259.0" y="3928.0" />
+      <point x="30.0" y="25.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdReddicord.SubCmdReset" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="52.5" y="-37.0" />
+      <point x="7986.208333333333" y="3035.0" />
+      <point x="7997.865196078432" y="3035.0" />
+      <point x="7997.865196078432" y="2407.0" />
+      <point x="7713.9093954248365" y="2407.0" />
+      <point x="31.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdEdit" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="52.5" y="-37.0" />
+      <point x="2565.5" y="2277.0" />
+      <point x="7377.9093954248365" y="2277.0" />
+      <point x="-304.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdCatFact.KatFact" target="com.ampro.weebot.commands.fun.CmdCatFact">
+      <point x="0.0" y="-59.5" />
+      <point x="0.0" y="93.0" />
+    </edge>
+    <edge source="com.ampro.weebot.database.Statistics.UserInfo" target="com.ampro.weebot.database.Statistics">
+      <point x="0.0" y="-115.0" />
+      <point x="6295.0" y="4173.0" />
+      <point x="6249.333333333333" y="4173.0" />
+      <point x="152.33333333333303" y="148.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdReddicord.SubCmdReset" target="com.ampro.weebot.commands.fun.CmdReddicord">
+      <point x="-52.5" y="-37.0" />
+      <point x="7881.208333333333" y="3035.0" />
+      <point x="7639.365196078432" y="3035.0" />
+      <point x="0.0" y="37.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdEnable" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="-52.5" y="-37.0" />
+      <point x="8724.208333333332" y="2367.0" />
+      <point x="7797.9093954248365" y="2367.0" />
+      <point x="115.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdMake" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="-52.5" y="-37.0" />
+      <point x="220.5" y="2157.0" />
+      <point x="7125.9093954248365" y="2157.0" />
+      <point x="-556.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCedManualTemp" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="52.5" y="-37.0" />
+      <point x="9757.365196078432" y="2297.0" />
+      <point x="7944.9093954248365" y="2297.0" />
+      <point x="262.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelRole.Companion" target="com.ampro.weebot.commands.moderation.CmdVoiceChannelRole">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="48.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdHelloThere" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-59.5" />
+      <point x="10861.865196078432" y="2257.0" />
+      <point x="8028.9093954248365" y="2257.0" />
+      <point x="346.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdToFile" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="52.5" y="-37.0" />
+      <point x="1247.5" y="3025.0" />
+      <point x="1607.954545454546" y="3025.0" />
+      <point x="-128.5454545454545" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSetName" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-59.5" />
+      <point x="8125.208333333333" y="2397.0" />
+      <point x="7734.9093954248365" y="2397.0" />
+      <point x="52.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdDeleteNote" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="-52.5" y="-37.0" />
+      <point x="1372.5" y="2227.0" />
+      <point x="7272.9093954248365" y="2227.0" />
+      <point x="-409.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdInsert" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="-52.5" y="-37.0" />
+      <point x="2690.5" y="3015.0" />
+      <point x="1929.318181818182" y="3015.0" />
+      <point x="192.81818181818153" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdLockFrom" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="52.5" y="-37.0" />
+      <point x="3734.5" y="2327.0" />
+      <point x="7482.9093954248365" y="2327.0" />
+      <point x="-199.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.BlackCard.Companion" target="com.ampro.weebot.commands.fun.games.cardgame.BlackCard">
+      <point x="0.0" y="-48.0" />
+      <point x="0.0" y="225.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSettings" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="566.0" y="2177.0" />
+      <point x="7167.9093954248365" y="2177.0" />
+      <point x="-514.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdBlock.Companion" target="com.ampro.weebot.commands.moderation.CmdBlock">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="59.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdReminder.Companion" target="com.ampro.weebot.commands.utilitycommands.CmdReminder">
+      <point x="0.0" y="-48.5" />
+      <point x="12809.365196078432" y="3035.0" />
+      <point x="12755.115196078432" y="3035.0" />
+      <point x="73.75" y="126.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.social.GuildSocialSettings.CurrencySettings" target="com.ampro.weebot.commands.social.GuildSocialSettings">
+      <point x="-88.75" y="-159.0" />
+      <point x="4651.1593954248365" y="2995.0" />
+      <point x="4398.291666666667" y="2995.0" />
+      <point x="154.33333333333394" y="225.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.CardsAgainstHumanity.Companion" target="com.ampro.weebot.commands.fun.games.cardgame.CardsAgainstHumanity">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="478.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdOutHouse" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="1027.0" y="2207.0" />
+      <point x="7230.9093954248365" y="2207.0" />
+      <point x="-451.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.CardGame" target="com.ampro.weebot.commands.fun.games.Player">
+      <point x="43.25" y="-37.0" />
+      <point x="452.20238095238096" y="711.0" />
+      <point x="609.5" y="711.0" />
+      <point x="609.5" y="211.0" />
+      <point x="540.3095238095239" y="211.0" />
+      <point x="124.33333333333337" y="93.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSelfDestruct" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="8355.208333333332" y="2387.0" />
+      <point x="7755.9093954248365" y="2387.0" />
+      <point x="73.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdEnable" target="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator">
+      <point x="52.5" y="-37.0" />
+      <point x="8829.208333333332" y="3025.0" />
+      <point x="9057.415196078431" y="3025.0" />
+      <point x="-85.60000000000036" y="37.0" />
+    </edge>
+    <edge source="com.ampro.weebot.extensions.Restriction.Status" target="com.ampro.weebot.extensions.Restriction">
+      <point x="0.0" y="-59.0" />
+      <point x="0.0" y="346.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdClear" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="52.5" y="-37.0" />
+      <point x="1016.5" y="3015.0" />
+      <point x="1543.681818181818" y="3015.0" />
+      <point x="-192.81818181818198" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdInsert" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="52.5" y="-37.0" />
+      <point x="2795.5" y="2287.0" />
+      <point x="7398.9093954248365" y="2287.0" />
+      <point x="-283.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.OutHouse" target="com.ampro.weebot.commands.IPassive">
+      <point x="0.0" y="-170.0" />
+      <point x="0.0" y="36.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdDeletePad" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="52.5" y="-37.0" />
+      <point x="786.5" y="3005.0" />
+      <point x="1479.409090909091" y="3005.0" />
+      <point x="-257.090909090909" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.social.CmdSocial" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="9410.865196078432" y="2327.0" />
+      <point x="7881.9093954248365" y="2327.0" />
+      <point x="199.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.progammer.CmdRegexTest" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-48.0" />
+      <point x="3265.0" y="2307.0" />
+      <point x="7440.9093954248365" y="2307.0" />
+      <point x="-241.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.bot.WeebotSettings.CommandRestriction" target="com.ampro.weebot.bot.WeebotSettings">
+      <point x="0.0" y="-148.0" />
+      <point x="0.0" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.Game" target="com.ampro.weebot.commands.fun.games.Player">
+      <point x="0.0" y="-225.0" />
+      <point x="183.0" y="211.0" />
+      <point x="291.6428571428571" y="211.0" />
+      <point x="-124.33333333333331" y="93.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdThis.ThisReactor" target="com.ampro.weebot.commands.IPassive">
+      <point x="-80.25" y="-104.0" />
+      <point x="7248.865196078432" y="3005.0" />
+      <point x="5847.520506535948" y="3005.0" />
+      <point x="87.11111111111131" y="36.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.developer.CmdSeeSuggestions" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="4883.6593954248365" y="2347.0" />
+      <point x="7524.9093954248365" y="2347.0" />
+      <point x="-157.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit.EditType" target="com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit">
+      <point x="0.0" y="-92.0" />
+      <point x="0.0" y="247.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSetLogChannel" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-70.5" />
+      <point x="11614.865196078432" y="2227.0" />
+      <point x="8091.9093954248365" y="2227.0" />
+      <point x="409.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.developer.CmdShutdown" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="13519.865196078432" y="2157.0" />
+      <point x="8238.909395424836" y="2157.0" />
+      <point x="556.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdReddicord" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="7639.365196078432" y="2417.0" />
+      <point x="7671.9093954248365" y="2417.0" />
+      <point x="-10.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdPurge" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="13289.865196078432" y="2167.0" />
+      <point x="8217.909395424836" y="2167.0" />
+      <point x="535.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdDisable" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="52.5" y="-37.0" />
+      <point x="9526.365196078432" y="2317.0" />
+      <point x="7902.9093954248365" y="2317.0" />
+      <point x="220.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdChatLock" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-59.5" />
+      <point x="5259.6593954248365" y="2357.0" />
+      <point x="7545.9093954248365" y="2357.0" />
+      <point x="-136.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.developer.Suggestion.State.Companion" target="com.ampro.weebot.commands.developer.Suggestion.State">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="81.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdBlock" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-59.5" />
+      <point x="10394.865196078432" y="2277.0" />
+      <point x="7986.9093954248365" y="2277.0" />
+      <point x="304.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.Companion" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdLockTo" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="52.5" y="-37.0" />
+      <point x="3504.5" y="2317.0" />
+      <point x="7461.9093954248365" y="2317.0" />
+      <point x="-220.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.CardGame" target="com.ampro.weebot.commands.fun.games.Game">
+      <point x="-43.25" y="-37.0" />
+      <point x="365.70238095238096" y="711.0" />
+      <point x="183.0" y="711.0" />
+      <point x="0.0" y="225.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdServerSettings" target="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator">
+      <point x="52.5" y="-37.0" />
+      <point x="9059.208333333332" y="3035.0" />
+      <point x="9100.215196078432" y="3035.0" />
+      <point x="-42.79999999999927" y="37.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdMake" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="52.5" y="-37.0" />
+      <point x="325.5" y="2995.0" />
+      <point x="1415.136363636364" y="2995.0" />
+      <point x="-321.3636363636365" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdHelloThere.Companion" target="com.ampro.weebot.commands.fun.CmdHelloThere">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="59.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.Reddicord" target="com.ampro.weebot.commands.IPassive">
+      <point x="0.0" y="-170.0" />
+      <point x="6787.9093954248365" y="3015.0" />
+      <point x="5825.74272875817" y="3015.0" />
+      <point x="65.33333333333394" y="36.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="9143.015196078431" y="2347.0" />
+      <point x="7839.9093954248365" y="2347.0" />
+      <point x="157.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.bot.GlobalWeebot" target="com.ampro.weebot.bot.Weebot">
+      <point x="0.0" y="-236.0" />
+      <point x="0.0" y="269.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.CmdHelp" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="6428.7843954248365" y="2377.0" />
+      <point x="7587.9093954248365" y="2377.0" />
+      <point x="-94.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.social.GuildSocialSettings.ProfileSettings" target="com.ampro.weebot.commands.IPassive">
+      <point x="49.0" y="-93.0" />
+      <point x="4493.4093954248365" y="3005.0" />
+      <point x="5673.298284313725" y="3005.0" />
+      <point x="-87.11111111111131" y="36.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdDeleteNote" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="52.5" y="-37.0" />
+      <point x="1477.5" y="3035.0" />
+      <point x="1672.227272727272" y="3035.0" />
+      <point x="-64.27272727272748" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdToFile" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="-52.5" y="-37.0" />
+      <point x="1142.5" y="2217.0" />
+      <point x="7251.9093954248365" y="2217.0" />
+      <point x="-430.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.miscellaneous.PingCommand" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="6198.7843954248365" y="2367.0" />
+      <point x="7566.9093954248365" y="2367.0" />
+      <point x="-115.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdLock.Companion" target="com.ampro.weebot.commands.moderation.CmdLock">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="59.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="4.547473508864641E-13" y="-203.0" />
+      <point x="1736.5" y="2237.0" />
+      <point x="7293.9093954248365" y="2237.0" />
+      <point x="-388.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.developer.CmdDevSuggestions" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-48.0" />
+      <point x="7875.865196078432" y="2417.0" />
+      <point x="7692.9093954248365" y="2417.0" />
+      <point x="10.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.social.GuildSocialSettings.ProfileSettings" target="com.ampro.weebot.commands.social.GuildSocialSettings">
+      <point x="-49.0" y="-93.0" />
+      <point x="4395.4093954248365" y="3035.0" />
+      <point x="4243.958333333333" y="3035.0" />
+      <point x="0.0" y="225.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.GateKeeper" target="com.ampro.weebot.commands.IPassive">
+      <point x="0.0" y="-159.0" />
+      <point x="6302.9093954248365" y="3025.0" />
+      <point x="5803.964950980393" y="3025.0" />
+      <point x="43.55555555555566" y="36.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdLock" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-59.5" />
+      <point x="13749.865196078432" y="2147.0" />
+      <point x="8259.909395424836" y="2147.0" />
+      <point x="577.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.ModificationWhileRunningException.Companion" target="com.ampro.weebot.commands.fun.games.ModificationWhileRunningException">
+      <point x="0.0" y="-25.5" />
+      <point x="0.0" y="48.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator.SubCmdUserDefaults" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="52.5" y="-37.0" />
+      <point x="9289.208333333332" y="3035.0" />
+      <point x="9295.365196078432" y="3035.0" />
+      <point x="9295.365196078432" y="2337.0" />
+      <point x="7860.9093954248365" y="2337.0" />
+      <point x="178.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.CmdCardsAgainstHumanity" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="2448.0" y="2267.0" />
+      <point x="7356.9093954248365" y="2267.0" />
+      <point x="-325.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.database.Statistics.WeebotInfo" target="com.ampro.weebot.database.Statistics">
+      <point x="0.0" y="-114.5" />
+      <point x="0.0" y="148.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.social.GuildSocialSettings.LevelSettings" target="com.ampro.weebot.commands.social.GuildSocialSettings">
+      <point x="0.0" y="-92.5" />
+      <point x="3970.9920479302864" y="3035.0" />
+      <point x="4089.624999999999" y="3035.0" />
+      <point x="-154.33333333333394" y="225.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.developer.Suggestion.Companion" target="com.ampro.weebot.commands.developer.Suggestion">
+      <point x="0.0" y="-37.0" />
+      <point x="7375.0" y="4283.0" />
+      <point x="7325.0" y="4283.0" />
+      <point x="50.0" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.CmdThis" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="7409.365196078432" y="2407.0" />
+      <point x="7650.9093954248365" y="2407.0" />
+      <point x="-31.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdWelcomeMsg" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="6888.7843954248365" y="2397.0" />
+      <point x="7629.9093954248365" y="2397.0" />
+      <point x="-52.5" y="71.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.games.cardgame.CAHPlayer" target="com.ampro.weebot.commands.fun.games.Player">
+      <point x="0.0" y="-126.0" />
+      <point x="492.5" y="211.0" />
+      <point x="415.9761904761905" y="211.0" />
+      <point x="0.0" y="93.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.moderation.CmdSetTracking.Companion" target="com.ampro.weebot.commands.moderation.CmdSetTracking">
+      <point x="0.0" y="-37.0" />
+      <point x="0.0" y="59.5" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.utilitycommands.CmdNotePad.CmdEdit" target="com.ampro.weebot.commands.utilitycommands.CmdNotePad">
+      <point x="-52.5" y="-37.0" />
+      <point x="2460.5" y="3025.0" />
+      <point x="1865.045454545454" y="3025.0" />
+      <point x="128.5454545454545" y="203.0" />
+    </edge>
+    <edge source="com.ampro.weebot.commands.fun.SubCmdLeaderBoard" target="com.ampro.weebot.extensions.WeebotCommand">
+      <point x="0.0" y="-37.0" />
+      <point x="12387.865196078432" y="2197.0" />
+      <point x="8154.9093954248365" y="2197.0" />
+      <point x="472.5" y="71.0" />
+    </edge>
+  </edges>
+  <settings layout="Hierarchic Group" zoom="1.2000000000000002" x="1656.0101842602023" y="2866.05303030303" />
+  <SelectedNodes />
+  <Categories>
+    <Category>Constructors</Category>
+    <Category>Methods</Category>
+    <Category>Properties</Category>
+    <Category>Inner Classes</Category>
+    <Category>Fields</Category>
+  </Categories>
+  <SCOPE>All</SCOPE>
+  <VISIBILITY>private</VISIBILITY>
+</Diagram>
+
