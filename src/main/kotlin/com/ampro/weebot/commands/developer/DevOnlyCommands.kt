@@ -80,9 +80,9 @@ class CmdStatsView : WeebotCommand("stats", null, arrayOf("viewstats", "statsvie
         }
 
         val size = enabled.filter { it }.size
-        val perc = ceil((size / enabled.size.toDouble()) * 100)
+        val perc = ceil((size / enabled.size.toDouble()) * 100).toInt()
 
-        strdPaginator.useNumberedItems(true).setText("Usage Stats from $size ($perc)")
+        strdPaginator.useNumberedItems(true).setText("Usage Stats from $size ($perc%)")
             .setUsers(event.author).setItemsPerPage(6).apply {
                 stats.map {
                     """${it.key}:

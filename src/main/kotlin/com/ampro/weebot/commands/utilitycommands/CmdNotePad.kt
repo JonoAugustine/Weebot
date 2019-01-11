@@ -369,7 +369,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
             }
         }
         val notePad = SelectablePaginator(setOf(event.author), title = this.name,
-                itemsPerPage = 10, items = items, fieldList = fList,
+                itemsPerPage = -1, items = items, fieldList = fList,
             exitAction = { it.delete().queueAfter(250, MILLISECONDS) }
         )
 

@@ -11,7 +11,9 @@ import com.ampro.weebot.commands.`fun`.games.*
 import com.ampro.weebot.commands.`fun`.games.WinCondition.ROUNDS
 import com.ampro.weebot.commands.`fun`.games.WinCondition.WINS
 import com.ampro.weebot.commands.`fun`.games.cardgame.GameState.CHOOSING
+import com.ampro.weebot.commands.`fun`.games.cardgame.GameState.READING
 import com.ampro.weebot.database.getGuild
+import com.ampro.weebot.database.getUser
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
@@ -19,6 +21,7 @@ import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
+import net.dv8tion.jda.core.utils.Checks
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
@@ -66,7 +69,7 @@ internal val DECK_STRD = loadJson<CAHDeck>(FILE_D_STRD_JSON) ?: run {
             .forEach {
                 val pick = it.count { char -> char == '_' }
                 C_BLACK_BASE.add(BlackCard(
-                    it.replace(Regex("_+"), "[___]").replace("<i>", "*")
+                    it.replace(Regex("_+"), "[____]").replace("<i>", "*")
                         .replace("</i>","* ").replace(Regex("</?br>"), "\n"),
                     if (pick == 0) 1 else pick))
             }
@@ -81,8 +84,9 @@ internal val DECK_STRD = loadJson<CAHDeck>(FILE_D_STRD_JSON) ?: run {
     return@run c
 }
 /**[Guild.getIdLong] -> [MutableList]<[CAHDeck]>*/
-internal val DECK_CUST: ConcurrentHashMap<Long, MutableList<CAHDeck>> = loadJson<ConcurrentHashMap<Long,
-        MutableList<CAHDeck>>>(FILE_D_CUST_JSON) ?: run {
+internal val DECK_CUST: ConcurrentHashMap<Long, MutableList<CAHDeck>>
+        = loadJson<ConcurrentHashMap<Long, MutableList<CAHDeck>>>(FILE_D_CUST_JSON)
+        ?: run {
     MLOG.elog("Failed to load Custom CAH Decks"); System.exit(-1);
     return@run ConcurrentHashMap<Long, MutableList<CAHDeck>>()
 }
@@ -180,13 +184,15 @@ enum class GameState {
  */
 class CardsAgainstHumanity(guild: Guild, author: User,
                            /** The hosting channel */
-                           val channel: TextChannel,
+                           channel: TextChannel,
                            decks: List<CAHDeck> = listOf(DECK_STRD),
                            val handSize: Int = HAND_SIZE_DEF,
                            val winCondition: WinCondition = WINS(7))
     : CardGame<CAHPlayer>(guild, author) {
 
     val guildName = guild.name
+    val channelID = channel.idLong
+    val channel: TextChannel get() = getGuild(guildID)!!.getTextChannelById(channelID)!!
     val name: (User) -> String = {
         getGuild(guildID)?.getMember(it)?.effectiveName?: it.name
     }
@@ -231,10 +237,15 @@ class CardsAgainstHumanity(guild: Guild, author: User,
         val title = (if ("Cards Against $guildName".length > EMBED_MAX_TITLE)
             CMD_CAH.displayName!! else "Cards Against $guildName") + " | round $round"
 
-        val baseEmbed: () -> EmbedBuilder = {makeEmbedBuilder(title, LINK_CAH)
-            .setAuthor("Czar: ${name(czar.user)}", czar.user.avatarUrl)
-            .addField("Black Card (Pick ${blackCard.pick})", blackCard.text, false)
-            .addField(howToPlayField).setThumbnail(LINK_CAH_THUMBNAIL)}
+        val baseEmbed: () -> EmbedBuilder = {
+            makeEmbedBuilder(title, LINK_CAH).apply {
+                setAuthor("Czar: ${name(czar.user)}", czar.user.avatarUrl)
+                setDescription("""**Black Card | Pick ${blackCard.pick}:**
+                    ${blackCard.text}""".trimIndent())
+                setThumbnail(LINK_CAH_THUMBNAIL)
+                if (gameState == CHOOSING) addField(howToPlayField)
+            }
+        }
 
         if (gameState == CHOOSING) { //If this is the CHOOSING embed
             /** Loads new [blackCard] and removes it from [activeCardsBlack] */
@@ -266,7 +277,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                         ).queue { endGame() }
                     }
                 }), 2) { blackCardMessage = it }.display(channel)
-        } else { //If this is the Choosing Embed
+        } else { //If this is the Reading Embed
             val embed = baseEmbed().addField("Czar, choose your victor!",
                 "Select a victor by reacting with the corresponding number.", true)
                 .build()
@@ -277,23 +288,70 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                     this.channel.sendMessage(makeEmbedBuilder(title, LINK_CAH,
                         "LeaderBoard:\n${leaderBoard()}")
                         .setAuthor("${name(p.user)} Won This Round! $Tada$Tada").build()
-                    ).queue()
-                    nextTurn()
+                    ).queue { nextTurn() }
                 }
             }.shuffled()
             if (playersIn.isEmpty()) TODO("This should not happen")
             SelectablePaginator(setOf(czar.user), emptySet(), -1, MINUTES, embed,
-                playersIn, singleUse = true) {blackCardMessage = it}.display(channel)
+                playersIn, itemsPerPage = -1, singleUse = true) { blackCardMessage = it }
+                .displayOrDefault(blackCardMessage, channel)
         }
 
     }
 
     /**
-     * If [player] is null: Sends each [CAHPlayer.hand]
-     * if [player] is not null: Sends the selected player their [CAHPlayer.hand]
+     * Sends each [players] their [CAHPlayer.hand]. This does NOT deal cards.
+     * @param players
      */
-    fun sendWhiteCards(player: CAHPlayer? = null) {
-        TODO()
+    fun sendWhiteCards(vararg players: CAHPlayer) {
+        if (players.isEmpty()) Checks.notEmpty(players, "Players")
+        val title = (if ("Cards Against $guildName".length > EMBED_MAX_TITLE)
+            CMD_CAH.displayName!! else "Cards Against $guildName") + " | round $round"
+        players.filterNot { it.user.isBot }.forEach {
+            val e = makeEmbedBuilder(title, LINK_CAH)
+                .setAuthor("Czar: ${name(czar.user)}", czar.user.avatarUrl)
+                .addField("Black Card (Pick ${blackCard.pick})", blackCard.text, false)
+                .setDescription(
+                    "Choose ${blackCard.pick} card(s) then $X_Red to confirm the selection"
+                ).setThumbnail(LINK_CAH_THUMBNAIL)
+                .build()
+            val u = getUser(it.user.idLong)
+            u?.openPrivateChannel()?.queue { pmc ->
+                SelectablePaginator(setOf(u), timeout = -1, baseEmbed = e,
+                    items = it.hand.mapIndexed { i, wc ->
+                        wc.text to act@{ _: Int, _: Message ->
+                            if (gameState == READING) {
+                                pmc.sendMessage("The czar is currently choosing!")
+                                    .queue { wm -> wm.delete().queueAfter(5, SECONDS) }
+                                return@act
+                            }
+                            //Clear on reslect
+                            if (blackCard.pick == it.playedCards.size) it.playedCards.clear()
+                            it.playedCards.add(wc)
+                            val d = blackCard.pick - it.playedCards.size
+                            val s = "Selected card ${i + 1}.\n" + if (d != 0) "You still need $d cards."
+                            else "You have picked all the needed cards."
+                            pmc.sendMessage(s).queue { cm ->
+                                cm.delete().queueAfter(10, SECONDS)
+                            }
+                            if (playerList.filterNot { it.user.isBot }
+                                        .none { it.playedCards.size != blackCard.pick }) {
+                                gameState = READING
+                                sendBlackCard()
+                            }
+                        }
+                    }, exitAction = { m: Message ->
+                        if (it.playedCards.size == blackCard.pick) {
+                            pmc.sendMessage("Card(s) Submitted. Good luck!")
+                                .queue { cm -> cm.delete().queueAfter(10, SECONDS) }
+                            playerHandMessages[it] = m
+                        } else pmc.sendMessage(
+                            "You need to select ${blackCard.pick} cards.").queue { wm ->
+                            wm.delete().queueAfter(10, SECONDS)
+                        }
+                    }).displayOrDefault(playerHandMessages[it], pmc)
+            } ?: Unit
+        }
     }
 
     /**
@@ -346,7 +404,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
         }
         this.playerList.forEach { dealCards(it) }
         sendBlackCard()
-        sendWhiteCards()
+        sendWhiteCards(*playerList.toTypedArray())
     }
 
     /** @return true if the Czar was reset (start a new round) */
@@ -393,7 +451,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
             gameState = CHOOSING
             isRunning = true
             sendBlackCard()
-            sendWhiteCards()
+            sendWhiteCards(*playerList.toTypedArray())
             true
         } else false
     }
@@ -430,7 +488,6 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
                 event.message.mentionedUsers.forEach { addUser(it) }
             }.startGame()
 
-        TODO(event)
         //STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
     }
 

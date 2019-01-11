@@ -26,9 +26,11 @@ import java.util.concurrent.TimeUnit.*
 
 const val EMBED_MAX_TITLE = 256
 const val EMBED_MAX_DESCRIPTION = 2048
-/** 25 */
+/**25*/
 const val EMBED_MAX_FIELDS = 25
+/**256*/
 const val EMBED_MAX_FIELD_NAME = 256
+/**1024*/
 const val EMBED_MAX_FIELD_VAL = 1024
 const val EMBED_MAX_FOOTER_TEXT = 2048
 const val EMBED_MAX_AUTHOR = 256
@@ -351,15 +353,17 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
  * A Paginator based on JAgrosh's [Paginator] that allows users to react with
  * a listed item like the [OrderedMenu] where each page has the same reacions.
  *
- * @author Jagrosh, Jonathan Augustine
+ * @param itemsPerPage The number of items on a single page. -1 if automatic
+ *
+ * @author Jonathan Augustine
  * @since 2.0
  */
 class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet(),
                           timeout: Long = 3L, unit: TimeUnit = MINUTES,
                           val title: String, val description: String = "",
                           /** The items to be listed with an [Emoji] and consumer */
-                          val items: List<Pair<String, (Int, Message) -> Unit>>,
-                          val columns: Int = 1, val itemsPerPage: Int = 10,
+                          val items: List<Pair<String, (Int, Message) -> Any>>,
+                          var itemsPerPage: Int = 10,
                           /**Disallow multiple reactions*/ val singleUse: Boolean = false,
                           val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
                           val thumbnail: String = "", val color: Color = STD_GREEN,
@@ -378,7 +382,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                 baseEmbed: MessageEmbed,
                 /** The items to be listed with an [Emoji] and consumer */
                 items: List<Pair<String, (Int, Message) -> Unit>>,
-                columns: Int = 1, itemsPerPage: Int = 10,
+                itemsPerPage: Int = 10,
                 /**Disallow multiple reactions*/ singleUse: Boolean = false,
                 bulkSkipNumber: Int = 0, wrapPageEnds: Boolean = true,
                 color: Color = STD_GREEN, exitAction: (Message) -> Unit = {},
@@ -389,7 +393,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                     }
                 })
             : this(users, roles, timeout, unit, baseEmbed.title, baseEmbed.description,
-        items, columns, itemsPerPage, singleUse, bulkSkipNumber, wrapPageEnds,
+        items, itemsPerPage, singleUse, bulkSkipNumber, wrapPageEnds,
         baseEmbed.thumbnail.url, color, baseEmbed.fields, exitAction, timeoutAction)
 
     companion object {
@@ -404,7 +408,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
 
     private val baseEmbed: EmbedBuilder get() = strdEmbedBuilder.apply {
         if (title.isNotBlank()) setTitle(title)
-        if (description.isNotBlank()) setDescription(description)
+        if (description.isNotBlank()) setDescription(description) else setDescription("")
         if (thumbnail.isNotBlank()) setThumbnail(thumbnail)
         if (fieldList.isNotEmpty()) fieldList.forEach { addField(it) }
         setColor(color)
@@ -414,6 +418,17 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     val emojiCounter: EmojiCounter = EmojiCounter(wrap = true)
 
     init {
+        if (this.itemsPerPage == -1) {
+            val sb = StringBuilder()
+            var itemCount = 0
+            this.items.sortedBy { it.first.length }.map { it.first }.forEach { s ->
+                sb.append("${emojiCounter.next()}$s\n")
+                if (sb.length > EMBED_MAX_FIELD_VAL || itemCount == 10) return@forEach
+                else itemCount++
+            }
+            this.itemsPerPage = itemCount
+            emojiCounter.reset()
+        }
         if (this.itemsPerPage !in 1..EmojiNumbers.size) {
             throw IllegalArgumentException("Items Per Page must be in 1..10")
         }
@@ -510,7 +525,6 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                     m.reactWith(if (bulkSkipNumber > 1) BIG_RIGHT else RIGHT)
                     m.reactWith(EXIT)
                     waitFor(m, pageNum)
-
                 }
                 else -> {
                     (start until end).forEach { m.reactWith(emojiCounter.next()) }
@@ -583,7 +597,8 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         }
 
         try {
-            message.clearReactions().queueAfter(250, SECONDS)
+            if (message.privateChannel == null)
+                message.clearReactions().queueAfter(250, SECONDS)
         } catch (ignored: PermissionException) {}
         initialize(message.editMessage(renderPage(newPageNum)), newPageNum)
     }
@@ -592,29 +607,19 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         val mbuilder = MessageBuilder()
         val ebuilder = this.baseEmbed
         emojiCounter.reset()
-        val sb = StringBuilder()
 
         val start = (pageNum - 1) * itemsPerPage
         val end = when {
             items.size < pageNum * itemsPerPage -> items.size
             else -> pageNum * itemsPerPage
         }
-        if (columns == 1) {
-            (start until end).forEach { i ->
-                sb.append("\n${emojiCounter.next().unicode}${items[i].first}")
-            }
-            ebuilder.appendDescription("\n\n" + sb.toString())
-        } else {
-            val per = Math.ceil((end - start).toDouble() / columns).toInt()
-            (0 until columns).forEach { k ->
-                var i = start + k * per
-                while (i < end && i < start + (k + 1) * per) {
-                    sb.append("\n${emojiCounter.next().unicode}${items[i].first}")
-                    i++
-                }
-                ebuilder.addField("", sb.toString(), true)
-            }
+
+        val sb = StringBuilder()
+        (start until end).forEach { i ->
+            sb.append("\n${emojiCounter.next()}${items[i].first}")
         }
+        ebuilder.addField("", sb.toString(), false)
+
         emojiCounter.reset()
         ebuilder.setFooter("Page $pageNum/$pages", null)
         mbuilder.setEmbed(ebuilder.build())
