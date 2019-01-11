@@ -6,7 +6,9 @@ package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.WAITER
 import com.ampro.weebot.bot.Weebot
-import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.CAT_MOD
+import com.ampro.weebot.commands.CAT_UTIL
+import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.ALL
 import com.ampro.weebot.commands.moderation.VCRoleManager.Limit.PUBLIC
 import com.ampro.weebot.database.STAT
@@ -19,8 +21,12 @@ import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.events.guild.voice.*
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceJoinEvent
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceLeaveEvent
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceMoveEvent
+import net.dv8tion.jda.core.events.guild.voice.GuildVoiceUpdateEvent
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
@@ -264,7 +270,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
 }
 
 /* *******************
-    Personal Auto VC
+    Personal Auto VCGen
  *********************/
 
 /**
@@ -338,7 +344,10 @@ class VCGenerator(baseChannel: Long) : IPassive {
             clean(guild)
             var r = false
             if (channel.idLong == baseId
-                    && !genChannels.containsKey(member.user.idLong)) {
+                    && !genChannels.containsKey(member.user.idLong)
+                    && ChronoUnit.MINUTES.between(
+                        channel.creationTime.atZoneSameInstant(NOW().offset), NOW()) > 0) {
+
                 val base = guild.getVoiceChannelById(baseId)
                 val settings = userSettings
                     .getOrDefault(member.user.idLong, guildSettings)
@@ -583,7 +592,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
 
     /** Set Server Defaults */
     internal class SubCmdServerSettings : WeebotCommand("def",null,
-        arrayOf("serverdefaults", "sdef", "servdef"), CAT_MOD, "", "",
+        arrayOf("serverdefaults", "sdef"), CAT_MOD, "", "",
         userPerms = arrayOf(MANAGE_CHANNEL), guildOnly = true, cooldown = 30) {
         override fun execute(event: CommandEvent) {
             getWeebotOrNew(event.guild).also { bot ->
@@ -903,6 +912,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                 ``temp [-L userLimit] [-c category] [name]``
                 *Must have ${MANAGE_CHANNEL.getName()} permission.*
             """.trimIndent(), true)
+            .addField("There is a 1 minute cooldown on auto-gen channels", "", false)
             .build()
     }
 }
