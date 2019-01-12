@@ -15,6 +15,7 @@ import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.getGuild
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -31,14 +32,15 @@ import kotlin.reflect.KClass
  * @author Jonathan Augustine
  * @since 2.0
  */
-class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
+class WeebotSettings(val guildID: Long) {
 
     /** Bot's nickname in hosting guild  */
     val nickname: String
         get() { return getGuild(guildID)?.selfMember?.nickname ?: "Weebot" }
 
     /** Guild's command string to call the bot.*/
-    var prefixs = mutableListOf("\\", "w!")
+    @SerializedName("prefixs")
+    var prefixes = mutableListOf<String>()
 
     /** The [TextChannel] to send logs to */
     var logchannel: Long = -1
@@ -118,7 +120,6 @@ class WeebotSettings(val guildID: Long) : GuildSettingsProvider {
             ?.queue { consumer(it) }
     }
 
-    override fun getPrefixes() = prefixs
 }
 
 /**
@@ -245,7 +246,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 class GlobalWeebot : Weebot(-1L) {
 
     init {
-        this.settings.prefixs = mutableListOf("", "w!", "\\", "!")
+        this.settings.prefixes = mutableListOf("", "w!", "\\", "!")
     }
 
     /** A list of user IDs that have enabled personal tracking */

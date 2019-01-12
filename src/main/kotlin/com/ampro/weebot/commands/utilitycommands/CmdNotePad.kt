@@ -672,7 +672,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                 return file
             }
         } catch (e: IOException) {
-            MLOG.elog("IOException Making NotePad Note ${e.message ?: ""} ")
+            MLOG.elog(NotePad::class, "IOException Making NotePad Note ${e.message?:""} ")
             return null
         }
     }
@@ -1079,7 +1079,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                                     }
                                 } else {
                                     event.reply("*Uhh...hmm.. sorry something went wrong. Please try again later*")
-                                    MLOG.elog("Failed to delete valid NotePads")
+                                    MLOG.elog(NotePad::class, "Failed to delete valid NotePads")
                                 }
                             } else if (it.message.contentDisplay.matches(REG_NO)) {
                                 event.reply("Ok, deletion cancelled.")
@@ -1326,7 +1326,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                         event.reply("*NotePad(s) deleted.* $heavy_check_mark")
                     } else {
                         event.reply("*Uhh...hmm.. sorry something went wrong. Please try again later*")
-                        MLOG.elog("Failed to delete valid NotePads")
+                        MLOG.elog(NotePad::class, "Failed to delete valid NotePads")
                     }
                 } else if (event_2.message.contentDisplay.matches(Regex("(?i)n+o+"))) {
                     event.reply("Ok, deletion cancelled.")

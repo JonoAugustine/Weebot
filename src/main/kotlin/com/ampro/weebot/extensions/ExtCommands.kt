@@ -4,15 +4,30 @@
 
 package com.ampro.weebot.extensions
 
-import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.*
+import com.ampro.weebot.commands.COMMANDS
+import com.ampro.weebot.database.*
+import com.ampro.weebot.database.constants.DEV_IDS
+import com.ampro.weebot.util.Emoji.*
+import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.*
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
+import jdk.nashorn.internal.ir.annotations.Ignore
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
+import net.dv8tion.jda.core.entities.Game.listening
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
+import net.dv8tion.jda.core.events.*
+import net.dv8tion.jda.core.events.guild.GuildJoinEvent
+import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
+import net.dv8tion.jda.core.hooks.EventListener
 import java.time.OffsetDateTime
+import java.time.temporal.ChronoUnit
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.ScheduledExecutorService
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.function.BiConsumer
@@ -232,6 +247,11 @@ abstract class WeebotCommand(name: String, val displayName: String?,
 
 }
 
+class WeebotCommandEvent(event: MessageReceivedEvent, arg: String)
+    : CommandEvent(event, arg, CMD_CLIENT) {
+    override fun linkId(message: Message) = Unit
+}
+
 /**
  * A [CommandClient] implementation that seeks to fix the glaring issues of
  * the implementation given by jagrosh
@@ -239,514 +259,215 @@ abstract class WeebotCommand(name: String, val displayName: String?,
  * @author Jonathan Augustine
  * @since 2.2.0
  */
-class WeebotCommandClient : CommandClient {
-    /**
-     * Gets the ID(s) of any CoOwners of this bot as a String Array.
-     *
-     * @return The String ID(s) of any CoOwners of this bot
-     */
-    override fun getCoOwnerIds(): Array<String> {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
+class WeebotCommandClient(val prefixes: List<String>,
+                          private val serverInvite: String,
+                          private val game: Game?,
+                          private val coroutinePool: ExecutorCoroutineDispatcher,
+                          helpWords: List<String>,
+                          private val helpConsumer: (CommandEvent) -> Unit
+) : CommandClient, EventListener {
+
+    val initTime: OffsetDateTime = NOW()
+
+    private val commandIndexMap = ConcurrentHashMap<String, Int>()
+    private val cooldowns = ConcurrentHashMap<String, OffsetDateTime>()
+
+    private var totalGuilds: Int = 0
+
+    val helpWords: List<String> = helpWords.map { it.toLowerCase() }
+
+    init {
+        COMMANDS.forEachIndexed { i, cmd ->
+            (cmd.aliases.map { it.toLowerCase() } + cmd.name.toLowerCase()).forEach {
+                if (commandIndexMap.containsKey(it)) throw IllegalArgumentException(
+                        "Command added has a conflicting name or alias: " +
+                                "${commandIndexMap[it]} vs $it"
+                )
+                commandIndexMap[it] = i
+            }
+        }
     }
 
-    /**
-     * Applies the specified cooldown with the provided name.
-     *
-     * @param  name
-     * The cooldown name
-     * @param  seconds
-     * The time to make the cooldown last
-     */
-    override fun applyCooldown(name: String?, seconds: Int) {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun shutdown() = coroutinePool.close()
+
+    /* ************
+        Cooldowns
+     *************/
+
+    override fun applyCooldown(name: String, seconds: Int) {
+        try {
+            if (!DEV_IDS.contains(name.substring(name.indexOf("U:") + 2).toLong()))
+                cooldowns[name] = NOW().plusSeconds(seconds.toLong())
+        } catch (e: NumberFormatException) {
+            cooldowns[name] = NOW().plusSeconds(seconds.toLong())
+        }
     }
 
-    /**
-     * Returns the type of [GuildSettingsManager][com.jagrosh.jdautilities.command.GuildSettingsManager],
-     * the same type of one provided when building this CommandClient, or `null` if one was not provided there.
-     *
-     *
-     * This is good if you want to use non-abstract methods specific to your implementation.
-     *
-     * @param  <M>
-     * The type of the GuildSettingsManager
-     *
-     * @return The GuildSettingsManager, or `null` if one was not provided when building this CommandClient.
-    </M> */
-    override fun <M : GuildSettingsManager<*>?> getSettingsManager(): M {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun getRemainingCooldown(name: String): Int {
+        cooldowns[name]?.also { cd ->
+            val time = NOW().until(cd, ChronoUnit.SECONDS).toInt()
+            if (time <= 0) {
+                cooldowns.remove(name)
+                return 0
+            }
+            return time
+        }
+        return 0
     }
 
-    /**
-     * Gets the error emoji.
-     *
-     * @return The error emoji
-     */
-    override fun getError(): String {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
+    override fun getCooldown(name: String) : OffsetDateTime? = cooldowns[name]
+
+    override fun cleanCooldowns() = cooldowns.filterValues { it.isBefore(NOW()) }
+        .forEach { cooldowns.remove(it.key) }
+
+    /* ***************
+        Default Emoji
+     *****************/
+
+    override fun getSuccess() = WhiteCheckMark.unicode
+    override fun getError() = X_Red.unicode
+    override fun getWarning() = Warning.unicode
+
+    /* ************
+         Owners
+     *************/
+
+    override fun getOwnerId() = DEV_IDS.first().toString()
+    override fun getCoOwnerIds() = DEV_IDS.map { it.toString() }.toTypedArray()
+    override fun getOwnerIdLong() = DEV_IDS.first()
+    override fun getCoOwnerIdsLong() = DEV_IDS.toLongArray()
+
+    /* ******************
+        Command Parsing
+     ********************/
+
+    override fun onEvent(event: Event) {
+        when (event) {
+            is MessageReceivedEvent -> {
+                if (event.author.isBot) return
+                GlobalScope.launch(coroutinePool) {
+                    onMessageReceived(event)
+                }
+            }
+            is GuildJoinEvent -> {
+                //Weebot joins a guild
+                if (event.guild.selfMember.joinDate.plusMinutes(10).isAfter(NOW())) {
+                    sendStats()
+                }
+            }
+            is GuildLeaveEvent -> sendStats()
+            is ReadyEvent -> {
+                JDA_SHARD_MNGR.setGame(
+                    game ?: listening("$@${event.jda.selfUser.name}$helpWord"))
+                sendStats()
+            }
+            is ShutdownEvent -> shutdown()
+        }
     }
 
-    /**
-     * Compiles the provided [Object][java.lang.Object] annotated with [ ] into a [ List][java.util.List] of [Command][com.jagrosh.jdautilities.command.Command]s and adds them to this CommandClient in
-     * the order they are listed.
-     *
-     *
-     * This is done through the [ AnnotatedModuleCompiler][AnnotatedModuleCompiler] provided when building this CommandClient.
-     *
-     * @param  module
-     * An object annotated with JDACommand.Module to compile into commands to be added.
-     *
-     * @throws java.lang.IllegalArgumentException
-     * If the Command provided has a name or alias that has already been registered
-     */
-    override fun addAnnotatedModule(module: Any?) {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun onMessageReceived(event: MessageReceivedEvent) {
+        /** each string from raw content. the first arg will be the command name */
+        var rawParts = event.splitArgsRaw().toMutableList()
+
+        val settings = if (event.guild != null) getWeebotOrNew(event.guild).settings
+        else DAO.GLOBAL_WEEBOT.settings
+
+        when {
+            //Check for @Mention
+            rawParts[0].matches(userMentionRegex)
+                    && SELF.idLong == rawParts[0].removeAll("[^0-9]+").toLong() -> {
+                rawParts = rawParts.subList(1)
+            }
+            // Check for guild specific prefixes
+            settings.prefixes.isNotEmpty() -> {
+                settings.prefixes.firstOrNull { rawParts[0].startsWith(it, true) }
+                    ?.let { rawParts[0] = rawParts[0].removePrefix(it) } ?: return
+            }
+            // Check for default prefixes
+            prefixes.isNotEmpty() -> {
+                prefixes.firstOrNull { rawParts[0].startsWith(it, true) }
+                    ?.let { rawParts[0] = rawParts[0].removePrefix(it) } ?: return
+            }
+            // lest a command was not called properly or at all
+            else -> return
+        }
+
+        val cmdCall: String = rawParts[0].toLowerCase()
+        val args = rawParts.subList(1).joinToString(" ")
+
+        if (helpWords.contains(cmdCall.toLowerCase())) {
+            helpConsumer(CommandEvent(event, args, this))
+        } else if (event.isFromType(PRIVATE) || event.textChannel.canTalk()) {
+            commandIndexMap[cmdCall]?.let {
+                COMMANDS[it].run(WeebotCommandEvent(event, args))
+            }
+        }
+
     }
 
-    /**
-     * Compiles the provided [Object][java.lang.Object] annotated with [ ] into a [ List][java.util.List] of [Command][com.jagrosh.jdautilities.command.Command]s and adds them to this CommandClient via
-     * the [Function][java.util.function.Function] provided.
-     *
-     *
-     * This is done through the [ AnnotatedModuleCompiler][AnnotatedModuleCompiler] provided when building this CommandClient.
-     *
-     *
-     * The Function will [apply][java.util.function.Function.apply] each [ ] in the compiled list and request an `int` in return.
-     * <br></br>Using this `int`, the command provided will be applied to the CommandClient via [ ][CommandClient.addCommand].
-     *
-     * @param  module
-     * An object annotated with JDACommand.Module to compile into commands to be added.
-     * @param  mapFunction
-     * The Function to get indexes for each compiled Command with when adding them to the CommandClient.
-     *
-     * @throws java.lang.ArrayIndexOutOfBoundsException
-     * If `index < 0` or `index > size()`
-     * @throws java.lang.IllegalArgumentException
-     * If the Command provided has a name or alias that has already been registered to an index
-     */
-    override fun addAnnotatedModule(module: Any?, mapFunction: Function<Command, Int>?) {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
+    private fun sendStats() {
+        //discordbots.org
+        MLOG.slog(this::class, "Sending Stats to discordbots.org...")
+        DISCORD_BOTLIST_API.setStats(JDA_SHARD_MNGR.shards.map { it.guilds.size })
+        //discordbotlist.com
+        /*MLOG.slog("Sending Stats to discordbotlist.com && discord.bots.gg...")
+        JDA_SHARD_MNGR.shards.forEachIndexed { i, shard ->
+            "https://discordbotlist.com/api/bots/${SELF.id}/stats".httpPost(
+                listOf("shard_id" to i, "guilds" to shard.guilds.size,
+                    "users" to shard.users.size))
+                .apply { headers.clear() }
+                .header("Authorization" to "Bot $KEY_DISCORD_BOT_COM")
+                .response { _, _, result ->
+                    result.component2()?.apply {
+                        MLOG.elog("Failed to POST to discordbotlist.com")
+                        MLOG.elog(response.responseMessage)
+                    }
+                }
+            //https://discord.bots.gg
+            "https://discord.bots.gg/api/v1/bots/${SELF.id}/stats".httpPost(
+                listOf("guildCount" to shard.guilds.size,
+                    "shardCount" to JDA_SHARD_MNGR.shards.size, "shardId" to i
+                    ,"Content-Type" to "application/json"
+                ))
+                .apply { headers.clear() }
+                .header("Authorization" to KEY_DISCORD_BOTS_GG)
+                .response { _, _, result ->
+                    result.component2()?.apply {
+                        MLOG.elog("Failed to POST to discord.bots.gg")
+                        MLOG.elog(response.responseMessage)
+                    }
+                }
+        }*/
     }
 
-    /**
-     * Gets the invite to the bot's support server.
-     *
-     * @return A possibly-null server invite
-     */
-    override fun getServerInvite(): String {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
 
+    //Unused Overrides
+    override fun getPrefix() = try { prefixes[0] } catch (e: Exception) { null }
+    override fun getAltPrefix() = try { prefixes[1] } catch (e: Exception) { null }
+    override fun getHelpWord() = helpWords.first()
+    override fun getServerInvite() = serverInvite
+    override fun getStartTime() = initTime
+    override fun addCommand(command: Command) = Unit
+    override fun addCommand(command: Command, index: Int) = Unit
+    override fun removeCommand(name: String?) = Unit
+    @Ignore override fun getCommands(): MutableList<Command>? = null
     /**
-     * Gets the Client's alternate prefix.
-     *
-     * @return A possibly-null alternate prefix
-     */
-    override fun getAltPrefix(): String {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the [ScheduledExecutorService][java.util.concurrent.ScheduledExecutorService] held by this client.
-     *
-     *
-     * This is used for methods such as [ CommandEvent#async(Runnable)][com.jagrosh.jdautilities.command.CommandEvent.async] run code asynchronously.
-     *
-     * @return The ScheduledExecutorService held by this client.
-     */
-    override fun getScheduleExecutor(): ScheduledExecutorService {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Cleans up expired cooldowns to reduce memory.
-     */
-    override fun cleanCooldowns() {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the warning emoji.
-     *
-     * @return The warning emoji
-     */
-    override fun getWarning(): String {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Adds a single [Command][com.jagrosh.jdautilities.command.Command] to this CommandClient's
-     * registered Commands.
-     *
-     *
-     * For CommandClient's containing 20 commands or less, command calls by users will have the bot iterate
-     * through the entire [ArrayList][java.util.ArrayList] to find the command called. As expected, this
-     * can get fairly hefty if a bot has a lot of Commands registered to it.
-     *
-     *
-     * To prevent delay a CommandClient that has more that 20 Commands registered to it will begin to use
-     * **indexed calls**.
-     * <br></br>Indexed calls use a [HashMap][java.util.HashMap] which links their
-     * [name][com.jagrosh.jdautilities.command.Command.name] and their
-     * [aliases][com.jagrosh.jdautilities.command.Command.aliases] to the index that which they
-     * are located at in the ArrayList they are stored.
-     *
-     *
-     * This means that all insertion and removal of Commands must reorganize the index maintained by the HashMap.
-     * <br></br>For this particular insertion, the Command provided is inserted at the end of the index, meaning it will
-     * become the "rightmost" Command in the ArrayList.
-     *
-     * @param  command
-     * The Command to add
-     *
-     * @throws java.lang.IllegalArgumentException
-     * If the Command provided has a name or alias that has already been registered
-     */
-    override fun addCommand(command: Command?) {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Adds a single [Command][com.jagrosh.jdautilities.command.Command] to this CommandClient's
-     * registered Commands at the specified index.
-     *
-     *
-     * For CommandClient's containing 20 commands or less, command calls by users will have the bot iterate
-     * through the entire [ArrayList][java.util.ArrayList] to find the command called. As expected, this
-     * can get fairly hefty if a bot has a lot of Commands registered to it.
-     *
-     *
-     * To prevent delay a CommandClient that has more that 20 Commands registered to it will begin to use
-     * **indexed calls**.
-     * <br></br>Indexed calls use a [HashMap][java.util.HashMap] which links their
-     * [name][com.jagrosh.jdautilities.command.Command.name] and their
-     * [aliases][com.jagrosh.jdautilities.command.Command.aliases] to the index that which they
-     * are located at in the ArrayList they are stored.
-     *
-     *
-     * This means that all insertion and removal of Commands must reorganize the index maintained by the HashMap.
-     * <br></br>For this particular insertion, the Command provided is inserted at the index specified, meaning it will
-     * become the Command located at that index in the ArrayList. This will shift the Command previously located at
-     * that index as well as any located at greater indices, right one index (`size()+1`).
-     *
-     * @param  command
-     * The Command to add
-     * @param  index
-     * The index to add the Command at (must follow the specifications `0<=index<=size()`)
-     *
-     * @throws java.lang.ArrayIndexOutOfBoundsException
-     * If `index < 0` or `index > size()`
-     * @throws java.lang.IllegalArgumentException
-     * If the Command provided has a name or alias that has already been registered to an index
-     */
-    override fun addCommand(command: Command?, index: Int) {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Returns an Object of the type parameter that should contain settings relating to the specified
-     * [Guild][net.dv8tion.jda.core.entities.Guild].
-     *
-     *
-     * The returning object for this is specified via provision of a
-     * [GuildSettingsManager][com.jagrosh.jdautilities.command.GuildSettingsManager] to
-     * [ CommandClientBuilder#setGuildSettingsManager(GuildSettingsManager)][com.jagrosh.jdautilities.command.CommandClientBuilder.setGuildSettingsManager], more specifically
-     * [ GuildSettingsManager#getSettings(Guild)][GuildSettingsManager.getSettings].
-     *
-     * @param  <S>
-     * The type of settings the GuildSettingsManager provides
-     * @param  guild
-     * The Guild to get Settings for
-     *
-     * @return The settings object for the Guild, specified in
-     * [         GuildSettingsManager#getSettings(Guild)][com.jagrosh.jdautilities.command.GuildSettingsManager.getSettings], can be `null` if the implementation
-     * allows it.
-    </S> */
-    override fun <S : Any?> getSettingsFor(guild: Guild?): S {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Sets the [CommandListener][com.jagrosh.jdautilities.command.CommandListener] to catch
-     * command-related events thrown by this [CommandClient][com.jagrosh.jdautilities.command.CommandClient].
-     *
-     * @param  listener
-     * The CommandListener
-     */
-    override fun setListener(listener: CommandListener?) {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Returns the list of registered [Command][com.jagrosh.jdautilities.command.Command]s
-     * during this session.
-     *
-     * @return A never-null List of Commands registered during this session
-     */
-    override fun getCommands(): MutableList<Command> {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the time this [CommandClient][com.jagrosh.jdautilities.command.CommandClient]
-     * implementation was created.
-     *
-     * @return The start time of this CommandClient implementation
-     */
-    override fun getStartTime(): OffsetDateTime {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the ID(s) of any CoOwners of this bot as a `long` Array.
-     *
-     * @return The `long` ID(s) of any CoOwners of this bot
-     */
-    override fun getCoOwnerIdsLong(): LongArray {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Returns the current [CommandListener][com.jagrosh.jdautilities.command.CommandListener].
-     *
-     * @return A possibly-null CommandListener
-     */
-    override fun getListener(): CommandListener {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the success emoji.
-     *
-     * @return The success emoji
-     */
-    override fun getSuccess(): String {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the number of uses for the provide [Command][com.jagrosh.jdautilities.command.Command]
-     * during this session, or `0` if the command is not registered to this CommandClient.
-     *
-     * @param  command
-     * The Command
-     *
-     * @return The number of uses for the Command
-     */
-    override fun getCommandUses(command: Command?): Int {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the number of uses for a [Command][com.jagrosh.jdautilities.command.Command]
-     * during this session matching the provided String name, or `0` if there is no Command
-     * with the name.
-     *
-     *
-     * **NOTE:** this method **WILL NOT** get uses for a command if an
-     * [alias][com.jagrosh.jdautilities.command.Command.aliases] is provided! Also note that
-     * [child commands][com.jagrosh.jdautilities.command.Command.children] **ARE NOT**
-     * tracked and providing names or effective names of child commands will return `0`.
-     *
-     * @param  name
-     * The name of the Command
-     *
-     * @return The number of uses for the Command, or `0` if the name does not match with a Command
-     */
-    override fun getCommandUses(name: String?): Int {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the [OffsetDateTime][java.time.OffsetDateTime] that the specified cooldown expires.
-     *
-     * @param  name
-     * The cooldown name
-     *
-     * @return The expiration time, or null if the cooldown does not exist
-     */
-    override fun getCooldown(name: String?): OffsetDateTime {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the ID of the owner of this bot as a `long`.
-     *
-     * @return The `long` ID of the owner of the bot
-     */
-    override fun getOwnerIdLong(): Long {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the word used to invoke a help DM.
-     *
-     * @return The help word
-     */
-    override fun getHelpWord(): String {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Shuts down internals of the Command Client, such as the threadpool and guild settings manager
-     */
-    override fun shutdown() {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the ID of the owner of this bot as a String.
-     *
-     * @return The String ID of the owner of the bot
-     */
-    override fun getOwnerId(): String {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Removes a single [Command][com.jagrosh.jdautilities.command.Command] from this CommandClient's
-     * registered Commands at the index linked to the provided name/alias.
-     *
-     *
-     * For CommandClient's containing 20 commands or less, command calls by users will have the bot iterate
-     * through the entire [ArrayList][java.util.ArrayList] to find the command called. As expected, this
-     * can get fairly hefty if a bot has a lot of Commands registered to it.
-     *
-     *
-     * To prevent delay a CommandClient that has more that 20 Commands registered to it will begin to use
-     * **indexed calls**.
-     * <br></br>Indexed calls use a [HashMap][java.util.HashMap] which links their
-     * [name][com.jagrosh.jdautilities.command.Command.name] and their
-     * [aliases][com.jagrosh.jdautilities.command.Command.aliases] to the index that which they
-     * are located at in the ArrayList they are stored.
-     *
-     *
-     * This means that all insertion and removal of Commands must reorganize the index maintained by the HashMap.
-     * <br></br>For this particular removal, the Command removed is that of the corresponding index retrieved by the name
-     * provided. This will shift any Commands located at greater indices, left one index (`size()-1`).
-     *
-     * @param  name
-     * The name or an alias of the Command to remove
-     *
-     * @throws java.lang.IllegalArgumentException
-     * If the name provided was not registered to an index
-     */
-    override fun removeCommand(name: String?) {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets whether this CommandClient uses linked deletion.
-     *
-     *
-     * Linking calls is the basic principle of pairing bot responses with their calling
-     * [Message][net.dv8tion.jda.core.entities.Message]s.
-     * <br></br>Using this with a basic function such as deletion, this causes bots to delete their
-     * Messages as a response to the calling Message being deleted.
-     *
-     * @return `true` if the bot uses linked deletion, `false` otherwise.
-     *
-     * @see com.jagrosh.jdautilities.command.CommandClientBuilder.setLinkedCacheSize
-     */
-    override fun usesLinkedDeletion(): Boolean {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the Client's prefix.
-     *
-     * @return A possibly-null prefix
-     */
-    override fun getPrefix(): String {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Returns the visual representation of the bot's prefix.
-     *
-     *
-     * This is the same as [com.jagrosh.jdautilities.command.CommandClient.getPrefix] unless the prefix is the default,
-     * in which case it appears as @Botname.
-     *
+     * same thing as [getPrefix]
      * @return A never-null prefix
      */
-    override fun getTextualPrefix(): String {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets an a recently updated count of all the [Guild][net.dv8tion.jda.core.entities.Guild]s
-     * the bot is connected to on all shards.
-     *
-     *
-     * **NOTE:** This may not always or should not be assumed accurate! Any time
-     * a shard joins or leaves a guild it will update the number retrieved by this method
-     * but will not update when other shards join or leave guilds. This means that shards
-     * will not always retrieve the same value. For instance:
-     *
-     *  * 1) Shard A joins 10 Guilds
-     *  * 2) Shard B invokes this method
-     *  * 3) Shard A invokes this method
-     *
-     * The number retrieved by Shard B will be that of the number retrieved by Shard A,
-     * minus 10 guilds because Shard B hasn't updated and accounted for those 10 guilds
-     * on Shard A.
-     *
-     *
-     * **This feature requires a Discord Bots API Key to be set!**
-     * <br></br>To set your Discord Bots API Key, you'll have to retrieve it from the
-     * [Discord Bots](http://bots.discord.pw/) website.
-     *
-     * @return A recently updated count of all the Guilds the bot is connected to on
-     * all shards.
-     */
-    override fun getTotalGuilds(): Int {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
-
-    /**
-     * Gets the remaining number of seconds on the specified cooldown.
-     *
-     * @param  name
-     * The cooldown name
-     *
-     * @return The number of seconds remaining
-     */
-    override fun getRemainingCooldown(name: String?): Int {
-        TODO(
-            "not implemented") //To change body of created functions use File | Settings | File Templates.
-    }
+    override fun getTextualPrefix() = prefix
+    override fun getTotalGuilds() = totalGuilds
+    @Suppress("UNCHECKED_CAST")
+    override fun <M : GuildSettingsManager<*>?> getSettingsManager() = null
+    override fun addAnnotatedModule(module: Any) = Unit
+    override fun addAnnotatedModule(module: Any, mapFunction: Function<Command, Int>) = Unit
+    override fun getScheduleExecutor(): ScheduledExecutorService?  = null
+    @Suppress("UNCHECKED_CAST")
+    override fun <S : Any?> getSettingsFor(guild: Guild) = null
+    override fun setListener(listener: CommandListener) = Unit
+    override fun getListener() = null
+    override fun usesLinkedDeletion() = false
+    override fun getCommandUses(command: Command): Int = -1
+    override fun getCommandUses(name: String) : Int = -1
 
 }

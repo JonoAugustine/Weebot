@@ -7,7 +7,8 @@ package com.ampro.weebot.database
 import com.ampro.weebot.*
 import com.ampro.weebot.commands.developer.CmdSuggestion
 import com.ampro.weebot.commands.developer.Suggestion
-import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.database.constants.CLIENT_WBT
+import com.ampro.weebot.database.constants.KEY_DISCORD_BOTS_ORG
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.google.gson.Gson
@@ -268,14 +269,14 @@ class Dao {
     fun backUp(): Int {
         try {
             if (!DIR_DAO.exists() && DIR_DAO.mkdirs()) {
-                MLOG.elog("[Database Manager] Failed to generate database dir!")
+                MLOG.elog(Dao::class, "Failed to generate database dir!")
                 return -1
             } else if (!DAO_BKUP.exists() && !DAO_BKUP.createNewFile()) {
-                MLOG.elog("[Database Manager] Failed to generate database backup!")
+                MLOG.elog(Dao::class, "Failed to generate database backup!")
                 return -1
             }
         } catch (e: IOException) {
-            MLOG.elog("IOException while creating Database backup file.")
+            MLOG.elog(Dao::class, "IOException while creating Database backup file.")
             e.printStackTrace()
             return -1
         }
@@ -287,11 +288,11 @@ class Dao {
                 return@use 1
             }
         } catch (e: FileNotFoundException) {
-            MLOG.elog("File not found while writing gson backup to file.")
+            MLOG.elog(Dao::class, "File not found while writing gson backup to file.")
             e.printStackTrace()
             return -1
         } catch (e: IOException) {
-            MLOG.elog("IOException while writing gson backup to file.")
+            MLOG.elog(Dao::class, "IOException while writing gson backup to file.")
             e.printStackTrace()
             return -1
         }

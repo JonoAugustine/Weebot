@@ -263,6 +263,39 @@
       "notePads": [],
       "guildID": 264445053596991498
     },
+    "508669831101546502": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 11
+          },
+          "time": {
+            "hour": 20,
+            "minute": 51,
+            "second": 6,
+            "nano": 502000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 508669831101546502
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 508669831101546502
+    },
     "528665849423200276": {
       "initDate": {
         "dateTime": {
@@ -833,24 +866,10 @@
             "scoreMap": {
               "185063150557593600": 0,
               "277593092561829889": 0,
-              "186130584693637131": 2,
-              "139167730237571072": 4,
+              "186130584693637131": 4,
+              "139167730237571072": 1,
               "383656411789524995": 2
             }
-          }
-        },
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
-          "DATA": {
-            "dead": false,
-            "inShutdown": false,
-            "userSettings": {},
-            "guildSettings": {
-              "limit": 0,
-              "name": "{USER}\u0027s Channel"
-            },
-            "baseId": 530923086401372160,
-            "genChannels": {}
           }
         }
       ],

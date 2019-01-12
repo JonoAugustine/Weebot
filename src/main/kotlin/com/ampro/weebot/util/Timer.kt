@@ -18,11 +18,10 @@ val WKDAY_MONTH_YEAR_TIME: DateTimeFormatter? = DateTimeFormatter.ofPattern("EEE
 fun NOW(): OffsetDateTime = OffsetDateTime.now()
 
 /** @return The current local date and time. dd-MM-yyyy HH:mm:ss */
-val NOW_STR: String get() = OffsetDateTime.now().format(
-        DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm:ss"))
+fun NOW_STR(): String = NOW().format(DD_MM_YYYY_HH_MM_SS)
 
 /** @return The current local date and time. dd-MM-yyyy HH-mm-ss */
-val NOW_STR_FILE: String get() = NOW_STR.replace(":", "-")
+val NOW_STR_FILE: String get() = NOW_STR().replace(":", "-")
 
 
 /**

@@ -30,19 +30,22 @@ fun CommandClientBuilder.addCommandsWithCheck(commands: Iterable<WeebotCommand>)
     var err = false
     commands.forEach { c ->
         if (c.name.toList().has { it.isUpperCase() }) {
-            MLOG.elog("Command name ${c.name} has is capitalized when it should not be!")
+            MLOG.elog(null,
+                "Command name ${c.name} has is capitalized when it should not be!")
             err = true
         }
         c.aliases.forEach { a ->
             if (a.toList().has { it.isUpperCase() }) {
-                MLOG.elog("Command name $a has is capitalized when it should not be!")
+                MLOG.elog(null,
+                    "Command name $a has is capitalized when it should not be!")
                 err = true
             }
         }
         commands.filter { it != c }.forEach { c2 ->
             if ((c2.aliases + listOf(c2.name)).map { it.toLowerCase() }
                         .contains(c.name.toLowerCase())) {
-                MLOG.elog("${c.name} shares a name with ${c2.name}!")
+                MLOG.elog(null,
+                    "${c.name} shares a name with ${c2.name}!")
                 err = true
             }
         }

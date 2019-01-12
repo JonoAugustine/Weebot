@@ -150,7 +150,7 @@ fun clearTempDirs() {
     try {
         FileUtils.cleanDirectory(DIR_TEMP)
     } catch (e: IOException) {
-        MLOG.elog("Failed clear temp dir.")
+        MLOG.elog(null, "Failed clear temp dir.")
         e.printStackTrace()
     }
 

@@ -83,6 +83,15 @@ fun EmbedBuilder.addEmptyFields(inline: Boolean = false, vararg titles: String):
     return this
 }
 
+fun MessageEmbed.send(messageChannel: MessageChannel, success: (Message) -> Unit = {}) {
+    messageChannel.sendMessage(this).queue(success)
+}
+
+fun MessageEmbed.send(messageChannel: MessageChannel, success: (Message) -> Unit = {},
+                      failure: (Throwable) -> Unit) {
+    messageChannel.sendMessage(this).queue(success, failure)
+}
+
 val strdPaginator: Paginator.Builder
     get() = Builder().setColor(STD_GREEN).setEventWaiter(WAITER)
         .waitOnSinglePage(false).useNumberedItems(false).showPageNumbers(true)
@@ -394,7 +403,9 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                 })
             : this(users, roles, timeout, unit, baseEmbed.title, baseEmbed.description,
         items, itemsPerPage, singleUse, bulkSkipNumber, wrapPageEnds,
-        baseEmbed.thumbnail.url, color, baseEmbed.fields, exitAction, timeoutAction)
+        baseEmbed.thumbnail.url, color, baseEmbed.fields, exitAction, timeoutAction) {
+
+    }
 
     companion object {
         val BIG_LEFT = Rewind

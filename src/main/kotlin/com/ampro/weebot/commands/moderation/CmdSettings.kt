@@ -4,9 +4,7 @@
 
 package com.ampro.weebot.commands.moderation
 
-import com.ampro.weebot.WAITER
-import com.ampro.weebot.Weebot
-import com.ampro.weebot.WeebotSettings
+import com.ampro.weebot.*
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
@@ -20,7 +18,6 @@ import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.awt.Color
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
@@ -147,13 +144,14 @@ private class CmdSetPrefix : WeebotCommand("prefix", null,emptyArray(), CAT_MOD,
 
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild)
+        val prfx = (if (bot.settings.prefixes.isNotEmpty())
+            bot.settings.prefixes else CMD_CLIENT.prefixes).joinToString(", ")
         when {
             event.args.isBlank() -> {
                 STAT.track(this, bot, event.author, event.creationTime)
                 SelectableEmbed(event.author, false, strdEmbedBuilder
                     .setTitle("Prefix").setDescription("""
-                        My current prefixes are: ``${
-                    bot.settings.prefixs.joinToString(", ")}``
+                        My current prefixes are: ``$prfx``
                         $A to add a prefix
                         $C to change the prefix
                     """.trimIndent())
@@ -170,7 +168,7 @@ private class CmdSetPrefix : WeebotCommand("prefix", null,emptyArray(), CAT_MOD,
                                     if (event_2.message.contentDisplay.length > 3) {
                                         event.reply("*That prefix is too long*")
                                     } else {
-                                        bot.settings.prefixs.add(
+                                        bot.settings.prefixes.add(
                                             event_2.message.contentDisplay
                                         )
                                         event.reply("You can now call me with ``${
@@ -188,8 +186,8 @@ private class CmdSetPrefix : WeebotCommand("prefix", null,emptyArray(), CAT_MOD,
                                     if (event_2.message.contentDisplay.length > 3) {
                                         event.reply("*That prefix is too long*")
                                     } else {
-                                        bot.settings.prefixs.clear()
-                                        bot.settings.prefixs.add(
+                                        bot.settings.prefixes.clear()
+                                        bot.settings.prefixes.add(
                                             event_2.message.contentDisplay
                                         )
                                         event.reply("You can now call me with ``${
@@ -206,8 +204,8 @@ private class CmdSetPrefix : WeebotCommand("prefix", null,emptyArray(), CAT_MOD,
             }
             else -> {
                 STAT.track(this, bot, event.author, event.creationTime)
-                bot.settings.prefixs.clear()
-                bot.settings.prefixs.add(event.args)
+                bot.settings.prefixes.clear()
+                bot.settings.prefixes.add(event.args)
                 event.reply("You can now call me with ${event.args}")
             }
         }

@@ -192,7 +192,8 @@ class CmdReddicord : WeebotCommand("reddicord", "Redicord",
     userPerms = arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
     botPerms =  arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
     guildOnly = true, children = arrayOf(SubCmdReset(),
-        SubCmdLeaderBoard("leaderboard", arrayOf("lb", "scores", "reddiscore","reddiscores")))
+        SubCmdLeaderBoard("leaderboard",
+            arrayOf("lb", "scores", "reddiscore","reddiscores", "score")))
 ) {
 
     class SubCmdReset : WeebotCommand("reset", null, arrayOf("clear", "clearscores"),

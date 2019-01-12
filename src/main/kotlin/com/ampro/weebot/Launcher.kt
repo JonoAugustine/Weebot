@@ -5,14 +5,12 @@
 package com.ampro.weebot
 
 import com.ampro.weebot.commands.*
-import com.ampro.weebot.commands.developer.*
+import com.ampro.weebot.commands.developer.CLIENT_TWTICH_PUB
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
-import com.ampro.weebot.util.Emoji.*
-import com.jagrosh.jdautilities.command.CommandClient
-import com.jagrosh.jdautilities.command.CommandClientBuilder
+import com.ampro.weebot.util.Emoji.Rage
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
 import kotlinx.coroutines.*
 import net.dv8tion.jda.bot.sharding.ShardManager
@@ -32,6 +30,7 @@ lateinit var SAVE_JOB: Job
 const val SAVE_INTER = 30
 
 val CACHED_POOL =  Executors.newCachedThreadPool().asCoroutineDispatcher()
+val CMD_POOL    = Executors.newFixedThreadPool(50).asCoroutineDispatcher()
 
 /** Main Logger */
 lateinit var MLOG: FileLogger
@@ -39,7 +38,7 @@ lateinit var MLOG: FileLogger
 //JDA connection shard Client
 lateinit var JDA_SHARD_MNGR: ShardManager
 var ON = true
-lateinit var CMD_CLIENT: CommandClient
+lateinit var CMD_CLIENT: WeebotCommandClient
 val WAITER: EventWaiter = EventWaiter()
 /** The bot's selfuser from */
 lateinit var SELF: SelfUser
@@ -49,7 +48,6 @@ const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try th
 
 val games = listOf(listening("@Weebot Help"), playing("with wires"),
     watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.1.1"))
-
 
 /**
  * Put bot online, setup listeners, and get full list of servers (Guilds)
@@ -68,7 +66,7 @@ fun main(args_: Array<String>) { runBlocking {
     }
     slog("\t...DONE")
     slog("Initializing Main Logger")
-    MLOG = FileLogger("Launcher $NOW_STR_FILE")
+    MLOG = FileLogger("Launcher")
     slog("...DONE\n\n")
 
     /** Setup for random methods and stuff that is needed before launch */
@@ -87,38 +85,25 @@ fun main(args_: Array<String>) { runBlocking {
     val alt = if (weebot) "\\" else "t\\"
 
     //COMMAND CLIENT
-    CMD_CLIENT = CommandClientBuilder().setOwnerId(DEV_IDS[0].toString())
-        .setCoOwnerIds(DEV_IDS[1].toString())
-        .setGuildSettingsManager { getWeebotOrNew(it.idLong).settings }
-        .setAlternativePrefix(alt)
-        .setGame(games.random())
-        .addCommandsWithCheck(COMMANDS)
-        .setEmojis(heavy_check_mark.unicode, Warning.unicode, X_Red.unicode)
-        .setServerInvite(LINK_INVITEBOT)
-        .setHelpConsumer { event ->
-            //If the only argument is the command invoke
-            val args = event.splitArgs()
-            if (args.isEmpty()) {
-                CMD_HELP.execute(event)
-            } else {
-                COMMANDS.forEach { cmd ->
-                    if (cmd.isCommandFor(args[0]) && (!cmd.isHidden || event.isOwner)) {
-                        if (cmd.getHelpBiConsumer() != null) {
-                            cmd.getHelpBiConsumer()!!.accept(event, cmd)
-                            return@setHelpConsumer
-                        } else if (!cmd.help.isNullOrBlank()) {
-                            event.reply("*${cmd.help}*")
-                            return@setHelpConsumer
-                        } else {
-                            event.reply(
-                                "*Help is currently unavailable for this command. You can use ``@Weebot sugg`` to send feedback to the Developers and remind them they have a job to do!* $Rage")
-                            return@setHelpConsumer
-                        }
-                    }
+    CMD_CLIENT = WeebotCommandClient(listOf(alt), LINK_INVITEBOT, games.random(),
+        CMD_POOL, (CMD_HELP.aliases + CMD_HELP.name).toList()) { event ->
+        val args = event.splitArgs()
+        if (args.isEmpty()) CMD_HELP.execute(event)
+        else COMMANDS.forEach { cmd ->
+            if (cmd.isCommandFor(args[0]) && (!cmd.isHidden || event.isOwner)) {
+                if (cmd.getHelpBiConsumer() != null) {
+                    cmd.getHelpBiConsumer()!!.accept(event, cmd)
+                } else if (!cmd.help.isNullOrBlank()) {
+                    event.reply("*${cmd.help}*")
+                } else {
+                    event.reply("*Help is currently unavailable for this " +
+                            "command. You can use ``@Weebot sugg`` to "
+                            + "send feedback to the Developers and remind "
+                            + "them they have a job to do!* $Rage")
                 }
             }
         }
-        .build()
+    }
 
     //DATABASE
     setUpDatabase()
@@ -137,8 +122,9 @@ fun main(args_: Array<String>) { runBlocking {
     startupWeebots()
 
     //WAIT FOR SHARD CONNECT
-    MLOG.slog("All ${JDA_SHARD_MNGR.shards.size} Shards connected! ${measureTimeMillis {
-        MLOG.slog("Waiting for all ${JDA_SHARD_MNGR.shards.size} shards to connect...")
+    MLOG.slog(null,
+        "All ${JDA_SHARD_MNGR.shards.size} Shards connected! ${measureTimeMillis {
+        MLOG.slog(null, "Waiting for all ${JDA_SHARD_MNGR.shards.size} shards to connect...")
         while (JDA_SHARD_MNGR.shards.has { it.status != CONNECTED }) {
             Thread.sleep(500)
         }
@@ -150,15 +136,13 @@ fun main(args_: Array<String>) { runBlocking {
 
     //Stats
     setUpStatistics()
-    //Bot List website APIs
-    setupBotListApis()
 
     genSetup.joinAll() //Ensure all gensetup is finished
 
-    MLOG.slog("Starting Save Job...")
+    MLOG.slog(null, "Starting Save Job...")
     SAVE_JOB = saveTimer()
 
-    MLOG.slog("Launch Complete!\n\n")
+    MLOG.slog(null, "Launch Complete!\n\n")
 
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
         .queueAfter(850, MILLISECONDS)
@@ -233,25 +217,25 @@ fun main(args_: Array<String>) { runBlocking {
  * or makes a new instance
  */
 fun setUpStatistics() {
-    MLOG.slog("Setting up Statistics...")
-    MLOG.slog("\tLoading Statistics...")
+    MLOG.slog(null, "Setting up Statistics...")
+    MLOG.slog(null, "\tLoading Statistics...")
     val stat: Statistics? = loadJson<Statistics>(STAT_SAVE)
     if (stat == null) {
-        MLOG.slog("\t\tUnable to load Statistics, creating new instance.")
+        MLOG.slog(null, "\t\tUnable to load Statistics, creating new instance.")
         STAT = Statistics()
         if (STAT.saveJson(STAT_SAVE) == -1) {
-            MLOG.slog("\tFAILED")
+            MLOG.slog(null, "\tFAILED")
             return
         }
-        MLOG.slog("\tStatistics instance created and saved to file.")
+        MLOG.slog(null, "\tStatistics instance created and saved to file.")
     } else {
-        MLOG.slog("\tStatistics located.")
+        MLOG.slog(null, "\tStatistics located.")
         STAT = stat
     }
-    MLOG.slog("\tBacking up Statistics.")
+    MLOG.slog(null, "\tBacking up Statistics.")
     STAT.saveJson(STAT_BK)
-    MLOG.slog("\t...DONE")
-    MLOG.slog("...DONE")
+    MLOG.slog(null, "\t...DONE")
+    MLOG.slog(null, "...DONE")
 }
 
 /**
@@ -260,73 +244,25 @@ fun setUpStatistics() {
  * Is called only once during setup.
  */
 private fun setUpDatabase() {
-    MLOG.slog("Setting up Database...")
-    MLOG.slog("\tLoading database...")
+    MLOG.slog(null, "Setting up Database...")
+    MLOG.slog(null, "\tLoading database...")
     var tdao = loadDao()
     if (tdao == null) {
-        MLOG.slog("\t\tUnable to loadDao database, creating new database.")
+        MLOG.slog(null, "\t\tUnable to loadDao database, creating new database.")
         tdao = Dao()
-        MLOG.slog("\t\tLoading known Guilds")
+        MLOG.slog(null, "\t\tLoading known Guilds")
         tdao.save()
-        MLOG.slog("\tDatabase created and saved to file.")
+        MLOG.slog(null, "\tDatabase created and saved to file.")
         DAO = tdao
     } else {
-        MLOG.slog("\tDatabase located. Updating registered Guilds.")
+        MLOG.slog(null, "\tDatabase located. Updating registered Guilds.")
         DAO = tdao
     }
     //DAO.updatePremiumUsers()
-    MLOG.slog("\tBacking up database.")
+    MLOG.slog(null, "\tBacking up database.")
     DAO.backUp()
-    MLOG.slog("\t...DONE")
-    MLOG.slog("...DONE")
-}
-
-/**
- * Sends data to the Discor Bot List Websites (in order)
- * https://discordbots.org/bot/437851896263213056
- * https://discordbotlist.com/bots/437851896263213056
- *
- * @since 2.1
- */
-private fun setupBotListApis() {
-    BOT_LIST_API_UPDATERS = GlobalScope.launch(CACHED_POOL) {
-        while (ON) {
-            //discordbots.org
-            MLOG.slog("Sending Stats to discordbots.org...")
-            DISCORD_BOTLIST_API.setStats(JDA_SHARD_MNGR.shards.map { it.guilds.size })
-            //discordbotlist.com
-            /*MLOG.slog("Sending Stats to discordbotlist.com && discord.bots.gg...")
-            JDA_SHARD_MNGR.shards.forEachIndexed { i, shard ->
-                "https://discordbotlist.com/api/bots/${SELF.id}/stats".httpPost(
-                    listOf("shard_id" to i, "guilds" to shard.guilds.size,
-                        "users" to shard.users.size))
-                    .apply { headers.clear() }
-                    .header("Authorization" to "Bot $KEY_DISCORD_BOT_COM")
-                    .response { _, _, result ->
-                        result.component2()?.apply {
-                            MLOG.elog("Failed to POST to discordbotlist.com")
-                            MLOG.elog(response.responseMessage)
-                        }
-                    }
-                //https://discord.bots.gg
-                "https://discord.bots.gg/api/v1/bots/${SELF.id}/stats".httpPost(
-                    listOf("guildCount" to shard.guilds.size,
-                        "shardCount" to JDA_SHARD_MNGR.shards.size, "shardId" to i
-                        ,"Content-Type" to "application/json"
-                    ))
-                    .apply { headers.clear() }
-                    .header("Authorization" to KEY_DISCORD_BOTS_GG)
-                    .response { _, _, result ->
-                        result.component2()?.apply {
-                            MLOG.elog("Failed to POST to discord.bots.gg")
-                            MLOG.elog(response.responseMessage)
-                        }
-                    }
-            }*/
-            MLOG.slog("done")
-            delay(30 * 60 * 1_000)
-        }
-    }
+    MLOG.slog(null, "\t...DONE")
+    MLOG.slog(null, "...DONE")
 }
 
 /**
@@ -334,7 +270,7 @@ private fun setupBotListApis() {
  * changed during downtime and initialize transient variables.
  */
 private fun startupWeebots() {
-    MLOG.slog("Starting Weebots...")
+    MLOG.slog(null, "Starting Weebots...")
     //Update the Weebots in the database after downtime.
     JDA_SHARD_MNGR.guilds.filterNot { DAO.WEEBOTS.contains(it.idLong) }
         .forEach {
@@ -357,7 +293,7 @@ private fun saveTimer() = GlobalScope.launch {
             DAO.backUp()
             STAT.saveJson(STAT_BK)
             if (i % 100 == 0) {
-                MLOG.slog("Database & Stats back up: $i")
+                MLOG.slog(null, "Database & Stats back up: $i")
             }
             i++
             delay(SAVE_INTER * 1_000L)
@@ -371,34 +307,34 @@ private fun saveTimer() = GlobalScope.launch {
 /** Begin the shutdown sequence. Backup and save database.  */
 fun shutdown(user: User? = null) {
     if (user != null)
-        MLOG.elog("Shutdown signal received from ${user.name} (${user.id}).")
+        MLOG.elog(null, "Shutdown signal received from ${user.name} (${user.id}).")
 
-    MLOG.elog("\tShutting down Global Weebot Reminder pools...")
+    MLOG.elog(null, "\tShutting down Global Weebot Reminder pools...")
     //DAO.GLOBAL_WEEBOT.reminderPools.forEach { _, pool -> pool.shutdown() }
-    MLOG.elog("\tBacking up database...")
+    MLOG.elog(null, "\tBacking up database...")
     if (DAO.backUp() < 1)
-        MLOG.elog("\t\tFailed to backup database!")
+        MLOG.elog(null, "\t\tFailed to backup database!")
     else {
-        MLOG.elog("\tSaving Database...")
+        MLOG.elog(null, "\tSaving Database...")
         when (DAO.save()) {
-            -1   -> MLOG.elog("\t\tCould not save backup due to file exception.")
-            -2   -> MLOG.elog("\t\tCould not save backup due to corrupt Json.")
-            else -> MLOG.elog("\t\tDatabase saved.")
+            -1   -> MLOG.elog(null, "\t\tCould not save backup due to file exception.")
+            -2   -> MLOG.elog(null, "\t\tCould not save backup due to corrupt Json.")
+            else -> MLOG.elog(null, "\t\tDatabase saved.")
         }
     }
-    MLOG.elog("\tBacking up Statistics...")
+    MLOG.elog(null, "\tBacking up Statistics...")
     if (STAT.saveJson(STAT_BK) < 1)
-        MLOG.elog("\t\tFailed to backup Statistics!")
+        MLOG.elog(null, "\t\tFailed to backup Statistics!")
     else {
-        MLOG.elog("\tSaving Statistics...")
+        MLOG.elog(null, "\tSaving Statistics...")
         when (STAT.saveJson(STAT_SAVE)) {
-            -1   -> MLOG.elog("\t\tCould not save due to file exception.")
-            -2   -> MLOG.elog("\t\tCould not save due to corrupt Json.")
-            else -> MLOG.elog("\t\tStatistics saved.")
+            -1   -> MLOG.elog(null, "\t\tCould not save due to file exception.")
+            -2   -> MLOG.elog(null, "\t\tCould not save due to corrupt Json.")
+            else -> MLOG.elog(null, "\t\tStatistics saved.")
         }
     }
 
-    MLOG.elog("\tClearing temp directories...")
+    MLOG.elog(null, "\tClearing temp directories...")
     clearTempDirs()
 
     JDA_SHARD_MNGR.shutdown()
@@ -408,6 +344,6 @@ fun shutdown(user: User? = null) {
 
     CACHED_POOL.close()
 
-    MLOG.elog("Safely shutdown.")
+    MLOG.elog(null, "Safely shutdown.")
     System.exit(0)
 }

@@ -7,9 +7,7 @@ package com.ampro.weebot.database.constants
 import com.ampro.weebot.MLOG
 import com.twilio.type.PhoneNumber
 import net.dv8tion.jda.bot.sharding.DefaultShardManagerBuilder
-import net.dv8tion.jda.core.AccountType
-import net.dv8tion.jda.core.JDA
-import net.dv8tion.jda.core.JDABuilder
+import net.dv8tion.jda.core.*
 import net.dv8tion.jda.core.entities.Game
 import javax.security.auth.login.LoginException
 
@@ -84,7 +82,7 @@ private const val TOKEN_TEST = "NDQ0MzIzNzMyMDEwMzAzNDg4.DdaQyQ.ztloAQmeuUffaC-D
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaLogIn() : JDA {
-    MLOG.slog("Logging in to Weebot JDA TWILIO_CLIENT...")
+    MLOG.slog(null, "Logging in to Weebot JDA TWILIO_CLIENT...")
     return JDABuilder(AccountType.BOT).setToken(
         TOKEN_WBT)
         .setGame(Game.playing("@Weebot help")).setCorePoolSize(10)
@@ -101,7 +99,7 @@ fun jdaLogIn() : JDA {
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaDevLogIn() : JDA {
-    MLOG.slog("Logging in to TestBot JDA TWILIO_CLIENT...")
+    MLOG.slog(null, "Logging in to TestBot JDA TWILIO_CLIENT...")
     return JDABuilder(AccountType.BOT).setToken(
         TOKEN_TEST)
         .setGame(Game.playing("Genocide")).setCorePoolSize(10)
@@ -113,7 +111,7 @@ fun jdaDevLogIn() : JDA {
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaShardLogIn() : DefaultShardManagerBuilder {
-    MLOG.slog("Logging in to Weebot JDA shards...")
+    MLOG.slog(null, "Logging in to Weebot JDA shards...")
     return DefaultShardManagerBuilder().setToken(TOKEN_WBT)
         .setShardsTotal(-1).setCorePoolSize(50)
 }
@@ -123,7 +121,7 @@ fun jdaShardLogIn() : DefaultShardManagerBuilder {
  */
 @Throws(LoginException::class, InterruptedException::class)
 fun jdaDevShardLogIn() : DefaultShardManagerBuilder {
-    MLOG.slog("Logging in to TestBot JDA shards...")
+    MLOG.slog(null, "Logging in to TestBot JDA shards...")
     return DefaultShardManagerBuilder().setToken(TOKEN_TEST)
             .setShardsTotal(-1).setCorePoolSize(10)
 }

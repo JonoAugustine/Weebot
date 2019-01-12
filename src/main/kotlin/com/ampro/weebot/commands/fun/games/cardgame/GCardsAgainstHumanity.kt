@@ -12,8 +12,7 @@ import com.ampro.weebot.commands.`fun`.games.WinCondition.ROUNDS
 import com.ampro.weebot.commands.`fun`.games.WinCondition.WINS
 import com.ampro.weebot.commands.`fun`.games.cardgame.GameState.CHOOSING
 import com.ampro.weebot.commands.`fun`.games.cardgame.GameState.READING
-import com.ampro.weebot.database.getGuild
-import com.ampro.weebot.database.getUser
+import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
@@ -59,7 +58,7 @@ internal val DECK_STRD = loadJson<CAHDeck>(FILE_D_STRD_JSON) ?: run {
         Files.readAllLines(FILE_C_WHITE.toPath())
             .forEach { C_WHITE_BASE.add(WhiteCard(it)) }
     } catch (e: IOException) {
-        MLOG.elog("Loading CAH WhiteCards - FAILED\n${e.message}")
+        MLOG.elog(CardsAgainstHumanity::class, "Loading CAH WhiteCards - FAILED\n${e.message}")
         System.exit(-1)
     }
 
@@ -74,11 +73,11 @@ internal val DECK_STRD = loadJson<CAHDeck>(FILE_D_STRD_JSON) ?: run {
                     if (pick == 0) 1 else pick))
             }
     } catch (e: IOException) {
-        MLOG.elog("Loading CAH BlackCards - FAILED\n${e.message}")
+        MLOG.elog(CardsAgainstHumanity::class, "Loading CAH BlackCards - FAILED\n${e.message}")
         System.exit(-1)
     }
 
-    MLOG.slog("[CAH] Init Load of base cards complete!")
+    MLOG.slog(CardsAgainstHumanity::class, "[CAH] Init Load of base cards complete!")
     val c = CAHDeck("Official", blackCards = C_BLACK_BASE, whiteCards = C_WHITE_BASE, public = true)
     c.saveJson(FILE_D_STRD_JSON.apply { createNewFile() })
     return@run c
@@ -87,7 +86,7 @@ internal val DECK_STRD = loadJson<CAHDeck>(FILE_D_STRD_JSON) ?: run {
 internal val DECK_CUST: ConcurrentHashMap<Long, MutableList<CAHDeck>>
         = loadJson<ConcurrentHashMap<Long, MutableList<CAHDeck>>>(FILE_D_CUST_JSON)
         ?: run {
-    MLOG.elog("Failed to load Custom CAH Decks"); System.exit(-1);
+    MLOG.elog(CardsAgainstHumanity::class, "Failed to load Custom CAH Decks"); System.exit(-1);
     return@run ConcurrentHashMap<Long, MutableList<CAHDeck>>()
 }
 
@@ -208,6 +207,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
 
     var blackCardMessage: Message? = null
     val playerHandMessages: ConcurrentHashMap<CAHPlayer, Message> = ConcurrentHashMap()
+    //TODO change back to card passives
 
     /** The current Czar  */
     lateinit var czar: CAHPlayer
@@ -230,13 +230,14 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                     "to have the message resent.)", true)
     }
 
+    val title: String get() = (if ("Cards Against $guildName".length > EMBED_MAX_TITLE)
+        CMD_CAH.displayName!! else "Cards Against $guildName") + " | round $round"
+
     /**
      * Send the black card to [channel]
      */
     fun sendBlackCard() {
-        val title = (if ("Cards Against $guildName".length > EMBED_MAX_TITLE)
-            CMD_CAH.displayName!! else "Cards Against $guildName") + " | round $round"
-
+        if (!isRunning) return
         val baseEmbed: () -> EmbedBuilder = {
             makeEmbedBuilder(title, LINK_CAH).apply {
                 setAuthor("Czar: ${name(czar.user)}", czar.user.avatarUrl)
@@ -260,7 +261,8 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                 $Warning to report this Black Card and load a new one
             """.trimIndent(), true).build()
             SelectableEmbed(czar.user, false, e, listOf(
-                ArrowsCounterclockwise to {  m, _ ->
+                ArrowsCounterclockwise to cc@{  m, _ ->
+                    if (!isRunning) return@cc
                     this.usedCardsBlack.add(this.blackCard)
                     reloadBlackCard()
                     m.delete().queueAfter(250, MILLISECONDS)
@@ -278,23 +280,38 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                     }
                 }), 2) { blackCardMessage = it }.display(channel)
         } else { //If this is the Reading Embed
+            //Give the bots cards
+            this.playerList.filter { it.user.isBot }.forEach {
+                while (it.playedCards.size < blackCard.pick)
+                    it.playedCards.add(it.hand.random())
+            }
             val embed = baseEmbed().addField("Czar, choose your victor!",
-                "Select a victor by reacting with the corresponding number.", true)
+                "${czar.user.asMention}, " +
+                        " Select a victor by reacting with the corresponding number.",
+                true)
                 .build()
-            val playersIn = playerList.filter { it.playedCards.isNotEmpty() }.map { p ->
+            val playersIn = playerList.filterNot { it.playedCards.isEmpty() || it == czar}
+                .map { p ->
                 //TODO Check formatting
                 p.playedCards.joinToString("\n") { it.text } to { _: Int, _: Message ->
                     p.cardsWon.add(this.blackCard)
                     this.channel.sendMessage(makeEmbedBuilder(title, LINK_CAH,
                         "LeaderBoard:\n${leaderBoard()}")
-                        .setAuthor("${name(p.user)} Won This Round! $Tada$Tada").build()
-                    ).queue { nextTurn() }
+                        .setAuthor("${name(p.user)} Won This Turn! $Tada$Tada").build()
+                    ).queue {
+                        gameState = CHOOSING
+                        nextTurn()
+                    }
                 }
             }.shuffled()
             if (playersIn.isEmpty()) TODO("This should not happen")
-            SelectablePaginator(setOf(czar.user), emptySet(), -1, MINUTES, embed,
+            val sp = SelectablePaginator(setOf(czar.user), emptySet(), -1, MINUTES, embed,
                 playersIn, itemsPerPage = -1, singleUse = true) { blackCardMessage = it }
-                .displayOrDefault(blackCardMessage, channel)
+
+            if (blackCardMessage != null) blackCardMessage!!.clearReactions().queue({
+                sp.displayOrDefault(blackCardMessage, channel)
+            }, { sp.displayOrDefault(blackCardMessage, channel) })
+            else sp.displayOrDefault(blackCardMessage, channel)
         }
 
     }
@@ -304,12 +321,11 @@ class CardsAgainstHumanity(guild: Guild, author: User,
      * @param players
      */
     fun sendWhiteCards(vararg players: CAHPlayer) {
+        if (!isRunning) return
         if (players.isEmpty()) Checks.notEmpty(players, "Players")
-        val title = (if ("Cards Against $guildName".length > EMBED_MAX_TITLE)
-            CMD_CAH.displayName!! else "Cards Against $guildName") + " | round $round"
         players.filterNot { it.user.isBot }.forEach {
             val e = makeEmbedBuilder(title, LINK_CAH)
-                .setAuthor("Czar: ${name(czar.user)}", czar.user.avatarUrl)
+                .addField("Czar: ${name(czar.user)}", "", true)
                 .addField("Black Card (Pick ${blackCard.pick})", blackCard.text, false)
                 .setDescription(
                     "Choose ${blackCard.pick} card(s) then $X_Red to confirm the selection"
@@ -320,8 +336,13 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                 SelectablePaginator(setOf(u), timeout = -1, baseEmbed = e,
                     items = it.hand.mapIndexed { i, wc ->
                         wc.text to act@{ _: Int, _: Message ->
+                            if (!isRunning) return@act
                             if (gameState == READING) {
                                 pmc.sendMessage("The czar is currently choosing!")
+                                    .queue { wm -> wm.delete().queueAfter(5, SECONDS) }
+                                return@act
+                            } else if (it == czar) {
+                                pmc.sendMessage("The Czar cannot play their own cards!")
                                     .queue { wm -> wm.delete().queueAfter(5, SECONDS) }
                                 return@act
                             }
@@ -330,21 +351,38 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                             it.playedCards.add(wc)
                             val d = blackCard.pick - it.playedCards.size
                             val s = "Selected card ${i + 1}.\n" + if (d != 0) "You still need $d cards."
-                            else "You have picked all the needed cards."
+                            else "You have picked all the needed cards. Click $X_Red to confirm."
                             pmc.sendMessage(s).queue { cm ->
                                 cm.delete().queueAfter(10, SECONDS)
                             }
-                            if (playerList.filterNot { it.user.isBot }
-                                        .none { it.playedCards.size != blackCard.pick }) {
-                                gameState = READING
-                                sendBlackCard()
-                            }
                         }
-                    }, exitAction = { m: Message ->
+                    }, exitAction = confirm@{ m: Message ->
+                        if (!isRunning) return@confirm
+                        if (it == czar) {
+                            pmc.sendMessage("The Czar cannot play their own cards!")
+                                .queue { wm -> wm.delete().queueAfter(5, SECONDS) }
+                            return@confirm
+                        } else if (gameState == READING) {
+                            pmc.sendMessage("The czar is currently choosing!")
+                                .queue { wm -> wm.delete().queueAfter(5, SECONDS) }
+                            return@confirm
+                        }
+                        if (playerList.filterNot { it.user.isBot || it == czar }
+                                    .none { it.playedCards.size != blackCard.pick }
+                                && gameState == CHOOSING) {
+                            gameState = READING
+                            sendBlackCard()
+                        }
                         if (it.playedCards.size == blackCard.pick) {
                             pmc.sendMessage("Card(s) Submitted. Good luck!")
                                 .queue { cm -> cm.delete().queueAfter(10, SECONDS) }
                             playerHandMessages[it] = m
+                            if (playerList.filterNot { it.user.isBot }
+                                        .none { it.playedCards.size != blackCard.pick }
+                                    && gameState == CHOOSING) {
+                                gameState = READING
+                                sendBlackCard()
+                            }
                         } else pmc.sendMessage(
                             "You need to select ${blackCard.pick} cards.").queue { wm ->
                             wm.delete().queueAfter(10, SECONDS)
@@ -360,8 +398,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
      * @param player The player to deal cards to.
      * @return False if the player already has a full hand.
      */
-    override fun dealCards(player: CAHPlayer) : Boolean {
-        if (player.hand.size == this.handSize) return false
+    override fun dealCards(player: CAHPlayer): Boolean {
         this.activeCardsWhite.removeAll(player.playedCards)
         this.usedCardsWhite.addAll(player.playedCards)
         player.hand.removeAll(player.playedCards)
@@ -409,12 +446,13 @@ class CardsAgainstHumanity(guild: Guild, author: User,
 
     /** @return true if the Czar was reset (start a new round) */
     private fun nextCzar() : Boolean {
-        val i = this.playerList.indexOf(czar)
-        return if (i + 1 in 0 until this.playerList.size) {
-            czar = this.playerList[i + 1]
+        val list: List<CAHPlayer> = this.playerList.filterNot { it.user.isBot }
+        val i = list.indexOf(czar)
+        return if (i + 1 in 0 until list.size) {
+            czar = list[i + 1]
             false
         } else {
-            czar = this.playerList.first()
+            czar = list.first()
             true
         }
     }
@@ -445,7 +483,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
             //Deal Cards to players
             this.playerList.forEach { dealCards(it) }
             //Set the First Czar
-            czar = this.playerList.random()
+            czar = this.playerList.filterNot { it.user.isBot }.random()
             //Set the first black card
             blackCard = activeCardsBlack.random()
             gameState = CHOOSING
@@ -457,14 +495,35 @@ class CardsAgainstHumanity(guild: Guild, author: User,
     }
 
     override fun endGame(): Boolean {
-        TODO("not implemented")
+        val sortedList = playerList.sortedByDescending { it.cardsWon.size }
+        val winner = sortedList.first()
+
+        val cgi = getWeebotOrNew(guildID).cahGuildInfo ?: let {
+            getWeebotOrNew(guildID).cahGuildInfo = CahGuildInfo(guildID)
+            return@let getWeebotOrNew(guildID).cahGuildInfo!!
+        }
+
+        cgi.leaderBoard.addUser(winner.user, winner.cardsWon.size)
+
+        makeEmbedBuilder(title, LINK_CAH, """And the winner is.....
+            ${winner.user.asMention}!!! $Tada$Tada$Tada""".trimIndent())
+            .setThumbnail(winner.user.avatarUrl)
+            .addField("Cards Against Humanity Leaderboard", cgi.leaderBoard.get()
+                .joinToString("\n") {
+                    getGuild(guildID)!!.getMemberById(it.first)?.effectiveName
+                            ?: "Unknown Member"
+                }, false).build()
+            .send(channel)
+        isRunning = false
+        playerHandMessages.clear()
+        blackCardMessage = null
+        return true
     }
 
     /** @return The [playerList] sorted by score each player on a new line */
     fun leaderBoard() : String {
-        return playerList.sortedBy { it.cardsWon.size }.joinToString {
-            "*${name(it.user)}:* ${it.cardsWon.size}\n"
-        }
+        return playerList.sortedByDescending { it.cardsWon.size }
+            .joinToString("\n") { "*${name(it.user)}:* ${it.cardsWon.size}" }
     }
 
 }
@@ -511,15 +570,16 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
             .addField("Game Setup", "setup [+bot] [hand_size] [deck1 deck2...] "
                     + "\n**Join Game**\njoin\n**+bot** adds Weebot to the game")
             .addField("Start Game (Requires $MIN_PLAYERS players)", "start")
-            .addField("Add Weebot to the Game", "+bot\n*Aliases*: addbot, invitebot")
+            .addField("Add Weebot to the Game", "+bots [@AnyBot]\n*Alias*: addbot")
             .addField("Play Your Card(s)", "White Cards can be played by reacting to "
-                    + "the private message or sending a command to the server channel\n"
-                    + "play <cardNum1> /cardNum2/...\n*Alias*: use")
+                    + "the private message")
             .addField("Card Czar Pick Winning Card(s)", "React to the Black Card message"
                     + "or use ``pick <card_set_num>``")
             .addField("Get your cards re-sent", "myhand")
+
             .addField("See the current game's scores","scores")
             .addField("See server leaderboard", "leaderboard\n*Aliases:* LB, top, ranks")
+
             .addBlankField()
             .addField("Make a Custom Deck", "cah makedeck <deck_name>", false)
             .addField("Make a Custom White Card",

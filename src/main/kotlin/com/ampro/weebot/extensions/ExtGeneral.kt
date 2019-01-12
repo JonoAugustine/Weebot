@@ -22,7 +22,10 @@ infix fun <E> Iterable<E>.splitBy(predicate: (E) -> Boolean)
     return (filter(predicate).toMutableList() to filterNot(predicate).toMutableList())
 }
 
-fun <T> List<T>.subList(fromIndex: Int) = subList(fromIndex, size)
+fun <T> List<T>.subList(fromIndex: Int): MutableList<T>  {
+    return if (this.isNotEmpty()) subList(fromIndex, size).toMutableList()
+    else mutableListOf()
+}
 
 /* ****************
         String

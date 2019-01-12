@@ -7,6 +7,8 @@ package com.ampro.weebot.util
 import jdk.nashorn.internal.ir.annotations.Ignore
 
 import java.io.*
+import kotlin.reflect.KClass
+import kotlin.reflect.jvm.jvmName
 
 val threadName: String get() = Thread.currentThread().name
 
@@ -23,6 +25,8 @@ class Slogger(val name: String = "") {
 
 /** File and Console logger */
 class FileLogger(val name: String, private val timeStamp: Boolean = true) {
+    constructor(kClass: KClass<*>, timeStamp: Boolean = true)
+            : this(kClass.simpleName ?: kClass.jvmName, timeStamp)
 
     companion object {
         val HEADDER = "## Aquatic Mastery Productions ##\n\t\t # Weebot Log #\n"
@@ -30,10 +34,8 @@ class FileLogger(val name: String, private val timeStamp: Boolean = true) {
 
     @Transient
     private val log: File = if (name.isNotEmpty()) {
-        File(DIR_LOGS, "$name.flog")
-    } else {
-        File(DIR_LOGS, "log_$NOW_STR_FILE.flog")
-    }
+        File(DIR_LOGS, "$name + $NOW_STR_FILE.flog")
+    } else File(DIR_LOGS, "log_$NOW_STR_FILE.flog")
 
     /**
      * Initializes the session's flog file.
@@ -49,37 +51,37 @@ class FileLogger(val name: String, private val timeStamp: Boolean = true) {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        flog("$HEADDER\t $NOW_STR\n\n\n")
+        flog("$HEADDER\t ${NOW_STR()}\n\n\n")
     }
 
     /**
      * Print and flog to file.
      *
+     * @param kClass the class of the logging
      * @param any The object to flog
      */
-    fun slog(any: Any = "") {
-        val out = if (any == "") {
-            ""
-        } else {
-            "${if (timeStamp) "[$NOW_STR]" else ""} [$name] [info] $any"
+    fun slog(kClass: KClass<*>?, any: Any = "") {
+        if (any.toString().isNotBlank()) {
+            val out = "${if (timeStamp) "[${NOW_STR()}]" else ""} [${
+            kClass?.simpleName ?: name}] [info] $any"
+            println(out)
+            flog(out)
         }
-        println(out)
-        flog(out)
     }
 
     /**
      * Print err and flog to file.
      *
+     * @param kClass the class of the logging
      * @param any The object to flog
      */
-    fun elog(any: Any = "") {
-        val out = if (any == "") {
-            ""
-        } else {
-            "${if (timeStamp) "[$NOW_STR]" else ""} [$name] [err] $any"
+    fun elog(kClass: KClass<*>?, any: Any = "") {
+        if (any.toString().isNotBlank()) {
+            val out = "${if (timeStamp) "[${NOW_STR()}]" else ""} [${
+            kClass?.simpleName ?: name}] [err] $any"
+            System.err.println(out)
+            flog(out)
         }
-        System.err.println(out)
-        flog(out)
     }
 
     /**
