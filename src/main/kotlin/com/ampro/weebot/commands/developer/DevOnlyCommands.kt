@@ -4,23 +4,27 @@
 
 package com.ampro.weebot.commands.developer
 
-/**
- * This file holds [WeebotCommand]s for Shutdown, GuildList, and Ping
- */
-
 import com.ampro.weebot.*
 import com.ampro.weebot.commands.CAT_DEV
-import com.ampro.weebot.database.*
+import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.constants.PHONE_JONO
+import com.ampro.weebot.database.getGuild
+import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.database.summarize
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.X_Red
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.core.JDA
 import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
 import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
-import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit.*
@@ -29,6 +33,10 @@ import kotlin.math.ceil
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
+
+/**
+ * This file holds [WeebotCommand]s for Shutdown, GuildList, and Ping
+ */
 
 /**
  * Shuts down the Weebots.
@@ -115,16 +123,16 @@ class CmdGuildList : WeebotCommand("guildlist", null, arrayOf("guilds", "servers
 
         SelectablePaginator(setOf(event.author),
             title = "All guilds housing ${SELF.name} (Total: ${gs.size})",
-            description = "``Name ~ member count (percentage non-bots) on shardID``",
-            items = gs.sortedByDescending { if (sortByDate)
+            description = "``Name ~ member count (percentage non-bots) on shardID``" +
+                    "\nTotal Unique Users: ",
+            items = gs.asSequence().sortedByDescending { if (sortByDate)
                 it.selfMember.joinDate.until(NOW(), ChronoUnit.MINUTES) * -1
             else it.trueSize.toLong() }.map {
                 "**${it.name}** ~ ${it.size} (${((
                         it.trueSize/it.size.toDouble())*100).roundToInt()}%)" +
-                        " on ${getGuildShard(it)?.shardId ?: "N/A"}" to {
-                        _: Int, _: Message -> it.infoEmbed(event).display(event.channel)
+                        " on ${getGuildShard(it)?.shardId ?: "N/A"}" to { _: Int, _: Message -> it.infoEmbed(event).display(event.channel)
                 }
-            }, itemsPerPage = 10)
+            }.toList(), itemsPerPage = 10)
             .display(event.channel)
 
     }
