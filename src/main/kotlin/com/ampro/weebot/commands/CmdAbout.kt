@@ -31,9 +31,8 @@ const val LINK_HQTWITCH    = "https://www.twitch.tv/hqregent"
  * @since 2.0
  */
 class CmdAbout : WeebotCommand("about", "About", emptyArray(), CAT_GEN,
-    "[me/more]", "Get information about Weebot.",
-    children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP),
-    cooldown = 90) {
+    "[me/more]", "Get information about Weebot.", cooldown = 90,
+    children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP)) {
 
     override fun execute(event: CommandEvent) {
         val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
@@ -90,7 +89,7 @@ class CmdAbout : WeebotCommand("about", "About", emptyArray(), CAT_GEN,
                 true)
         }
         eb.setFooter("Last restart", null)
-        eb.setTimestamp(event.client.startTime)
+        eb.setTimestamp(CMD_CLIENT.initTime)
 
         //other (?)
 

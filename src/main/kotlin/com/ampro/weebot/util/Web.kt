@@ -26,7 +26,7 @@ inline fun <reified C: Any> String.get() : Result<C, FuelError> {
 /**
  * General setup steps to make API usage simpler.
  */
-fun setupWebFuel() {
+val setUpWebFuel = run {
     FuelManager.instance.baseHeaders = mapOf("User-Agent" to "Mozilla/5.0")
     FuelManager.instance.baseParams  = listOf("Accept" to "application/json")
 }

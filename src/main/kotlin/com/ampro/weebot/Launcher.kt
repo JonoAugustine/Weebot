@@ -70,7 +70,7 @@ fun main(args_: Array<String>) { runBlocking {
     slog("...DONE\n\n")
 
     /** Setup for random methods and stuff that is needed before launch */
-    val genSetup = listOf(launch { setupWebFuel() })
+    //val genSetup = listOf(launch {  })
 
     //Debug
     //RestAction.setPassContext(true) // enable context by default
@@ -126,7 +126,7 @@ fun main(args_: Array<String>) { runBlocking {
         "All ${JDA_SHARD_MNGR.shards.size} Shards connected! ${measureTimeMillis {
         MLOG.slog(null, "Waiting for all ${JDA_SHARD_MNGR.shards.size} shards to connect...")
         while (JDA_SHARD_MNGR.shards.has { it.status != CONNECTED }) {
-            Thread.sleep(500)
+            Thread.sleep(250)
         }
     } / 1_000} seconds")
 
@@ -137,7 +137,7 @@ fun main(args_: Array<String>) { runBlocking {
     //Stats
     setUpStatistics()
 
-    genSetup.joinAll() //Ensure all gensetup is finished
+    //genSetup.joinAll() //Ensure all gensetup is finished
 
     MLOG.slog(null, "Starting Save Job...")
     SAVE_JOB = saveTimer()
@@ -145,27 +145,30 @@ fun main(args_: Array<String>) { runBlocking {
     MLOG.slog(null, "Launch Complete!\n\n")
 
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
-        .queueAfter(850, MILLISECONDS)
+        .queueAfter(250, MILLISECONDS)
 
     //Watch HQStream
     launch(CACHED_POOL) {
-        delay(20 * 60 * 1_000)
-        CLIENT_TWTICH_PUB.helix
-            .getStreams("","",null,null,null,null, listOf("127416768"),null)
-            .observe().subscribe { streamList ->
-                streamList.streams.firstOrNull { it.userId == TWITCH_HQR_ID }
-                    ?.also {
+        while (ON) {
+            MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
+            CLIENT_TWTICH_PUB.helix.getStreams("", "", null, null, null, null,
+                listOf("127416768"), null).observe().subscribe { streamList ->
+                    streamList.streams.firstOrNull { it.userId == TWITCH_HQR_ID }?.also {
                         JDA_SHARD_MNGR.setGame(streaming(it.title, LINK_HQTWITCH))
+                        MLOG.slog(null, "\nOnline. Switching watching")
                     }
-            }
-        delay(20 * 60 * 1_000)
-        CLIENT_TWTICH_PUB.helix
-            .getStreams("","",null,null,null,null, listOf("127416768"),null)
-            .observe().subscribe { streamList ->
-                if (streamList.streams.none { it.userId == TWITCH_HQR_ID }) {
-                    JDA_SHARD_MNGR.setGame(games.random())
                 }
-            }
+            delay(20 * 60 * 1_000)
+            MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
+            CLIENT_TWTICH_PUB.helix.getStreams("", "", null, null, null, null,
+                listOf("127416768"), null).observe().subscribe { streamList ->
+                    if (streamList.streams.none { it.userId == TWITCH_HQR_ID }) {
+                        JDA_SHARD_MNGR.setGame(games.random())
+                        MLOG.slog(null, "\nOffline. Switching watching")
+                    }
+                }
+            delay(20 * 60 * 1_000)
+        }
     }
     //Watch HQTwitter
     /*launch(CACHED_POOL) {

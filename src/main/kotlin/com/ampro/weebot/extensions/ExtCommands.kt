@@ -13,7 +13,7 @@ import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.*
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
 import jdk.nashorn.internal.ir.annotations.Ignore
-import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.*
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.*
@@ -281,8 +281,7 @@ class WeebotCommandClient(val prefixes: List<String>,
             (cmd.aliases.map { it.toLowerCase() } + cmd.name.toLowerCase()).forEach {
                 if (commandIndexMap.containsKey(it)) throw IllegalArgumentException(
                         "Command added has a conflicting name or alias: " +
-                                "${commandIndexMap[it]} vs $it"
-                )
+                                "${commandIndexMap[it]} vs $it")
                 commandIndexMap[it] = i
             }
         }
@@ -345,9 +344,7 @@ class WeebotCommandClient(val prefixes: List<String>,
         when (event) {
             is MessageReceivedEvent -> {
                 if (event.author.isBot) return
-                GlobalScope.launch(coroutinePool) {
-                    onMessageReceived(event)
-                }
+                GlobalScope.launch(coroutinePool) { onMessageReceived(event) }
             }
             is GuildJoinEvent -> {
                 //Weebot joins a guild

@@ -22,6 +22,7 @@ import net.dv8tion.jda.core.entities.Message.MentionType.ROLE
 import net.dv8tion.jda.core.entities.Message.MentionType.USER
 import net.dv8tion.jda.core.entities.MessageHistory
 import net.dv8tion.jda.core.entities.TextChannel
+import java.lang.Integer.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
@@ -84,7 +85,7 @@ class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", 
     // \purge #
     override fun execute(event: CommandEvent)  {
         var toDelete = try {
-            Integer.parseInt(event.splitArgs()[0])
+            event.splitArgs()[0].toInt() + 1
         } catch (e: Exception) { return }
         val td = toDelete
 
@@ -105,8 +106,6 @@ class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", 
         }
 
         GlobalScope.launch {
-            event.delete(1)
-            delay(2)
             list.forEach { toDel ->
                 MessageHistory(event.textChannel).retrievePast(toDel).queue {
                     event.textChannel.deleteMessages(it).queue()
