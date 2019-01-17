@@ -4,9 +4,7 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.commands.CMD_HELP
-import com.ampro.weebot.commands.COMMANDS
-import com.ampro.weebot.commands.LINK_HQTWITCH
+import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.developer.CLIENT_TWTICH_PUB
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
@@ -22,10 +20,8 @@ import net.dv8tion.jda.core.entities.Game.*
 import net.dv8tion.jda.core.entities.Game.GameType.STREAMING
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
+import java.util.concurrent.*
 import java.util.concurrent.Executors.newFixedThreadPool
-import java.util.concurrent.SynchronousQueue
-import java.util.concurrent.ThreadFactory
-import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
 import javax.security.auth.login.LoginException
@@ -77,13 +73,13 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
         System.exit(-1)
     }
     slog("\t...DONE")
-    slog("Initializing Main Logger")
+    slog("Initializing Main Logger\n\n")
     MLOG = FileLogger("Weebot")
-    delay(500)
-    MLOG.slog(null, "...DONE\n\n")
 
     /** Setup for random methods and stuff that is needed before launch */
-    //val genSetup = listOf(launch {  })
+    val genSetup = listOf(
+        launch { setUpWebFuel() }
+    )
 
     //Debug
     //RestAction.setPassContext(true) // enable context by default
@@ -150,7 +146,7 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     //Stats
     setUpStatistics()
 
-    //genSetup.joinAll() //Ensure all gensetup is finished
+    genSetup.joinAll() //Ensure all gensetup is finished
 
     MLOG.slog(null, "Starting Save Job...")
     SAVE_JOB = saveTimer()
@@ -238,7 +234,7 @@ fun setUpStatistics() {
     if (stat == null) {
         MLOG.slog(null, "\t\tUnable to load Statistics, creating new instance.")
         STAT = Statistics()
-        if (STAT.saveJson(STAT_SAVE) == -1) {
+        if (STAT.saveJson(STAT_SAVE, true) == -1) {
             MLOG.slog(null, "\tFAILED")
             return
         }
@@ -306,7 +302,7 @@ private fun saveTimer() = GlobalScope.launch {
     try {
         while (ON) {
             DAO.backUp()
-            STAT.saveJson(STAT_BK)
+            STAT.saveJson(STAT_BK, true)
             if (i % 100 == 0) {
                 MLOG.slog(null, "Database & Stats back up: $i")
             }
@@ -338,11 +334,11 @@ fun shutdown(user: User? = null) {
         }
     }
     MLOG.elog(null, "\tBacking up Statistics...")
-    if (STAT.saveJson(STAT_BK) < 1)
+    if (STAT.saveJson(STAT_BK, true) < 1)
         MLOG.elog(null, "\t\tFailed to backup Statistics!")
     else {
         MLOG.elog(null, "\tSaving Statistics...")
-        when (STAT.saveJson(STAT_SAVE)) {
+        when (STAT.saveJson(STAT_SAVE, true)) {
             -1   -> MLOG.elog(null, "\t\tCould not save due to file exception.")
             -2   -> MLOG.elog(null, "\t\tCould not save due to corrupt Json.")
             else -> MLOG.elog(null, "\t\tStatistics saved.")

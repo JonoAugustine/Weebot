@@ -78,8 +78,8 @@ fun List<Any>.toFile(name: String = "file") : File {
  *        -2 if a Gson exception was thrown
  */
 @Synchronized
-fun Any.saveJson(file: File): Int {
-    return if (file.createNewFile()) {
+fun Any.saveJson(file: File, overWrite: Boolean = false): Int {
+    return if (file.createNewFile() || (file.exists() && overWrite)) {
         return try {
             val fw = FileWriter(file)
             GSON.toJson(this, fw)
