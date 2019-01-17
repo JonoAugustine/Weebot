@@ -105,7 +105,7 @@ abstract class WeebotCommand(name: String, val displayName: String?,
                              arguments: String, help: String,
                              helpBiConsumer: BiConsumer<CommandEvent, Command>? = null,
                              guildOnly: Boolean = false, ownerOnly: Boolean = false,
-                             hidden: Boolean = false, useTopicTags: Boolean = true,
+                             hidden: Boolean = false,
                              children: Array<out Command>? = emptyArray(),
                              requiredRole: String? = null, cooldown: Int = 0,
                              cooldownScope: CooldownScope = USER,
@@ -116,14 +116,16 @@ abstract class WeebotCommand(name: String, val displayName: String?,
     init {
         super.name = name
         super.aliases = aliases
+        super.category = category
         super.help = help
         super.helpBiConsumer = helpBiConsumer
-        super.category = category
         super.arguments = arguments
+        super.hidden = hidden
         super.guildOnly = guildOnly
         super.requiredRole = requiredRole
         super.ownerCommand = ownerOnly
         super.cooldown = cooldown
+        super.cooldownScope = cooldownScope
         super.userPermissions = userPerms
         super.botPermissions = botPerms
         super.children = children
@@ -279,9 +281,11 @@ class WeebotCommandClient(val prefixes: List<String>,
     init {
         COMMANDS.forEachIndexed { i, cmd ->
             (cmd.aliases.map { it.toLowerCase() } + cmd.name.toLowerCase()).forEach {
-                if (commandIndexMap.containsKey(it)) throw IllegalArgumentException(
-                        "Command added has a conflicting name or alias: " +
-                                "${commandIndexMap[it]} vs $it")
+                if (commandIndexMap.containsKey(it)) {
+                    MLOG.elog(this::class, "Command added has a conflicting " +
+                            "name or alias: other=${commandIndexMap[it]} vs this=$it")
+                    com.ampro.weebot.shutdown()
+                }
                 commandIndexMap[it] = i
             }
         }
@@ -324,7 +328,7 @@ class WeebotCommandClient(val prefixes: List<String>,
      *****************/
 
     override fun getSuccess() = WhiteCheckMark.unicode
-    override fun getError() = X_Red.unicode
+    override fun getError()   = X_Red.unicode
     override fun getWarning() = Warning.unicode
 
     /* ************

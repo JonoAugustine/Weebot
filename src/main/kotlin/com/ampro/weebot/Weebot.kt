@@ -92,11 +92,12 @@ class WeebotSettings(val guildID: Long) {
     /** [TextChannel.getIdLong] -> [Pair]<[MutableList]<Class<[WeebotCommand]>>
      *     Pair<lockedTo, BlockedFrom>
      */
-    var commandRestrictions: ConcurrentHashMap<KClass<out WeebotCommand>, CommandRestriction>
-            = ConcurrentHashMap()
+    var commandRestrictions: ConcurrentHashMap<KClass<out WeebotCommand>,
+            CommandRestriction> = ConcurrentHashMap()
 
-    fun isAllowed(cmd: WeebotCommand, textChannel: TextChannel)
-        = commandRestrictions[cmd::class]?.allows(textChannel) != false
+    fun isAllowed(cmd: WeebotCommand, textChannel: TextChannel): Boolean {
+        return commandRestrictions[cmd::class]?.allows(textChannel) != false
+    }
 
     /**
      * Sneds a log message to the log channel if it is set

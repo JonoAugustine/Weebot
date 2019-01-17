@@ -270,7 +270,6 @@ class CmdSeeSuggestions : WeebotCommand("see", null, arrayOf("-s"), CAT_DEV, "",
 
     // \sugg -s(ee) [-k <keyword>] [-r <accepted/unreviewed/completed/ignored>] [pagenum]
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
         val args = event.splitArgs()
         val keyWords = mutableListOf<String>()
         val reviewStates = mutableListOf<State>()

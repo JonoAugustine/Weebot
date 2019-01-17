@@ -35,9 +35,8 @@ class CmdAbout : WeebotCommand("about", "About", emptyArray(), CAT_GEN,
     children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP)) {
 
     override fun execute(event: CommandEvent) {
-        val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
-        else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author, event.creationTime)
+        STAT.track(this, if (event.guild != null) getWeebotOrNew(event.guild)
+        else DAO.GLOBAL_WEEBOT, event.author, event.creationTime)
         val eb = strdEmbedBuilder.setTitle("All about Weebot")
             .setThumbnail(CmdHelloThere.HELLO_THERE_GIFS[0])
 
@@ -60,11 +59,11 @@ class CmdAbout : WeebotCommand("about", "About", emptyArray(), CAT_GEN,
             .append("\n\n*Use \"${SELF.asMention} help\" for info using my commands.*")
             .append("\n\n**__Weebot Commands__**\n\n")
 
-        sBuilder.append(COMMANDS.sortedBy { it.name.toLowerCase() }
-            .filterNot { it.isOwnerCommand || it.isHidden }.map {
-                "*" + (it.displayName
-                        ?: it.name[0].toUpperCase() + it.name.substring(1)) + "*"
-            }.joinToString(", "))
+        sBuilder.append(COMMANDS.sortedBy { it.name.toLowerCase() }.filterNot {
+            it.isOwnerCommand || it.isHidden || it.category == CAT_UNDER_CONSTRUCTION
+        }.joinToString(", ") {
+            "*${it.displayName ?: it.name[0].toUpperCase()+it.name.substring(1)}*"
+        })
         eb.setDescription(sBuilder.toString())
         sBuilder.setLength(0)
 

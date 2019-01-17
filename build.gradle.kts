@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.ampro"
-version = "2.1.1"
+version = "2.2.0"
 
 application {
     mainClassName = "com.ampro.weebot.LauncherKt"
@@ -58,7 +58,7 @@ dependencies {
     //Tools & APIs
     implementation("me.sargunvohra.lib:pokekotlin:2.3.0")
     implementation("com.twilio.sdk:twilio:7.9.0")
-    implementation("com.github.twitch4j:twitch4j:1.0.0-alpha.5")
+    implementation("com.github.twitch4j:twitch4j:1.0.0-alpha.6")
     implementation("org.twitter4j:twitter4j-stream:4.0.7")
     //implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.1.1")
     //implementation("net.dean.jraw:JRAW:1.1.0")

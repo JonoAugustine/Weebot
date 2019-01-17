@@ -17,10 +17,12 @@ import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA.Status.CONNECTED
 import net.dv8tion.jda.core.JDA.Status.SHUTDOWN
 import net.dv8tion.jda.core.entities.Game.*
+import net.dv8tion.jda.core.entities.Game.GameType.STREAMING
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
-import java.util.concurrent.Executors
+import java.util.concurrent.*
 import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit.MINUTES
 import javax.security.auth.login.LoginException
 import kotlin.system.measureTimeMillis
 
@@ -29,15 +31,18 @@ lateinit var SAVE_JOB: Job
 /** How ofter to asve to file in Seconds */
 const val SAVE_INTER = 30
 
-val CACHED_POOL =  Executors.newCachedThreadPool().asCoroutineDispatcher()
+val CACHED_POOL = ThreadPoolExecutor(5, 5000, 10, MINUTES, SynchronousQueue()) { r ->
+    MLOG.slog(ThreadFactory::class, "Cached Thread Created")
+    Thread(r, "CachedPool")
+}.asCoroutineDispatcher()
 val CMD_POOL    = Executors.newFixedThreadPool(50).asCoroutineDispatcher()
 
 /** Main Logger */
 lateinit var MLOG: FileLogger
 
+var ON = true
 //JDA connection shard Client
 lateinit var JDA_SHARD_MNGR: ShardManager
-var ON = true
 lateinit var CMD_CLIENT: WeebotCommandClient
 val WAITER: EventWaiter = EventWaiter()
 /** The bot's selfuser from */
@@ -47,7 +52,8 @@ const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try th
         "again later*"
 
 val games = listOf(listening("@Weebot Help"), playing("with wires"),
-    watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.1.1"))
+    watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.2.0"),
+    listening("crying enemies"), watching("HQR's life fall apart"))
 
 /**
  * Put bot online, setup listeners, and get full list of servers (Guilds)
@@ -57,7 +63,7 @@ val games = listOf(listening("@Weebot Help"), playing("with wires"),
  * @throws LoginException
  * @throws InterruptedException
  */
-fun main(args_: Array<String>) { runBlocking {
+fun main(args_: Array<String>) = runBlocking<Unit> {
     slog("Launching...")
     slog("\tBuilding Directories...")
     if (!buildDirs()) {
@@ -66,8 +72,8 @@ fun main(args_: Array<String>) { runBlocking {
     }
     slog("\t...DONE")
     slog("Initializing Main Logger")
-    MLOG = FileLogger("Launcher")
-    slog("...DONE\n\n")
+    MLOG = FileLogger("Weebot")
+    MLOG.slog(null, "...DONE\n\n")
 
     /** Setup for random methods and stuff that is needed before launch */
     //val genSetup = listOf(launch {  })
@@ -148,28 +154,27 @@ fun main(args_: Array<String>) { runBlocking {
         .queueAfter(250, MILLISECONDS)
 
     //Watch HQStream
-    launch(CACHED_POOL) {
-        while (ON) {
-            MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
-            CLIENT_TWTICH_PUB.helix.getStreams("", "", null, null, null, null,
-                listOf("127416768"), null).observe().subscribe { streamList ->
-                    streamList.streams.firstOrNull { it.userId == TWITCH_HQR_ID }?.also {
-                        JDA_SHARD_MNGR.setGame(streaming(it.title, LINK_HQTWITCH))
-                        MLOG.slog(null, "\nOnline. Switching watching")
-                    }
-                }
-            delay(20 * 60 * 1_000)
-            MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
-            CLIENT_TWTICH_PUB.helix.getStreams("", "", null, null, null, null,
-                listOf("127416768"), null).observe().subscribe { streamList ->
-                    if (streamList.streams.none { it.userId == TWITCH_HQR_ID }) {
-                        JDA_SHARD_MNGR.setGame(games.random())
-                        MLOG.slog(null, "\nOffline. Switching watching")
-                    }
-                }
-            delay(20 * 60 * 1_000)
+    launch(CACHED_POOL) { while (ON) {
+        MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
+        CLIENT_TWTICH_PUB.helix.getStreams("", "", null, null, null, null,
+            listOf("127416768"), null).observe().subscribe { streamList ->
+            streamList.streams.firstOrNull { it.userId == TWITCH_HQR_ID }?.also {
+                JDA_SHARD_MNGR.setGame(streaming(it.title, LINK_HQTWITCH))
+                MLOG.slog(null, "\nOnline. Set watching")
+            }
         }
-    }
+        delay(20 * 60 * 1_000)
+        MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
+        CLIENT_TWTICH_PUB.helix.getStreams("", "", null, null, null, null,
+            listOf("127416768"), null).observe().subscribe { streamList ->
+            if (streamList.streams.none { it.userId == TWITCH_HQR_ID }
+                    && JDA_SHARD_MNGR[0].presence.game == STREAMING) {
+                JDA_SHARD_MNGR.setGame(games.random())
+                MLOG.slog(null, "\nOffline. Set random")
+            }
+        }
+        delay(20 * 60 * 1_000)
+    }}
     //Watch HQTwitter
     /*launch(CACHED_POOL) {
         val stream = TwitterStreamFactory(TWITTER_CONFIG).instance
@@ -213,7 +218,7 @@ fun main(args_: Array<String>) { runBlocking {
         stream.sample("java")
 
     }*/
-}}
+}
 
 /**
  * Attempts to load Statistics data from file. Sets [STAT] to the loaded data

@@ -8,6 +8,7 @@ import com.ampro.weebot.MLOG
 import com.ampro.weebot.extensions.MentionType.*
 import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.command.CommandEvent
+import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.*
@@ -54,7 +55,9 @@ fun CommandClientBuilder.addCommandsWithCheck(commands: Iterable<WeebotCommand>)
     return this.addCommands(commands)
 }
 
-enum class MentionType {USER, ROLE, CHANNEL}
+operator fun ShardManager.get(shardIndex: Int) = shards!![shardIndex]
+
+enum class MentionType { USER, ROLE, CHANNEL }
 
 val userMentionRegex: Regex = "^(<@!?\\d+>)$".toRegex()
 val roleMentionRegex: Regex = "^(<@&\\d+>)$".toRegex()
