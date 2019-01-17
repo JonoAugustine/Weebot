@@ -6,8 +6,12 @@ package com.ampro.weebot.commands
 
 import com.ampro.weebot.*
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
-import com.ampro.weebot.database.*
-import com.ampro.weebot.database.constants.*
+import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.constants.LINK_DISCORD_BOTS
+import com.ampro.weebot.database.constants.LINK_DISCORD_BOTS_LIST
+import com.ampro.weebot.database.constants.LINK_INVITEBOT
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.WKDAY_MONTH_YEAR_TIME
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
@@ -260,7 +264,7 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
 
 }
 
-class CmdWatchaDoin : WeebotCommand("watchadoin", "Whatcha Doin'?", arrayOf("whatsup"),
+class CmdWatchaDoin : WeebotCommand("whatchadoin", "Whatcha Doin'?", arrayOf("whatsup"),
     CAT_GEN, "","What am I up to?", cooldown = 0, cooldownScope = USER_SHARD,
     guildOnly = true) {
     override fun execute(event: CommandEvent) {
@@ -270,6 +274,7 @@ class CmdWatchaDoin : WeebotCommand("watchadoin", "Whatcha Doin'?", arrayOf("wha
             STREAMING -> "I'm watching my creator's Live Stream! $LINK_HQTWITCH"
             LISTENING -> "I'm listening to ${game.name ?: "...something"}"
             WATCHING -> "I'm watching ${game.name ?: "...something"}."
+            else -> "Huh...what was I doing...uhmmmm"
         }
         event.reply(s)
     }

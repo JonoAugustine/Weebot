@@ -4,7 +4,9 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.CMD_HELP
+import com.ampro.weebot.commands.COMMANDS
+import com.ampro.weebot.commands.LINK_HQTWITCH
 import com.ampro.weebot.commands.developer.CLIENT_TWTICH_PUB
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.*
@@ -20,7 +22,10 @@ import net.dv8tion.jda.core.entities.Game.*
 import net.dv8tion.jda.core.entities.Game.GameType.STREAMING
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
-import java.util.concurrent.*
+import java.util.concurrent.Executors.newFixedThreadPool
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
 import javax.security.auth.login.LoginException
@@ -31,11 +36,12 @@ lateinit var SAVE_JOB: Job
 /** How ofter to asve to file in Seconds */
 const val SAVE_INTER = 30
 
-val CACHED_POOL = ThreadPoolExecutor(5, 5000, 10, MINUTES, SynchronousQueue()) { r ->
+val CACHED_POOL = ThreadPoolExecutor(3, 5000, 10, MINUTES, SynchronousQueue()) { r ->
     MLOG.slog(ThreadFactory::class, "Cached Thread Created")
     Thread(r, "CachedPool")
 }.asCoroutineDispatcher()
-val CMD_POOL    = Executors.newFixedThreadPool(50).asCoroutineDispatcher()
+val CMD_POOL    = newFixedThreadPool(50) { r -> Thread(r, "CommandPool") }
+    .asCoroutineDispatcher()
 
 /** Main Logger */
 lateinit var MLOG: FileLogger
@@ -73,6 +79,7 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     slog("\t...DONE")
     slog("Initializing Main Logger")
     MLOG = FileLogger("Weebot")
+    delay(500)
     MLOG.slog(null, "...DONE\n\n")
 
     /** Setup for random methods and stuff that is needed before launch */
@@ -86,7 +93,7 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     val reg_wbot = Regex("(?i)(w|weebot|full)")
     val reg_tBot = Regex("(?i)(t|tobeew|test)")
 
-    val weebot = !(args_.isNotEmpty() && args_[0].matches(reg_tBot))
+    val weebot = (args_.isNotEmpty() && args_[0].matches(reg_tBot)).not()
 
     val alt = if (weebot) "\\" else "t\\"
 
