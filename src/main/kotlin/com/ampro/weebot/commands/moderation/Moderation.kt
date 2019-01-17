@@ -54,13 +54,14 @@ class CmdModeration : WeebotCommand("mod", "Moderation", emptyArray(), CAT_MOD, 
 
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
-        val bot = getWeebotOrNew(event.guild)
+        val g = event.guild
+        val bot = getWeebotOrNew(g)
         val moderationData = bot.moderationData ?: let {
             bot.moderationData = ModerationData(event.creationTime)
             return@let bot.moderationData!!
         }
 
-        if (args.isEmpty()) return event.reply(moderationData.asEmbed(event.guild).build())
+        if (args.isEmpty()) return event.reply(moderationData.asEmbed(g).build())
         else STAT.track(this, bot, event.author, event.creationTime)
 
         when {
@@ -145,7 +146,7 @@ class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
         val mentions = event.message.mentionedMembers.filterNot {
             it.user.idLong == event.author.idLong
         }
-        val moderationData = bot.moderationData ?: let {
+        val modData = bot.moderationData ?: let {
             bot.moderationData = ModerationData(event.creationTime)
             return@let bot.moderationData!!
         }
@@ -155,8 +156,8 @@ class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
             if (!(event.member hasPerm KICK_MEMBERS)) {
                 return event.respondThenDelete("You must have the Kick Member Permission")
             }
-            val reports = (if (mentions.isEmpty()) moderationData.reports
-            else moderationData.reports.filter {
+            val reports = (if (mentions.isEmpty()) modData.reports
+            else modData.reports.filter {
                 mentions.map { m -> m.user.idLong }.contains(it.key)
             }).filter { it.value.isNotEmpty() }
 
@@ -208,29 +209,65 @@ class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
                     }).display(event.channel)
             } else event.respondThenDelete("There are no user reports to see.")
         } else {
+            //Report actions
             STAT.track(this, bot, event.author, event.creationTime)
             if (mentions.isNotEmpty()) {
-                val reas = event.message.contentRaw.split(Regex("\\s+"))
-                    .subList(1).filterNot { it.matchesAny(userMentionRegex) }
-                    .joinToString(" ")
+                val reas = event.args.split(Regex("\\s+"))
+                    .filterNot { it.matchesAny(userMentionRegex) }.joinToString(" ")
                 if (reas.isBlank()) return event.respondThenDelete("No reason given.")
                 mentions.let {
-                    return@let (if (moderationData.hierarchicalReports)
+                    return@let (if (modData.hierarchicalReports)
                         it.filterNot { it outRanks event.member }
                     else it).filterNot { it hasPerm ADMINISTRATOR }
                 }.apply {
-                    forEach {
-                        val reps = moderationData.reports.getOrPut(
-                            it.user.idLong) { mutableListOf() }
+                    forEach { member ->
+                        val reps = modData.reports.getOrPut(member.user.idLong)
+                        { mutableListOf() }
                         reps.add(reas)
-                        if (moderationData.reportLimit != -1
-                                && reps.size >= moderationData.reportLimit) {
-                            moderationData.reportLimitActions.forEach {
-                                when (it) {
-                                    KICK -> TODO()
-                                    BAN -> TODO()
-                                    NOTIFY_USER -> event.replyInDm(reportLimitEmbed(event.guild))
-                                    NOTIFY_ADMINS -> TODO()
+                        if (modData.reportLimit != -1
+                                && reps.size >= modData.reportLimit) {
+                            modData.reportLimitActions.forEach { action ->
+                                when (action) {
+                                    KICK -> {
+                                        event.guild.controller.kick(member).reason(
+                                            "Hit the maximum community reports"
+                                        ).queue({
+                                            bot.settings.sendLog("""
+                                                User kicked: ${member.user.asMention}
+                                                Reached max community reports (${modData.reportLimit})
+                                                """.trimIndent())
+                                        }, {
+                                            bot.settings.sendLog("""
+                                                Unable to kick: ${member.user.asMention}
+                                                Reached max community reports (${modData.reportLimit})
+                                                """.trimIndent())
+                                        })
+                                    }
+                                    BAN -> {
+                                        event.guild.controller.ban(member, 1,
+                                            "Hit the maximum community reports"
+                                        ).queue({
+                                            bot.settings.sendLog("""
+                                                User banned: ${member.user.asMention}
+                                                Reached max community reports (${modData.reportLimit})
+                                                """.trimIndent())
+                                        }, {
+                                            bot.settings.sendLog("""
+                                                Unable to ban: ${member.user.asMention}
+                                                Reached max community reports (${modData.reportLimit})
+                                                """.trimIndent())
+                                        })
+                                    }
+                                    NOTIFY_USER -> event.replyInDm(reportLimitEmbed(gld))
+                                    NOTIFY_ADMINS -> {
+                                        val s = gld.members.filter {
+                                            it.isOwner || it hasPerm ADMINISTRATOR
+                                        }.joinToString { it.asMention }
+                                        bot.settings.sendLog("""$s
+                                            User reached maximum community reports!!
+                                            $Warning User: ${member.asMention}
+                                        """.trimIndent())
+                                    }
                                 }
                             }
                         }

@@ -68,13 +68,16 @@ val CMD_EMBED           = CmdEmbedMaker()
  *              Fun              *
  *********************************/
 
+//Random
 val CMD_CATFACT         = CmdCatFact()
 val CMD_HELLOTHERE      = CmdHelloThere()
+val CMD_EMOJIFY         = CmdEmojify()
+val CMD_THIS            = CmdThis()
+//Structured
 val CMD_REDDICORD       = CmdReddicord()
 val CMD_REDDICORD_SCORE = SubCmdLeaderBoard("reddiscore", arrayOf("reddiscores"))
 val CMD_CAH             = CmdCardsAgainstHumanity()
-val CMD_THIS            = CmdThis()
-val CMD_EMOJIFY         = CmdEmojify()
+
 
 
 val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,

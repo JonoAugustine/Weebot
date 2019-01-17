@@ -393,6 +393,7 @@ class WeebotCommandClient(val prefixes: List<String>,
             else -> return
         }
 
+        if (rawParts.isEmpty()) return
         val cmdCall: String = rawParts[0].toLowerCase()
         val args = rawParts.subList(1).joinToString(" ")
 

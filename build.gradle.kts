@@ -37,6 +37,8 @@ dependencies {
     implementation("joda-time:joda-time:2.2")
     implementation("commons-io:commons-io:2.6")
     implementation("com.google.code.gson:gson:2.8.5")
+    implementation("com.github.ben-manes.caffeine:caffeine:2.6.2")
+    implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:4.3.0")
         //Web
     implementation("com.github.kittinunf.fuel:fuel:1.16.0")
     implementation("com.github.kittinunf.fuel:fuel-gson:1.16.0")
@@ -55,10 +57,10 @@ dependencies {
         //Bot List Sites
     implementation("org.discordbots:DBL-Java-Library:2.0.1")
 
-    //Tools & APIs
+    //APIs
     implementation("me.sargunvohra.lib:pokekotlin:2.3.0")
     implementation("com.twilio.sdk:twilio:7.9.0")
-    implementation("com.github.twitch4j:twitch4j:1.0.0-alpha.6")
+    implementation("com.github.twitch4j:twitch4j:1.0.0-alpha.5")
     implementation("org.twitter4j:twitter4j-stream:4.0.7")
     //implementation("org.mariuszgromada.math:MathParser.org-mXparser:4.1.1")
     //implementation("net.dean.jraw:JRAW:1.1.0")
