@@ -24,7 +24,6 @@ val DEV_IDS = mutableListOf(
  * @return true if the user ID is a dev.
  */
 fun isDev(id: Long): Boolean = DEV_IDS.contains(id)
-
 fun User.isDev() = isDev(this.idLong)
 
 const val PHONE_JONO = "+12404236950"

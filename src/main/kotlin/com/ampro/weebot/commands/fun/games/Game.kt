@@ -118,12 +118,9 @@ abstract class Game<P : Player> (guild: Guild, author: User) {
     /** Is the game currently running? Starts false */
     var isRunning: Boolean = false
 
-    protected val playerList = mutableListOf<P>()
+    internal val playerList = mutableListOf<P>()
 
-    init {
-        this.addUser(author)
-    }
-
+    init { this.addUser(author) }
 
     /**
      * Create a game with an initial set of `Player`s

@@ -5,14 +5,12 @@
 package com.ampro.weebot.commands.utilitycommands
 
 import com.ampro.weebot.*
-import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.*
-import com.ampro.weebot.extensions.strdEmbedBuilder
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
-import com.ampro.weebot.util.Emoji.*
+import com.ampro.weebot.util.Emoji.AlarmClock
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.*
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
@@ -24,21 +22,13 @@ import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 
 /** An instantiable representation of a User's OutHouse. */
-class OutHouse(user: User, var remainingMin: Long, val message: String, val forward:Boolean)
-    : IPassive {
+class OutHouse(user: User, var remainingMin: Long, val message: String,
+               val forward: Boolean) : IPassive {
 
     var lastTime: OffsetDateTime? = NOW()
     val userId = user.idLong
 
     override fun dead() = this.remainingMin <= 1
-
-    fun formatTime(): String {
-        val d    = remainingMin / 60 / 24
-        val h   = (remainingMin / 60 ) - 24 * d
-        val m = remainingMin - (h * 60) - (d * 60 * 24)
-        return "${if(d > 0) "$d d, " else ""}${if(h > 0) "$h hr, " else ""
-        }${if(m > 0) "$m min " else ""}"
-    }
 
     override fun accept(bot: Weebot, event: Event) {
         if (event !is GuildMessageReceivedEvent) return
@@ -50,39 +40,37 @@ class OutHouse(user: User, var remainingMin: Long, val message: String, val forw
             lastTime = NOW()
         }
         if (remainingMin <= 1) return
+
         val guild = event.guild
         val mess = event.message
         val author = event.author
 
-        if (event.channel.type != PRIVATE) {
-            if (author `is` userId) {
-                val mem = guild.getMember(author)
-                event.channel.sendMessage("*Welcome back ${mem.effectiveName}*").queue()
-                this.remainingMin = 0
-                return
-            } else if (mess.isMentioned(guild.getMemberById(userId).user)) {
-                //Respond as bot
-                val sb = StringBuilder().append("*Sorry, ")
-                    .append(guild.getMemberById(userId).effectiveName)
-                if (message.isNotBlank()) sb.append(" is out $message. ")
-                else sb.append(" is currently unavailable. ")
-                sb.append("Please try mentioning them again after ")
-                    .append(formatTime()).append(". Thank you.*")
-                event.channel.sendMessage(sb.toString()).queue()
+        if (author `is` userId) {
+            val mem = guild.getMember(author)
+            event.channel.sendMessage("*Welcome back ${mem.effectiveName}*").queue()
+            this.remainingMin = 0
+            return
+        } else if (mess.mentionedUsers.has { it.idLong == userId }) {
+            //Respond as bot
+            val sb = StringBuilder().append("*Sorry, ")
+                .append(getUser(userId)?.asMention ?: "that user")
+            if (message.isNotBlank()) sb.append(" is out $message. ")
+            else sb.append(" is currently unavailable. ")
+            sb.append("Please try mentioning them again after ")
+                .append((remainingMin * 60L).formatTime()).append(". Thank you.*")
+            event.channel.sendMessage(sb.toString()).queue()
 
-                //Forward Message
-                if (forward) {
-                    val m = event.message.contentDisplay
-                    val a = "${author.name} (${guild.getMember(author).effectiveName})"
-                    val e = strdEmbedBuilder.setAuthor(a)
-                        .setTitle("Message from ${guild.name}")
-                        .setDescription(m).build()
-                    getUser(userId)?.openPrivateChannel()?.queue {
-                        it.sendMessage(e).queue()
-                    }
+            //Forward Message
+            if (forward) {
+                val m = event.message.contentDisplay
+                val a = "${author.name} (${guild.getMember(author).effectiveName})"
+                val e = strdEmbedBuilder.setAuthor(a)
+                    .setTitle("Message from ${guild.name}").setDescription(m).build()
+                getUser(userId)?.openPrivateChannel()?.queue {
+                    it.sendMessage(e).queue()
                 }
-                return
             }
+            return
         }
     }
 
@@ -118,8 +106,10 @@ class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UT
         else getWeebotOrNew(event.guild)
         STAT.track(this, bot, event.author, event.creationTime)
 
-        val pas = DAO.GLOBAL_WEEBOT.getUesrPassiveList(event.author)
-            .firstOrNull { it is OutHouse } ?: run {
+        DAO.GLOBAL_WEEBOT.getUserPassive<OutHouse>(event.author)?.apply {
+            event.reply("*You're already in the outhouse* ${
+            (remainingMin * 60L).formatTime()}")
+        } ?: run {
             //Add new OH
             val args = event.splitArgs()
 
@@ -148,14 +138,16 @@ class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UT
             } else ""
 
             val oh = OutHouse(event.author, min.toLong(), message, forward)
-            if (DAO.GLOBAL_WEEBOT.addUserPassive(event.author, oh))
-                event.reply("I will hold down the fort while you're away! :guardsman:")
-            else event.reply("Sorry, You have already reached the maximum number of Passives")
-            return
+            if (DAO.GLOBAL_WEEBOT.addUserPassive(event.author, oh)) {
+                event.reply("I will hold down the fort while you're away! :guardsman:"
+                        + " see you in ${(min * 60L).formatTime()}")
+                return@run oh
+            }
+            else {
+                event.reply("Sorry, You have already reached the maximum number of Passives")
+                return@run null
+            }
         }
-        //Already in OH
-        pas as OutHouse
-        event.reply("*You're already in the outhouse* ${pas.formatTime()}")
     }
 
 }

@@ -103,8 +103,35 @@
     "PASSIVE_MAX": 10,
     "PASSIVE_MAX_PREM": 50,
     "userPassives": {
+      "451005806222245889": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        }
+      ],
       "113450820942487552": [],
-      "139167730237571072": []
+      "139167730237571072": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        }
+      ]
     },
     "REM_MAX": 10,
     "REM_MAX_PREM": 50,

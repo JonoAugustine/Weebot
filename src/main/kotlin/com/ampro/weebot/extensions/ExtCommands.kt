@@ -8,6 +8,7 @@ import com.ampro.weebot.*
 import com.ampro.weebot.commands.COMMANDS
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.DEV_IDS
+import com.ampro.weebot.database.constants.isDev
 import com.ampro.weebot.util.Emoji.*
 import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.*
@@ -144,15 +145,12 @@ abstract class WeebotCommand(name: String, val displayName: String?,
      * @since 2.0
      */
     open class HelpBiConsumerBuilder() {
-        constructor(title: String) : this() { embedBuilder.setTitle(title).addField(
-            guide) }
-        constructor(title: String, description: String) : this(title) {
-            this.description.append(description)
-        }
+        constructor(title: String) : this(title, true)
+        constructor(title: String, description: String, withGuide: Boolean = true)
+                : this(title, false) { this.description.append(description) }
         constructor(title: String, withGuide: Boolean) : this() {
             embedBuilder.setTitle(title)
-            if (withGuide) embedBuilder.addField(
-                guide) else return
+            if (withGuide) embedBuilder.addField(guide)
         }
 
         companion object {
@@ -299,7 +297,9 @@ class WeebotCommandClient(val prefixes: List<String>,
 
     override fun applyCooldown(name: String, seconds: Int) {
         try {
-            if (!DEV_IDS.contains(name.substring(name.indexOf("U:") + 2).toLong()))
+            val id = name.split("|").firstOrNull { it.startsWith("U", true) }
+                ?.removeAll(Regex("[^\\d]"))?.toLong()
+            if (id == null || !isDev(id))
                 cooldowns[name] = NOW().plusSeconds(seconds.toLong())
         } catch (e: NumberFormatException) {
             cooldowns[name] = NOW().plusSeconds(seconds.toLong())

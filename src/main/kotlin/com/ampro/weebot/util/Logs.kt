@@ -18,15 +18,15 @@ fun elog(any: Any? = "", inline: Boolean = false)
         = System.err.print("${if(inline) "" else "\n"}[$threadName] $any")
 
 /** A simple logger that will show it's name each time it prints */
-class Slogger(val name: String = "") {
+open class Slogger(val name: String = "") {
     fun slog(any: Any = "") = println("[$name] [$threadName] $any")
     fun elog(any: Any = "") = System.err.println("[$name] [$threadName] $any")
 }
 
 /** File and Console logger */
-class FileLogger(val name: String, private val timeStamp: Boolean = true) {
-    constructor(kClass: KClass<*>, timeStamp: Boolean = true)
-            : this(kClass.simpleName ?: kClass.jvmName, timeStamp)
+class FileLogger(name: String, val timeStamp: Boolean = true,
+                 val asSlogger: Boolean = false)
+    : Slogger(name) {
 
     companion object {
         val HEADDER = "## Aquatic Mastery Productions ##\n\t\t # Weebot Log #\n"
@@ -43,15 +43,15 @@ class FileLogger(val name: String, private val timeStamp: Boolean = true) {
      * @return false if the logger fails to initialize
      */
     init {
-        if (log.exists()) {
-            throw FileAlreadyExistsException(log)
+        if (!asSlogger) {
+            if (log.exists()) throw FileAlreadyExistsException(log)
+            try {
+                log.createNewFile()
+            } catch (e: IOException) {
+                e.printStackTrace()
+            }
+            flog("$HEADDER\t ${NOW_STR()}\n\n\n")
         }
-        try {
-            log.createNewFile()
-        } catch (e: IOException) {
-            e.printStackTrace()
-        }
-        flog("$HEADDER\t ${NOW_STR()}\n\n\n")
     }
 
     /**
@@ -62,10 +62,12 @@ class FileLogger(val name: String, private val timeStamp: Boolean = true) {
      */
     fun slog(kClass: KClass<*>?, any: Any = "") {
         if (any.toString().isNotBlank()) {
-            val out = "${if (timeStamp) "[${NOW_STR()}]" else ""} [${
-            kClass?.simpleName ?: name}] [info] $any"
-            println(out)
-            flog(out)
+            val out = StringBuilder()
+            if (timeStamp) out.append("[${NOW_STR()}]")
+            out.append("[$threadName]")
+                .append("[${kClass?.simpleName ?: name}] [info] $any")
+            println(out.toString())
+            if (!asSlogger) flog(out.toString())
         }
     }
 
@@ -77,10 +79,12 @@ class FileLogger(val name: String, private val timeStamp: Boolean = true) {
      */
     fun elog(kClass: KClass<*>?, any: Any = "") {
         if (any.toString().isNotBlank()) {
-            val out = "${if (timeStamp) "[${NOW_STR()}]" else ""} [${
-            kClass?.simpleName ?: name}] [err] $any"
-            System.err.println(out)
-            flog(out)
+            val out = StringBuilder()
+            if (timeStamp) out.append("[${NOW_STR()}]")
+            out.append("[$threadName]")
+                .append("[${kClass?.simpleName ?: name}] [err] $any")
+            println(out.toString())
+            if (!asSlogger) flog(out.toString())
         }
     }
 

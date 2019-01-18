@@ -233,8 +233,8 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
                         }
                 }
                 event.delete()
-                when (i) {
-                    1 -> //if ALL
+                when {
+                    i == 1 -> //if ALL
                         strdPaginator.setText("All Weebot Commands").setUsers(event.author)
                             .setItemsPerPage(6).apply {
                             filterAndMap { !(it.isHidden || it.isOwnerCommand) }.forEach { s ->
@@ -243,17 +243,19 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
                         }.build().apply {
                             event.author.openPrivateChannel().queue { paginate(it, 1) }
                         }
-                    2 -> strdPaginator.setText("Dev Commands").setUsers(event.author).apply {
+                    i == 2 && event.isOwner ->
+                        strdPaginator.setText("Dev Commands").setUsers(event.author).apply {
                         filterAndMap { it.isHidden || it.isOwnerCommand }.forEach { s -> addItems(s) }
                     }.build().apply {
                         event.author.openPrivateChannel().queue { paginate(it, 1) }
                     }
                     else -> {
-                        val cat = categories[i - 3]
+                        val cat = categories[i - (event.isOwner.toInt() + 2)]
                         strdPaginator.setText("Weebot's ${cat.name} Commands")
                             .setItemsPerPage(6)
                             .setUsers(event.author).apply {
-                            filterAndMap { it.category == cat && !it.isHidden }.forEach { s -> addItems(s) }
+                            filterAndMap { it.category == cat && !it.isHidden }
+                                .forEach { s -> addItems(s) }
                         }.build().apply {
                             event.author.openPrivateChannel().queue { paginate(it, 1) }
                         }

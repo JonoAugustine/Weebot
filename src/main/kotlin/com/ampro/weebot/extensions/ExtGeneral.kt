@@ -109,3 +109,9 @@ fun <K, V> MutableMap<K, V>.removeIf(predicate: (K, V) -> Boolean) {
     val targets = filter { predicate(it.key, it.value) }
     targets.forEach { t -> this.remove(t.key) }
 }
+
+/* ********
+    Number
+ */
+
+fun Boolean.toInt(): Int = if (this) 1 else 0
