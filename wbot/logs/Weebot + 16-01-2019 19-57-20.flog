@@ -1,0 +1,37 @@
+
+## Aquatic Mastery Productions ##
+		 # Weebot Log #
+	 16-01-2019 19:57:20
+
+
+
+[16-01-2019 19:57:20] [Weebot] [info] ...DONE
+
+
+[16-01-2019 19:57:20] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:57:21] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:57:21] [Weebot] [info] Setting up Database...
+[16-01-2019 19:57:21] [Weebot] [info] 	Loading database...
+[16-01-2019 19:57:22] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:57:22] [Weebot] [info] 	Database located. Updating registered Guilds.
+[16-01-2019 19:57:22] [Weebot] [info] 	Backing up database.
+[16-01-2019 19:57:23] [Weebot] [info] 	...DONE
+[16-01-2019 19:57:23] [Weebot] [info] ...DONE
+[16-01-2019 19:57:23] [Weebot] [info] Logging in to TestBot JDA shards...
+[16-01-2019 19:57:23] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:57:24] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:57:24] [Weebot] [info] Starting Weebots...
+[16-01-2019 19:57:24] [Weebot] [info] Waiting for all 1 shards to connect...
+[16-01-2019 19:57:24] [WeebotCommandClient] [info] Sending Stats to discordbots.org...
+[16-01-2019 19:57:24] [Weebot] [info] All 1 Shards connected! 0 seconds
+[16-01-2019 19:57:24] [Weebot] [info] Setting up Statistics...
+[16-01-2019 19:57:24] [Weebot] [info] 	Loading Statistics...
+[16-01-2019 19:57:24] [Weebot] [info] 	Statistics located.
+[16-01-2019 19:57:24] [Weebot] [info] 	Backing up Statistics.
+[16-01-2019 19:57:24] [Weebot] [info] 	...DONE
+[16-01-2019 19:57:24] [Weebot] [info] ...DONE
+[16-01-2019 19:57:24] [Weebot] [info] Starting Save Job...
+[16-01-2019 19:57:24] [Weebot] [info] Launch Complete!
+
+
+[16-01-2019 19:57:24] [Weebot] [info] Checking HQRegent Twitch Live Stream

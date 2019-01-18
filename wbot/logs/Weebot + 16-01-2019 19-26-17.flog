@@ -1,0 +1,42 @@
+
+## Aquatic Mastery Productions ##
+		 # Weebot Log #
+	 16-01-2019 19:26:17
+
+
+
+[16-01-2019 19:26:17] [Weebot] [info] ...DONE
+
+
+[16-01-2019 19:26:17] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:26:17] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:26:17] [Weebot] [info] Setting up Database...
+[16-01-2019 19:26:17] [Weebot] [info] 	Loading database...
+[16-01-2019 19:26:17] [Weebot] [info] 	Database located. Updating registered Guilds.
+[16-01-2019 19:26:17] [Weebot] [info] 	Backing up database.
+[16-01-2019 19:26:17] [Weebot] [info] 	...DONE
+[16-01-2019 19:26:17] [Weebot] [info] ...DONE
+[16-01-2019 19:26:17] [Weebot] [info] Logging in to Weebot JDA shards...
+[16-01-2019 19:26:18] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:26:18] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:26:18] [Weebot] [info] Starting Weebots...
+[16-01-2019 19:26:18] [ThreadFactory] [info] Cached Thread Created
+[16-01-2019 19:26:18] [Weebot] [info] Waiting for all 1 shards to connect...
+[16-01-2019 19:26:22] [WeebotCommandClient] [info] Sending Stats to discordbots.org...
+[16-01-2019 19:26:22] [Weebot] [info] All 1 Shards connected! 4 seconds
+[16-01-2019 19:26:22] [Weebot] [info] Setting up Statistics...
+[16-01-2019 19:26:22] [Weebot] [info] 	Loading Statistics...
+[16-01-2019 19:26:22] [Weebot] [info] 	Statistics located.
+[16-01-2019 19:26:22] [Weebot] [info] 	Backing up Statistics.
+[16-01-2019 19:26:22] [Weebot] [info] 	...DONE
+[16-01-2019 19:26:22] [Weebot] [info] ...DONE
+[16-01-2019 19:26:22] [Weebot] [info] Starting Save Job...
+[16-01-2019 19:26:22] [Weebot] [info] Launch Complete!
+
+
+[16-01-2019 19:26:22] [Weebot] [info] Checking HQRegent Twitch Live Stream
+[16-01-2019 19:46:23] [Weebot] [info] Checking HQRegent Twitch Live Stream
+[16-01-2019 20:06:23] [Weebot] [info] Checking HQRegent Twitch Live Stream
+[16-01-2019 20:15:55] [Weebot] [info] Database & Stats back up: 100
+[16-01-2019 20:26:23] [Weebot] [info] Checking HQRegent Twitch Live Stream
+[16-01-2019 20:46:23] [Weebot] [info] Checking HQRegent Twitch Live Stream
