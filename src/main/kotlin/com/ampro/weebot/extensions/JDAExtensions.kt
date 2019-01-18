@@ -155,7 +155,7 @@ fun CommandClientBuilder.addCommands(commands: Iterable<WeebotCommand>)
 }
 
 infix fun User.`is`(id: Long) = this.idLong == id
-
+infix fun User.`is`(user: User) = this.idLong == user.idLong
 
 fun MessageReceivedEvent.isValidUser(guild: Guild?, user: User,
                                      channel: MessageChannel? = null)

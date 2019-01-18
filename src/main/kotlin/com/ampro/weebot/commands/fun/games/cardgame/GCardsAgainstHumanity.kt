@@ -167,7 +167,7 @@ class CAHPlayer(user: User) : Comparable<Player>, Player(user) {
  * @since 2.2.0
  */
 internal class PlayerHandPassive(@Transient private val player: CAHPlayer,
-                                 @Transient private val cah: CardsAgainstHumanity?)
+                                 @Transient internal val cah: CardsAgainstHumanity?)
     : IPassive {
     var dead = false
     override fun dead() = dead
@@ -251,11 +251,13 @@ internal class PlayerHandPassive(@Transient private val player: CAHPlayer,
                         } fewer card(s). Hit $X_Red and reselect.")
                         .queue { it.delete().queueAfter(5, SECONDS) }
                 }
-                if (cah.playerList.filterNot { it.user.isBot || it == cah.czar }
-                            .all { it.playedCards.size == cah.blackCard.pick }
-                        && cah.gameState == CHOOSING) {
-                    cah.gameState = READING
-                    cah.sendBlackCard()
+                synchronized(cah) {
+                    if (cah.playerList.filterNot { it.user.isBot || it == cah.czar }
+                                .all { it.playedCards.size == cah.blackCard.pick }
+                            && cah.gameState == CHOOSING) {
+                        cah.gameState = READING
+                        cah.sendBlackCard()
+                    }
                 }
             }
         }
@@ -419,9 +421,11 @@ class CardsAgainstHumanity(guild: Guild, author: User,
     fun sendWhiteCards(vararg players: CAHPlayer) {
         if (!isRunning) return
         players.filterNot { it.user.isBot }.forEach { p ->
-            playerHandMenus.getOrPut(p) { PlayerHandPassive(p, this@CardsAgainstHumanity) }
-                .also { DAO.GLOBAL_WEEBOT.addUserPassive(p.user, it) }
-                .send()
+            playerHandMenus.getOrPut(p) {
+                val php = PlayerHandPassive(p, this@CardsAgainstHumanity)
+                DAO.GLOBAL_WEEBOT.addUserPassive(p.user, php)
+                return@getOrPut php
+            }.send()
         }
     }
 
@@ -513,7 +517,8 @@ class CardsAgainstHumanity(guild: Guild, author: User,
      */
     override fun startGame(): Boolean {
         return if (this.players.size in MIN_PLAYERS..MAX_PLAYERS) {
-            if (this.playerList.filterNot { it.user.isBot }.size < 2) return false
+            if (this.playerList.filterNot { it.user.isBot }.size < 2)
+                return false
             //Deal Cards to players
             this.playerList.forEach { dealCards(it) }
             //Set the First Czar
@@ -576,10 +581,14 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
 ) {
 
     override fun execute(event: CommandEvent) {
-        val c = CardsAgainstHumanity(event.guild, event.author, event.textChannel)
+        val bot = getWeebotOrNew(event.guild)
+        bot.games.add(
+        CardsAgainstHumanity(event.guild, event.author, event.textChannel)
             .apply {
                 event.message.mentionedUsers.forEach { addUser(it) }
-            }.startGame()
+                startGame()
+            }
+        )
 
         //STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
     }

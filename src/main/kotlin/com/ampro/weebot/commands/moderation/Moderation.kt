@@ -131,25 +131,15 @@ class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
     fun name(guild: Guild, id: Long)
             = guild.getMemberById(id)?.effectiveName ?: getUser(id)?.name ?: "Unknown User"
 
-    private fun reportLimitEmbed(guild: Guild): MessageEmbed {
-        return makeEmbedBuilder("You hit the Report Limit! $Warning",null, """
-            You have hit the maximum number of Reports in **${guild.name}**
-            """.trimIndent())
-            .setColor(STD_RED).build()
-    }
-
     override fun execute(event: CommandEvent) {
         val gld = event.guild
         val bot = getWeebotOrNew(gld)
         if (event.args.isNullOrBlank()) return
         val args = event.splitArgs()
         val mentions = event.message.mentionedMembers.filterNot {
-            it.user.idLong == event.author.idLong
-        }
-        val modData = bot.moderationData ?: let {
-            bot.moderationData = ModerationData(event.creationTime)
-            return@let bot.moderationData!!
-        }
+            it.user `is` event.author || it.user.isBot
+        }.toMutableList()
+        val modData = bot.moderationData
 
         //if See (dont track see)
         if (args[0].matches(REG_HYPHEN + "(se*|v(iew)?)")) {
@@ -211,74 +201,76 @@ class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
         } else {
             //Report actions
             STAT.track(this, bot, event.author, event.creationTime)
-            if (mentions.isNotEmpty()) {
-                val reas = event.args.split(Regex("\\s+"))
-                    .filterNot { it.matchesAny(userMentionRegex) }.joinToString(" ")
-                if (reas.isBlank()) return event.respondThenDelete("No reason given.")
-                mentions.let {
-                    return@let (if (modData.hierarchicalReports)
-                        it.filterNot { it outRanks event.member }
-                    else it).filterNot { it hasPerm ADMINISTRATOR }
-                }.apply {
-                    forEach { member ->
-                        val reps = modData.reports.getOrPut(member.user.idLong)
-                        { mutableListOf() }
-                        reps.add(reas)
-                        if (modData.reportLimit != -1
-                                && reps.size >= modData.reportLimit) {
-                            modData.reportLimitActions.forEach { action ->
-                                when (action) {
-                                    KICK -> {
-                                        event.guild.controller.kick(member).reason(
-                                            "Hit the maximum community reports"
-                                        ).queue({
-                                            bot.settings.sendLog("""
-                                                User kicked: ${member.user.asMention}
-                                                Reached max community reports (${modData.reportLimit})
-                                                """.trimIndent())
-                                        }, {
-                                            bot.settings.sendLog("""
-                                                Unable to kick: ${member.user.asMention}
-                                                Reached max community reports (${modData.reportLimit})
-                                                """.trimIndent())
-                                        })
-                                    }
-                                    BAN -> {
-                                        event.guild.controller.ban(member, 1,
-                                            "Hit the maximum community reports"
-                                        ).queue({
-                                            bot.settings.sendLog("""
-                                                User banned: ${member.user.asMention}
-                                                Reached max community reports (${modData.reportLimit})
-                                                """.trimIndent())
-                                        }, {
-                                            bot.settings.sendLog("""
-                                                Unable to ban: ${member.user.asMention}
-                                                Reached max community reports (${modData.reportLimit})
-                                                """.trimIndent())
-                                        })
-                                    }
-                                    NOTIFY_USER -> event.replyInDm(reportLimitEmbed(gld))
-                                    NOTIFY_ADMINS -> {
-                                        val s = gld.members.filter {
-                                            it.isOwner || it hasPerm ADMINISTRATOR
-                                        }.joinToString { it.asMention }
-                                        bot.settings.sendLog("""$s
-                                            User reached maximum community reports!!
-                                            $Warning User: ${member.asMention}
+            if (mentions.isEmpty())
+                return event.respondThenDelete("No user was mentioned in the report.")
+
+            val reas = event.args.split(Regex("\\s+"))
+                .filterNot { it.matchesAny(userMentionRegex) }.joinToString(" ")
+            if (reas.isBlank()) return event.respondThenDelete("No reason given.")
+
+            if (modData.hierarchicalReports)
+                mentions.removeAll{ it outRanks event.member || it hasPerm ADMINISTRATOR }
+
+            mentions.forEach { member ->
+                val reps = modData.reports.getOrPut(member.user.idLong){mutableListOf()}
+                reps.add(reas)
+                if (modData.reportLimit == -1 || reps.size < modData.reportLimit)
+                    return@forEach
+                modData.reportLimitActions.forEach { action ->
+                    when (action) {
+                        KICK -> {
+                            event.guild.controller.kick(member)
+                                .reason("Hit the maximum community reports").queue({
+                                bot.settings.sendLog("""
+                                        User kicked: ${member.user.asMention}
+                                        Reached max community reports (${modData.reportLimit})
                                         """.trimIndent())
-                                    }
-                                }
+                            }, {
+                                bot.settings.sendLog("""
+                                        Unable to kick: ${member.user.asMention}
+                                        Reached max community reports (${modData.reportLimit})
+                                        """.trimIndent())
+                            })
+                        }
+                        BAN -> {
+                            event.guild.controller.ban(member, 1,
+                                "Hit the maximum community reports").queue({
+                                bot.settings.sendLog("""
+                                        User banned: ${member.user.asMention}
+                                        Reached max community reports (${modData.reportLimit})
+                                        """.trimIndent())
+                            }, {
+                                bot.settings.sendLog("""
+                                        Unable to ban: ${member.user.asMention}
+                                        Reached max community reports (${modData.reportLimit})
+                                        """.trimIndent())
+                            })
+                        }
+                        NOTIFY_USER -> member.user.openPrivateChannel().queue {
+                            it.sendMessage(makeEmbedBuilder(
+                                "You hit the Report Limit! $Warning",null,
+                                "You have hit the maximum number of Reports " +
+                                        "in **${gld.name}**").setColor(STD_RED).build())
+                                .queueIgnore()
+                        }
+                        NOTIFY_ADMINS -> {
+                            val admins = gld.members.filter {
+                                (it.isOwner /**|| it hasPerm ADMINISTRATOR*/)
+                                        && !it.user.isBot
                             }
+                            bot.settings.sendLog("""
+                                    User reached maximum community reports!!
+                                    $Warning User: ${member.asMention}
+                                """.trimIndent(), admins)
                         }
                     }
-                    val rep = """Reported: *${joinToString(", ") { it.effectiveName }}*
-                        |Reason: $reas""".trimMargin()
-                    event.replyWarning(rep)
-                    bot.settings.sendLog(
-                        "${event.member.effectiveName} (ID: ${event.author.id}) $rep")
                 }
-            } else event.respondThenDelete("No user was mentioned in the report.")
+            }
+            val rep = """Reported: *${mentions.joinToString(", ") { it.effectiveName }}*
+                | Reason: $reas""".trimMargin()
+            event.replyWarning(rep)
+            bot.settings.sendLog(
+                "${event.member.effectiveName} (ID: ${event.author.id}) $rep")
         }
 
     }

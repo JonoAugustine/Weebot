@@ -12,6 +12,7 @@ import com.ampro.weebot.extensions.MentionType.CHANNEL
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_GUILD
+import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.entities.Message
@@ -23,21 +24,22 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
 
 /**
- * A [WeebotCommand] to view any running [IPassive]s
+ * A [WeebotCommand] to view any running [IPassive]s from [Weebot.passives] or
+ * [GlobalWeebot.userPassives] respectively
  *
  * @author Jonathan Augustine
- * @since 2.1
+ * @since 2.1.0
  */
 class CmdTaskManager : WeebotCommand("taskmanager", "Task Manager",
     arrayOf("task", "tasks"), CAT_GEN, "[commandName]",
-    "View all active Passives in the guild.", cooldown = 60, cooldownScope = USER_GUILD,
-    userPerms = arrayOf(ADMINISTRATOR)) {
+    "View all active passive commands in the guild or for the user.", cooldown = 60,
+    cooldownScope = USER_SHARD, userPerms = arrayOf(ADMINISTRATOR)) {
     override fun execute(event: CommandEvent) {
         val passives = if (event.guild != null) getWeebotOrNew(event.guild).passives
-        else DAO.GLOBAL_WEEBOT.getUesrPassiveList(event.author)
+        else DAO.GLOBAL_WEEBOT.getUserPassiveList(event.author)
 
         if (passives.isEmpty()) {
-            event.reply("*No active COMMANDS.*")
+            event.reply("*No active commands.*")
             return
         }
 
@@ -116,7 +118,7 @@ private class CmdSetName : WeebotCommand("nickname",null, arrayOf("name", "chang
 
     companion object {
         val normField: Field = Field("NickName",
-        "Change the bot's nickname\n``\\set nickname <Name>``\nAliases: name, changename",
+        "Change the bot's nickname\n``set nickname <Name>``\nAliases: name, changename",
             true)
     }
 

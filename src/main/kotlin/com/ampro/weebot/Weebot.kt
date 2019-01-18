@@ -4,8 +4,9 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.commands.CMD_REM
-import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.`fun`.games.Game
+import com.ampro.weebot.commands.`fun`.games.Player
 import com.ampro.weebot.commands.`fun`.games.cardgame.CahGuildInfo
 import com.ampro.weebot.commands.moderation.ModerationData
 import com.ampro.weebot.commands.utilitycommands.CmdReminder.Companion.remWatchJob
@@ -15,10 +16,12 @@ import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.getGuild
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.ampro.weebot.util.NOW
 import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
@@ -110,10 +113,15 @@ class WeebotSettings(val guildID: Long) {
     /**
      * Sneds a log message to the log channel if it is set
      */
-    fun sendLog(message: String, consumer: (Message) -> Unit = {}) {
-        getGuild(guildID)?.getTextChannelById(logchannel)
-            ?.sendMessage(makeEmbedBuilder("${SELF.name} Log",null,message).build())
-            ?.queue { consumer(it) }
+    fun sendLog(message: String, mentions: Iterable<IMentionable> = emptyList(),
+                consumer: (Message) -> Unit = {}) {
+        getGuild(guildID)?.getTextChannelById(logchannel)?.apply {
+            val msg = MessageBuilder(
+                makeEmbedBuilder("${SELF.name} Log",null,message).build())
+                .also { mentions.forEach { m -> it.append(m) } }
+                .build()
+            sendMessage(msg).queue { consumer(it) }
+        }
     }
 
     fun sendLog(message: Message, consumer: (Message) -> Unit = {}) {
@@ -161,11 +169,24 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     /** [IPassive] objects, cleared on exit  */
     @get:Synchronized
-    //@Transient
     val passives: ArrayList<IPassive> = ArrayList()
 
+    @Suppress("SENSELESS_COMPARISON")
     @get:Synchronized
-    var moderationData: ModerationData? = null
+    @Transient
+    var games: MutableList<Game<out Player>> = mutableListOf()
+        get() {
+            if (field == null) field = mutableListOf()
+            return field
+        }
+
+    @Suppress("SENSELESS_COMPARISON")
+    @get:Synchronized
+    var moderationData: ModerationData = ModerationData(NOW())
+        get() {
+            if (field == null) field = ModerationData(NOW())
+            return field
+        }
 
     /** [NotePad]s */
     @get:Synchronized
@@ -173,7 +194,6 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
 
     @get:Synchronized
     var cahGuildInfo: CahGuildInfo? = null
-
 
     /*************************************************
         *               INIT                       *
@@ -262,10 +282,9 @@ class GlobalWeebot : Weebot(-1L) {
      * @return The list of [IPassive]s linked to this user. If one does not exist,
      *          it is created, added to the map and returned
      */
-    fun getUesrPassiveList(user: User) = userPassives.getOrPut(user.idLong) {
+    fun getUserPassiveList(user: User) = userPassives.getOrPut(user.idLong) {
         mutableListOf()
-    }
-
+    }!!
 
     /**
      * Adds a [IPassive] to the user's lists of global passives if the user
@@ -287,6 +306,13 @@ class GlobalWeebot : Weebot(-1L) {
             }
         }
     }
+
+    inline fun <reified T:IPassive> getUserPassive(user: User)
+            = getUserPassiveList(user).firstOrNull { it::class == T::class } as T?
+
+    inline fun <reified T:IPassive> getUserPassives(user: User): MutableList<T>
+            = getUserPassiveList(user).filter { it::class == T::class }
+        .mapTo(mutableListOf()) { it as T }
 
     override fun feedPassives(event: Event) {
         userPassives.values.forEach { it ->
