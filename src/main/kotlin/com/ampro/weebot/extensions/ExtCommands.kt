@@ -8,6 +8,7 @@ import com.ampro.weebot.*
 import com.ampro.weebot.commands.COMMANDS
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.DEV_IDS
+import com.ampro.weebot.database.constants.isDev
 import com.ampro.weebot.util.Emoji.*
 import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.*
@@ -296,7 +297,9 @@ class WeebotCommandClient(val prefixes: List<String>,
 
     override fun applyCooldown(name: String, seconds: Int) {
         try {
-            if (!DEV_IDS.contains(name.substring(name.indexOf("U:") + 2).toLong()))
+            val id = name.split("|").firstOrNull { it.startsWith("U", true) }
+                ?.removeAll(Regex("[^\\d]"))?.toLong()
+            if (id == null || !isDev(id))
                 cooldowns[name] = NOW().plusSeconds(seconds.toLong())
         } catch (e: NumberFormatException) {
             cooldowns[name] = NOW().plusSeconds(seconds.toLong())
