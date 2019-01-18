@@ -5,3 +5,7 @@ Weebot.iml
 /out/
 build/
 /local.properties
+/.flooignore
+/.floo
+*.flog
+/wbot/temp/dbstemp.wbot

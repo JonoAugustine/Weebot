@@ -39,7 +39,12 @@ development progress.
 ----
 <a name='Roadmap'></a>
 **Roadmap**
-
+- Convert it all to Kotlin, oof
+    1. (new) VoiceChannel temp mentionable Roles
+    2. (transfer) Restrictions
+    3. In-chat Reddit sim
+    2. Custom commands/responses (regex or prefix)
+    2. (transfer) Notepads
  - ~~Finish current basic settings implementations~~
  	- ~~Finish settings methods~~
  	- ~~Add User-joined Greetings~~

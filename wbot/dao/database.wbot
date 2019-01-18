@@ -1,0 +1,4105 @@
+{
+  "initTime": "12-12-2018 19-12-30",
+  "suggestions": [
+    {
+      "id": "W43VX",
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 17
+          },
+          "time": {
+            "hour": 12,
+            "minute": 58,
+            "second": 34,
+            "nano": 792000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "ACCEPTED",
+      "votes": [],
+      "suggestion": "For emote only text posts, find+replace emote with higher res picture"
+    },
+    {
+      "id": "UNWAO",
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 6
+          },
+          "time": {
+            "hour": 21,
+            "minute": 55,
+            "second": 4,
+            "nano": 371000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "ACCEPTED",
+      "votes": [],
+      "suggestion": "reddicord score for daily, weekly, monthly, yearly, all time etc"
+    },
+    {
+      "id": "PNMEO",
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 7
+          },
+          "time": {
+            "hour": 22,
+            "minute": 47,
+            "second": 3,
+            "nano": 736000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "ACCEPTED",
+      "votes": [],
+      "suggestion": "automatically change a message to emoji letters"
+    },
+    {
+      "id": "S2XSZ",
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 8
+          },
+          "time": {
+            "hour": 5,
+            "minute": 2,
+            "second": 7,
+            "nano": 566000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "ACCEPTED",
+      "votes": [],
+      "suggestion": "report command fur mini mods to report people to be kicked"
+    }
+  ],
+  "GLOBAL_WEEBOT": {
+    "trackedUsers": [],
+    "PASSIVE_MAX": 10,
+    "PASSIVE_MAX_PREM": 50,
+    "userPassives": {
+      "451005806222245889": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        }
+      ],
+      "113450820942487552": [],
+      "139167730237571072": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        }
+      ]
+    },
+    "REM_MAX": 10,
+    "REM_MAX_PREM": 50,
+    "userReminders": {
+      "228574821590499329": [],
+      "139167730237571072": []
+    },
+    "initDate": {
+      "dateTime": {
+        "date": {
+          "year": 2018,
+          "month": 12,
+          "day": 12
+        },
+        "time": {
+          "hour": 19,
+          "minute": 12,
+          "second": 30,
+          "nano": 722000000
+        }
+      },
+      "offset": {
+        "totalSeconds": -18000
+      }
+    },
+    "settings": {
+      "prefixs": [
+        "",
+        "w!",
+        "\\",
+        "!"
+      ],
+      "logchannel": -1,
+      "trackingEnabled": false,
+      "guildID": -1
+    },
+    "passives": [],
+    "notePads": [],
+    "guildID": -1
+  },
+  "WEEBOTS": {
+    "-1": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 19,
+            "minute": 12,
+            "second": 30,
+            "nano": 722000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "",
+          "w!",
+          "\\",
+          "!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": -1
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": -1
+    },
+    "499672486854524948": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 5
+          },
+          "time": {
+            "hour": 20,
+            "minute": 23,
+            "second": 12,
+            "nano": 606000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 499672486854524948
+      },
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
+          "DATA": {
+            "dead": false,
+            "inShutdown": false,
+            "userSettings": {},
+            "guildSettings": {
+              "limit": 0,
+              "name": "{USER}\u0027s Channel",
+              "categoryID": 531281881820299274
+            },
+            "baseId": 531281947864072202,
+            "genChannels": {}
+          }
+        }
+      ],
+      "notePads": [],
+      "guildID": 499672486854524948
+    },
+    "264445053596991498": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 29
+          },
+          "time": {
+            "hour": 22,
+            "minute": 43,
+            "second": 15,
+            "nano": 377000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 264445053596991498
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 264445053596991498
+    },
+    "508669831101546502": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 11
+          },
+          "time": {
+            "hour": 20,
+            "minute": 51,
+            "second": 6,
+            "nano": 502000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 508669831101546502
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 508669831101546502
+    },
+    "528665849423200276": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 31
+          },
+          "time": {
+            "hour": 0,
+            "minute": 15,
+            "second": 47,
+            "nano": 96000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 528665849423200276
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 528665849423200276
+    },
+    "110373943822540800": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 1
+          },
+          "time": {
+            "hour": 18,
+            "minute": 15,
+            "second": 35,
+            "nano": 199000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 110373943822540800
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 110373943822540800
+    },
+    "525317303726768138": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 459000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 525317303726768138
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 525317303726768138
+    },
+    "218979588716494848": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 822000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": 264915323877064706,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 218979588716494848
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 218979588716494848
+    },
+    "527270009584746496": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 13,
+            "minute": 53,
+            "second": 35,
+            "nano": 503000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": true,
+        "commandRestrictions": {},
+        "guildID": 527270009584746496
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 527270009584746496
+    },
+    "522406539798118419": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 459000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 522406539798118419
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 522406539798118419
+    },
+    "522375095826513931": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 459000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 522375095826513931
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 522375095826513931
+    },
+    "524778881652359174": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 459000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 524778881652359174
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 524778881652359174
+    },
+    "450100127256936458": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 27
+          },
+          "time": {
+            "hour": 19,
+            "minute": 39,
+            "second": 45,
+            "nano": 617000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 450100127256936458
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 450100127256936458
+    },
+    "534162728386953257": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 13
+          },
+          "time": {
+            "hour": 19,
+            "minute": 21,
+            "second": 22,
+            "nano": 82000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 534162728386953257
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 534162728386953257
+    },
+    "515264149308309514": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 6
+          },
+          "time": {
+            "hour": 13,
+            "minute": 30,
+            "second": 7,
+            "nano": 885000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 515264149308309514
+      },
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
+          "DATA": {
+            "dead": false,
+            "inShutdown": false,
+            "userSettings": {},
+            "guildSettings": {
+              "limit": 0,
+              "name": "{USER}\u0027s Channel",
+              "categoryID": 531539888252780544
+            },
+            "baseId": 531539940006428689,
+            "genChannels": {}
+          }
+        }
+      ],
+      "notePads": [],
+      "guildID": 515264149308309514
+    },
+    "520640811583668255": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 459000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 520640811583668255
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 520640811583668255
+    },
+    "465332971369660416": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 14
+          },
+          "time": {
+            "hour": 22,
+            "minute": 40,
+            "second": 21,
+            "nano": 866000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 465332971369660416
+      },
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCGenerator",
+          "DATA": {
+            "dead": false,
+            "inShutdown": false,
+            "userSettings": {},
+            "guildSettings": {
+              "limit": 6,
+              "name": "{USER}\u0027s Channel",
+              "categoryID": 534589781561311232
+            },
+            "baseId": 534589142051323924,
+            "genChannels": {}
+          }
+        }
+      ],
+      "notePads": [],
+      "guildID": 465332971369660416
+    },
+    "450090355451494401": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 16
+          },
+          "time": {
+            "hour": 12,
+            "minute": 25,
+            "second": 46,
+            "nano": 687000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 450090355451494401
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 450090355451494401
+    },
+    "531533646616854558": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 6
+          },
+          "time": {
+            "hour": 13,
+            "minute": 9,
+            "second": 37,
+            "nano": 694000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 531533646616854558
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 531533646616854558
+    },
+    "532236202720493589": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 8
+          },
+          "time": {
+            "hour": 19,
+            "minute": 22,
+            "second": 45,
+            "nano": 902000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 532236202720493589
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 532236202720493589
+    },
+    "391642284694962187": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 10
+          },
+          "time": {
+            "hour": 5,
+            "minute": 4,
+            "second": 24,
+            "nano": 210000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 391642284694962187
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 391642284694962187
+    },
+    "139168039634468865": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 19,
+            "minute": 13,
+            "second": 12,
+            "nano": 523000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!",
+          "fw!"
+        ],
+        "logchannel": 493111883814010899,
+        "trackingEnabled": true,
+        "commandRestrictions": {},
+        "guildID": 139168039634468865
+      },
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.CmdThis$ThisReactor",
+          "DATA": {
+            "dead": false
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.moderation.VCRoleManager",
+          "DATA": {
+            "dead": false,
+            "genRoles": {
+              "204663874010480641": 531990530377121792,
+              "244833480846999552": 532380350635048960,
+              "530923086401372160": 530923450089472000,
+              "197129868079661056": 533806587597291541
+            },
+            "limit": "PUBLIC"
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.Reddicord",
+          "DATA": {
+            "dead": false,
+            "channelIDs": [
+              417176543903744001
+            ],
+            "scoreMap": {
+              "185063150557593600": 5,
+              "277593092561829889": 6,
+              "186130584693637131": 6,
+              "139167730237571072": 6,
+              "383656411789524995": 0
+            }
+          }
+        }
+      ],
+      "moderationData": {
+        "reportLimit": -1,
+        "reportLimitActions": [
+          "NOTIFY_USER",
+          "NOTIFY_ADMINS"
+        ],
+        "hierarchicalReports": false,
+        "reports": {},
+        "initDate": {
+          "dateTime": {
+            "date": {
+              "year": 2019,
+              "month": 1,
+              "day": 17
+            },
+            "time": {
+              "hour": 1,
+              "minute": 44,
+              "second": 6,
+              "nano": 506000000
+            }
+          },
+          "offset": {
+            "totalSeconds": 0
+          }
+        }
+      },
+      "notePads": [
+        {
+          "id": "JU63D",
+          "notes": [
+            {
+              "id": "7BLLXR6VM0",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 12,
+                    "day": 31
+                  },
+                  "time": {
+                    "hour": 11,
+                    "minute": 54,
+                    "second": 8,
+                    "nano": 455000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 0,
+              "locked": true,
+              "note": "Matt is a nerd",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 12,
+                    "day": 31
+                  },
+                  "time": {
+                    "hour": 11,
+                    "minute": 54,
+                    "second": 8,
+                    "nano": 455000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            }
+          ],
+          "editHistory": [
+            {
+              "noteIDs": [
+                "ASNFDAT4QQ"
+              ],
+              "editorID": 139167730237571072,
+              "type": "DELETE",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 7,
+                    "minute": 2,
+                    "second": 21,
+                    "nano": 756000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "ASNFDAT4QQ"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 6,
+                    "minute": 47,
+                    "second": 53,
+                    "nano": 206000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "S22LJ0EF0I"
+              ],
+              "editorID": 139167730237571072,
+              "type": "DELETE",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 5
+                  },
+                  "time": {
+                    "hour": 19,
+                    "minute": 22,
+                    "second": 12,
+                    "nano": 339000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "C93YVWLKRI"
+              ],
+              "editorID": 139167730237571072,
+              "type": "DELETE",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 5
+                  },
+                  "time": {
+                    "hour": 19,
+                    "minute": 21,
+                    "second": 22,
+                    "nano": 625000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "C93YVWLKRI"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 12,
+                    "day": 31
+                  },
+                  "time": {
+                    "hour": 23,
+                    "minute": 46,
+                    "second": 50,
+                    "nano": 560000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "7BLLXR6VM0"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 12,
+                    "day": 31
+                  },
+                  "time": {
+                    "hour": 11,
+                    "minute": 54,
+                    "second": 8,
+                    "nano": 455000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "S22LJ0EF0I"
+              ],
+              "editorID": 139167730237571072,
+              "type": "EDIT",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 12,
+                    "day": 31
+                  },
+                  "time": {
+                    "hour": 11,
+                    "minute": 52,
+                    "second": 48,
+                    "nano": 679000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "S22LJ0EF0I"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2018,
+                    "month": 12,
+                    "day": 31
+                  },
+                  "time": {
+                    "hour": 11,
+                    "minute": 38,
+                    "second": 6,
+                    "nano": 131000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            }
+          ],
+          "readRestriction": {
+            "allowedUsers": [],
+            "blockedUsers": [],
+            "allowedRoles": [],
+            "blockedRoles": [],
+            "allowedTextChannels": [],
+            "blockedTextChannels": [],
+            "allowedVoiceChannels": [],
+            "blockedVoiceChannels": []
+          },
+          "writeRestriction": {
+            "allowedUsers": [],
+            "blockedUsers": [],
+            "allowedRoles": [],
+            "blockedRoles": [],
+            "allowedTextChannels": [],
+            "blockedTextChannels": [],
+            "allowedVoiceChannels": [],
+            "blockedVoiceChannels": []
+          },
+          "name": "NL Notes",
+          "authorID": 139167730237571072,
+          "initTime": {
+            "dateTime": {
+              "date": {
+                "year": 2018,
+                "month": 12,
+                "day": 30
+              },
+              "time": {
+                "hour": 3,
+                "minute": 49,
+                "second": 37,
+                "nano": 476000000
+              }
+            },
+            "offset": {
+              "totalSeconds": 0
+            }
+          }
+        },
+        {
+          "id": "CLXRB",
+          "notes": [
+            {
+              "id": "ROEN8GMIC3",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 7
+                  },
+                  "time": {
+                    "hour": 4,
+                    "minute": 14,
+                    "second": 46,
+                    "nano": 763000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 0,
+              "locked": true,
+              "note": "Branching stories",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 7
+                  },
+                  "time": {
+                    "hour": 4,
+                    "minute": 14,
+                    "second": 46,
+                    "nano": 763000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "id": "QIBR9GQIIO",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 7
+                  },
+                  "time": {
+                    "hour": 4,
+                    "minute": 15,
+                    "second": 22,
+                    "nano": 895000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 0,
+              "locked": true,
+              "note": "Option to allow character to appear in other people\u0027s games",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 7
+                  },
+                  "time": {
+                    "hour": 4,
+                    "minute": 15,
+                    "second": 22,
+                    "nano": 895000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "id": "77M0M2G2GO",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 7
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 10,
+                    "second": 9,
+                    "nano": 591000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 0,
+              "locked": true,
+              "note": "\"open world\" with zones (ala LoZ style) vs linear choose your own adventure type?",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 7
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 10,
+                    "second": 9,
+                    "nano": 591000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "id": "M691KK46VA",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 7,
+                    "minute": 1,
+                    "second": 49,
+                    "nano": 910000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 0,
+              "locked": false,
+              "note": "Possible PvP element, similar to Pokecord battles",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 7,
+                    "minute": 1,
+                    "second": 49,
+                    "nano": 910000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "id": "9DPHZ4432U",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 8,
+                    "second": 8,
+                    "nano": 822000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 1,
+              "locked": false,
+              "note": "Should there be an end",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 2,
+                    "second": 39,
+                    "nano": 614000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "id": "N7XABY2M4F",
+              "lastEditTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 10,
+                    "second": 41,
+                    "nano": 282000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              },
+              "edits": 0,
+              "locked": false,
+              "note": "what should the setting be? Future, fantasy, mixture, modern?",
+              "authorID": 139167730237571072,
+              "initTime": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 10,
+                    "second": 41,
+                    "nano": 282000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            }
+          ],
+          "editHistory": [
+            {
+              "noteIDs": [
+                "N7XABY2M4F"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 10,
+                    "second": 41,
+                    "nano": 282000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "9DPHZ4432U"
+              ],
+              "editorID": 139167730237571072,
+              "type": "EDIT",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 8,
+                    "second": 8,
+                    "nano": 822000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "9DPHZ4432U"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 2,
+                    "second": 39,
+                    "nano": 614000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "M691KK46VA"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 9
+                  },
+                  "time": {
+                    "hour": 7,
+                    "minute": 1,
+                    "second": 49,
+                    "nano": 910000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "77M0M2G2GO"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 7
+                  },
+                  "time": {
+                    "hour": 10,
+                    "minute": 10,
+                    "second": 9,
+                    "nano": 591000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "QIBR9GQIIO"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 7
+                  },
+                  "time": {
+                    "hour": 4,
+                    "minute": 15,
+                    "second": 22,
+                    "nano": 895000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            },
+            {
+              "noteIDs": [
+                "ROEN8GMIC3"
+              ],
+              "editorID": 139167730237571072,
+              "type": "ADD",
+              "info": "",
+              "time": {
+                "dateTime": {
+                  "date": {
+                    "year": 2019,
+                    "month": 1,
+                    "day": 7
+                  },
+                  "time": {
+                    "hour": 4,
+                    "minute": 14,
+                    "second": 46,
+                    "nano": 763000000
+                  }
+                },
+                "offset": {
+                  "totalSeconds": 0
+                }
+              }
+            }
+          ],
+          "readRestriction": {
+            "allowedUsers": [],
+            "blockedUsers": [],
+            "allowedRoles": [],
+            "blockedRoles": [],
+            "allowedTextChannels": [
+              198260878636875787,
+              398624527782772757,
+              245744799754354691
+            ],
+            "blockedTextChannels": [],
+            "allowedVoiceChannels": [],
+            "blockedVoiceChannels": []
+          },
+          "writeRestriction": {
+            "allowedUsers": [],
+            "blockedUsers": [],
+            "allowedRoles": [],
+            "blockedRoles": [],
+            "allowedTextChannels": [],
+            "blockedTextChannels": [],
+            "allowedVoiceChannels": [],
+            "blockedVoiceChannels": []
+          },
+          "name": "NL RPG",
+          "authorID": 139167730237571072,
+          "initTime": {
+            "dateTime": {
+              "date": {
+                "year": 2019,
+                "month": 1,
+                "day": 7
+              },
+              "time": {
+                "hour": 4,
+                "minute": 13,
+                "second": 51,
+                "nano": 167000000
+              }
+            },
+            "offset": {
+              "totalSeconds": 0
+            }
+          }
+        }
+      ],
+      "guildID": 139168039634468865
+    },
+    "515978820118118426": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 459000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 515978820118118426
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 515978820118118426
+    },
+    "339842458458521634": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 458000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 339842458458521634
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 339842458458521634
+    },
+    "438231431215579137": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 14,
+            "minute": 25,
+            "second": 46,
+            "nano": 594000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 438231431215579137
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 438231431215579137
+    },
+    "466047914419159061": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 459000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 466047914419159061
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 466047914419159061
+    },
+    "258020165785092113": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 459000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 258020165785092113
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 258020165785092113
+    }
+  },
+  "PREMIUM_USERS": {
+    "237082240327221248": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 237082240327221248
+    },
+    "345728560033693696": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 345728560033693696
+    },
+    "260727858366906368": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 260727858366906368
+    },
+    "171748824816025600": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 171748824816025600
+    },
+    "389937555853934593": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 389937555853934593
+    },
+    "396824765261676554": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 396824765261676554
+    },
+    "452607714041004032": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 452607714041004032
+    },
+    "251203671113728001": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 251203671113728001
+    },
+    "291617792627703808": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 291617792627703808
+    },
+    "364531884866404352": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 364531884866404352
+    },
+    "251007075843440641": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 251007075843440641
+    },
+    "471311334550798338": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 485000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 471311334550798338
+    },
+    "197152184037539851": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 197152184037539851
+    },
+    "268813960566931467": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 268813960566931467
+    },
+    "250029034925326336": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 250029034925326336
+    },
+    "258715234586329089": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 258715234586329089
+    },
+    "488786712206770196": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 4
+          },
+          "time": {
+            "hour": 20,
+            "minute": 47,
+            "second": 0,
+            "nano": 613000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 488786712206770196
+    },
+    "186930311261585408": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 186930311261585408
+    },
+    "179429609945694208": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 179429609945694208
+    },
+    "187295900463398913": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 187295900463398913
+    },
+    "104213413487464448": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 104213413487464448
+    },
+    "430469541907267585": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 430469541907267585
+    },
+    "130359538623709184": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 828000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 130359538623709184
+    },
+    "325727873442906112": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 325727873442906112
+    },
+    "255873465997852673": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 255873465997852673
+    },
+    "195244363339530240": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 195244363339530240
+    },
+    "298558233293881345": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 298558233293881345
+    },
+    "178544451076096005": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 178544451076096005
+    },
+    "350773424148447235": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 350773424148447235
+    },
+    "270408459881545728": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 270408459881545728
+    },
+    "442163888184885248": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 442163888184885248
+    },
+    "182624312635817985": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 182624312635817985
+    },
+    "329630845805789186": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 488000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 329630845805789186
+    },
+    "241084439562682379": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 241084439562682379
+    },
+    "110031510857338880": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 110031510857338880
+    },
+    "397551360674889738": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 397551360674889738
+    },
+    "218439244056756234": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 218439244056756234
+    },
+    "433078185555656705": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 433078185555656705
+    },
+    "264576573661773835": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 264576573661773835
+    },
+    "333797968119595011": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 828000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 333797968119595011
+    },
+    "207300272374939649": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 207300272374939649
+    },
+    "280191855658926082": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 280191855658926082
+    },
+    "232666137664421888": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 232666137664421888
+    },
+    "185063150557593600": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 185063150557593600
+    },
+    "302927929896337408": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 302927929896337408
+    },
+    "249570572864978946": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 249570572864978946
+    },
+    "83010416610906112": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 83010416610906112
+    },
+    "460283140707975169": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 460283140707975169
+    },
+    "140660562630672384": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 828000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 140660562630672384
+    },
+    "314553924608851969": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 314553924608851969
+    },
+    "275422801723392002": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 275422801723392002
+    },
+    "184474965859368960": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 828000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 184474965859368960
+    },
+    "192481766785679361": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 192481766785679361
+    },
+    "254964480201588738": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 254964480201588738
+    },
+    "158792456911978496": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 158792456911978496
+    },
+    "392437309733339138": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 828000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 392437309733339138
+    },
+    "139199790104707073": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 139199790104707073
+    },
+    "111938078653841408": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 111938078653841408
+    },
+    "270904126974590976": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 270904126974590976
+    },
+    "204255221017214977": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 204255221017214977
+    },
+    "165140151121608704": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 828000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 165140151121608704
+    },
+    "187601390904803328": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 187601390904803328
+    },
+    "451005806222245889": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 451005806222245889
+    },
+    "215269097124921345": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 215269097124921345
+    },
+    "234149074813714434": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 234149074813714434
+    },
+    "231611709238804480": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 231611709238804480
+    },
+    "334122098358353932": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 334122098358353932
+    },
+    "254694324111933441": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 254694324111933441
+    },
+    "383656411789524995": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 383656411789524995
+    },
+    "339196122822082571": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 339196122822082571
+    },
+    "469292091395276801": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 469292091395276801
+    },
+    "327339164766961664": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 327339164766961664
+    },
+    "396507242817519626": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 29
+          },
+          "time": {
+            "hour": 17,
+            "minute": 52,
+            "second": 44,
+            "nano": 537000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 396507242817519626
+    },
+    "302267586597355520": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 302267586597355520
+    },
+    "159985870458322944": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 159985870458322944
+    },
+    "287242743749804032": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 287242743749804032
+    },
+    "506308172923797539": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 506308172923797539
+    },
+    "384476604966895620": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 384476604966895620
+    },
+    "235088799074484224": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 235088799074484224
+    },
+    "172002275412279296": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 172002275412279296
+    },
+    "242774723971383296": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 242774723971383296
+    },
+    "188925301059878913": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 828000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 188925301059878913
+    },
+    "139188528012722176": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 139188528012722176
+    },
+    "197895215334293504": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 197895215334293504
+    },
+    "186130584693637131": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 186130584693637131
+    },
+    "316979294473551874": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 316979294473551874
+    },
+    "139498575846572033": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 139498575846572033
+    },
+    "242009161565470731": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 242009161565470731
+    },
+    "190956372819574794": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 190956372819574794
+    },
+    "246842860740018187": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 246842860740018187
+    },
+    "447493607977648128": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 447493607977648128
+    },
+    "208398168411340801": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 208398168411340801
+    },
+    "437851896263213056": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 437851896263213056
+    },
+    "277593092561829889": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 277593092561829889
+    },
+    "359492229976424458": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 830000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 359492229976424458
+    },
+    "253296911342239744": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 253296911342239744
+    },
+    "271430385471062016": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 832000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 271430385471062016
+    },
+    "351227880153546754": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 28
+          },
+          "time": {
+            "hour": 6,
+            "minute": 38,
+            "second": 20,
+            "nano": 488000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 351227880153546754
+    },
+    "365975655608745985": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 831000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 365975655608745985
+    },
+    "397655940066705410": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 833000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 397655940066705410
+    },
+    "444323732010303488": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 444323732010303488
+    }
+  },
+  "blockedUsers": [
+    [
+      {
+        "CLASSNAME": "com.ampro.weebot.commands.developer.CmdSuggestion"
+      },
+      [
+        383656411789524995
+      ]
+    ]
+  ]
+}
