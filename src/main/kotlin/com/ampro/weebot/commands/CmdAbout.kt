@@ -224,7 +224,9 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
         event.delete()
         SelectablePaginator(setOf(event.author), title = "Weebot Help",
             description = "Select a category or All", singleUse = true,
-            items = (listOf(catAll) + CATEGORIES).map { cat ->
+            items = (listOf(catAll) + CATEGORIES.filter { c ->
+                COMMANDS.any { it.category == c }
+            }).map { cat ->
                 cat.name to { _: Int, m: Message ->
                     if (cat == catAll) {
                         strdPaginator.setText("All Weebot Commands").setUsers(event.author).setItemsPerPage(6).apply {
@@ -253,9 +255,10 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
                         }.build().apply {
                             event.author.openPrivateChannel().queue { paginate(it, 1) }
                         }
+                    m.delete().queue()
                 }
             }, timeout = 1, exitAction = {it.delete().queue()},
-            timeoutAction = {it.delete().queue()}).display(event.channel)
+            timeoutAction = {}).display(event.channel)
 
     }
 
