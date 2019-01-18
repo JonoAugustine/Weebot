@@ -110,33 +110,7 @@
     "REM_MAX_PREM": 50,
     "userReminders": {
       "228574821590499329": [],
-      "139167730237571072": [
-        {
-          "id": "2SDD9HF",
-          "lastTime": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 16
-              },
-              "time": {
-                "hour": 13,
-                "minute": 39,
-                "second": 31,
-                "nano": 104000000
-              }
-            },
-            "offset": {
-              "totalSeconds": -18000
-            }
-          },
-          "userID": 139167730237571072,
-          "channel": 439522471369244683,
-          "minutes": 13,
-          "message": "https://medium.com/google-developers/announcing-the-java-kotlin-client-library-for-actions-on-google-217828dead"
-        }
-      ]
+      "139167730237571072": []
     },
     "initDate": {
       "dateTime": {
@@ -388,39 +362,6 @@
       "notePads": [],
       "guildID": 110373943822540800
     },
-    "218979588716494848": {
-      "initDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 12
-          },
-          "time": {
-            "hour": 20,
-            "minute": 59,
-            "second": 42,
-            "nano": 822000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "settings": {
-        "prefixs": [
-          "\\",
-          "w!"
-        ],
-        "logchannel": 264915323877064706,
-        "trackingEnabled": false,
-        "commandRestrictions": {},
-        "guildID": 218979588716494848
-      },
-      "passives": [],
-      "notePads": [],
-      "guildID": 218979588716494848
-    },
     "525317303726768138": {
       "initDate": {
         "dateTime": {
@@ -453,6 +394,39 @@
       "passives": [],
       "notePads": [],
       "guildID": 525317303726768138
+    },
+    "218979588716494848": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 822000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [
+          "\\",
+          "w!"
+        ],
+        "logchannel": 264915323877064706,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 218979588716494848
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 218979588716494848
     },
     "527270009584746496": {
       "initDate": {
@@ -974,14 +948,41 @@
             ],
             "scoreMap": {
               "185063150557593600": 5,
-              "277593092561829889": 7,
-              "186130584693637131": 4,
-              "139167730237571072": 4,
+              "277593092561829889": 6,
+              "186130584693637131": 6,
+              "139167730237571072": 6,
               "383656411789524995": 0
             }
           }
         }
       ],
+      "moderationData": {
+        "reportLimit": -1,
+        "reportLimitActions": [
+          "NOTIFY_USER",
+          "NOTIFY_ADMINS"
+        ],
+        "hierarchicalReports": false,
+        "reports": {},
+        "initDate": {
+          "dateTime": {
+            "date": {
+              "year": 2019,
+              "month": 1,
+              "day": 17
+            },
+            "time": {
+              "hour": 1,
+              "minute": 44,
+              "second": 6,
+              "nano": 506000000
+            }
+          },
+          "offset": {
+            "totalSeconds": 0
+          }
+        }
+      },
       "notePads": [
         {
           "id": "JU63D",
@@ -1984,27 +1985,6 @@
       },
       "userId": 345728560033693696
     },
-    "171748824816025600": {
-      "joinDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 12
-          },
-          "time": {
-            "hour": 20,
-            "minute": 59,
-            "second": 42,
-            "nano": 832000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "userId": 171748824816025600
-    },
     "260727858366906368": {
       "joinDate": {
         "dateTime": {
@@ -2026,7 +2006,7 @@
       },
       "userId": 260727858366906368
     },
-    "396824765261676554": {
+    "171748824816025600": {
       "joinDate": {
         "dateTime": {
           "date": {
@@ -2038,14 +2018,14 @@
             "hour": 20,
             "minute": 59,
             "second": 42,
-            "nano": 829000000
+            "nano": 832000000
           }
         },
         "offset": {
           "totalSeconds": -18000
         }
       },
-      "userId": 396824765261676554
+      "userId": 171748824816025600
     },
     "389937555853934593": {
       "joinDate": {
@@ -2067,6 +2047,27 @@
         }
       },
       "userId": 389937555853934593
+    },
+    "396824765261676554": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 396824765261676554
     },
     "452607714041004032": {
       "joinDate": {
@@ -2257,27 +2258,6 @@
       },
       "userId": 250029034925326336
     },
-    "488786712206770196": {
-      "joinDate": {
-        "dateTime": {
-          "date": {
-            "year": 2019,
-            "month": 1,
-            "day": 4
-          },
-          "time": {
-            "hour": 20,
-            "minute": 47,
-            "second": 0,
-            "nano": 613000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "userId": 488786712206770196
-    },
     "258715234586329089": {
       "joinDate": {
         "dateTime": {
@@ -2298,6 +2278,27 @@
         }
       },
       "userId": 258715234586329089
+    },
+    "488786712206770196": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 4
+          },
+          "time": {
+            "hour": 20,
+            "minute": 47,
+            "second": 0,
+            "nano": 613000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 488786712206770196
     },
     "186930311261585408": {
       "joinDate": {
@@ -2362,27 +2363,6 @@
       },
       "userId": 187295900463398913
     },
-    "430469541907267585": {
-      "joinDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 12
-          },
-          "time": {
-            "hour": 20,
-            "minute": 59,
-            "second": 42,
-            "nano": 829000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "userId": 430469541907267585
-    },
     "104213413487464448": {
       "joinDate": {
         "dateTime": {
@@ -2403,6 +2383,27 @@
         }
       },
       "userId": 104213413487464448
+    },
+    "430469541907267585": {
+      "joinDate": {
+        "dateTime": {
+          "date": {
+            "year": 2018,
+            "month": 12,
+            "day": 12
+          },
+          "time": {
+            "hour": 20,
+            "minute": 59,
+            "second": 42,
+            "nano": 829000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "userId": 430469541907267585
     },
     "130359538623709184": {
       "joinDate": {
