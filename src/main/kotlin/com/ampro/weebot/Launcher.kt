@@ -54,7 +54,7 @@ const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try th
         "again later*"
 
 val games = listOf(listening("@Weebot Help"), playing("with wires"),
-    watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.2.0"),
+    watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.2.1"),
     listening("crying enemies"), watching("HQR's life fall apart"))
 
 /**

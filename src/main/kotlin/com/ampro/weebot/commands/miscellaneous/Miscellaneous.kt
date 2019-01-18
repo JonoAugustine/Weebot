@@ -20,7 +20,7 @@ import java.time.temporal.ChronoUnit
  * @author Jonathan Augustine
  * @since 1.0
  */
-class PingCommand : WeebotCommand("ping", null, arrayOf("pong"), CAT_GEN,
+class PingCommand : WeebotCommand("ping", null, arrayOf("pong"), CAT_MISC,
     "", "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong", false)
         .setDescription("Checks the bot's latency.").build(), false, cooldown = 10
 ) {
@@ -84,13 +84,12 @@ class CmdNameGenerator : WeebotCommand("namegen", "Name Generator", arrayOf("ngc
 
 }
 
-
 /**
  * @author Jonathan Augustine
  * @since 2.2.0
  */
 class CmdApiToGetALife : WeebotCommand("fact", "APGL Facts", emptyArray(),
-    CAT_FUN, "", "Get random facts and images from api-to-get-a.life",
+    CAT_MISC, "", "Get random facts and images from api-to-get-a.life",
     cooldown = 20, cooldownScope = CooldownScope.USER, guildOnly = true) {
 
     private val BASE_URL = "https://api-to.get-a.life"

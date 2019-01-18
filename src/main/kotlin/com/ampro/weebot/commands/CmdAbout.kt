@@ -6,22 +6,17 @@ package com.ampro.weebot.commands
 
 import com.ampro.weebot.*
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
-import com.ampro.weebot.database.DAO
-import com.ampro.weebot.database.STAT
-import com.ampro.weebot.database.constants.LINK_DISCORD_BOTS
-import com.ampro.weebot.database.constants.LINK_DISCORD_BOTS_LIST
-import com.ampro.weebot.database.constants.LINK_INVITEBOT
-import com.ampro.weebot.database.getWeebotOrNew
+import com.ampro.weebot.database.*
+import com.ampro.weebot.database.constants.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.WKDAY_MONTH_YEAR_TIME
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
 import com.jagrosh.jdautilities.command.CommandEvent
-import com.jagrosh.jdautilities.menu.OrderedMenu
 import net.dv8tion.jda.core.entities.ChannelType
 import net.dv8tion.jda.core.entities.Game.GameType.*
+import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.Role.DEFAULT_COLOR_RAW
-import java.util.concurrent.TimeUnit.MINUTES
 import kotlin.math.ceil
 
 const val HELLO_THERE = "https://www.youtube.com/watch?v=rEq1Z0bjdwc"
@@ -34,7 +29,7 @@ const val LINK_HQTWITCH    = "https://www.twitch.tv/hqregent"
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdAbout : WeebotCommand("about", "About", emptyArray(), CAT_GEN,
+class CmdAbout : WeebotCommand("about", "About", arrayOf("info"), CAT_GEN,
     "[me/more]", "Get information about Weebot.", cooldown = 90,
     children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP)) {
 
@@ -191,6 +186,7 @@ class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, 
                     }
                     sb.append(roles[i].name).append(", ")
                 }
+                if (!sb.endsWith("...")) sb.setLength(sb.length - 2)
                 "```css\n$sb\n```"
             }, true)
             .build()
@@ -207,61 +203,60 @@ class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, 
  */
 class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), CAT_GEN,
         "[category] [command name]", "Get information about Weebot Commands and Usage.",
-        cooldown = 90, guildOnly = false
-) {
+        cooldown = 30, guildOnly = false) {
+    val catAll: Category = Category("All")
+
     public override fun execute(event: CommandEvent) {
         val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
         else getWeebotOrNew(event.guild)
         STAT.track(this, bot, event.author, event.creationTime)
-        OrderedMenu.Builder().setEventWaiter(WAITER).setUsers(event.author)
-            .useCancelButton(true).setDescription("Weebot Help").apply {
-                addChoice("All")
-                if (event.isOwner) addChoice("DEV ONLY")
-                categories.forEach { addChoice(it.name) }
-            }.setTimeout(1, MINUTES).setSelection { _, i ->
-                fun filterAndMap(predicate: (WeebotCommand) -> Boolean): List<String> {
-                    val sb = StringBuilder()
-                    return COMMANDS.filter(predicate)
-                        .sortedBy { it.displayName ?: it.name }.map {
-                            sb.clear()
-                            sb.append("**").append(it.displayName ?: it.name)
-                                .append("**\n")
-                            if (!it.help.isNullOrBlank()) sb.append(it.help).append("\n")
-                            if (it.aliases.isNotEmpty()) sb.append(
-                                "*Aliases: ${(it.aliases + it.name).joinToString(", ")}*\n")
-                            sb.append("Guild Only: ${it.isGuildOnly}\n\n").toString()
-                        }
+        fun filterAndMap(predicate: (WeebotCommand) -> Boolean): List<String> {
+            val sb = StringBuilder()
+            return COMMANDS.filter(predicate).sortedBy { it.displayName ?: it.name }.map {
+                    sb.clear()
+                    sb.append("**").append(it.displayName ?: it.name).append("**\n")
+                    if (!it.help.isNullOrBlank()) sb.append(it.help).append("\n")
+                    if (it.aliases.isNotEmpty()) sb.append(
+                        "*Aliases: ${(it.aliases + it.name).joinToString(", ")}*\n")
+                    sb.append("Guild Only: ${it.isGuildOnly}\n\n").toString()
                 }
-                event.delete()
-                when {
-                    i == 1 -> //if ALL
-                        strdPaginator.setText("All Weebot Commands").setUsers(event.author)
-                            .setItemsPerPage(6).apply {
-                            filterAndMap { !(it.isHidden || it.isOwnerCommand) }.forEach { s ->
+        }
+        event.delete()
+        SelectablePaginator(setOf(event.author), title = "Weebot Help",
+            description = "Select a category or All", singleUse = true,
+            items = (listOf(catAll) + CATEGORIES).map { cat ->
+                cat.name to { _: Int, m: Message ->
+                    if (cat == catAll) {
+                        strdPaginator.setText("All Weebot Commands").setUsers(event.author).setItemsPerPage(6).apply {
+                                filterAndMap { !(it.isHidden || it.isOwnerCommand) }.forEach { s ->
+                                    addItems(s)
+                                }
+                            }.build().apply {
+                                event.author.openPrivateChannel().queue { paginate(it, 1) }
+                            }
+                    }
+                    if (cat == CAT_DEV) {
+                        strdPaginator.setText("Dev Commands")
+                            .setUsers(event.author).apply {
+                                filterAndMap { it.category == cat || (!it.isHidden ||
+                                        (event.isOwner && (it.isHidden|| it.isOwnerCommand)))
+                            }.forEach { s -> addItems(s) }
+                        }.build().apply {
+                            event.author.openPrivateChannel().queue { paginate(it, 1) }
+                        }
+                    } else strdPaginator
+                        .setText("Weebot's ${cat.name} Commands").setItemsPerPage(6)
+                        .setUsers(event.author).apply {
+                            filterAndMap { it.category == cat && !it.isHidden }.forEach { s ->
                                 addItems(s)
                             }
                         }.build().apply {
                             event.author.openPrivateChannel().queue { paginate(it, 1) }
                         }
-                    i == 2 && event.isOwner ->
-                        strdPaginator.setText("Dev Commands").setUsers(event.author).apply {
-                        filterAndMap { it.isHidden || it.isOwnerCommand }.forEach { s -> addItems(s) }
-                    }.build().apply {
-                        event.author.openPrivateChannel().queue { paginate(it, 1) }
-                    }
-                    else -> {
-                        val cat = categories[i - (event.isOwner.toInt() + 2)]
-                        strdPaginator.setText("Weebot's ${cat.name} Commands")
-                            .setItemsPerPage(6)
-                            .setUsers(event.author).apply {
-                            filterAndMap { it.category == cat && !it.isHidden }
-                                .forEach { s -> addItems(s) }
-                        }.build().apply {
-                            event.author.openPrivateChannel().queue { paginate(it, 1) }
-                        }
-                    }
                 }
-            }.build().display(event.channel)
+            }, timeout = 1, exitAction = {it.delete().queue()},
+            timeoutAction = {it.delete().queue()}).display(event.channel)
+
     }
 
 }
