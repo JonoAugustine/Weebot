@@ -74,7 +74,10 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     }
     slog("\t...DONE")
     slog("Initializing Main Logger\n\n")
-    MLOG = FileLogger("Weebot")
+    //LOGIN & LISTENERS
+    val weebot = (args_.isNotEmpty() && args_[0].matches("(?i)(t|tobeew|test)")).not()
+
+    MLOG = FileLogger("Weebot", true, !weebot)
 
     /** Setup for random methods and stuff that is needed before launch */
     val genSetup = listOf(
@@ -84,12 +87,6 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     //Debug
     //RestAction.setPassContext(true) // enable context by default
     //RestAction.DEFAULT_FAILURE = Consumer(Throwable::printStackTrace)
-
-    //LOGIN & LISTENERS
-    val reg_wbot = Regex("(?i)(w|weebot|full)")
-    val reg_tBot = Regex("(?i)(t|tobeew|test)")
-
-    val weebot = (args_.isNotEmpty() && args_[0].matches(reg_tBot)).not()
 
     val alt = if (weebot) "\\" else "t\\"
 
