@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "com.ampro"
-version = "2.2.0"
+version = "2.2.1"
 
 application {
     mainClassName = "com.ampro.weebot.LauncherKt"
