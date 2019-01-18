@@ -144,15 +144,12 @@ abstract class WeebotCommand(name: String, val displayName: String?,
      * @since 2.0
      */
     open class HelpBiConsumerBuilder() {
-        constructor(title: String) : this() { embedBuilder.setTitle(title).addField(
-            guide) }
-        constructor(title: String, description: String) : this(title) {
-            this.description.append(description)
-        }
+        constructor(title: String) : this(title, true)
+        constructor(title: String, description: String, withGuide: Boolean = true)
+                : this(title, false) { this.description.append(description) }
         constructor(title: String, withGuide: Boolean) : this() {
             embedBuilder.setTitle(title)
-            if (withGuide) embedBuilder.addField(
-                guide) else return
+            if (withGuide) embedBuilder.addField(guide)
         }
 
         companion object {

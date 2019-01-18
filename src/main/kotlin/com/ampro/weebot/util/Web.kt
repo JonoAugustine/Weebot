@@ -17,18 +17,18 @@ import com.twilio.rest.api.v2010.account.MessageCreator
 import com.twilio.type.PhoneNumber
 
 /** Wrapper class for APIs responses that only hold a URL string */
-data class ApiLinkResponse(@SerializedName("link") val link: String = "")
+data class Link(val link: String?)
 
 inline fun <reified C: Any> String.get() : Result<C, FuelError> {
-    return this.httpGet().responseObject<C>().third
+    return this.httpGet(listOf(ACCEPT_JSON)).responseObject<C>().third
 }
 
+val ACCEPT_JSON = "Accept" to "application/json"
 /**
  * General setup steps to make API usage simpler.
  */
 fun setUpWebFuel() {
     FuelManager.instance.baseHeaders = mapOf("User-Agent" to "Mozilla/5.0")
-    FuelManager.instance.baseParams  = listOf("Accept" to "application/json")
 }
 
 val TWILIO_CLIENT: TwilioRestClient? = TwilioRestClient.Builder(

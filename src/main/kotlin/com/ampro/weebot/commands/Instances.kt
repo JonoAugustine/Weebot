@@ -7,7 +7,7 @@ package com.ampro.weebot.commands
 import com.ampro.weebot.commands.`fun`.*
 import com.ampro.weebot.commands.`fun`.games.cardgame.CmdCardsAgainstHumanity
 import com.ampro.weebot.commands.developer.*
-import com.ampro.weebot.commands.miscellaneous.PingCommand
+import com.ampro.weebot.commands.miscellaneous.*
 import com.ampro.weebot.commands.moderation.*
 import com.ampro.weebot.commands.progammer.CmdEmbedMaker
 import com.ampro.weebot.commands.progammer.CmdRegexTest
@@ -69,7 +69,9 @@ val CMD_EMBED           = CmdEmbedMaker()
  *********************************/
 
 //Random
-val CMD_CATFACT         = CmdCatFact()
+val CMD_NAMEGEN         = CmdNameGenerator()
+val CMD_ATGAL           = CmdApiToGetALife()
+
 val CMD_HELLOTHERE      = CmdHelloThere()
 val CMD_EMOJIFY         = CmdEmojify()
 val CMD_THIS            = CmdThis()
@@ -88,5 +90,6 @@ val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
         CMD_OHC, CMD_REM, CMD_NOTE,
         CMD_VCR, CMD_VCGEN,
         CMD_CAH,
-        CMD_THIS, CMD_HELLOTHERE, CMD_CATFACT, CMD_EMOJIFY,
+        CMD_NAMEGEN, CMD_ATGAL,
+        CMD_THIS, CMD_HELLOTHERE, CMD_EMOJIFY,
         CMD_REDDICORD, CMD_REDDICORD_SCORE)
