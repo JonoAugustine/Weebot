@@ -7,11 +7,13 @@ package com.ampro.weebot.commands.miscellaneous
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.*
 import com.ampro.weebot.database.*
+import com.ampro.weebot.database.constants.LINK_INVITEBOT
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.Link
 import com.ampro.weebot.util.get
 import com.github.kittinunf.fuel.httpGet
 import com.jagrosh.jdautilities.command.CommandEvent
+import net.dv8tion.jda.core.Permission
 import java.time.temporal.ChronoUnit
 
 /**
@@ -35,6 +37,27 @@ class PingCommand : WeebotCommand("ping", null, arrayOf("pong"), CAT_GEN,
     }
 }
 
+/**
+ * Sends a link to invite the bot to another server.
+ *
+ * @author Jonathan Augustine
+ * @since 1.0
+ */
+class CmdInviteLink : WeebotCommand("invitelink", "Invite Link" ,
+    arrayOf("ilc", "invite"), CAT_MISC, "", "Get an invite link for Weebot.",
+    HelpBiConsumerBuilder("Get an invite link for Weebot")
+        .setDescription("[`Or just invite me with this link I guess`]($LINK_INVITEBOT)")
+        .setThumbnail(weebotAvatar).build(), cooldown = 360,
+    botPerms = arrayOf(Permission.MESSAGE_EMBED_LINKS),
+    userPerms = arrayOf(Permission.MESSAGE_EMBED_LINKS)
+) {
+    override fun execute(event: CommandEvent) {
+        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+        makeEmbedBuilder("Invite me to another server!", LINK_INVITEBOT,
+            "[`Invite me with dis thing here`]($LINK_INVITEBOT)")
+            .setThumbnail(weebotAvatar).build().send(event.channel)
+    }
+}
 
 /**
  * @author Jonathan Augustine

@@ -83,12 +83,8 @@ fun EmbedBuilder.addEmptyFields(inline: Boolean = false, vararg titles: String):
     return this
 }
 
-fun MessageEmbed.send(messageChannel: MessageChannel, success: (Message) -> Unit = {}) {
-    messageChannel.sendMessage(this).queue(success)
-}
-
 fun MessageEmbed.send(messageChannel: MessageChannel, success: (Message) -> Unit = {},
-                      failure: (Throwable) -> Unit) {
+                      failure: (Throwable) -> Unit = {}) {
     messageChannel.sendMessage(this).queue(success, failure)
 }
 
@@ -698,13 +694,11 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
 
     private fun initialize(action: RestAction<Message>, failure: (Throwable) -> Unit = {})
             = action.queue({ m ->
-        options.forEach {
-            runBlocking { delay(250) }
-            m reactWith it.first
-        }
+        m.reactWith(options.map { it.first })
         waitFor(m)
     }, failure)
 
+    /** Wait for a reaction. Reset if not [singleUse] */
     private fun waitFor(message: Message) {
         waiter.waitForEvent(MessageReactionAddEvent::class.java, { event ->
             when {

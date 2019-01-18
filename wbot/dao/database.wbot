@@ -103,40 +103,41 @@
     "PASSIVE_MAX": 10,
     "PASSIVE_MAX_PREM": 50,
     "userPassives": {
+      "451005806222245889": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        }
+      ],
       "113450820942487552": [],
-      "139167730237571072": []
+      "139167730237571072": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
+          "DATA": {
+            "dead": false
+          }
+        }
+      ]
     },
     "REM_MAX": 10,
     "REM_MAX_PREM": 50,
     "userReminders": {
       "228574821590499329": [],
-      "139167730237571072": [
-        {
-          "id": "2SDD9HF",
-          "lastTime": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 16
-              },
-              "time": {
-                "hour": 13,
-                "minute": 39,
-                "second": 31,
-                "nano": 104000000
-              }
-            },
-            "offset": {
-              "totalSeconds": -18000
-            }
-          },
-          "userID": 139167730237571072,
-          "channel": 439522471369244683,
-          "minutes": 13,
-          "message": "https://medium.com/google-developers/announcing-the-java-kotlin-client-library-for-actions-on-google-217828dead"
-        }
-      ]
+      "139167730237571072": []
     },
     "initDate": {
       "dateTime": {

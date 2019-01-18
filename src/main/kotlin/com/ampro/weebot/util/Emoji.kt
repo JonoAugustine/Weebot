@@ -6,6 +6,8 @@
 package com.ampro.weebot.util
 
 import com.ampro.weebot.util.Emoji.*
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.MessageReaction.ReactionEmote
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -25,24 +27,25 @@ fun Message.reactWith(emoji: Emoji, success: Consumer<in Void>) {
 }
 
 /**
- * Add a Reaction to the [Message] with an [Emoji]
- *
- * @param emoji The [Emoji] to react with
- *
- * @author Jonathan Augustine
- * @since 2.0
+ * Adds multiple Reactions to the [Message] in order of submission.
  */
-infix fun Message.reactWith(emoji: Emoji) = addReaction(emoji.unicode).queue()
+fun Message.reactWith(vararg emojis: Emoji) = runBlocking {
+    emojis.forEach {
+        this@reactWith.addReaction(it.unicode).queue()
+        delay(100)
+    }
+}
 
 /**
  * Adds multiple Reactions to the [Message] in order of submission.
- * THIS USES ``complete()`` AND IS BLOCKING
  */
-fun Message.reactWith(vararg emojis: Emoji) {
+fun Message.reactWith(emojis: Iterable<Emoji>) = runBlocking {
     emojis.forEach {
-        this.addReaction(it.unicode).queue()
+        this@reactWith.addReaction(it.unicode).queue()
+        delay(100)
     }
 }
+
 
 /**
  * Attempt to convert a JDA [Emote] to an [Emoji]

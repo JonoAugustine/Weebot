@@ -4,9 +4,11 @@
 
 package com.ampro.weebot.util
 
+import com.ampro.weebot.MLOG
 import com.ampro.weebot.commands.COMMANDS
 import com.google.gson.*
 import com.jagrosh.jdautilities.command.Command
+import java.lang.Exception
 import java.lang.reflect.Type
 import kotlin.reflect.KClass
 
@@ -89,7 +91,11 @@ class InterfaceAdapter<T: Any> : JsonSerializer<T>, JsonDeserializer<T> {
                            jsonSerializationContext: JsonSerializationContext): JsonElement {
         val jsonObject = JsonObject()
         jsonObject.addProperty(CLASSNAME, jsonElement.javaClass.name)
-        jsonObject.add(DATA, jsonSerializationContext.serialize(jsonElement))
+        try {
+            jsonObject.add(DATA, jsonSerializationContext.serialize(jsonElement))
+        } catch (e: Exception) {
+            MLOG.elog(this::class, jsonElement.javaClass.name)
+        }
         return jsonObject
     }
 

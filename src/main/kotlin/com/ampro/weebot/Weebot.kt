@@ -291,9 +291,8 @@ class GlobalWeebot : Weebot(-1L) {
     override fun feedPassives(event: Event) {
         userPassives.values.forEach { it ->
             GlobalScope.launch {
-                it.apply { removeIf { it.dead() } }.forEach {
-                    it.accept(this@GlobalWeebot, event)
-                }
+                it.removeIf(IPassive::dead)
+                it.forEach { it.accept(this@GlobalWeebot, event) }
             }
         }
     }
