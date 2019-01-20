@@ -201,16 +201,6 @@ fun GuildMessageReactionAddEvent.isValidUser(roles: List<Role> = emptyList(),
  */
 class Restriction {
 
-    /** An indication of the Command's restriction in a guild.  */
-    enum class Status {
-        /** The Item has no restrictions  */
-        OPEN,
-        /** The Item has restrictions  */
-        RESTRICTED,
-        /** The Item is disabled  */
-        DISABLED
-    }
-
     val allowedUsers: MutableList<Long> = ArrayList()
     val blockedUsers: MutableList<Long> = ArrayList()
     val allowedRoles: MutableList<Long> = ArrayList()
@@ -383,15 +373,21 @@ class Restriction {
 
     /** @return `true` if there are any restrictions.
      */
-    fun restricted(): Boolean {
-        return (allowedUsers.isEmpty() || blockedUsers.isEmpty() || allowedRoles.isEmpty() || blockedRoles.isEmpty() || allowedTextChannels.isEmpty() || blockedTextChannels.isEmpty())
+    fun isRestricted(): Boolean {
+        return (allowedUsers.isNotEmpty()
+                && blockedUsers.isNotEmpty()
+                && allowedRoles.isNotEmpty()
+                && blockedRoles.isNotEmpty()
+                && allowedTextChannels.isNotEmpty()
+                && blockedTextChannels.isNotEmpty())
+            .not()
     }
 
     /**
      * Get an [EmbedBuilder] with each allow or block list as it's own
      * field. The EmbedBuilder is in standard Weebot form, untitled with no
      * description.
-     * @param guild The guild the restriction is housed in.
+     * @param guild The guild the writeRestrictions is housed in.
      * @return
      */
     fun toEmbedBuilder(guild: Guild): EmbedBuilder {

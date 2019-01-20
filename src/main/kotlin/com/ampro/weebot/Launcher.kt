@@ -20,6 +20,7 @@ import net.dv8tion.jda.core.entities.Game.*
 import net.dv8tion.jda.core.entities.Game.GameType.STREAMING
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
+import org.apache.commons.io.FileUtils
 import java.util.concurrent.*
 import java.util.concurrent.Executors.newFixedThreadPool
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -299,7 +300,9 @@ private fun saveTimer() = GlobalScope.launch {
     try {
         while (ON) {
             DAO.backUp()
-            STAT.saveJson(STAT_BK, true)
+            synchronized(STAT){ STAT.saveJson(STAT_BK, true) }
+            FileUtils.cleanDirectory(TEMP_OUT)
+            FileUtils.cleanDirectory(TEMP_IN)
             if (i % 100 == 0) {
                 MLOG.slog(null, "Database & Stats back up: $i")
             }

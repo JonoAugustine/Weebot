@@ -46,6 +46,16 @@ fun Message.reactWith(emojis: Iterable<Emoji>) = runBlocking {
     }
 }
 
+/**
+ * Adds multiple Reactions to the [Message] in order of submission.
+ * @param emojis Emote IDs or Emoji unicode
+ */
+fun Message.reactWith(reactions: List<String>) = runBlocking {
+    reactions.forEach {
+        this@reactWith.addReaction(it).queue()
+        delay(100)
+    }
+}
 
 /**
  * Attempt to convert a JDA [Emote] to an [Emoji]

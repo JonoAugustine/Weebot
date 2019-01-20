@@ -35,6 +35,7 @@ class CmdTaskManager : WeebotCommand("taskmanager", "Task Manager",
     "View all active passive commands in the guild or for the user.", cooldown = 60,
     cooldownScope = USER_SHARD, userPerms = arrayOf(ADMINISTRATOR)) {
     override fun execute(event: CommandEvent) {
+        //Update to show running games as well TODO
         val passives = if (event.guild != null) getWeebotOrNew(event.guild).passives
         else DAO.GLOBAL_WEEBOT.getUserPassiveList(event.author)
 

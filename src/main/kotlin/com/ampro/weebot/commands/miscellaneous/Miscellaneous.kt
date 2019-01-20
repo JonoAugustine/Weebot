@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.commands.miscellaneous
 
+import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.*
 import com.ampro.weebot.database.*
@@ -102,11 +103,11 @@ class CmdApiToGetALife : WeebotCommand("fact", "APGL Facts", emptyArray(),
     }
     private data class Fact(val fact: String)
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         when {
             event.args.isNullOrBlank() -> {
                 this.execute(WeebotCommandEvent(event.event,
-                    listOf("dog", "cat", "panda").random()))
+                    listOf("dog", "cat", "panda").random(), event.bot))
             }
             event.args.matches("(?i)dog") -> {
                 (BASE_URL + FACT_DOG).get<Fact>().component1()?.also {

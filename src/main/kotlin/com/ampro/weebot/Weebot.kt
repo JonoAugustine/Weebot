@@ -2,6 +2,8 @@
  * Copyright Aquatic Mastery Productions (c) 2019.
  */
 
+@file:Suppress("SENSELESS_COMPARISON")
+
 package com.ampro.weebot
 
 import com.ampro.weebot.commands.*
@@ -97,6 +99,10 @@ class WeebotSettings(val guildID: Long) {
      */
     var commandRestrictions: ConcurrentHashMap<KClass<out WeebotCommand>,
             CommandRestriction> = ConcurrentHashMap()
+        get() {
+            if (field == null) field = ConcurrentHashMap()
+            return field
+        }
 
     fun isAllowed(cmd: WeebotCommand, textChannel: TextChannel): Boolean {
         return commandRestrictions[cmd::class]?.allows(textChannel) != false
@@ -193,7 +199,11 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     val notePads = mutableListOf<NotePad>()
 
     @get:Synchronized
-    var cahGuildInfo: CahGuildInfo? = null
+    var cahGuildInfo: CahGuildInfo = CahGuildInfo(this.guildID)
+        get() {
+            if (field == null) field = CahGuildInfo(this.guildID)
+            return field
+        }
 
     /*************************************************
         *               INIT                       *
@@ -216,9 +226,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     inline fun <reified C:IPassive> getPassive(predicate: (C) -> Boolean)
             = passives.firstOrNull { it::class == C::class && predicate(it as C) } as C?
 
-    /**
-     * @return The all [IPassive]s of the type [C] held by this [Weebot]
-     */
+    /** @return never-null list of all [IPassive]s of the type [C] */
     inline fun <reified C:IPassive> getPassives()
             = passives.filter {  it::class == C::class } as MutableList<*>
 
@@ -244,14 +252,16 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
         GlobalScope.launch(CACHED_POOL) { it.accept(this@Weebot, event) }
     }
 
+    /** Get all games of type [G] currently running */
+    inline fun <reified G:Game<out Player>> getRunningGames()
+            = games.filter { it is G && it.isRunning }
+
+    fun add(game: Game<out Player>) = this.games.add(game)
+
     /**
      * Any startup settings or states that must be reloaded before launch.
-     *  Injects variables if anything null
-     * TODO Startup
      */
-    open fun startUp() {
-        if (settings.commandRestrictions == null) settings.commandRestrictions = ConcurrentHashMap()
-    }
+    open fun startUp() {}
 
     override fun compareTo(other: Weebot) = (this.guildID - other.guildID).toInt()
 

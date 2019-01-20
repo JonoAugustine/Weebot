@@ -4,8 +4,7 @@
 
 package com.ampro.weebot.commands.`fun`.games.cardgame
 
-import com.ampro.weebot.MLOG
-import com.ampro.weebot.Weebot
+import com.ampro.weebot.*
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.`fun`.games.*
 import com.ampro.weebot.commands.`fun`.games.WinCondition.ROUNDS
@@ -16,15 +15,18 @@ import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
-import com.jagrosh.jdautilities.command.CommandEvent
+import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.Message.MentionType.*
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import net.dv8tion.jda.core.events.Event
+import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import net.dv8tion.jda.core.events.message.react.MessageReactionAddEvent
 import java.io.File
 import java.io.IOException
 import java.nio.file.Files
+import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.*
 
@@ -33,13 +35,13 @@ internal const val LINK_CAH_THUMBNAIL
         = "https://cardsagainsthumanity.com/v8/images/social-3f4a4c57.png"
 
 internal const val MIN_PLAYERS   = 3
-internal const val MAX_PLAYERS   = 25 //TODO this is a really artificial limit
+internal const val MAX_PLAYERS   = 25
 internal const val HAND_SIZE_MAX = 10
 /** Default Hand Size */
 internal const val HAND_SIZE_DEF = 5
 internal const val HAND_SIZE_MIN = 4
 
-internal val CAH_IDGEN   = IdGenerator(7)
+internal val CAH_IDGEN   = IdGenerator(7, "CAH:")
 
 val DIR_CAH             = File(DIR_RES, "CAH")
 val FILE_C_BLACK        = File(DIR_CAH, "CAH_C_BLACK")
@@ -96,7 +98,10 @@ internal val DECK_CUST: ConcurrentHashMap<Long, MutableList<CAHDeck>>
  */
 data class CahGuildInfo(val guildId: Long) {
     val leaderBoard: LeaderBoard = LeaderBoard()
-    val decks: MutableList<CAHDeck> get() = DECK_CUST[guildId] ?: mutableListOf()
+    /** All decks created by the guild (not saved to dao file) */
+    val decks: MutableList<CAHDeck> get() = DECK_CUST.getOrPut(guildId) {mutableListOf()}
+    /** Saved public decks not made by the guild */
+    val favoritedDecks: MutableList<String> = mutableListOf()
 }
 
 /**
@@ -126,14 +131,42 @@ fun <T: Any> Collection<CAHDeck>.collect(params: (CAHDeck) -> List<T>)
 }
 
 /**
+ * @param name
+ * @param authorID
+ * @param public
+ * @param init
+ * @param writeRestrictions
+ * @param blackCards
+ * @param whiteCards
+ *
  * @author Jonathan Augustine
  * @since 1.0
  */
 data class CAHDeck(var name: String, val authorID: Long = -1L,
-                   val restriction: Restriction = Restriction(),
+                   var public: Boolean = false, val init: OffsetDateTime = NOW(),
+                   val writeRestrictions: Restriction = Restriction(),
                    val blackCards: MutableList<BlackCard> = mutableListOf(),
-                   val whiteCards: MutableList<WhiteCard> = mutableListOf(),
-                   val id: String = CAH_IDGEN.next(), var public: Boolean = false)
+                   val whiteCards: MutableList<WhiteCard> = mutableListOf()) {
+    val id: String = CAH_IDGEN.next()
+    /**Number of times used publically*/
+    var popularity: Int = 0
+
+    /**
+     * @return an [EmbedBuilder] set to:
+     * Title: [name]
+     * Description: [id] \n [authorID] \n [init] \n [public] \n [popularity]
+     */
+    internal fun asEmbed() = makeEmbedBuilder(name, null, """
+        ID: ``$id``
+        Author: ${getUser(authorID)?.asMention ?: "*Unknown User*"}
+        Created ${init.format(WKDAY_MONTH_YEAR)}
+        ${if (public) "Public for all Weebot users" else ""}
+        ${if (public && popularity > 0) "Times Used: $popularity" else ""}
+        ${if (blackCards.isNotEmpty()) "Black Cards: ${blackCards.size}" else ""}
+        ${if (whiteCards.isNotEmpty()) "White Cards: ${whiteCards.size}" else ""}
+        """.trimIndent())
+
+}
 
 /**
  * The Cards Against Humanity Player. Has a hand of [WhiteCard]s and won [BlackCard]s
@@ -281,13 +314,13 @@ enum class GameState {
 class CardsAgainstHumanity(guild: Guild, author: User,
                            /** The hosting channel */
                            channel: TextChannel,
-                           decks: List<CAHDeck> = listOf(DECK_STRD),
+                           val decks: List<CAHDeck> = listOf(DECK_STRD),
                            val handSize: Int = HAND_SIZE_DEF,
                            val winCondition: WinCondition = WINS(7))
     : CardGame<CAHPlayer>(guild, author) {
 
     private val guildName = guild.name
-    private val channelID = channel.idLong
+    internal val channelID = channel.idLong
     val channel: TextChannel get() = getGuild(guildID)!!.getTextChannelById(channelID)!!
     val name: (User) -> String = {
         getGuild(guildID)?.getMember(it)?.effectiveName?: it.name
@@ -353,6 +386,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                 this.blackCard = this.activeCardsBlack.random()
                 blackCardMessage?.delete()?.queueAfter(250, MILLISECONDS)
                 sendBlackCard()
+                sendWhiteCards(*playerList.toTypedArray())
             }
             val e = baseEmbed().addField("Guide", """
                 $ArrowsCounterclockwise to load a new Black Card
@@ -366,6 +400,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                     m.delete().queueAfter(250, MILLISECONDS)
                 }, Warning to { m, _ ->
                     try {
+                        blackCard.reports++
                         reloadBlackCard()
                         channel.sendMessage(
                             "Card Reported, thank you for helping our moderation efforts!")
@@ -385,7 +420,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
             }
             val embed = baseEmbed().addField("Czar, choose your victor!",
                 "${czar.user.asMention}, " +
-                        " Select a victor by reacting with the corresponding number.",
+                        "Select a victor by reacting with the corresponding number.",
                 true)
                 .build()
             val playersIn = playerList.filterNot { it.playedCards.isEmpty() || it == czar}
@@ -396,15 +431,13 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                     this.channel.sendMessage(makeEmbedBuilder(title, LINK_CAH,
                         "LeaderBoard:\n${leaderBoard()}")
                         .setAuthor("${name(p.user)} Won This Turn! $Tada$Tada").build()
-                    ).queue {
-                        gameState = CHOOSING
-                        nextTurn()
-                    }
+                    ).queue { nextTurn() }
                 }
             }.shuffled()
-            if (playersIn.isEmpty()) TODO("This should not happen")
             val sp = SelectablePaginator(setOf(czar.user), emptySet(), -1, MINUTES, embed,
-                playersIn, itemsPerPage = -1, singleUse = true) { blackCardMessage = it }
+                playersIn, itemsPerPage = -1, singleUse = true) {
+                blackCardMessage = it
+            }
 
             if (blackCardMessage != null) blackCardMessage!!.clearReactions().queue({
                 sp.displayOrDefault(blackCardMessage, channel)
@@ -463,7 +496,6 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                 if (winners.isNotEmpty()) endGame()
             }
         }
-
         this.activeCardsBlack.remove(this.blackCard)
         this.usedCardsBlack.add(this.blackCard)
         if (activeCardsBlack.isEmpty()) {
@@ -477,8 +509,9 @@ class CardsAgainstHumanity(guild: Guild, author: User,
             usedCardsWhite.clear()
         }
         this.playerList.forEach { dealCards(it) }
-        sendBlackCard()
         sendWhiteCards(*playerList.toTypedArray())
+        gameState = CHOOSING
+        sendBlackCard()
     }
 
     /** @return true if the Czar was reset (start a new round) */
@@ -534,13 +567,14 @@ class CardsAgainstHumanity(guild: Guild, author: User,
     }
 
     override fun endGame(): Boolean {
+        if (!decks.all { it == DECK_STRD }) decks.filter(CAHDeck::public)
+            .forEach { it.popularity++ }
         val sortedList = playerList.sortedByDescending { it.cardsWon.size }
         val winner = sortedList.first()
+        val bot = getWeebotOrNew(guildID)
+        bot.games.remove(this)
 
-        val cgi = getWeebotOrNew(guildID).cahGuildInfo ?: let {
-            getWeebotOrNew(guildID).cahGuildInfo = CahGuildInfo(guildID)
-            return@let getWeebotOrNew(guildID).cahGuildInfo!!
-        }
+        val cgi = bot.cahGuildInfo
 
         cgi.leaderBoard.addUser(winner.user, winner.cardsWon.size)
 
@@ -577,20 +611,37 @@ class CardsAgainstHumanity(guild: Guild, author: User,
  */
 class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
     arrayOf("cardsagainsthumanity"), CAT_UNDER_CONSTRUCTION, "<command> [arguments]",
-    "Start a game of CardsAgainstHumanity or make custom cards.", guildOnly = true
+    "Play a game of CardsAgainstHumanity or make custom cards.", guildOnly = true,
+    children = arrayOf(SubCmdDeck(), SubCmdSeeReports())
 ) {
 
-    override fun execute(event: CommandEvent) {
-        val bot = getWeebotOrNew(event.guild)
-        bot.games.add(
-        CardsAgainstHumanity(event.guild, event.author, event.textChannel)
-            .apply {
-                event.message.mentionedUsers.forEach { addUser(it) }
-                startGame()
-            }
-        )
+    //Setup, Join, & leaderboard
+    override fun execute(event: WeebotCommandEvent) {
+        if (event.splitArgs().isEmpty()) return
+        val liveGames = event.bot.getRunningGames<CardsAgainstHumanity>()
 
-        //STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+        //Setup, Join, & leaderboard
+        when {
+            //setup [hand_size] [default] [deck_id1 deck_id2...] [@bots...]
+            event.argList[0].matches("(?i)set(up)?") -> {
+                TODO(event)
+                //TODO selectableEmbed, +/- for hand size, paginator for decks
+            }
+            //join the game at any time
+            event.argList[0].matches("(?i)j(oin)?") -> TODO(event)
+            //start
+            event.argList[0].matches("(?i)sta?rt") -> {
+                TODO(event)
+                STAT.track(this, event.bot, event.author, event.creationTime)
+            }
+            //Get your cards re-sent
+            event.argList[0].matches("(?i)((my)?hand|(re)?send)") -> TODO(event)
+            //See the current game's scores
+            event.argList[0].matches("(?i)scores?") -> TODO(event)
+            //"See server leaderboard", "``leaderboard``\n*Aliases:* LB, top",
+            event.argList[0].matches("(?i)setup") -> TODO(event)
+            event.argList[0].matches("(?i)setup") -> TODO(event)
+        }
     }
 
     init {
@@ -598,55 +649,272 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
             "*You can purchase Cards Against Humanity for yourself to support the creators* "
                     + "[`here`]($LINK_CAH)\n\n" +
                     "Play a game of Cards Against Humanity and make custom decks " +
-                    "with user-made cards. Weebot uses all official decks (as of december " +
-                    "2018).\n\nTo play a game, you first need to setup and have at least" +
-                    "3 players join, then you can start. Cards will be given to each player" +
-                    "in a private message, then a Card Czar will be chosen at random." +
-                    "A Black Card will be sent to the channel the game was started in," +
-                    "once each player has played their card(s) (by reacting to their " +
-                    "private chat hand or sending a ``play`` command) the Czar can choose" +
-                    "a winner by reacting to the Black Card (up to $MAX_PLAYERS) or " +
-                    "using the ``pick`` command. Each round new cards will be delt " +
-                    "to each player, a new Czar will be chosen (in order), and a new" +
-                    "Black Card will be sent until a winner is reached or the game is " +
-                    "cancelled.\n\nHAVE FUN!")
-            .addField("Game Setup", "setup [+bot] [hand_size] [deck1 deck2...] "
-                    + "\n**Join Game**\njoin\n**+bot** adds Weebot to the game")
-            .addField("Start Game (Requires $MIN_PLAYERS players)", "start")
-            .addField("Add Weebot to the Game", "+bots [@AnyBot]\n*Alias*: addbot")
+                    "with user-made cards. Weebot uses all official decks (as of " +
+                    "December 2018).\n\nTo play a game, you first need to setup " +
+                    "and have at least 3 players join, then you can start. Cards will " +
+                    "be given to each player in a private message, then a Card Czar " +
+                    "will be chosen at random. A Black Card will be sent to the channel" +
+                    " the game was started in, once each player has played their card" +
+                    "(s) by reacting to their private chat hand. The Czar can choose " +
+                    "a winner by reacting to the Black Card. Each round new cards will " +
+                    "be dealt to each player, a new Czar will be chosen (in order), and " +
+                    "a new Black Card will be sent until a winner is reached or the " +
+                    "game is cancelled.\n\nHAVE FUN!")
+            .addField("Game Setup", """``setup [hand_size] [deck1 deck2...]``
+                Any bot can be added to the game by ``@mentioning`` them
+                ``join`` to join the game at any time
+                ``start`` to start the game (*Requires $MIN_PLAYERS players*)
+                """.trimIndent())
             .addField("Play Your Card(s)", "White Cards can be played by reacting to "
-                    + "the private message")
-            .addField("Card Czar Pick Winning Card(s)", "React to the Black Card message"
-                    + "or use ``pick <card_set_num>``")
-            .addField("Get your cards re-sent", "myhand")
-
-            .addField("See the current game's scores","scores")
-            .addField("See server leaderboard", "leaderboard\n*Aliases:* LB, top, ranks")
-
-            .addBlankField()
-            .addField("Make a Custom Deck", "cah makedeck <deck_name>", false)
-            .addField("Make a Custom White Card",
-                "cah mkwc <deck_name> <card text>\n*Aliases*: makewhitecard, makewc",
-                false)
-            .addField("Make a Custom Black Card",
-                "cah mkbc <deck_name> <numberOfBlanks> <card text>\n*Aliases*: "
-                        + "makeblackcard, makebc", false)
-            .addField("View all Custom Decks", "cah alldecks", false)
-            .addField("View a Custom Deck's Cards",
-                "cah view <deck_name>\n*Alias*: seedeck", false)
-            .addField("Lock a Custom Deck to One or More Roles", "cah lock <deck_name>",
-                false)
-            .addField("Get a Custom Deck as a Text File", "cah deckfile <deck_name>",
-                false)
-            .addField("Remove Custom Deck **", "cah remove <deck_number>", false)
-            .addField("Remove Custom White Card ","rmwc <deck_name> <card_number>",
-                false)
-            .addField("Remove Custom Black Card ","rmbc <deck_name> <card_number>",
-                false)
-            .addField("Under Construction ",
-                "Commands marked '**' are still under construction", false)
+                    + "the private message", true)
+            .addField("Czar Pick Winning Card(s)", "React to the Black Card message",true)
+            .addField("Get your cards re-sent", "``myhand``", true)
+            .addField("See the current game's scores","``scores``", true)
+            .addField("See server leaderboard", "``leaderboard``\n*Aliases:* LB, top", true)
+            .addField("Make a Custom Deck", "``deck make [-public] <deck_name>``", true)
+            .addField("View Custom Decks",
+                """``deck see [-public or -all] [deckNames/IDs...]``
+                    |``-public/-p`` to see a list of public, user-made decks
+                    |``-all/-a`` to see decks made in this server and public ones
+                    |*By default, only decks in this server will be shown*
+                    |""".trimMargin(), true)
             .setThumbnail(LINK_CAH_THUMBNAIL)
             .build()
     }
 
+}
+
+/**
+ * Sub command for [CAHDeck] actions
+ * @author Jonathan Augustine
+ * @since 2.2.1
+ */
+internal class SubCmdDeck : WeebotCommand("deck", null, arrayOf("decks"), CAT_GAME,
+    "","", guildOnly = true, cooldown = 60, cooldownScope = USER_SHARD) {
+    override fun execute(event: WeebotCommandEvent) {
+        //make [-public] <deck_name>
+        when {
+            event.argList.isEmpty() -> {
+                event.respondThenDelete("Use ``make`` or ``view`` to do something.", 5)
+            }
+            event.argList[0].matches("(?i)m(ake)?") -> {
+                if (event.argList.size == 1) { //Use waiter to get name
+                    event.respondThenDelete("What is the name of the new deck?", 360)
+                    WAITER.waitForEvent(MessageReceivedEvent::class.java, check@{
+                        when (validName(it, it.message.contentDisplay, event.bot)) {
+                            0 -> {
+                                event.respondThenDelete(
+                                    "Name cannot contain emotes, please try again")
+                                false
+                            }
+                            -1 -> {
+                                event.respondThenDelete("Name cannot have mentions, " +
+                                        "please try again")
+                                false
+                            }
+                            -2 -> {
+                                event.respondThenDelete("Name cannot be a number, " +
+                                        "please try again")
+                                false
+                            }
+                            -3 -> {
+                                event.respondThenDelete("Name is too long, please try again")
+                                false
+                            }
+                            -4 -> {
+                                event.respondThenDelete("There is already a deck " +
+                                        "by that name in this server, please try again")
+                                false
+                            }
+                            else -> it.isValidUser(event.guild, setOf(event.author),
+                                channel = event.channel)
+                        }
+                    },
+                        {
+                        event.respondThenDelete(
+                            "Allow all Weebot users to use this deck? (yes/no)", 360)
+                        WAITER.waitForEvent(MessageReceivedEvent::class.java, check@{e2 ->
+                            if (e2.isValidUser(event.guild, setOf(event.author),
+                                        channel = event.channel)) {
+                                if (!e2.message.contentDisplay
+                                            .matchesAny(REG_YES, REG_NO)) {
+                                    event.respondThenDelete("Please say ``yes`` or ``no``")
+                                    false
+                                } else true
+                            } else false
+                        }, { e2 ->
+                            val pub = e2.message.contentDisplay.matches(REG_YES)
+                            val deck = CAHDeck(it.message.contentDisplay,
+                                it.author.idLong, pub, event.creationTime)
+                            event.bot.cahGuildInfo.decks.add(deck)
+                            sendNewDeck(event, deck)
+                            STAT.track(this, event.bot, event.author, event.creationTime)
+                        }, 5, MINUTES, {
+                            event.respondThenDelete("Timed out. Please try again.")
+                        })
+                    }, 5, MINUTES, {
+                        event.respondThenDelete("Timed out. Please try again.")
+                    })
+                } else {
+                    var nameStart = 1
+                    if (event.argList[1].matches(REG_HYPHEN+"p(ub(lic)?)?")) nameStart++
+                    if (nameStart >= event.argList.size) {
+                        return event.respondThenDelete("No name provided.", 30)
+                    }
+                    val name = event.argList.subList(nameStart).joinToString(" ")
+
+                    if (validName(event.event, name, event.bot) == 0) {
+                        return event.respondThenDelete(
+                            "Name cannot contain emotes, " + "please try again", 30)
+                    } else if (validName(event.event, name, event.bot) == -1) {
+                        return event.respondThenDelete("Name cannot have mentions, " +
+                                "please try again", 30)
+                    } else if (validName(event.event, name, event.bot) == -2) {
+                        return event.respondThenDelete("Name cannot be a number, " +
+                                "please try again", 30)
+                    } else if (validName(event.event, name, event.bot) == -3) {
+                        return event.respondThenDelete("Name is too long, please try " +
+                                "again", 30)
+                    } else if (validName(event.event, name, event.bot) == -4) {
+                        return event.respondThenDelete("There is already a deck "
+                                + "by that name in this server, please try again", 30)
+                    } else if (event.bot.cahGuildInfo.decks.has{
+                                it.name.equals(name, true)})
+                        return event.respondThenDelete("There is already a deck " +
+                                "in this server by that name. Please try again.", 30)
+
+                    val deck = CAHDeck(name, event.author.idLong, nameStart == 2,
+                        event.creationTime)
+                    event.bot.cahGuildInfo.decks.add(deck)
+                    sendNewDeck(event, deck)
+                    STAT.track(this, event.bot, event.author, event.creationTime)
+                }
+            }
+            event.argList[0].matches("(?i)(v(iew)?|se*)") -> {
+                TODO(event)
+                //see/view [-public or -all] [deckNames/IDs...]
+                //*By default, only decks in this server will be shown*
+            }
+        }
+    }
+
+    private fun sendDeck(event: WeebotCommandEvent, deck: CAHDeck, embed: EmbedBuilder?) {
+        if (event.bot.cahGuildInfo.decks.none { it.id == deck.id })
+            return sendForeignDeck(event, deck)
+
+        val e = (embed ?: deck.asEmbed()).addField("Actions", """
+            $BlackLargeSquare to write a Black Card
+            $B to view all Black Cards
+            $WhiteLargeSquare to write a White Card
+            $W to view all White Cards
+            ${if(event.author.`is`(deck.authorID)) "$Lock to change write restrictions"
+            else ""}""".trimIndent(), false).build()
+
+        val items = mutableListOf(
+            BlackLargeSquare to { m: Message, u: User ->
+                TODO(event)
+            }, B to { m: Message, u: User ->
+                TODO(event)
+            }, WhiteLargeSquare to { m: Message, u: User ->
+                TODO(event)
+            }, W to { m: Message, u: User ->
+                TODO(event)
+            }
+        )
+        if (event.author.`is`(deck.authorID)) {
+            items.add(Lock to { m: Message, u: User ->
+                TODO(event)
+            })
+        }
+
+        val writers = mutableSetOf(event.author)
+        val writerRoles = mutableSetOf<Role>()
+        if (deck.writeRestrictions.isRestricted()) {
+            writers.addAll(deck.writeRestrictions.allowedUsers.mapNotNull {
+                event.guild.getMemberById(it).user
+            })
+            writerRoles.addAll(deck.writeRestrictions.allowedRoles.mapNotNull {
+                event.guild.getRoleById(it)
+            })
+        }
+
+        SelectableEmbed(writers, writerRoles, 5, MINUTES, false, e, items) {
+            it.clearReactions().queue()
+        }.display(event.channel)
+
+    }
+
+    private fun sendForeignDeck(event: WeebotCommandEvent, deck: CAHDeck) {
+        TODO(event)
+    }
+
+    /** Builds an embed for [CAHDeck] creation then uses [sendDeck] to send */
+    private fun sendNewDeck(event: WeebotCommandEvent, deck: CAHDeck) {
+        sendDeck(event, deck, deck.asEmbed().addField("What Next?", """
+            Right now this deck is empty $FrowningFace, but you can start adding cards
+            to this deck by reacting to this message or by using this command:
+            ```css
+            cah deck view ${deck.id.removePrefix(CAH_IDGEN.prefix)}
+            ```
+            """.trimIndent(), false).setThumbnail(event.author.avatarUrl)
+            .setAuthor("New Deck Created!!"))
+
+    }
+
+    /**
+     * @return 1 if valid
+     *         0 if contained emotes
+     *        -1 if contains mentions
+     *        -2 if it's a number
+     *        -3 if invalid length
+     *        -4 if duplicate name
+     */
+    private fun validName(event: MessageReceivedEvent, name: String, weebot: Weebot)
+            : Int {
+        return when {
+            event.message.emotes.isNotEmpty() -> 0
+            event.message.getMentions(USER, ROLE, CHANNEL, EMOTE, HERE, EVERYONE)
+                .isNotEmpty() -> -1
+            name.length > EMBED_MAX_TITLE -> -3
+            weebot.cahGuildInfo.decks.any { it.name.equals(name, true) } -> -4
+            else -> try {
+                name.toDouble()
+                -2
+            } catch (e: NumberFormatException) { 1 }
+        }
+    }
+}
+
+/**
+ * A [WeebotCommand] to inspect any [BlackCard] or [WhiteCard] with any reports.
+ *
+ * @author Jonathan Augustine
+ * @since 2.2.1
+ */
+internal class SubCmdSeeReports : WeebotCommand("reports", null, arrayOf("report", "rep"),
+    CAT_DEV, "", "", ownerOnly = true, hidden = true) {
+    override fun execute(event: WeebotCommandEvent) {
+        val whiteCards = (DECK_CUST.map { it.value }.flatten() + DECK_STRD)
+            .map { it.whiteCards }.flatten().filter { it.reports > 0 }
+            .sortedByDescending { it.reports }.map {
+                "[R: ${it.reports}] W:``${it.id}`` ~ ${it.text}" to { _:Int, m:Message ->
+                    TODO(event)
+                }
+            }
+
+        val blackCards = (DECK_CUST.map { it.value }.flatten() + DECK_STRD)
+            .map { it.blackCards }.flatten().filter { it.reports > 0 }
+            .sortedByDescending { it.reports }.map {
+                "``[R: ${it.reports}] B:${it.id} - Picks ${it.pick}`` ~ ${it.text}" to
+                        { _:Int, m:Message ->
+                    TODO(event)
+                }
+            }
+
+        SelectablePaginator(setOf(event.author), timeout = -1, itemsPerPage = -1,
+            title = "Reported CAH Cards",
+            description = "All CAH cards with at least ``1`` report.",
+            items = blackCards + whiteCards).display(event.channel)
+
+    }
 }

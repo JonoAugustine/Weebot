@@ -320,6 +320,7 @@ class SubCmdLeaderBoard(name: String, alias: Array<String>)
         val rCord = bot.getPassive<Reddicord>()
         val mentions = event.message.mentionedUsers
         STAT.track(this, bot, event.author, event.creationTime)
+        event.delete()
 
         fun getScore(userID: Long) = rCord?.scoreMap!![userID]?.get()
 

@@ -33,12 +33,11 @@ class CmdAbout : WeebotCommand("about", "About", arrayOf("info"), CAT_GEN,
     "[me/more]", "Get information about Weebot.", cooldown = 90,
     children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP)) {
 
-    override fun execute(event: CommandEvent) {
-        STAT.track(this, if (event.guild != null) getWeebotOrNew(event.guild)
-        else DAO.GLOBAL_WEEBOT, event.author, event.creationTime)
+    override fun execute(event: WeebotCommandEvent) {
+        STAT.track(this, event.bot, event.author, event.creationTime)
+
         val eb = strdEmbedBuilder.setTitle("All about Weebot")
             .setThumbnail(CmdHelloThere.HELLO_THERE_GIFS[0])
-
         //Description
         val sBuilder = StringBuilder("[`Hello there!`]($HELLO_THERE) ").append(
             "I am ***Weebot***, a bot, that ")
@@ -105,7 +104,6 @@ class CmdAbout : WeebotCommand("about", "About", arrayOf("info"), CAT_GEN,
 
 }
 
-
 /**
  * Send a [MessageEmbed] giving info about the user.
  *
@@ -115,10 +113,8 @@ class CmdAbout : WeebotCommand("about", "About", arrayOf("info"), CAT_GEN,
 class SubCmdAboutUser : WeebotCommand("me", null, arrayOf("aboutme"), CAT_GEN,
     "", "Get information about yourself.", cooldown = 90, guildOnly = true
 ) {
-    override fun execute(event: CommandEvent) {
-        val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
-        else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author, event.creationTime)
+    override fun execute(event: WeebotCommandEvent) {
+        STAT.track(this, event.bot, event.author, event.creationTime)
         val roles = event.member.roles
         event.reply(
                 strdEmbedBuilder.apply {
@@ -144,7 +140,7 @@ class SubCmdAboutUser : WeebotCommand("me", null, arrayOf("aboutme"), CAT_GEN,
 class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, "", "",
     cooldown = 90, cooldownScope = USER_CHANNEL, guildOnly = true
 ) {
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val g = event.guild
         val roles = g.roles.filterNot { it.isPublicRole }
 
@@ -206,7 +202,7 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
         cooldown = 30, guildOnly = false) {
     val catAll: Category = Category("All")
 
-    public override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
         else getWeebotOrNew(event.guild)
         STAT.track(this, bot, event.author, event.creationTime)
@@ -267,7 +263,7 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
 class CmdWatchaDoin : WeebotCommand("whatchadoin", "Whatcha Doin'?", arrayOf("whatsup"),
     CAT_GEN, "","What am I up to?", cooldown = 0, cooldownScope = USER_SHARD,
     guildOnly = true) {
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val game = event.selfMember.game ?: games.random()
         val s: String = when (game.type) {
             DEFAULT -> "I'm playing ${game.name}"

@@ -19,6 +19,7 @@ import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
+import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import net.dv8tion.jda.core.entities.Game.listening
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
 import net.dv8tion.jda.core.events.*
@@ -238,6 +239,12 @@ abstract class WeebotCommand(name: String, val displayName: String?,
         }
     }
 
+    override fun execute(event: CommandEvent) = this.execute(event as WeebotCommandEvent)
+
+    open fun execute(event: WeebotCommandEvent) {
+
+    }
+
     override fun isAllowed(channel: TextChannel): Boolean {
         return getWeebotOrNew(channel.guild).settings.isAllowed(this, channel)
                 && super.isAllowed(channel)
@@ -247,8 +254,11 @@ abstract class WeebotCommand(name: String, val displayName: String?,
 
 }
 
-class WeebotCommandEvent(event: MessageReceivedEvent, arg: String)
+class WeebotCommandEvent(event: MessageReceivedEvent, arg: String, val bot: Weebot)
     : CommandEvent(event, arg, CMD_CLIENT) {
+    val argList get() = splitArgs()
+    val isPrivate get() = event.isFromType(PRIVATE)
+    val isTextChannel get() = event.isFromType(TEXT)
     override fun linkId(message: Message) = Unit
 }
 
@@ -264,7 +274,7 @@ class WeebotCommandClient(val prefixes: List<String>,
                           private val game: Game?,
                           private val coroutinePool: ExecutorCoroutineDispatcher,
                           helpWords: List<String>,
-                          private val helpConsumer: (CommandEvent) -> Unit
+                          private val helpConsumer: (WeebotCommandEvent) -> Unit
 ) : CommandClient, EventListener {
 
     val initTime: OffsetDateTime = NOW()
@@ -397,12 +407,11 @@ class WeebotCommandClient(val prefixes: List<String>,
         val cmdCall: String = rawParts[0].toLowerCase()
         val args = rawParts.subList(1).joinToString(" ")
 
+        val wce = WeebotCommandEvent(event, args, event.guild?.bot ?: DAO.GLOBAL_WEEBOT)
         if (helpWords.contains(cmdCall.toLowerCase())) {
-            helpConsumer(CommandEvent(event, args, this))
+            helpConsumer(wce)
         } else if (event.isFromType(PRIVATE) || event.textChannel.canTalk()) {
-            commandIndexMap[cmdCall]?.let {
-                COMMANDS[it].run(WeebotCommandEvent(event, args))
-            }
+            commandIndexMap[cmdCall]?.let { COMMANDS[it].run(wce) }
         }
 
     }
@@ -441,7 +450,6 @@ class WeebotCommandClient(val prefixes: List<String>,
                 }
         }*/
     }
-
 
     //Unused Overrides
     override fun getPrefix() = try { prefixes[0] } catch (e: Exception) { null }
