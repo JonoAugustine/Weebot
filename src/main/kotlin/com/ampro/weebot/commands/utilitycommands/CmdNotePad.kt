@@ -5,7 +5,6 @@
 package com.ampro.weebot.commands.utilitycommands
 
 import com.ampro.weebot.*
-import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.utilitycommands.NotePad.Note
 import com.ampro.weebot.commands.utilitycommands.NotePad.NotePadEdit.EditType
@@ -67,7 +66,7 @@ private infix fun CommandEvent.canWriteTo(notePad: NotePad): Boolean {
         //Check Channel
         !notePad.writeRestriction.isAllowed(textChannel) -> false
         //Check Role
-        !member.roles.has { notePad.writeRestriction.isAllowed(it) } -> false
+        !member.roles.any { notePad.writeRestriction.isAllowed(it) } -> false
         //Check User
         notePad.writeRestriction.isAllowed(member.user) -> true
         //else
@@ -92,7 +91,7 @@ private infix fun CommandEvent.canRead(notePad: NotePad): Boolean {
         //Check Channel
         !notePad.readRestriction.isAllowed(textChannel) -> false
         //Check Role
-        !member.roles.has { notePad.readRestriction.isAllowed(it) } -> false
+        !member.roles.any { notePad.readRestriction.isAllowed(it) } -> false
         //Check User
         notePad.readRestriction.isAllowed(member.user) -> true
         //else
@@ -216,7 +215,7 @@ data class NotePad(var name: String, val authorID: Long, val initTime: OffsetDat
                                         val index = notePad.indexOf(this)
                                         if (index == -1) {
                                             m.channel.sendMessage(
-                                                GENERIC_ERR_MESG)
+                                                GENERIC_ERR_MSG)
                                                 .queue()
                                             return@setAction
                                         } else {
@@ -769,7 +768,7 @@ class CmdNotePad : WeebotCommand("notepad", "NotePads",
             notePad = NotePad(nameList.joinToString(" "), event.author.idLong,
                 event.creationTime)
 
-            if (!pads.has { it.name.toLowerCase() == notePad.name.toLowerCase() }) {
+            if (!pads.any { it.name.toLowerCase() == notePad.name.toLowerCase() }) {
                 pads.add(notePad)
                 event.reply("*NotePad \"${notePad.name}\" added!*")
             } else {
@@ -921,7 +920,7 @@ class CmdNotePad : WeebotCommand("notepad", "NotePads",
             val map = mutableMapOf<NotePad, MutableList<String>>()
 
             args.forEach { id ->
-                cv.find { pad -> pad.notes.has { it.id == id } }?.also { pad ->
+                cv.find { pad -> pad.notes.any { it.id == id } }?.also { pad ->
                     pad.notes.find { it.id == id }?.also { note ->
                         map.getOrPut(pad, { mutableListOf() }).add(id)
                     }
@@ -940,11 +939,11 @@ class CmdNotePad : WeebotCommand("notepad", "NotePads",
                     map.forEach { notePad, notes ->
                         notePad.deleteNotesById(notes, event.author, event.creationTime)
                     }
-                    event.respondThenDelete("Notes deleted")
+                    event.respondThenDeleteBoth("Notes deleted")
                     it.message.delete().queueIgnore()
                     m.delete().queueIgnore()
                 }, 1, MINUTES, {
-                    event.respondThenDelete("Timed Out")
+                    event.respondThenDeleteBoth("Timed Out")
                     m.delete().queue()
                 })
             }
@@ -1056,7 +1055,7 @@ class CmdNotePad : WeebotCommand("notepad", "NotePads",
                                 }
                                 event.reply("*NotePad(s) cleared.*")
                                 val unUsed = args.filterNot { s ->
-                                    cw.has { np -> np.id.equals(s, true) }
+                                    cw.any { np -> np.id.equals(s, true) }
                                 }
                                 if (unUsed.isNotEmpty()) {
                                     event.reply(
@@ -1108,7 +1107,7 @@ class CmdNotePad : WeebotCommand("notepad", "NotePads",
                                 if (pads.removeAll(notePads)) {
                                     event.reply("*NotePad(s) deleted.* $heavy_check_mark")
                                     val unUsed = args.filterNot {  s ->
-                                        cr.has { np -> np.id.equals(s, true) }
+                                        cr.any { np -> np.id.equals(s, true) }
                                     }
                                     if (unUsed.isNotEmpty()) {
                                         event.reply("I couldn't find any NotePads matching: ${unUsed
@@ -1220,10 +1219,10 @@ class CmdNotePad : WeebotCommand("notepad", "NotePads",
                     viewable: MutableList<NotePad>) : (Message, User) -> Unit
             = { it, u ->
         when {
-            allPads.isEmpty() -> event.respondThenDelete(strdEmbedBuilder.setTitle(
+            allPads.isEmpty() -> event.respondThenDeleteBoth(strdEmbedBuilder.setTitle(
                 "${event.guild.name} has no NotePads").setDescription(
                 "Use ``make [Notepad Name]`` to make a new NotePad").build(), 30)
-            viewable.isEmpty() -> event.respondThenDelete(strdEmbedBuilder.setTitle(
+            viewable.isEmpty() -> event.respondThenDeleteBoth(strdEmbedBuilder.setTitle(
                 "${event.guild.name} has no NotePads you can view").setDescription(
                 "Use ``make [Notepad Name]`` to make a new NotePad").build(), 30)
             else -> sendNotePads(event, viewable, event.textChannel)
@@ -1335,7 +1334,7 @@ class CmdNotePad : WeebotCommand("notepad", "NotePads",
                     }
                 }
                 cw.isEmpty() -> {
-                    if (nps.has { cw.contains(it) })
+                    if (nps.any { cw.contains(it) })
                         event.reply("*You do not have permission to edit these NotePad(s).*")
                     else {
                         event.reply("No NotePad(s) could be found with the given ID(s).")
@@ -1445,7 +1444,7 @@ class CmdNotePad : WeebotCommand("notepad", "NotePads",
                     notePads.isEmpty() -> event.reply(
                         "No NotePad(s) could be found with the given ID(s).")
                 }
-                val unUsed = IDs.filterNot { viewable.has { np -> np.id.equals(it, true) } }
+                val unUsed = IDs.filterNot { viewable.any { np -> np.id.equals(it, true) } }
                 if (unUsed.isNotEmpty()) {
                     event.reply("I couldn't find any NotePad(s) matching: ${unUsed.joinToString(", ")}")
                 }
@@ -1467,7 +1466,7 @@ class CmdNotePad : WeebotCommand("notepad", "NotePads",
                     IDs.isEmpty() -> event.reply("No Note ID was provided.")
                     notes_2.isEmpty() -> event.reply("No Note(s) could be found with the given ID(s).")
                 }
-                val unUsed = IDs.filterNot { notes_2.has { np -> np.id.equals(it, true) } }
+                val unUsed = IDs.filterNot { notes_2.any { np -> np.id.equals(it, true) } }
                 if (unUsed.isNotEmpty()) {
                     event.reply("I couldn't find any Note(s) matching: ${unUsed.joinToString(", ")}")
                 }

@@ -4,18 +4,16 @@
 
 package com.ampro.weebot.commands.`fun`
 
-import com.ampro.weebot.Weebot
+import com.ampro.weebot.*
 import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.database.STAT
 import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.CHANNEL
-import com.ampro.weebot.SELF
-import com.ampro.weebot.WAITER
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
-import com.jagrosh.jdautilities.command.Command.CooldownScope.*
+import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.Permission.*
 import net.dv8tion.jda.core.entities.*
@@ -159,7 +157,7 @@ class Reddicord(channels: MutableList<TextChannel> = mutableListOf()) : IPassive
         }
         k?.users?.queue {
             it.joinToString(", ") { it.name }
-            if (it.has { it.idLong == SELF.idLong }) success(it)
+            if (it.any { it.idLong == SELF.idLong }) success(it)
             else failure(it)
         }
     }
@@ -206,7 +204,7 @@ class CmdReddicord : WeebotCommand("reddicord", "Redicord",
                     rCord.scoreMap.replaceAll { _, _ -> AtomicInteger(0) }
                 }
                 event.reply("Scores reset to ``0``")
-            } ?: event.respondThenDelete(makeEmbedBuilder("Reddicord has not been " +
+            } ?: event.respondThenDeleteBoth(makeEmbedBuilder("Reddicord has not been " +
                     "activated", description = "To activate Reddicord, use ``reddicord " +
                     "on`` or try ``help reddicord`` for more info.").build(), 60)
         }
@@ -264,15 +262,15 @@ class CmdReddicord : WeebotCommand("reddicord", "Redicord",
                                     "enabled: " + validToInvalid.second.map { it.asMention })
                         }
                     }
-                    else -> event.respondThenDelete("Reddicord is already active in ${event.textChannel.asMention}")
+                    else -> event.respondThenDeleteBoth("Reddicord is already active in ${event.textChannel.asMention}")
                 }
             }
             args[0].toLowerCase().matches(Regex("^(off|disable)$")) -> {
                 when {
-                    rCord == null -> event.respondThenDelete("Reddicord is already off in ${event.textChannel.asMention}")
+                    rCord == null -> event.respondThenDeleteBoth("Reddicord is already off in ${event.textChannel.asMention}")
                     mentionedChannels.isNotEmpty() -> {
                         rCord.channelIDs.removeAll { id ->
-                            mentionedChannels.has { it.idLong == id }
+                            mentionedChannels.any { it.idLong == id }
                         }
                         event.reply(strdEmbedBuilder.setTitle("Reddicord has been deactivated in ${mentionedChannels.joinToString(", ") { it.name }}")
                             .setDescription("Use ``reddicord on <channels>`` to turn it back on at any time.").build())
@@ -284,7 +282,7 @@ class CmdReddicord : WeebotCommand("reddicord", "Redicord",
                     }
                 }
             }
-            else -> event.respondThenDelete("Sorry, I had trouble understanding " +
+            else -> event.respondThenDeleteBoth("Sorry, I had trouble understanding " +
                     "${args[0]}. Try using ``on`` or ``off``.", 30)
         }
     }
@@ -326,12 +324,12 @@ class SubCmdLeaderBoard(name: String, alias: Array<String>)
 
         when {
             rCord == null -> {
-                event.respondThenDelete(makeEmbedBuilder("Reddicord has not been activated",
+                event.respondThenDeleteBoth(makeEmbedBuilder("Reddicord has not been activated",
                     description = "To activate Reddicord, use ``reddicord on`` or try "
                             + "``help reddicord`` for more info.").build(), 60)
             }
             rCord.scoreMap.isEmpty() -> {
-                event.respondThenDelete(makeEmbedBuilder(
+                event.respondThenDeleteBoth(makeEmbedBuilder(
                     "Reddicord has been activated but no one has any points yet!",
                     description = "To get started, post a meme in a Reddicord chat.")
                     .build(), 60)
@@ -346,7 +344,7 @@ class SubCmdLeaderBoard(name: String, alias: Array<String>)
                 val mapped: List<Pair<AtomicInteger, String>>
                         = (if (mentions.isEmpty()) rCord.scoreMap
                 else rCord.scoreMap.filterKeys { k ->
-                    mentions.has { it.idLong == k} }).map {
+                    mentions.any { it.idLong == k} }).map {
                     val name = event.guild.getMemberById(it.key)
                         ?.effectiveName ?: "Uknown User"
                     it.value to "$name: ${getScore(it.key)}"

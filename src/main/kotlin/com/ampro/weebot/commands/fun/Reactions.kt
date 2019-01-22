@@ -97,7 +97,7 @@ class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reacto
                 TODO(event)
             }
             else -> {
-                event.respondThenDelete("Sorry, I had trouble understanding " +
+                event.respondThenDeleteBoth("Sorry, I had trouble understanding " +
                         "${args[0]}. Try using " + "``on`` or ``off``.", 20)
             }
         }
@@ -213,7 +213,7 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
                         ) { it.reactWith(ArrowUp, T, H, I_lowercase, S) }
                         return
                     } else {
-                        event.respondThenDelete("The ^this reactor is already active")
+                        event.respondThenDeleteBoth("The ^this reactor is already active")
                         return
                     }
                 }
@@ -229,7 +229,7 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
                     }
                 }
                 else -> {
-                    event.respondThenDelete(
+                    event.respondThenDeleteBoth(
                         "Sorry, I had trouble understanding ${args[0]}. Try using " +
                                 "``on`` or ``off``.", 30)
                 }
@@ -256,7 +256,7 @@ class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN, "",
     override fun execute(event: CommandEvent) {
         if (event.args.isNullOrBlank()) return
         if (event.args.length * 6 > EMBED_MAX_DESCRIPTION)
-            return event.respondThenDelete("Too long", 5)
+            return event.respondThenDeleteBoth("Too long", 5)
 
         val s = event.args.replace(Regex("\\s"), "\t")
             .replace(Regex("(?i)[A-z]")) { ":regional_indicator_${it.value.toLowerCase()}:"

@@ -91,7 +91,7 @@ fun getSuggById(id: String, event: CommandEvent): Suggestion? {
     return DAO.suggestions.find {
         it.id.equals(id.removeAll("[^a-zA-Z0-9]"), true)
     } ?: run {
-        event.respondThenDelete("*No suggestion matched the ID provided.*", 30)
+        event.respondThenDeleteBoth("*No suggestion matched the ID provided.*", 30)
         return null
     }
 }
@@ -160,7 +160,7 @@ open class CmdSuggestion : WeebotCommand("suggest", "Suggest",
             //When voting
             args[0].matches(voteRegi) -> {
                 if (args.size < 2) {
-                    event.respondThenDelete("*No suggestion ID was provided.*", 30)
+                    event.respondThenDeleteBoth("*No suggestion ID was provided.*", 30)
                     return
                 }
                 STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
@@ -379,7 +379,7 @@ class CmdDevSuggestions : WeebotCommand("dev", null, emptyArray(), CAT_DEV, "",
                 sugg.state = try {
                     State.read(args[2])
                 } catch (e: IllegalArgumentException) {
-                    event.respondThenDelete(
+                    event.respondThenDeleteBoth(
                         "Invalid State! UNREVIEWED, ACCEPTED, COMPLETED or IGNORED"
                     )
                     return

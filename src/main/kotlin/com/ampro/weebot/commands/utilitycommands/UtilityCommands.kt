@@ -51,7 +51,7 @@ class OutHouse(user: User, var remainingMin: Long, val message: String,
             event.channel.sendMessage("*Welcome back ${mem.effectiveName}*").queue()
             this.remainingMin = 0
             return
-        } else if (mess.mentionedUsers.has { it.idLong == userId }) {
+        } else if (mess.mentionedUsers.any { it.idLong == userId }) {
             //Respond as bot
             val sb = StringBuilder().append("*Sorry, ")
                 .append(getUser(userId)?.asMention ?: "that user")

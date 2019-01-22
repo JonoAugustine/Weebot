@@ -202,7 +202,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
             args.isEmpty() -> {
                 vcRoleManager?.asEmbed(event.guild)?.build()?.also {
                     event.reply(it)
-                } ?: event.respondThenDelete("No Voice Channel Role Manager active.")
+                } ?: event.respondThenDeleteBoth("No Voice Channel Role Manager active.")
             }
             args[0].matchesAny(REG_ON, REG_ENABLE) -> {
                 if (vcRoleManager == null) {
@@ -237,7 +237,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
                 vcRoleManager?.also {
                     it.limit = ALL
                     event.reply("*Voice Channel Role Manager set to watch All Channels.*")
-                } ?: event.respondThenDelete(
+                } ?: event.respondThenDeleteBoth(
                     "There is no VCRole Manager active. Use ``vcr on``"
                 )
             }
@@ -246,15 +246,15 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
                     it.limit = PUBLIC
                     event.reply(
                         "*Voice Channel Role Manager set to only watch Public Channels.*")
-                } ?: event.respondThenDelete(
+                } ?: event.respondThenDeleteBoth(
                     "There is no VCRole Manager active. Use ``vcr on``"
                 )
             }
             args[0].matches(REG_HYPHEN + "c(lear)?") -> {
                 vcRoleManager?.apply {
                     clean(event.guild)
-                    event.respondThenDelete("VCRoles Cleared")
-                } ?: event.respondThenDelete(
+                    event.respondThenDeleteBoth("VCRoles Cleared")
+                } ?: event.respondThenDeleteBoth(
                     "There is no VCRole Manager active. Use ``vcr on``"
                 )
             }
@@ -409,7 +409,7 @@ class VCGenerator(baseChannel: Long) : IPassive {
      * @param full If true, all channels will be removed from the guild
      */
     private fun clean(guild: Guild, full: Boolean = false) {
-        genChannels.removeIf { _, id -> !guild.voiceChannels.has { it.idLong == id } }
+        genChannels.removeIf { _, id -> !guild.voiceChannels.any { it.idLong == id } }
         if (full) genChannels.forEach { entry ->
             guild.getVoiceChannelById(entry.value)?.delete()?.queueAfter(250, MILLISECONDS)
         }
@@ -417,7 +417,7 @@ class VCGenerator(baseChannel: Long) : IPassive {
 
     fun asEmbed(guild: Guild) : EmbedBuilder {
             genChannels.removeIf { _, vcID ->
-                !guild.voiceChannels.has { it.idLong == vcID }
+                !guild.voiceChannels.any { it.idLong == vcID }
             }
             val channel = guild.getVoiceChannelById(baseId)?.name
                     ?: "Unknown! The channel may have been deleted."
@@ -548,7 +548,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                     it.shutdown(event.guild)
                     bot.passives.remove(it)
                 } else {
-                    event.respondThenDelete("*The Voice Channel Generator is already active.*", 5)
+                    event.respondThenDeleteBoth("*The Voice Channel Generator is already active.*", 5)
                     return
                 }
             }
@@ -580,7 +580,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                 |No more channels will be created, and all remaining channels will
                 |be closed on exit.
                 |""".trimMargin())
-                } ?: event.respondThenDelete("There is no VCGenerator active", 5)
+                } ?: event.respondThenDeleteBoth("There is no VCGenerator active", 5)
             }
         }
     }
@@ -646,7 +646,7 @@ class CmdVoiceChannelGenerator : WeebotCommand("voicechannelgenerator",
                             }
                                 m.clearReactions().queueAfter(250, MILLISECONDS)
                                 if (event.guild.voiceChannels.isEmpty()) {
-                                    event.respondThenDelete("There are no Voice Channels!")
+                                    event.respondThenDeleteBoth("There are no Voice Channels!")
                                     newChannel()
                                 } else chooseChannel(m)
                         }, OpenFileFolder to { m: Message, _: User ->

@@ -16,7 +16,7 @@ import com.jagrosh.jdautilities.command.Command.Category
 
 
 
-internal const val GEN_FAILURE_MESSAGE = "You do not have access to this command."
+private const val GEN_FAILURE_MESSAGE = "You do not have access to this command."
 
 val CAT_GEN     = Category("General", GEN_FAILURE_MESSAGE) {true}
 val CAT_DEV     = Category("Developer", GEN_FAILURE_MESSAGE) {true}

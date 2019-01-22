@@ -103,14 +103,14 @@ fun Any.saveJson(file: File, overWrite: Boolean = false): Int {
  */
 @Synchronized
 inline fun <reified T> loadJson(file: File): T? {
-    try {
-        FileReader(file).use { reader -> return GSON.fromJson(reader, T::class.java) }
+    return try {
+        FileReader(file).use { GSON.fromJson(it, T::class.java) }
     } catch (e: FileNotFoundException) {
         System.err.println("Unable to locate file '${file.name}'")
-        return null
+        null
     } catch (e: IOException) {
         System.err.println("IOException while reading json '${file.name}'.")
-        return null
+        null
     }
 }
 

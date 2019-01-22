@@ -6,6 +6,8 @@ package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.*
 import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.`fun`.games.Game
+import com.ampro.weebot.commands.`fun`.games.Player
 import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.extensions.MentionType.CHANNEL
@@ -34,38 +36,44 @@ class CmdTaskManager : WeebotCommand("taskmanager", "Task Manager",
     arrayOf("task", "tasks"), CAT_GEN, "[commandName]",
     "View all active passive commands in the guild or for the user.", cooldown = 60,
     cooldownScope = USER_SHARD, userPerms = arrayOf(ADMINISTRATOR)) {
-    override fun execute(event: CommandEvent) {
-        //Update to show running games as well TODO
+    override fun execute(event: WeebotCommandEvent) {
         val passives = if (event.guild != null) getWeebotOrNew(event.guild).passives
         else DAO.GLOBAL_WEEBOT.getUserPassiveList(event.author)
+        val games = event.bot.games.filter(Game<out Player>::isRunning)
 
-        if (passives.isEmpty()) {
-            event.reply("*No active commands.*")
-            return
-        }
+        if (passives.isEmpty() && games.isEmpty())
+            return event.respondThenDeleteBoth("*No active commands.*")
 
         SelectablePaginator(title = "Task manager",
-            description = "All running background Commands.",
+            description = "All running background Commands & Games.",
             color = event.guild?.roles?.get(0)?.color ?: STD_GREEN,
             items = passives.map { passive ->
                 passive::class.java.simpleName!! to { _:Int, _: Message ->
-                    strdButtonMenu.setText("_").setDescription("""
-                        Click $Fire to end this command
-                    """.trimIndent()).setColor(Color.RED).addChoice(Fire.unicode)
+                    strdButtonMenu.setText("_")
+                        .setDescription("Click $Fire to end this command")
+                        .setColor(Color.RED).addChoice(Fire.unicode)
                         .setAction { emote ->
                             if (emote.toEmoji()?.equals(Fire) == true) {
-                                if (passives.remove(passive)) {
-                                    event.reply("Removed.")
-                                } else {
-                                    event.reply(GEN_FAILURE_MESSAGE)
-                                }
+                                if (passives.remove(passive)) event.reply("Removed.")
+                                else event.reply(GENERIC_ERR_MSG)
                             }
                         }.setFinalAction { it.delete().queue({},{}) }
                         .build().display(event.channel)
                 }
-            }, exitAction = {
-                it.clearReactions().queue({},{})
-            }).display(event.channel)
+            } + games.map { game ->
+                game::class.simpleName!! to { _:Int, _: Message ->
+                    strdButtonMenu.setText("_")
+                        .setDescription("Click $Fire to end this command")
+                        .setColor(Color.RED).addChoice(Fire.unicode)
+                        .setAction { emote ->
+                            if (emote.toEmoji()?.equals(Fire) == true) {
+                                if (event.bot.games.remove(game)) event.reply("Removed.")
+                                else event.reply(GENERIC_ERR_MSG)
+                            }
+                        }.setFinalAction { it.delete().queue({},{}) }
+                        .build().display(event.channel)
+                }
+            }, exitAction = { it.clearReactions().queue({},{}) }).display(event.channel)
     }
 }
 
@@ -322,10 +330,10 @@ private class CmdLock : WeebotCommand("lock", null,arrayOf("lockto", "open"), CA
         val bot = getWeebotOrNew(event.guild)
         val args = event.splitArgs()
         if (args.isEmpty()) {
-            return event.respondThenDelete("No Command mentioned", 10)
+            return event.respondThenDeleteBoth("No Command mentioned", 10)
         }
         val cmd = COMMANDS.firstOrNull { it.isCommandFor(args[0]) }
-                ?: return event.respondThenDelete("No Command mentioned", 10)
+                ?: return event.respondThenDeleteBoth("No Command mentioned", 10)
 
         STAT.track(this, bot, event.author, event.creationTime)
 
@@ -368,10 +376,10 @@ private class CmdBlock : WeebotCommand("block", null,emptyArray(), CAT_MOD,
         val bot = getWeebotOrNew(event.guild)
         val args = event.splitArgs()
         if (args.isEmpty()) {
-            return event.respondThenDelete("No Command mentioned", 10)
+            return event.respondThenDeleteBoth("No Command mentioned", 10)
         }
         val cmd = COMMANDS.firstOrNull { it.isCommandFor(args[0]) }
-                ?: return event.respondThenDelete("No Command mentioned", 10)
+                ?: return event.respondThenDeleteBoth("No Command mentioned", 10)
 
         STAT.track(this, bot, event.author, event.creationTime)
 

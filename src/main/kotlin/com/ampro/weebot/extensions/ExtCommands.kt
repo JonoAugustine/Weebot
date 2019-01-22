@@ -45,19 +45,35 @@ fun CommandEvent.getInvocation(): String = this.message.contentStripped
     .removePrefix("w!").removePrefix("\\").split(" ")[0]
 
 /**
+ * Respond to the [CommandEvent] then delete the message after [delay] seconds
+ */
+fun CommandEvent.respondThenDelete(message: String, delay: Long = 10L,
+                                   success: () -> Unit = {})
+        = reply("*$message*") {
+    it.delete().reason(message).queueAfter(delay, SECONDS) {success()}
+}
+
+/**
+ * Respond to the [CommandEvent] then delete the message after [delay] seconds
+ */
+fun CommandEvent.respondThenDelete(embed: MessageEmbed, delay: Long = 10L,
+                                   success: () -> Unit = {})
+        = reply(embed) { it.delete().queueAfter(delay, SECONDS) {success()} }
+
+
+
+/**
  * Send a response to a [CommandEvent] and then delete both messages.
  *
  * @param reason The message to send
  * @param delay The delay in seconds between send & delete (default 10)
  */
-fun CommandEvent.respondThenDelete(reason: String, delay: Long = 10L) {
+fun CommandEvent.respondThenDeleteBoth(reason: String, delay: Long = 10L) {
     this.reply("*$reason*") { response ->
         if (this.privateChannel != null) {
             response.delete().reason(reason).queueAfter(delay, SECONDS)
-        } else {
-            event.message.delete().reason(reason).queueAfter(delay, SECONDS) {
-                response.delete().reason(reason).queue()
-            }
+        } else response.delete().reason(reason).queueAfter(delay, SECONDS) {
+            event.message.delete().reason(reason).queueIgnore()
         }
     }
 }
@@ -68,7 +84,7 @@ fun CommandEvent.respondThenDelete(reason: String, delay: Long = 10L) {
  * @param reason The message to send
  * @param delay The delay in seconds between send & delete
  */
-fun CommandEvent.respondThenDelete(reason: MessageEmbed, delay: Long = 10L) {
+fun CommandEvent.respondThenDeleteBoth(reason: MessageEmbed, delay: Long = 10L) {
     this.reply(reason) { response ->
         if (this.privateChannel != null) {
             response.delete().queueAfter(delay, SECONDS)

@@ -341,22 +341,18 @@ class GlobalWeebot : Weebot(-1L) {
     /**
      * @return The list of [Reminder]s linked to this user
      */
-    fun getReminders(user: User) = userReminders.getOrPut(user.idLong) { mutableListOf() }
+    fun getReminders(user: User) = userReminders.getOrPut(user.idLong){mutableListOf()}!!
 
     fun getReminders() = userReminders.toMap()
 
     fun addReminder(user: User, reminder: Reminder) = synchronized(userReminders) {
         val list = userReminders.getOrPut(user.idLong) { mutableListOf() }
-        val added = if (DAO.isPremium(user)) {
-            when {
-                list.size >= REM_MAX_PREM -> false
-                else -> { list.add(reminder); true }
-            }
-        } else {
-            when {
-                list.size >= REM_MAX -> false
-                else -> { list.add(reminder); true }
-            }
+        val added = if (DAO.isPremium(user)) when {
+            list.size >= REM_MAX_PREM -> false
+            else -> { list.add(reminder); true }
+        } else when {
+            list.size >= REM_MAX -> false
+            else -> { list.add(reminder); true }
         }
 
         if (added) { CMD_REM.remJobMap.putIfAbsent(user.idLong, remWatchJob(list)) }

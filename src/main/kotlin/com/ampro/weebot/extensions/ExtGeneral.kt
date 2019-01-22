@@ -7,6 +7,8 @@ package com.ampro.weebot.extensions
 import kotlinx.coroutines.async
 import kotlinx.coroutines.runBlocking
 
+val Any?.unit get() = Unit
+
 /* **************
         Lists
  ***************/
@@ -92,8 +94,6 @@ fun List<String>.contains(regex: Regex) : Boolean {
 fun String.containsAny(strings: Collection<String>, ignoreCase: Boolean = true)
         : Boolean = strings.asSequence().any { this.contains(it, ignoreCase) }
 
-infix fun <T: Any> Iterable<T>.has(predicate: (T) -> Boolean) = find(predicate) != null
-
 /* ***********************
         Map Extensions
  *************************/
@@ -111,7 +111,7 @@ fun <K, V> MutableMap<K, V>.removeIf(predicate: (K, V) -> Boolean) {
 }
 
 /* ********
-    Number
+    Number & Boolean
  */
 
 fun Boolean.toInt(): Int = if (this) 1 else 0

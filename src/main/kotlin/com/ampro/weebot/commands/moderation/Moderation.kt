@@ -104,7 +104,7 @@ class CmdModeration : WeebotCommand("mod", "Moderation", emptyArray(), CAT_MOD, 
                         moderationData.hierarchicalReports = false
                         event.reply("Anyone can now report anyone (but admins)")
                     }
-                    else -> return event.respondThenDelete("Please say ``on`` or ``off``", 10)
+                    else -> return event.respondThenDeleteBoth("Please say ``on`` or ``off``", 10)
                 }
             }
         }
@@ -144,7 +144,7 @@ class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
         //if See (dont track see)
         if (args[0].matches(REG_HYPHEN + "(se*|v(iew)?)")) {
             if (!(event.member hasPerm KICK_MEMBERS)) {
-                return event.respondThenDelete("You must have the Kick Member Permission")
+                return event.respondThenDeleteBoth("You must have the Kick Member Permission")
             }
             val reports = (if (mentions.isEmpty()) modData.reports
             else modData.reports.filter {
@@ -197,16 +197,16 @@ class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
                                 }).display(event.channel)
                         }
                     }).display(event.channel)
-            } else event.respondThenDelete("There are no user reports to see.")
+            } else event.respondThenDeleteBoth("There are no user reports to see.")
         } else {
             //Report actions
             STAT.track(this, bot, event.author, event.creationTime)
             if (mentions.isEmpty())
-                return event.respondThenDelete("No user was mentioned in the report.")
+                return event.respondThenDeleteBoth("No user was mentioned in the report.")
 
             val reas = event.args.split(Regex("\\s+"))
                 .filterNot { it.matchesAny(userMentionRegex) }.joinToString(" ")
-            if (reas.isBlank()) return event.respondThenDelete("No reason given.")
+            if (reas.isBlank()) return event.respondThenDeleteBoth("No reason given.")
 
             if (modData.hierarchicalReports)
                 mentions.removeAll{ it outRanks event.member || it hasPerm ADMINISTRATOR }

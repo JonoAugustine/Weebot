@@ -4,8 +4,7 @@
 
 package com.ampro.weebot.extensions
 
-import com.ampro.weebot.SELF
-import com.ampro.weebot.WAITER
+import com.ampro.weebot.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.menu.*
@@ -363,11 +362,12 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
  * @author Jonathan Augustine
  * @since 2.0
  */
-class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet(),
-                          timeout: Long = 3L, unit: TimeUnit = MINUTES,
-                          val title: String, val description: String = "",
-                          /** The items to be listed with an [Emoji] and consumer */
-                          val items: List<Pair<String, (Int, Message) -> Any>>,
+open class SelectablePaginator(users: Set<User> = emptySet(),
+                               roles: Set<Role> = emptySet(),
+                               timeout: Long = 3L, unit: TimeUnit = MINUTES,
+                               val title: String, val description: String = "",
+                               /** The items to be listed with an [Emoji] and consumer */
+                               val items: List<Pair<String, (Int, Message) -> Any>>,
                           var itemsPerPage: Int = 10,
                           /**Disallow multiple reactions*/ val singleUse: Boolean = false,
                           val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
@@ -411,21 +411,14 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         val BIG_RIGHT = FastForward
     }
 
-    private val pages: Int = Math.ceil(items.size.toDouble() / itemsPerPage).toInt()
-
-    private val baseEmbed: EmbedBuilder get() = strdEmbedBuilder.apply {
-        if (title.isNotBlank()) setTitle(title)
-        if (description.isNotBlank()) setDescription(description) else setDescription("")
-        if (thumbnail.isNotBlank()) setThumbnail(thumbnail)
-        if (fieldList.isNotEmpty()) fieldList.forEach { addField(it) }
-        setColor(color)
-    }
+    protected val pages: Int
+    protected var used: Boolean = false
 
     /** 0-10 */
     val emojiCounter: EmojiCounter = EmojiCounter(wrap = true)
 
     init {
-        if (this.itemsPerPage == -1) {
+        if (this.itemsPerPage < 1) {
             val sb = StringBuilder()
             var itemCount = 0
             this.items.sortedBy { it.first.length }.map { it.first }.forEach { s ->
@@ -437,8 +430,18 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
             emojiCounter.reset()
         }
         if (this.itemsPerPage !in 1..EmojiNumbers.size) {
+            MLOG.elog(this::class, "Invalid pagination sizing!")
             throw IllegalArgumentException("Items Per Page must be in 1..10")
         }
+        pages = Math.ceil(items.size.toDouble() / itemsPerPage).toInt()
+    }
+
+    protected open fun baseEmbed(): EmbedBuilder = strdEmbedBuilder.also {
+        if (title.isNotBlank()) it.setTitle(title)
+        it.setDescription(description)
+        if (thumbnail.isNotBlank()) it.setThumbnail(thumbnail)
+        if (fieldList.isNotEmpty()) fieldList.forEach { f -> it.addField(f) }
+        it.setColor(color)
     }
 
     /**
@@ -512,7 +515,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
         initialize(message.editMessage(msg), page)
     }
 
-    private fun initialize(action: RestAction<Message>, pageNum: Int,
+    protected open fun initialize(action: RestAction<Message>, pageNum: Int,
                            failure: (Throwable) -> Unit = {}) {
         val start = (pageNum - 1) * itemsPerPage
         val end = when {
@@ -523,18 +526,16 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
             when {
                 pages > 1 -> {
                     if (bulkSkipNumber > 1) m.reactWith(BIG_LEFT)
-                    m.reactWith(LEFT)
-                    runBlocking { delay(500) }
+                    m.reactWith(listOf(LEFT.unicode))
                     emojiCounter.reset()
-                    (start until end).forEach { m.reactWith(emojiCounter.next()) }
-                    runBlocking { delay(500) }
-                    if (bulkSkipNumber > 1) m.reactWith(RIGHT)
+                    for (it in start until end) m.reactWith(emojiCounter.next())
+                    m.reactWith(RIGHT)
                     m.reactWith(if (bulkSkipNumber > 1) BIG_RIGHT else RIGHT)
                     m.reactWith(EXIT)
                     waitFor(m, pageNum)
                 }
                 else -> {
-                    (start until end).forEach { m.reactWith(emojiCounter.next()) }
+                    for (it in start until end) m.reactWith(emojiCounter.next())
                     runBlocking { delay(500) }
                     m.reactWith(EXIT)
                     waitFor(m, pageNum)
@@ -551,7 +552,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
     }
 
     // Private method that handles MessageReactionAddEvents
-    private fun handleMessageReactionAddAction(event: MessageReactionAddEvent,
+    protected open fun handleMessageReactionAddAction(event: MessageReactionAddEvent,
                                                message: Message, pageNum: Int) {
         var newPageNum = pageNum
         val emoji = event.reaction.reactionEmote.toEmoji()
@@ -581,22 +582,23 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
                 }
             }
             EXIT -> {
+                used = true
+                try {
+                    message.clearReactions().queueAfter(250, SECONDS);Unit
+                } catch (ignored: PermissionException) {}
                 exitAction(message)
-                if (singleUse) {
-                    try {
-                        message.clearReactions().queueAfter(250, SECONDS)
-                    } catch (ignored: PermissionException) {}
-                    return
-                }
+                return
             }
             else -> {
                 val i = EmojiNumbers.indexOf(emoji) + ((pageNum - 1) * itemsPerPage)
                 if (i in 0..items.size) {
                     items[i].second(i, message)
-                    if (singleUse) {
+                    used = true
+                    if (singleUse && used) {
                         try {
                             message.clearReactions().queueAfter(250, SECONDS)
                         } catch (ignored: PermissionException) {}
+                        initialize(message.editMessage(renderPage(newPageNum)), newPageNum)
                         return
                     }
                 }
@@ -612,7 +614,7 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
 
     private fun renderPage(pageNum: Int): Message {
         val mbuilder = MessageBuilder()
-        val ebuilder = this.baseEmbed
+        val ebuilder = this.baseEmbed()
         emojiCounter.reset()
 
         val start = (pageNum - 1) * itemsPerPage
@@ -643,12 +645,43 @@ class SelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = empt
             // and returns false.
             LEFT, EXIT, RIGHT -> isValidUser(event.user, event.guild)
             BIG_LEFT, BIG_RIGHT -> bulkSkipNumber > 1 && isValidUser(event.user, event.guild)
-            else -> if (EmojiNumbers.has { it == emoji }) {
+            else -> if (EmojiNumbers.any { it == emoji }) {
                 isValidUser(event.user,event.guild)
             } else false
         }
     }
 
+}
+
+/**
+ * An implementation of [SelectablePaginator] which allows for the
+ * [SelectablePaginator.baseEmbed] to be generated by a provided anonymous function.
+ * This permits the paginator to update it's description (for instance) each time
+ * the page is redered.
+ *
+ * @param embed
+ * @author Jonathan Augustine
+ * @since 2.2.1
+ */
+class DynamicSelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet(),
+                                 timeout: Long = 3L, unit: TimeUnit = MINUTES,
+                                 val embed: () -> EmbedBuilder,
+                                 /** The items to be listed with an [Emoji] and consumer */
+                                items: List<Pair<String, (Int, Message) -> Unit>>,
+                                 itemsPerPage: Int = 10,
+                                 /**Disallow multiple reactions*/ singleUse: Boolean = false,
+                                 bulkSkipNumber: Int = 0, wrapPageEnds: Boolean = true,
+                                 color: Color = STD_GREEN, exitAction: (Message) -> Unit = {},
+                                 timeoutAction: (Message) -> Unit = { m ->
+                                    try {
+                                        m.clearReactions().queueAfter(250, SECONDS)
+                                    } catch (ignored: Exception) {
+                                    }
+                                })
+    : SelectablePaginator(users, roles, timeout, unit, embed().build(), items,
+    itemsPerPage, singleUse, bulkSkipNumber, wrapPageEnds, color, exitAction,
+    timeoutAction) {
+    override fun baseEmbed(): EmbedBuilder = embed()
 }
 
 /**
@@ -669,7 +702,6 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                 timeoutAction: (Message) -> Unit)
             : this(setOf(user), emptySet<Role>(), timeout, MINUTES, singleUse,
         messageEmbed, options, timeoutAction)
-
 
 
     override fun display(channel: MessageChannel) {
@@ -703,7 +735,7 @@ class SelectableEmbed(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
         waiter.waitForEvent(MessageReactionAddEvent::class.java, { event ->
             when {
                 event.messageIdLong != message.idLong -> false
-                options.has { it.first == event.reactionEmote.toEmoji() } -> {
+                options.any { it.first == event.reactionEmote.toEmoji() } -> {
                     isValidUser(event.user, event.guild)
                 }
                 else -> false

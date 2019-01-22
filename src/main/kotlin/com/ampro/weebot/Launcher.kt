@@ -21,6 +21,7 @@ import net.dv8tion.jda.core.entities.Game.GameType.STREAMING
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
 import org.apache.commons.io.FileUtils
+import java.lang.Runnable
 import java.util.concurrent.*
 import java.util.concurrent.Executors.newFixedThreadPool
 import java.util.concurrent.TimeUnit.MILLISECONDS
@@ -29,9 +30,10 @@ import javax.security.auth.login.LoginException
 import kotlin.system.measureTimeMillis
 
 
-lateinit var SAVE_JOB: Job
+private lateinit var SAVER_JOB: Job
+val SAVE_JOBS = mutableListOf<() -> Unit>()
 /** How ofter to asve to file in Seconds */
-const val SAVE_INTER = 30
+private const val SAVE_INTER = 30
 
 val CACHED_POOL = ThreadPoolExecutor(3, 5000, 10, MINUTES, SynchronousQueue()) { r ->
     MLOG.slog(ThreadFactory::class, "Cached Thread Created")
@@ -51,8 +53,9 @@ val WAITER: EventWaiter = EventWaiter()
 /** The bot's selfuser from */
 lateinit var SELF: SelfUser
 
-const val GENERIC_ERR_MESG = "*Sorry, I tripped over my shoelaces. Please try that " +
-        "again later*"
+/** *Sorry, I tripped over my shoelaces. Please try that again later* */
+const val GENERIC_ERR_MSG
+        = "*Sorry, I tripped over my shoelaces. Please try that again later*"
 
 val games = listOf(listening("@Weebot Help"), playing("with wires"),
     watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.2.1"),
@@ -132,9 +135,7 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     MLOG.slog(null,
         "All ${JDA_SHARD_MNGR.shards.size} Shards connected! ${measureTimeMillis {
         MLOG.slog(null, "Waiting for all ${JDA_SHARD_MNGR.shards.size} shards to connect...")
-        while (JDA_SHARD_MNGR.shards.has { it.status != CONNECTED }) {
-            Thread.sleep(250)
-        }
+        while (JDA_SHARD_MNGR.shards.any { it.status != CONNECTED }) Thread.sleep(250)
     } / 1_000} seconds")
 
     //SET SELF AND AVATAR URL
@@ -147,12 +148,27 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     genSetup.joinAll() //Ensure all gensetup is finished
 
     MLOG.slog(null, "Starting Save Job...")
-    SAVE_JOB = saveTimer()
+    SAVER_JOB = GlobalScope.launch(Executors.newFixedThreadPool(1)
+    { Thread(it, "SaveCycle") }.asCoroutineDispatcher()) {
+        var i = 1
+        try {
+            while (ON) {
+                for (j in 0 until SAVE_JOBS.size) Runnable(SAVE_JOBS[j]).run()
+                if (i % 100 == 0) MLOG.slog(null, "Save Cycle: ${i++}")
+                delay(SAVE_INTER * 1_000L)
+            }
+        } catch (e: InterruptedException) {
+            e.printStackTrace()
+            sendSMS(PHONE_JONO, "WEEBOT: Save Job Failed")
+        }
+    }
+    SAVE_JOBS.add(daoStatSave())
 
     MLOG.slog(null, "Launch Complete!\n\n")
 
+    //Send online confirm message
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
-        .queueAfter(250, MILLISECONDS)
+        .queueAfter(250, MILLISECONDS) { it.delete().queueIgnore(30) }
 
     //Watch HQStream
     launch(CACHED_POOL) { while (ON) {
@@ -291,24 +307,16 @@ private fun startupWeebots() {
 }
 
 /**
- * Starts a [Job] that saves a database backup each interval.
+ * Saves a database backup each interval.
  * Listens for a shutdown event to save the the main file
  */
 @Synchronized
-private fun saveTimer() = GlobalScope.launch {
-    var i = 1
+private fun daoStatSave(): () -> Unit = {
     try {
-        while (ON) {
-            DAO.backUp()
-            synchronized(STAT){ STAT.saveJson(STAT_BK, true) }
-            FileUtils.cleanDirectory(TEMP_OUT)
-            FileUtils.cleanDirectory(TEMP_IN)
-            if (i % 100 == 0) {
-                MLOG.slog(null, "Database & Stats back up: $i")
-            }
-            i++
-            delay(SAVE_INTER * 1_000L)
-        }
+        DAO.backUp()
+        synchronized(STAT) { STAT.saveJson(STAT_BK, true) }
+        FileUtils.cleanDirectory(TEMP_OUT)
+        FileUtils.cleanDirectory(TEMP_IN)
     } catch (e: InterruptedException) {
         e.printStackTrace()
         sendSMS(PHONE_JONO, "WEEBOT: Save Job Failed")

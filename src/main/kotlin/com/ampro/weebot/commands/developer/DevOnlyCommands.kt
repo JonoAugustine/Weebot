@@ -32,6 +32,7 @@ import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
+import kotlin.text.*
 
 
 /**
@@ -123,8 +124,10 @@ class CmdGuildList : WeebotCommand("guildlist", null, arrayOf("guilds", "servers
 
         SelectablePaginator(setOf(event.author),
             title = "All guilds housing ${SELF.name} (Total: ${gs.size})",
-            description = "``Name ~ member count (percentage non-bots) on shardID``" +
-                    "\nTotal Unique Users: ",
+            description = """``Name ~ member count (percentage non-bots) on shardID``
+                Total Unique Users: ${String.format("%,d", JDA_SHARD_MNGR.users.size)}
+                Total Shards: ${JDA_SHARD_MNGR.shards.size}
+                """.trimIndent(),
             items = gs.asSequence().sortedByDescending { if (sortByDate)
                 it.selfMember.joinDate.until(NOW(), ChronoUnit.MINUTES) * -1
             else it.trueSize.toLong() }.map {
@@ -138,7 +141,7 @@ class CmdGuildList : WeebotCommand("guildlist", null, arrayOf("guilds", "servers
     }
 
     private fun getGuildShard(g: Guild): JDA.ShardInfo?
-        = JDA_SHARD_MNGR.shards.find { s -> s.guilds.has { it.id == g.id } }?.shardInfo
+        = JDA_SHARD_MNGR.shards.find { s -> s.guilds.any { it.id == g.id } }?.shardInfo
 
 }
 
