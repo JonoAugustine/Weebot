@@ -131,7 +131,7 @@ class CmdWelcomeMsg : WeebotCommand("welcome", "Welcome Messages",
                         "join message to?\n``#channelMention``")
                 waitThen(event) { first ->
                     if (first.message.mentionedChannels.isEmpty())
-                        return@waitThen event.respondThenDelete("No channel mentioned.")
+                        return@waitThen event.respondThenDeleteBoth("No channel mentioned.")
                     val channel = first.message.mentionedChannels.first()
                     event.reply(
                         "Please enter the member join message that will be sent to ${channel.asMention}"

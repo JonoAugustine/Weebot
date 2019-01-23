@@ -46,6 +46,16 @@ fun Message.reactWith(emojis: Iterable<Emoji>) = runBlocking {
     }
 }
 
+/**
+ * Adds multiple Reactions to the [Message] in order of submission.
+ * @param emojis Emote IDs or Emoji unicode
+ */
+fun Message.reactWith(reactions: List<String>) = runBlocking {
+    reactions.forEach {
+        this@reactWith.addReaction(it).queue()
+        delay(100)
+    }
+}
 
 /**
  * Attempt to convert a JDA [Emote] to an [Emoji]
@@ -232,8 +242,9 @@ enum class Emoji constructor(val unicode: String) {
     FileFolder("\uD83D\uDCC1"), Fire("\uD83D\uDD25"), FireEngine("\uD83D\uDE92"),
     Fireworks("\uD83C\uDF86"), FirstQuarterMoon("\uD83C\uDF13"),
     FirstQuarterMoonWith("\uD83C\uDF1B"), Fish("\uD83D\uDC1F"), FishCake("\uD83C\uDF65"),
-    FishingPoleAndFish("\uD83C\uDFA3"), Fist("\u270A"), Five("\u0035\u20E3"),
-    Flags("\uD83C\uDF8F"), Flashlight("\uD83D\uDD26"), FloppyDisk("\uD83D\uDCBE"),
+    FishingPoleAndFish("\uD83C\uDFA3"), Fist("\u270A"), FirstPlaceMedal("\uD83E\uDD47"),
+    Five("\u0035\u20E3"), Flags("\uD83C\uDF8F"), Flashlight("\uD83D\uDD26"),
+    FloppyDisk("\uD83D\uDCBE"),
     FlowerPlayingCards("\uD83C\uDFB4"), Flushed("\uD83D\uDE33"), Foggy("\uD83C\uDF01"),
     Football("\uD83C\uDFC8"), Footprints("\uD83D\uDC63"), ForkAndKnife("\uD83C\uDF74"),
     Fountain("\u26F2"), Four("\u0034\u20E3"), FourLeafClover("\uD83C\uDF40"),

@@ -20,6 +20,100 @@ import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.util.concurrent.TimeUnit.SECONDS
 
+
+/**
+ * Adds a reaction to a message on unsigned request.
+ *
+ * @author Jonathan Augustine
+ * @since 2.2.1
+ */
+class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reactor"),
+    CAT_FUN, "", "React with predefined emotes to any message.",
+    cooldown = 10, guildOnly = true, userPerms = arrayOf(MESSAGE_ADD_REACTION),
+    botPerms = arrayOf(MESSAGE_ADD_REACTION)
+) {
+
+    /**
+     * @author Jonathan Augstine
+     * @since 2.0
+     */
+    private class Reactor(var invoke: Regex, var reaction: List<String>) : IPassive {
+        var dead = false
+        override fun dead() = dead
+
+        /**
+         * Get the first message in the list that isn't "^[invoke]".
+         *
+         * @param messages An message iterable
+         * @param startDex The index to start searching at
+         *
+         * @return The first message that doesnt match \^(t+h+i+s+|t+h+a+t+) or null
+         */
+        fun getNonThis(messages: List<Message>)
+                = messages.firstOrNull { !it.contentDisplay.matches(invoke) }
+
+        override fun accept(bot: Weebot, event: Event) {
+            if (event !is GuildMessageReceivedEvent) return
+            val args = event.message.contentDisplay.toLowerCase().split(Regex("\\s+"))
+            args.forEachIndexed { i, it ->
+                if (it.matches(invoke)) {
+                    event.channel.getHistoryBefore(event.message, 100).queue { his ->
+                        val dex = try {
+                            args[i + 1].toInt() - 1
+                        } catch (e: Exception) {
+                            0
+                        }
+                        (getNonThis(his.retrievedHistory.subList(dex))
+                                ?: his.retrievedHistory[0]).reactWith(reaction)
+                    }
+                    return
+                }
+            }
+        }
+    }
+
+    override fun execute(event: CommandEvent) {
+        val args = event.splitArgs()
+        val bot = getWeebotOrNew(event.guild)
+        val reactors = bot.getPassives<Reactor>()
+
+        if (args.isEmpty()) {
+            return event.reply(strdEmbedBuilder.setTitle("This-Reactor").setDescription(
+                "A passive reaction watcher triggered ").appendDescription(
+                "by \'^this\' or \'^that\' with an ").appendDescription(
+                "optional number indicating how many ").appendDescription(
+                "messages up to react to. ``^this 4``").build())
+        }
+
+        STAT.track(this, bot, event.author, event.creationTime)
+
+        //on <invoke> <r e a c t i o n e m o t e s>
+        when {
+            args[0].toLowerCase().matchesAny(REG_ON, REG_ENABLE) -> {
+                event.message.emotes
+                TODO(event)
+            }
+            args[0].toLowerCase().matchesAny(REG_OFF, REG_DISABLE) -> {
+                TODO(event)
+            }
+            else -> {
+                event.respondThenDeleteBoth("Sorry, I had trouble understanding " +
+                        "${args[0]}. Try using " + "``on`` or ``off``.", 20)
+            }
+        }
+
+    }
+
+    init {
+        helpBiConsumer = HelpBiConsumerBuilder("Message Reacter")
+            .setDescription("Have me react to a message with any emote on request.")
+            .addToDesc("\nEx.) use ``^this`` to react with ``^THiS`` to a message.")
+            .setAliases(aliases)
+            .build { it.reactWith(ArrowUp, T, H, I_lowercase, S) }
+    }
+
+}
+
 /**
  * Adds a reaction THiS to a message. Can also be used to activate an [IPassive]
  * watcher for "^this" or "^that" messages.
@@ -119,7 +213,7 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
                         ) { it.reactWith(ArrowUp, T, H, I_lowercase, S) }
                         return
                     } else {
-                        event.respondThenDelete("The ^this reactor is already active")
+                        event.respondThenDeleteBoth("The ^this reactor is already active")
                         return
                     }
                 }
@@ -135,7 +229,7 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
                     }
                 }
                 else -> {
-                    event.respondThenDelete(
+                    event.respondThenDeleteBoth(
                         "Sorry, I had trouble understanding ${args[0]}. Try using " +
                                 "``on`` or ``off``.", 30)
                 }
@@ -162,7 +256,7 @@ class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN, "",
     override fun execute(event: CommandEvent) {
         if (event.args.isNullOrBlank()) return
         if (event.args.length * 6 > EMBED_MAX_DESCRIPTION)
-            return event.respondThenDelete("Too long", 5)
+            return event.respondThenDeleteBoth("Too long", 5)
 
         val s = event.args.replace(Regex("\\s"), "\t")
             .replace(Regex("(?i)[A-z]")) { ":regional_indicator_${it.value.toLowerCase()}:"

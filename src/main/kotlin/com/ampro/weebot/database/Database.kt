@@ -24,6 +24,7 @@ import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
 import kotlin.math.ceil
+import kotlin.reflect.KClass
 
 /* ************************
      Discord Bot List API
@@ -68,6 +69,9 @@ fun getWeebotOrNew(guildID: Long) : Weebot {
         b
     }
 }
+
+val Guild.bot: Weebot
+    get() = getWeebotOrNew(this)
 
 infix fun User.isBlocked(klass: Class<out WeebotCommand>)
         = DAO.blockedUsers[klass]?.contains(idLong) == true
@@ -135,8 +139,8 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
     /**
      * A map of Command names to their useage statistics
      */
-    val commandUsage: ConcurrentHashMap<String, MutableList<CommandUsageEvent>>
-            = ConcurrentHashMap()
+    val commandUsage: ConcurrentHashMap<KClass<out WeebotCommand>,
+            MutableList<CommandUsageEvent>> = ConcurrentHashMap()
 
     /**
      * @param command
@@ -145,7 +149,7 @@ data class Statistics(val initTime: OffsetDateTime = NOW()) {
      */
     fun track(command: WeebotCommand, weebot: Weebot, user: User, time: OffsetDateTime) {
         if (/*TODO weebot.settings.trackingEnabled &&*/ weebot !is GlobalWeebot) {
-            commandUsage.getOrPut(command.displayName ?: command.name) { mutableListOf() }
+            commandUsage.getOrPut(command::class) { mutableListOf() }
                 .add(CommandUsageEvent(weebot.guildID, WeebotInfo(weebot),
                     UserInfo(user), time))
         }

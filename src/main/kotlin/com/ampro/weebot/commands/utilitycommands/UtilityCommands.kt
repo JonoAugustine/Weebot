@@ -13,6 +13,7 @@ import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.AlarmClock
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.*
+import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
 import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.Event
@@ -50,7 +51,7 @@ class OutHouse(user: User, var remainingMin: Long, val message: String,
             event.channel.sendMessage("*Welcome back ${mem.effectiveName}*").queue()
             this.remainingMin = 0
             return
-        } else if (mess.mentionedUsers.has { it.idLong == userId }) {
+        } else if (mess.mentionedUsers.any { it.idLong == userId }) {
             //Respond as bot
             val sb = StringBuilder().append("*Sorry, ")
                 .append(getUser(userId)?.asMention ?: "that user")
@@ -173,7 +174,7 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
     class Reminder(val userID: Long, val channel: Long?, var minutes: Long,
                    val message: String) {
 
-        companion object { val REM_ID_GEN = IdGenerator(7) }
+        companion object { private val REM_ID_GEN = IdGenerator(7, "REM:") }
 
         val id = REM_ID_GEN.next()
         var lastTime: OffsetDateTime? = NOW()
@@ -191,15 +192,14 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
          * Sends the user their reminder
          */
         fun send() {
-            val e = strdEmbedBuilder.setTitle("Weebot Reminder")
-                .setDescription(getUser(userID)?.asMention ?: "")
-                .appendDescription(message).build()
-            if (channel == null) {
-                getUser(userID)?.openPrivateChannel()?.queue { pc ->
-                    pc.sendMessage(e).queue()
+            getUser(userID)?.apply {
+                val m = MessageBuilder(makeEmbedBuilder("Weebot Reminder", null,message)
+                    .build()).append(this).build()
+                if (channel == null) {
+                    openPrivateChannel()?.queue { it.sendMessage(m).queue() }
+                } else {
+                    JDA_SHARD_MNGR.getTextChannelById(channel).sendMessage(m).queue()
                 }
-            } else {
-                JDA_SHARD_MNGR.getTextChannelById(channel).sendMessage(e).queue()
             }
         }
 
@@ -215,13 +215,6 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
     }
 
     val remJobMap = ConcurrentHashMap<Long, Job>()
-
-    val remCleaner: Job = GlobalScope.launch(CACHED_POOL) {
-        while (ON) {
-            delay(60 * 60 * 1_000)
-            synchronized(remJobMap) { remJobMap.removeIf { _, v -> !v.isActive } }
-        }
-    }
 
     companion object {
         val DAYS_30_MIN = 43200
@@ -245,9 +238,16 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
         DAO.GLOBAL_WEEBOT.getReminders().forEach {
             remJobMap.putIfAbsent(it.key, remWatchJob(it.value))
         }
+        /** Cleaner Job */ GlobalScope.launch(CACHED_POOL) {
+            while (ON) {
+                delay(60 * 60 * 1_000)
+                synchronized(remJobMap) { remJobMap.removeIf { _, v -> !v.isActive } }
+            }
+        }
     }
 
     fun sendReminderList(event: CommandEvent) {
+        //TODO Reminder editor paginator
         event.replyInDm(strdEmbedBuilder.setTitle(event.author.name + "'s Reminders")
             .apply {
                 setDescription("")
@@ -302,9 +302,9 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
                 if (m > 0) messageIndex++
                 if (private) messageIndex++
 
-                val min = if (d == 0 && h == 0 && m == 0) {
-                    60
-                } else (d * 24 * 60) + (h * 60) + m
+                /**Minutes*/
+                val min: Long = if (d == 0 && h == 0 && m == 0) 60L
+                else (d * 24L * 60L) + (h * 60L) + m
                 if (min > DAYS_30_MIN) {
                     event.reactError()
                     event.reply("*The Maximum reminder time is 30 days.*")
@@ -316,8 +316,7 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
                 } else ""
 
                 val r = Reminder(event.author.idLong,
-                    if (private || event.isFromType(PRIVATE)) null
-                    else event.channel.idLong, min.toLong(), message)
+                    if (private) null else event.textChannel?.idLong, min, message)
 
                 if (DAO.GLOBAL_WEEBOT.addReminder(event.author, r)) {
                     event.reactSuccess()

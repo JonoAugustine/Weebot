@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.commands.miscellaneous
 
+import com.ampro.weebot.GENERIC_ERR_MSG
 import com.ampro.weebot.commands.*
 import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.*
 import com.ampro.weebot.database.*
@@ -102,32 +103,32 @@ class CmdApiToGetALife : WeebotCommand("fact", "APGL Facts", emptyArray(),
     }
     private data class Fact(val fact: String)
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         when {
             event.args.isNullOrBlank() -> {
                 this.execute(WeebotCommandEvent(event.event,
-                    listOf("dog", "cat", "panda").random()))
+                    listOf("dog", "cat", "panda").random(), event.bot))
             }
             event.args.matches("(?i)dog") -> {
                 (BASE_URL + FACT_DOG).get<Fact>().component1()?.also {
                     makeEmbedBuilder("Doggo Fact", null, it.fact)
                         .setImage((BASE_URL+IMG_DOG).get<Link>().component1()?.link)
                         .build().send(event.channel)
-                } ?: event.respondThenDelete(GEN_FAILURE_MESSAGE)
+                } ?: event.respondThenDeleteBoth(GENERIC_ERR_MSG)
             }
             event.args.matches("(?i)cat") -> {
                 (BASE_URL + FACT_CAT).get<Fact>().component1()?.also {
                     makeEmbedBuilder("Kat Fact", null, it.fact)
                         .setImage((BASE_URL+IMG_CAT).get<Link>().component1()?.link)
                         .build().send(event.channel)
-                } ?: event.respondThenDelete(GEN_FAILURE_MESSAGE)
+                } ?: event.respondThenDeleteBoth(GENERIC_ERR_MSG)
             }
             event.args.matches("(?i)panda") -> {
                 (BASE_URL + FACT_PANDA).get<Fact>().component1()?.also {
                     makeEmbedBuilder("Giant Panda Fact", null, it.fact)
                         .setImage((BASE_URL+IMG_PANDA).get<Link>().component1()?.link)
                         .build().send(event.channel)
-                } ?: event.respondThenDelete(GEN_FAILURE_MESSAGE)
+                } ?: event.respondThenDeleteBoth(GENERIC_ERR_MSG)
             }
             event.args.matches("(?i)red(panda)?") -> TODO(event)
             event.args.matches("(?i)pika(chu)?") -> TODO(event)

@@ -11,6 +11,7 @@ import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.OFFICIAL_CHATS
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.SELF
+import com.ampro.weebot.commands.CAT_GEN
 import com.ampro.weebot.util.DD_MM_YYYY_HH_MM
 import com.ampro.weebot.util.IdGenerator
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -90,7 +91,7 @@ fun getSuggById(id: String, event: CommandEvent): Suggestion? {
     return DAO.suggestions.find {
         it.id.equals(id.removeAll("[^a-zA-Z0-9]"), true)
     } ?: run {
-        event.respondThenDelete("*No suggestion matched the ID provided.*", 30)
+        event.respondThenDeleteBoth("*No suggestion matched the ID provided.*", 30)
         return null
     }
 }
@@ -103,7 +104,7 @@ fun getSuggById(id: String, event: CommandEvent): Suggestion? {
  * @since 1.0
  */
 open class CmdSuggestion : WeebotCommand("suggest", "Suggest",
-    arrayOf("suggestion", "sugg"), CAT_DEV, "See help embed.",
+    arrayOf("suggestion", "sugg"), CAT_GEN, "See help embed.",
     "Submit and Vote for anonymous suggestions for the Weebot devs.",
     HelpBiConsumerBuilder("Weebot Suggestions", false).setDescription(
         "Submit an anonymous suggestion to the Weebot developers right from " +
@@ -159,7 +160,7 @@ open class CmdSuggestion : WeebotCommand("suggest", "Suggest",
             //When voting
             args[0].matches(voteRegi) -> {
                 if (args.size < 2) {
-                    event.respondThenDelete("*No suggestion ID was provided.*", 30)
+                    event.respondThenDeleteBoth("*No suggestion ID was provided.*", 30)
                     return
                 }
                 STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
@@ -265,8 +266,8 @@ fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boole
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdSeeSuggestions : WeebotCommand("see", null, arrayOf("-s"), CAT_DEV, "", "",
-    cooldown = 5) {
+class CmdSeeSuggestions : WeebotCommand("-see", null, arrayOf("-s", "see"),
+    CAT_GEN, "", "", cooldown = 5) {
 
     // \sugg -s(ee) [-k <keyword>] [-r <accepted/unreviewed/completed/ignored>] [pagenum]
     override fun execute(event: CommandEvent) {
@@ -378,7 +379,7 @@ class CmdDevSuggestions : WeebotCommand("dev", null, emptyArray(), CAT_DEV, "",
                 sugg.state = try {
                     State.read(args[2])
                 } catch (e: IllegalArgumentException) {
-                    event.respondThenDelete(
+                    event.respondThenDeleteBoth(
                         "Invalid State! UNREVIEWED, ACCEPTED, COMPLETED or IGNORED"
                     )
                     return

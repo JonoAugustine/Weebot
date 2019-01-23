@@ -22,7 +22,6 @@ import net.dv8tion.jda.core.entities.Message.MentionType.ROLE
 import net.dv8tion.jda.core.entities.Message.MentionType.USER
 import net.dv8tion.jda.core.entities.MessageHistory
 import net.dv8tion.jda.core.entities.TextChannel
-import java.lang.Integer.*
 import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
@@ -90,7 +89,7 @@ class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", 
         val td = toDelete
 
         if (toDelete !in 2..1_000) {
-            event.respondThenDelete("You must choose a number between 2 and 1,000.")
+            event.respondThenDeleteBoth("You must choose a number between 2 and 1,000.")
             return
         }
         STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
@@ -112,7 +111,7 @@ class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", 
                 }
                 delay(1_000)
             }
-            event.respondThenDelete("*${event.author.name} cleared $td messages from ${
+            event.respondThenDeleteBoth("*${event.author.name} cleared $td messages from ${
             event.textChannel.name}*", 5)
         }
 
@@ -154,7 +153,7 @@ class CmdChatLock : WeebotCommand("chatlock", "Chat Lock",
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
         if (args.isEmpty()) {
-            return event.respondThenDelete("*Please specify a time span.*")
+            return event.respondThenDeleteBoth("*Please specify a time span.*")
         }
         val channel = event.textChannel
         //Parse time
@@ -163,7 +162,7 @@ class CmdChatLock : WeebotCommand("chatlock", "Chat Lock",
         fun value(index: Int) : Int = if (index >= 0) try {
             args[index + 1].toInt()
         } catch (e: Exception) {
-            event.respondThenDelete("*Invalid value at arg* ``${index + 1}``")
+            event.respondThenDeleteBoth("*Invalid value at arg* ``${index + 1}``")
             -2
         } else -2
 
@@ -174,12 +173,12 @@ class CmdChatLock : WeebotCommand("chatlock", "Chat Lock",
         if (min > 0) seconds += min * 60
 
         if (seconds !in 30..(30 * 60)) {
-            return event.respondThenDelete(
+            return event.respondThenDeleteBoth(
                 "*Must be between ``30`` seconds and ``30`` minutes.*", 20)
         }
 
         lockMap[channel.idLong]?.also {
-            event.respondThenDelete("This channel is already on lockdown.")
+            event.respondThenDeleteBoth("This channel is already on lockdown.")
         } ?: run {
             //Start Lockdown
             val origOverrides = channel.permissionOverrides.filterNot {

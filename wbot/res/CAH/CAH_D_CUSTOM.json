@@ -1,1 +1,61 @@
-{}
+{
+  "map": {
+    "139168039634468865": [
+      {
+        "id": "CAH:U3MT8DL",
+        "popularity": 0,
+        "name": "Cards Against the Liquidators",
+        "authorID": 139167730237571072,
+        "public": true,
+        "init": {
+          "dateTime": {
+            "date": {
+              "year": 2019,
+              "month": 1,
+              "day": 21
+            },
+            "time": {
+              "hour": 18,
+              "minute": 4,
+              "second": 8,
+              "nano": 531000000
+            }
+          },
+          "offset": {
+            "totalSeconds": 0
+          }
+        },
+        "writeRestrictions": {
+          "allowedUsers": [],
+          "blockedUsers": [],
+          "allowedRoles": [
+            139170685435117568,
+            197428072910159872,
+            244833822321934337
+          ],
+          "blockedRoles": [],
+          "allowedTextChannels": [],
+          "blockedTextChannels": [],
+          "allowedVoiceChannels": [],
+          "blockedVoiceChannels": []
+        },
+        "blackCards": [
+          {
+            "id": "CAH:GYUYO65",
+            "reports": 0,
+            "text": "Why is \u003c@!139167730237571072\u003e so lonely?",
+            "pick": 1
+          },
+          {
+            "id": "CAH:YMPRXUD",
+            "reports": 0,
+            "text": "This is a test card.",
+            "pick": 1
+          }
+        ],
+        "whiteCards": []
+      }
+    ],
+    "218979588716494848": []
+  }
+}

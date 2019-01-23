@@ -4,21 +4,19 @@
 
 package com.ampro.weebot.extensions
 
-import com.ampro.weebot.MLOG
+import com.ampro.weebot.WAITER
 import com.ampro.weebot.extensions.MentionType.*
-import com.jagrosh.jdautilities.command.CommandClientBuilder
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.bot.sharding.ShardManager
-import net.dv8tion.jda.core.EmbedBuilder
-import net.dv8tion.jda.core.Permission
+import net.dv8tion.jda.core.*
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent
 import net.dv8tion.jda.core.requests.RestAction
 import java.time.OffsetDateTime
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.TimeUnit.MINUTES
+import java.util.concurrent.TimeUnit.SECONDS
 
 /*
  * Extension methods used for JDA elements
@@ -26,36 +24,7 @@ import java.util.concurrent.TimeUnit
 
 fun TODO(event: CommandEvent) = event.reply("This action is still under construction.")
 
-fun CommandClientBuilder.addCommandsWithCheck(commands: Iterable<WeebotCommand>)
-        :  CommandClientBuilder {
-    var err = false
-    commands.forEach { c ->
-        if (c.name.toList().has { it.isUpperCase() }) {
-            MLOG.elog(null,
-                "Command name ${c.name} has is capitalized when it should not be!")
-            err = true
-        }
-        c.aliases.forEach { a ->
-            if (a.toList().has { it.isUpperCase() }) {
-                MLOG.elog(null,
-                    "Command name $a has is capitalized when it should not be!")
-                err = true
-            }
-        }
-        commands.filter { it != c }.forEach { c2 ->
-            if ((c2.aliases + listOf(c2.name)).map { it.toLowerCase() }
-                        .contains(c.name.toLowerCase())) {
-                MLOG.elog(null,
-                    "${c.name} shares a name with ${c2.name}!")
-                err = true
-            }
-        }
-    }
-    if (err) System.exit(0)
-    return this.addCommands(commands)
-}
-
-operator fun ShardManager.get(shardIndex: Int) = shards!![shardIndex]
+operator fun ShardManager.get(shardIndex: Int): JDA = shards!![shardIndex]
 
 enum class MentionType { USER, ROLE, CHANNEL }
 
@@ -101,6 +70,8 @@ val Guild.size: Int get() = this.members.size
 /** The non-bot user count of the [Guild] */
 val Guild.trueSize: Int get() = this.members.filterNot { it.user.isBot }.size
 
+fun Member.isAdmin() = hasPerm(Permission.ADMINISTRATOR)
+
 infix fun Member.outRanks(other: Member) : Boolean {
     var myhigh = -1
     this.roles.forEach { if (it.position > myhigh) myhigh = it.position }
@@ -122,40 +93,40 @@ infix fun Member.compareHighestRoleTo(other: Member) : Int {
     }
 }
 
-fun Member.hasPerms(vararg p: Permission) = this.permissions.containsAll(p.toList())
+fun Member.hasPerms(vararg p: Permission) = permissions.containsAll(p.toList())
 
-fun Member.hasOneOfPerms(vararg p: Permission) : Boolean {
-    p.forEach { return this.permissions.contains(it) }
-    return false
-}
+infix fun Member.hasPerm(perm: Permission) = hasPerms(perm)
 
-infix fun Member.hasPerm(perm: Permission) = this.permissions.contains(perm)
+fun Member.hasOneOfPerms(vararg p: Permission) = p.any { it in permissions }
 
 /** Queue and ignore any result */
 fun <T> RestAction<T>.queueIgnore(secDelay: Long = 0) {
-    this.queueAfter(secDelay, TimeUnit.SECONDS, {},{})
+    this.queueAfter(secDelay, SECONDS, {},{})
 }
 
 val CommandEvent.creationTime: OffsetDateTime
     get() = this.message.creationTime
 
-fun MessageReceivedEvent.splitArgsRaw() = message.contentRaw.split("\\s+".toRegex())
-fun GuildMessageReceivedEvent.splitArgsRaw() = message.contentRaw.split("\\s+".toRegex())
+fun waitForMessage(event: WeebotCommandEvent, timeOut: Long = 3L,
+                   timeUnit: TimeUnit = MINUTES, timeOutAction: () -> Unit = {},
+                   predicate: (MessageReceivedEvent) -> Boolean = {true},
+                   action: (MessageReceivedEvent) -> Unit) = waitForMessage(event.guild,
+    event.author, event.channel, timeOut, timeUnit, timeOutAction, predicate, action)
 
-/**
- * Add multiple commands from an [Iterable].
- *
- * @author Jonathan Augustine
- * @since 2.0
- */
-fun CommandClientBuilder.addCommands(commands: Iterable<WeebotCommand>)
-        : CommandClientBuilder {
-    commands.forEach { this.addCommand(it) }
-    return this
+fun waitForMessage(guild: Guild? = null, user: User, channel: MessageChannel? = null,
+                   timeOut: Long = 3L, timeUnit: TimeUnit = MINUTES,
+                   timeOutAction: () -> Unit = {},
+                   predicate: (MessageReceivedEvent) -> Boolean,
+                   action: (MessageReceivedEvent) -> Unit) {
+    WAITER.waitForEvent(MessageReceivedEvent::class.java,
+        { it.isValidUser(guild, user, channel) && predicate(it) }, action,
+        timeOut, timeUnit, timeOutAction)
 }
 
-infix fun User.`is`(id: Long) = this.idLong == id
-infix fun User.`is`(user: User) = this.idLong == user.idLong
+fun MessageReceivedEvent.splitArgsRaw() = message.contentRaw.split("\\s+".toRegex())
+
+infix fun ISnowflake.`is`(id: Long) = this.idLong == id
+infix fun ISnowflake.`is`(other: ISnowflake) = this.idLong == other.idLong
 
 fun MessageReceivedEvent.isValidUser(guild: Guild?, user: User,
                                      channel: MessageChannel? = null)
@@ -163,29 +134,18 @@ fun MessageReceivedEvent.isValidUser(guild: Guild?, user: User,
 
 fun MessageReceivedEvent.isValidUser(guild: Guild?, users: Set<User> = emptySet(),
                                      roles: Set<Role> = emptySet(),
-                                     channel: MessageChannel? = null) = when {
-    author.isBot -> false
-    channel != null && channel.idLong != this.channel.idLong -> false
-    guild != null && !isFromType(TEXT) -> false
-    this.guild?.id ?: -2 != guild?.id ?: -2 -> false
-    users.isEmpty() && roles.isEmpty() -> true
-    users.contains(author) -> true
-    !(guild?.isMember(author) ?: true) -> false
-    else -> guild?.getMember(author)?.roles?.has { roles.contains(it) } ?: true
-}
-
-fun GuildMessageReactionAddEvent.isValidUser(roles: List<Role> = emptyList(),
-                                          users: Set<User> = emptySet(),
-                                          guild: Guild) : Boolean {
+                                     channel: MessageChannel? = null): Boolean {
     return when {
-        user.isBot -> false
+        author.isBot -> false
+        channel != null && channel.idLong != this.channel.idLong -> false
+        guild != null && !isFromType(TEXT) -> false
+        this.guild?.id ?: -2 != guild?.id ?: -2 -> false
         users.isEmpty() && roles.isEmpty() -> true
-        users.contains(user) -> true
-        !guild.isMember(user) -> false
-        else -> guild.getMember(user).roles.stream().anyMatch { roles.contains(it) }
+        users.contains(author) -> true
+        !(guild?.isMember(author) ?: true) -> false
+        else -> guild?.getMember(author)?.roles?.any { it in roles } ?: true
     }
 }
-
 
 /**
  * Contains validation information and methods to restrict access to any entity.
@@ -200,16 +160,6 @@ fun GuildMessageReactionAddEvent.isValidUser(roles: List<Role> = emptyList(),
  * @author Jonathan Augustine
  */
 class Restriction {
-
-    /** An indication of the Command's restriction in a guild.  */
-    enum class Status {
-        /** The Item has no restrictions  */
-        OPEN,
-        /** The Item has restrictions  */
-        RESTRICTED,
-        /** The Item is disabled  */
-        DISABLED
-    }
 
     val allowedUsers: MutableList<Long> = ArrayList()
     val blockedUsers: MutableList<Long> = ArrayList()
@@ -227,23 +177,24 @@ class Restriction {
      * @param iSnowflakes The iSnowflakes to allow
      */
     fun allow(iSnowflakes: List<ISnowflake>) {
-        if (iSnowflakes.isEmpty()) { return }
-        when {
-            iSnowflakes[0] is User -> iSnowflakes.forEach { user ->
-                this.blockedUsers.remove(user.idLong)
-                this.allowedUsers.add(user.idLong)
-            }
-            iSnowflakes[0] is Role -> iSnowflakes.forEach { role ->
-                this.blockedRoles.remove(role.idLong)
-                this.allowedRoles.add(role.idLong)
-            }
-            iSnowflakes[0] is TextChannel -> iSnowflakes.forEach { channel ->
-                this.blockedTextChannels.remove(channel.idLong)
-                this.allowedTextChannels.add(channel.idLong)
-            }
-            iSnowflakes[0] is VoiceChannel -> iSnowflakes.forEach { channel ->
-                blockedVoiceChannels.remove(channel.idLong)
-                allowedVoiceChannels.add(channel.idLong)
+        iSnowflakes.forEach {
+            when (it) {
+                is User -> {
+                    this.blockedUsers.remove(it.idLong)
+                    this.allowedUsers.add(it.idLong)
+                }
+                is Role -> {
+                    this.blockedRoles.remove(it.idLong)
+                    this.allowedRoles.add(it.idLong)
+                }
+                is TextChannel -> {
+                    this.blockedTextChannels.remove(it.idLong)
+                    this.allowedTextChannels.add(it.idLong)
+                }
+                is VoiceChannel -> {
+                    blockedVoiceChannels.remove(it.idLong)
+                    allowedVoiceChannels.add(it.idLong)
+                }
             }
         }
     }
@@ -255,22 +206,23 @@ class Restriction {
      *
      * @param iSnowflakes The iSnowflakes to block
      */
-    fun block(iSnowflakes: List<ISnowflake>) {
-        if (iSnowflakes.isEmpty()) {
-            return
-        }
-        when {
-            iSnowflakes[0] is User -> iSnowflakes.forEach { user ->
-                this.allowedUsers.remove(user.idLong)
-                this.blockedUsers.add(user.idLong)
+    fun block(iSnowflakes: List<ISnowflake>) = iSnowflakes.forEach {
+        when (it) {
+            is User -> {
+                this.blockedUsers.add(it.idLong)
+                this.allowedUsers.remove(it.idLong)
             }
-            iSnowflakes[0] is Role -> iSnowflakes.forEach { role ->
-                this.allowedRoles.remove(role.idLong)
-                this.blockedRoles.add(role.idLong)
+            is Role -> {
+                this.blockedRoles.add(it.idLong)
+                this.allowedRoles.remove(it.idLong)
             }
-            iSnowflakes[0] is TextChannel -> iSnowflakes.forEach { channel ->
-                this.allowedTextChannels.remove(channel.idLong)
-                this.blockedTextChannels.add(channel.idLong)
+            is TextChannel -> {
+                this.blockedTextChannels.add(it.idLong)
+                this.allowedTextChannels.remove(it.idLong)
+            }
+            is VoiceChannel -> {
+                blockedVoiceChannels.add(it.idLong)
+                allowedVoiceChannels.remove(it.idLong)
             }
         }
     }
@@ -346,6 +298,15 @@ class Restriction {
     }
 
     /**
+     * Checks if a [Member] is allowed.
+     *
+     * @return `true` ONLY if the [member] is allowed by [User.getIdLong] or
+     * [Member.getRoles]
+     */
+    infix fun explicitlyAllows(member: Member) = allowedUsers.contains(member.user.idLong)
+            || member.roles.any { allowedRoles.contains(it.idLong) }
+
+    /**
      * Allow a TextChannel access.
      * Will remove the channel from the "blocked" list if present.
      * @param channel The TextChannel to allow access
@@ -381,17 +342,34 @@ class Restriction {
         }
     }
 
+    /** Clear all restrictions */
+    fun clear() {
+        allowedUsers.clear()
+        blockedUsers.clear()
+        allowedRoles.clear()
+        blockedRoles.clear()
+        allowedTextChannels.clear()
+        blockedTextChannels.clear()
+        allowedVoiceChannels.clear()
+        blockedVoiceChannels.clear()
+    }
+
     /** @return `true` if there are any restrictions.
      */
-    fun restricted(): Boolean {
-        return (allowedUsers.isEmpty() || blockedUsers.isEmpty() || allowedRoles.isEmpty() || blockedRoles.isEmpty() || allowedTextChannels.isEmpty() || blockedTextChannels.isEmpty())
+    fun isRestricted(): Boolean {
+        return (allowedUsers.isNotEmpty()
+                || blockedUsers.isNotEmpty()
+                || allowedRoles.isNotEmpty()
+                || blockedRoles.isNotEmpty()
+                || allowedTextChannels.isNotEmpty()
+                || blockedTextChannels.isNotEmpty())
     }
 
     /**
      * Get an [EmbedBuilder] with each allow or block list as it's own
      * field. The EmbedBuilder is in standard Weebot form, untitled with no
      * description.
-     * @param guild The guild the restriction is housed in.
+     * @param guild The guild the wrtRestrct is housed in.
      * @return
      */
     fun toEmbedBuilder(guild: Guild): EmbedBuilder {

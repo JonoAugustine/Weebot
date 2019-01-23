@@ -6,20 +6,19 @@ package com.ampro.weebot.commands.progammer
 
 import com.ampro.weebot.WAITER
 import com.ampro.weebot.commands.CAT_PROG
-import com.ampro.weebot.database.*
+import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.entities.*
-import net.dv8tion.jda.core.entities.ChannelType.*
+import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
-import net.dv8tion.jda.core.requests.RestAction
 import java.net.URL
-import java.util.concurrent.TimeUnit
-import java.util.concurrent.TimeUnit.*
-import java.util.function.Predicate
+import java.util.concurrent.TimeUnit.MINUTES
+import java.util.concurrent.TimeUnit.SECONDS
 import java.util.regex.PatternSyntaxException
 
 /**
