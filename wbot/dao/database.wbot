@@ -96,6 +96,30 @@
       "state": "ACCEPTED",
       "votes": [],
       "suggestion": "report command fur mini mods to report people to be kicked"
+    },
+    {
+      "id": "YV4BU",
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 22
+          },
+          "time": {
+            "hour": 13,
+            "minute": 6,
+            "second": 39,
+            "nano": 353000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "UNREVIEWED",
+      "votes": [],
+      "suggestion": "add better support for reminders (ref: RemindMe!)"
     }
   ],
   "GLOBAL_WEEBOT": {
@@ -136,8 +160,11 @@
     "REM_MAX": 10,
     "REM_MAX_PREM": 50,
     "userReminders": {
+      "186130584693637131": [],
       "228574821590499329": [],
-      "139167730237571072": []
+      "139167730237571072": [
+        null
+      ]
     },
     "initDate": {
       "dateTime": {
@@ -169,6 +196,33 @@
       "guildID": -1
     },
     "passives": [],
+    "moderationData": {
+      "reportLimit": -1,
+      "reportLimitActions": [
+        "NOTIFY_USER",
+        "NOTIFY_ADMINS"
+      ],
+      "hierarchicalReports": false,
+      "reports": {},
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 18
+          },
+          "time": {
+            "hour": 16,
+            "minute": 16,
+            "second": 11,
+            "nano": 532000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      }
+    },
     "notePads": [],
     "guildID": -1
   },
@@ -620,6 +674,36 @@
       "notePads": [],
       "guildID": 450100127256936458
     },
+    "524634674472157215": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 18
+          },
+          "time": {
+            "hour": 13,
+            "minute": 33,
+            "second": 47,
+            "nano": 344000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 524634674472157215
+      },
+      "passives": [],
+      "notePads": [],
+      "guildID": 524634674472157215
+    },
     "534162728386953257": {
       "initDate": {
         "dateTime": {
@@ -817,39 +901,6 @@
       "notePads": [],
       "guildID": 450090355451494401
     },
-    "531533646616854558": {
-      "initDate": {
-        "dateTime": {
-          "date": {
-            "year": 2019,
-            "month": 1,
-            "day": 6
-          },
-          "time": {
-            "hour": 13,
-            "minute": 9,
-            "second": 37,
-            "nano": 694000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "settings": {
-        "prefixs": [
-          "\\",
-          "w!"
-        ],
-        "logchannel": -1,
-        "trackingEnabled": false,
-        "commandRestrictions": {},
-        "guildID": 531533646616854558
-      },
-      "passives": [],
-      "notePads": [],
-      "guildID": 531533646616854558
-    },
     "532236202720493589": {
       "initDate": {
         "dateTime": {
@@ -937,9 +988,7 @@
       },
       "settings": {
         "prefixs": [
-          "\\",
-          "w!",
-          "fw!"
+          "\\"
         ],
         "logchannel": 493111883814010899,
         "trackingEnabled": true,
@@ -974,23 +1023,27 @@
               417176543903744001
             ],
             "scoreMap": {
-              "185063150557593600": 5,
-              "277593092561829889": 6,
-              "186130584693637131": 6,
-              "139167730237571072": 6,
-              "383656411789524995": 0
+              "185063150557593600": 10,
+              "277593092561829889": 11,
+              "186130584693637131": 14,
+              "139167730237571072": 8,
+              "383656411789524995": 16
             }
           }
         }
       ],
       "moderationData": {
-        "reportLimit": -1,
+        "reportLimit": 15,
         "reportLimitActions": [
           "NOTIFY_USER",
           "NOTIFY_ADMINS"
         ],
         "hierarchicalReports": false,
-        "reports": {},
+        "reports": {
+          "451005806222245889": [
+            "test"
+          ]
+        },
         "initDate": {
           "dateTime": {
             "date": {
@@ -1869,39 +1922,6 @@
       "notePads": [],
       "guildID": 339842458458521634
     },
-    "438231431215579137": {
-      "initDate": {
-        "dateTime": {
-          "date": {
-            "year": 2018,
-            "month": 12,
-            "day": 28
-          },
-          "time": {
-            "hour": 14,
-            "minute": 25,
-            "second": 46,
-            "nano": 594000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "settings": {
-        "prefixs": [
-          "\\",
-          "w!"
-        ],
-        "logchannel": -1,
-        "trackingEnabled": false,
-        "commandRestrictions": {},
-        "guildID": 438231431215579137
-      },
-      "passives": [],
-      "notePads": [],
-      "guildID": 438231431215579137
-    },
     "466047914419159061": {
       "initDate": {
         "dateTime": {
@@ -1964,7 +1984,14 @@
         "commandRestrictions": {},
         "guildID": 258020165785092113
       },
-      "passives": [],
+      "passives": [
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.CmdThis$ThisReactor",
+          "DATA": {
+            "dead": false
+          }
+        }
+      ],
       "notePads": [],
       "guildID": 258020165785092113
     }
