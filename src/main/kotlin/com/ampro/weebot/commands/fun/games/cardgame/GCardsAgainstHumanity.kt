@@ -18,7 +18,7 @@ import com.ampro.weebot.util.Emoji.*
 import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
 import net.dv8tion.jda.core.EmbedBuilder
-import net.dv8tion.jda.core.Permission.*
+import net.dv8tion.jda.core.Permission.ADMINISTRATOR
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.Message.MentionType.*
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
@@ -351,8 +351,12 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                            channel: TextChannel,
                            val decks: List<CAHDeck> = listOf(DECK_STRD),
                            val handSize: Int = HAND_SIZE_DEF,
-                           val winCondition: WinCondition = WINS(7))
+                           val winCondition: WinCondition = WINS(5))
     : CardGame<CAHPlayer>(guild, author) {
+
+    constructor(event: WeebotCommandEvent, decks: List<CAHDeck>, handSize: Int,
+                winCondition: WinCondition)
+            : this(event.guild, event.author, event.textChannel, decks, handSize, winCondition)
 
     private val guildName = guild.name
     internal val channelID = channel.idLong
@@ -369,14 +373,13 @@ class CardsAgainstHumanity(guild: Guild, author: User,
 
     /**The current [BlackCard] being played on */
     lateinit var blackCard: BlackCard
-
     private var blackCardMessage: Message? = null
 
     @Transient
     private val playerHandMenus = ConcurrentHashMap<CAHPlayer, PlayerHandPassive>()
 
     /** The current Czar  */
-    internal lateinit var czar: CAHPlayer
+     lateinit var czar: CAHPlayer
 
     internal lateinit var gameState: GameState
 
@@ -485,7 +488,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
      * Sends each [players] their [CAHPlayer.hand]. This does NOT deal cards.
      * @param players
      */
-    fun sendWhiteCards(vararg players: CAHPlayer) {
+    private fun sendWhiteCards(vararg players: CAHPlayer) {
         if (!isRunning) return
         players.filterNot { it.user.isBot }.forEach { p ->
             playerHandMenus.getOrPut(p) {
@@ -583,21 +586,26 @@ class CardsAgainstHumanity(guild: Guild, author: User,
      * @return false if there are less than 3 players.
      */
     override fun startGame(): Boolean {
-        return if (this.players.size in MIN_PLAYERS..MAX_PLAYERS) {
-            if (this.playerList.filterNot { it.user.isBot }.size < 2)
-                return false
+        return when {
+            this.players.size !in MIN_PLAYERS..MAX_PLAYERS -> false
+            this.playerList.filterNot { it.user.isBot }.size < 2 -> false
             //Deal Cards to players
-            this.playerList.forEach { dealCards(it) }
             //Set the First Czar
-            czar = this.playerList.filterNot { it.user.isBot }.random()
             //Set the first black card
-            blackCard = activeCardsBlack.random()
-            gameState = CHOOSING
-            isRunning = true
-            sendBlackCard()
-            sendWhiteCards(*playerList.toTypedArray())
-            true
-        } else false
+            else -> {
+                this.playerList.forEach { dealCards(it) }
+                //Set the First Czar
+                czar = this.playerList.filterNot { it.user.isBot }.random()
+                //Set the first black card
+                blackCard = activeCardsBlack.random()
+                gameState = CHOOSING
+                isRunning = true
+                sendBlackCard()
+                sendWhiteCards(*playerList.toTypedArray())
+                true
+            }
+        }
+
     }
 
     override fun endGame(): Boolean {
@@ -653,13 +661,124 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
     override fun execute(event: WeebotCommandEvent) {
         if (event.splitArgs().isEmpty()) return
         val liveGames = event.bot.getRunningGames<CardsAgainstHumanity>()
+        val thisGame = liveGames.firstOrNull { event.channel.`is`(it.channelID) }
 
         //Setup, Join, & leaderboard
         when {
-            //setup [hand_size] [default] [deck_id1 deck_id2...] [@bots...]
+            //setup [@bots...]
             event.argList[0].matches("(?i)set(up)?") -> {
-                TODO(event)
-                //TODO selectableEmbed, +/- for hand size, paginator for decks
+                if (thisGame != null) {
+                    return event.respondThenDeleteBoth("There is already a game " +
+                            "running in ${event.textChannel.asMention}. End that one " +
+                            "before starting a new game.")
+                }
+                val decks = mutableListOf(DECK_STRD)
+                var handSize = HAND_SIZE_DEF
+                var winCond = WINS(5)
+                val players = mutableListOf(event.author)
+                players.addAll(event.message.mentionedUsers.filter { it.isBot })
+                fun gameState(): MessageEmbed {
+                    return makeEmbedBuilder("$displayName Setup",null, """
+                        Hand Size: $handSize
+                        Win Condition: ${winCond.score} ${winCond.name.toLowerCase()}
+                        Decks: ${decks.joinToString { it.name }}
+                        Players: ${players.joinToString { it.asMention }}
+
+                        $HeavyPlusSign/$HeavyMinusSign to change hand size
+                        $FirstPlaceMedal to change the win condition
+                        $D to choose the decks to play with
+                        $J to join/leave the game
+                        ${if(players.filterNot{it.isBot}.size<MIN_PLAYERS)""
+                        else "$Beginner to start"}
+                        """.trimIndent()).build()
+                }
+                SelectableEmbed(messageEmbed = gameState(), options = listOf(
+                    HeavyPlusSign to plus@{ m, u ->
+                        if (!u.`is`(event.author)) return@plus
+                        if (handSize < HAND_SIZE_MAX) {
+                            handSize++
+                            m.editMessage(gameState()).queue()
+                        } else event.respondThenDelete("Max hand size: $HAND_SIZE_MAX")
+                    }, HeavyMinusSign to minus@{ m, u ->
+                        if (!u.`is`(event.author)) return@minus
+                        if (handSize > HAND_SIZE_MIN) {
+                            handSize--
+                            m.editMessage(gameState()).queue()
+                        } else event.respondThenDelete("Min hand size: $HAND_SIZE_MIN")
+                    }, FirstPlaceMedal to win@{ m, u ->
+                        if (!u.`is`(event.author)) return@win
+                        winCond = if (winCond == WINS) ROUNDS else WINS
+                        event.respondThenDelete(
+                            "Win Condition changed to ${winCond.name}. How many to win?:")
+                        waitForMessage(event, 1, predicate = {
+                            return@waitForMessage try {
+                                it.message.contentDisplay.toInt()
+                                true
+                            } catch (e: NumberFormatException) {
+                                event.respondThenDelete("Must be a number.")
+                                it.message.delete().queue()
+                                false
+                            }
+                        }) {
+                            winCond(it.message.contentDisplay.toInt())
+                            event.respondThenDelete(
+                                "Win Condition set to ${winCond.score} ${winCond.name}")
+                            it.message.delete().queue()
+                            m.editMessage(gameState()).queue()
+                        }
+                    }, D to deck@{ m, u ->
+                        if (!u.`is`(event.author)) return@deck
+                        val fallBack = mutableListOf<CAHDeck>().apply { addAll(decks) }
+                        decks.clear()
+                        decks.add(DECK_STRD)
+                        m.editMessage(gameState()).queue()
+                        val items = (event.bot.cahGuildInfo.decks
+                                + DECK_CUST.map.flatMap{it.value}.filter(CAHDeck::public))
+                            .filterNot { (it.whiteCards + it.blackCards).isEmpty() }
+                            .distinctBy(CAHDeck::id).map {
+                                "${it.name} (``${it.id}``)" to { _:Int, _:Message ->
+                                    decks.add(it)
+                                    m.editMessage(gameState()).queue()
+                                }
+                            }
+                        SelectablePaginator(baseEmbed = makeEmbedBuilder(
+                            "Select one or more decks", null, """
+                                Select at least one deck to play with.
+                                React with $X_Red to confirm.""".trimIndent())
+                            .build(), items = items, itemsPerPage = -1, exitAction = {
+                                //val wcS = decks.flatMap { it.whiteCards }.size
+                                //val bcS = decks.flatMap { it.blackCards }.size
+                                if (decks.isEmpty()) {
+                                    event.respondThenDelete("you need to pick at least 1 deck")
+                                } else {
+                                    it.delete().queue()
+                                    m.editMessage(gameState()).queue()
+                                }
+                            }, timeoutAction = {
+                            decks.clear()
+                            decks.addAll(fallBack)
+                            it.delete().queue()
+                            m.editMessage(gameState()).queue()
+                        }).display(event.textChannel)
+                    }, J to join@{ m, u ->
+                        if (players.removeIf { it.id == u.id }) {
+                            event.respondThenDelete("${u.asMention} left the game")
+                            m.editMessage(gameState()).queue()
+                        } else {
+                            event.respondThenDelete("${u.asMention} joined the game!")
+                            players.add(u)
+                            m.editMessage(gameState()).queue()
+                        }
+                    }, Beginner to { m, u ->
+                        val cah = CardsAgainstHumanity(event, decks, handSize, winCond)
+                        players.forEach { cah.addUser(it) }
+                        if (!cah.startGame()) {
+                            event.respondThenDelete("The are either too few or too " +
+                                    "many players ($MIN_PLAYERS--$MAX_PLAYERS)")
+                        }
+                        event.bot.games.add(cah)
+                    }
+                )) { it.delete().queue() }.display(event.channel)
             }
             //join the game at any time
             event.argList[0].matches("(?i)j(oin)?") -> TODO(event)
@@ -672,9 +791,12 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
             event.argList[0].matches("(?i)((my)?hand|(re)?send)") -> TODO(event)
             //See the current game's scores
             event.argList[0].matches("(?i)scores?") -> TODO(event)
+            //TODO leave the current game add to docs
+            event.argList[0].matches("(?i)setup") -> TODO(event)
+            //End the current game by vote TODO add to docs
+            event.argList[0].matches("(?i)setup") -> TODO(event)
             //"See server leaderboard", "``leaderboard``\n*Aliases:* LB, top",
-            event.argList[0].matches("(?i)setup") -> TODO(event)
-            event.argList[0].matches("(?i)setup") -> TODO(event)
+            event.argList[0].matches("(?i)((l(eader)?b(oard)?)|top)") -> TODO(event)
         }
     }
 
@@ -695,11 +817,9 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
                     "be dealt to each player, a new Czar will be chosen (in order), and " +
                     "a new Black Card will be sent until a winner is reached or the " +
                     "game is cancelled.\n\nHAVE FUN!")
-            .addField("Game Setup", """``setup [hand_size] [deck1 deck2...]``
+            .addField("Game Setup", """``setup [@botPlayers...]``
                 Any bot can be added to the game by ``@mentioning`` them
-                ``join`` to join the game at any time
-                ``start`` to start the game (*Requires $MIN_PLAYERS players*)
-                """.trimIndent())
+                ``join`` to join the game at any time""".trimIndent())
             .addField("Play Your Card(s)", "White Cards can be played by reacting to "
                     + "the private message", true)
             .addField("Czar Pick Winning Card(s)", "React to the Black Card message",true)
@@ -843,15 +963,12 @@ private class SubCmdDeck : WeebotCommand("deck", null, arrayOf("decks"),
                     }
                     event.argList[1].matches(REG_HYPHEN+"p(ub(lic)?)?") -> {
                         idDex++
-                        JDA_SHARD_MNGR.guilds.flatMap {
-                            it.bot.cahGuildInfo.decks.filter(CAHDeck::public)
-                        }.toMutableList()
+                        DECK_CUST.map.flatMap { it.value.filter(CAHDeck::public) }
                     }
                     event.argList[1].matches(REG_HYPHEN+"al*") -> {
                         idDex++
-                        (JDA_SHARD_MNGR.guilds.flatMap {
-                            it.bot.cahGuildInfo.decks.filter(CAHDeck::public)
-                        } + gDecks).toMutableList()
+                        (DECK_CUST.map.flatMap { it.value.filter(CAHDeck::public)
+                        } + gDecks)
                     }
                     else -> {
                         if (gDecks.isEmpty()) {
@@ -1234,6 +1351,10 @@ private class SubCmdSeeReports : WeebotCommand("reports", null, arrayOf("report"
                     TODO(event)
                 }
             }
+
+        if (blackCards.isEmpty() && whiteCards.isEmpty()) {
+            return event.reply("No reports to view")
+        }
 
         SelectablePaginator(setOf(event.author), timeout = -1, itemsPerPage = -1,
             title = "Reported CAH Cards",

@@ -19,7 +19,7 @@ import com.jagrosh.jdautilities.command.Command.Category
 private const val GEN_FAILURE_MESSAGE = "You do not have access to this command."
 
 val CAT_GEN     = Category("General", GEN_FAILURE_MESSAGE) {true}
-val CAT_DEV     = Category("Developer", GEN_FAILURE_MESSAGE) {true}
+val CAT_DEV     = Category("Developer", GEN_FAILURE_MESSAGE) { it.isOwner }
 val CAT_MOD     = Category("Moderator", GEN_FAILURE_MESSAGE) {true}
 val CAT_PROG    = Category("Programmer", GEN_FAILURE_MESSAGE) {true}
 val CAT_GAME    = Category("Game", GEN_FAILURE_MESSAGE) {true}

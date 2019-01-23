@@ -371,7 +371,7 @@ open class SelectablePaginator(users: Set<User> = emptySet(),
                           var itemsPerPage: Int = 10,
                           /**Disallow multiple reactions*/ val singleUse: Boolean = false,
                           val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
-                          val thumbnail: String = "", val color: Color = STD_GREEN,
+                          val thumbnail: String? = null, val color: Color = STD_GREEN,
                           val fieldList: List<Field> = emptyList(),
                           val exitAction: (Message) -> Unit = {},
                           val timeoutAction: (Message) -> Unit = { m ->
@@ -399,7 +399,7 @@ open class SelectablePaginator(users: Set<User> = emptySet(),
                 })
             : this(users, roles, timeout, unit, baseEmbed.title, baseEmbed.description,
         items, itemsPerPage, singleUse, bulkSkipNumber, wrapPageEnds,
-        baseEmbed.thumbnail.url, color, baseEmbed.fields, exitAction, timeoutAction) {
+        baseEmbed.thumbnail?.url, color, baseEmbed.fields, exitAction, timeoutAction) {
 
     }
 
@@ -439,7 +439,7 @@ open class SelectablePaginator(users: Set<User> = emptySet(),
     protected open fun baseEmbed(): EmbedBuilder = strdEmbedBuilder.also {
         if (title.isNotBlank()) it.setTitle(title)
         it.setDescription(description)
-        if (thumbnail.isNotBlank()) it.setThumbnail(thumbnail)
+        if (!thumbnail.isNullOrBlank()) it.setThumbnail(thumbnail)
         if (fieldList.isNotEmpty()) fieldList.forEach { f -> it.addField(f) }
         it.setColor(color)
     }

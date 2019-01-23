@@ -267,7 +267,7 @@ fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boole
  * @since 2.0
  */
 class CmdSeeSuggestions : WeebotCommand("-see", null, arrayOf("-s", "see"),
-    CAT_DEV, "", "", cooldown = 5) {
+    CAT_GEN, "", "", cooldown = 5) {
 
     // \sugg -s(ee) [-k <keyword>] [-r <accepted/unreviewed/completed/ignored>] [pagenum]
     override fun execute(event: CommandEvent) {

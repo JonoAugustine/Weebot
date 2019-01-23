@@ -200,7 +200,8 @@ class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, 
 class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), CAT_GEN,
         "[category] [command name]", "Get information about Weebot Commands and Usage.",
         cooldown = 30, guildOnly = false) {
-    val catAll: Category = Category("All")
+
+    private val catAll: Category = Category("All")
 
     override fun execute(event: WeebotCommandEvent) {
         val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
@@ -218,14 +219,16 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
                 }
         }
         event.delete()
+        val cats = listOf(catAll) + CATEGORIES.toMutableList().also {
+            if (!event.isOwner) it.remove(CAT_DEV)
+        }.filter { c -> COMMANDS.any { it.category == c } }
         SelectablePaginator(setOf(event.author), title = "Weebot Help",
             description = "Select a category or All", singleUse = true,
-            items = (listOf(catAll) + CATEGORIES.filter { c ->
-                COMMANDS.any { it.category == c }
-            }).map { cat ->
+            items = cats.map { cat ->
                 cat.name to { _: Int, m: Message ->
                     if (cat == catAll) {
-                        strdPaginator.setText("All Weebot Commands").setUsers(event.author).setItemsPerPage(6).apply {
+                        strdPaginator.setText("All Weebot Commands")
+                            .setUsers(event.author).setItemsPerPage(6).apply {
                                 filterAndMap { !(it.isHidden || it.isOwnerCommand) }.forEach { s ->
                                     addItems(s)
                                 }
@@ -236,8 +239,8 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
                     if (cat == CAT_DEV) {
                         strdPaginator.setText("Dev Commands")
                             .setUsers(event.author).apply {
-                                filterAndMap { it.category == cat || (!it.isHidden ||
-                                        (event.isOwner && (it.isHidden|| it.isOwnerCommand)))
+                                filterAndMap {
+                                    it.isHidden || it.isOwnerCommand || it.category == cat
                             }.forEach { s -> addItems(s) }
                         }.build().apply {
                             event.author.openPrivateChannel().queue { paginate(it, 1) }
@@ -254,7 +257,7 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
                     m.delete().queue()
                 }
             }, timeout = 1, exitAction = {it.delete().queue()},
-            timeoutAction = {}).display(event.channel)
+            timeoutAction = {it.delete().queue()}).display(event.channel)
 
     }
 

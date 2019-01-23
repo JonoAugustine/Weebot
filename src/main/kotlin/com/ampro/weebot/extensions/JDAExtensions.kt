@@ -109,7 +109,7 @@ val CommandEvent.creationTime: OffsetDateTime
 
 fun waitForMessage(event: WeebotCommandEvent, timeOut: Long = 3L,
                    timeUnit: TimeUnit = MINUTES, timeOutAction: () -> Unit = {},
-                   predicate: (MessageReceivedEvent) -> Boolean,
+                   predicate: (MessageReceivedEvent) -> Boolean = {true},
                    action: (MessageReceivedEvent) -> Unit) = waitForMessage(event.guild,
     event.author, event.channel, timeOut, timeUnit, timeOutAction, predicate, action)
 
@@ -125,8 +125,8 @@ fun waitForMessage(guild: Guild? = null, user: User, channel: MessageChannel? = 
 
 fun MessageReceivedEvent.splitArgsRaw() = message.contentRaw.split("\\s+".toRegex())
 
-infix fun User.`is`(id: Long) = this.idLong == id
-infix fun User.`is`(user: User) = this.idLong == user.idLong
+infix fun ISnowflake.`is`(id: Long) = this.idLong == id
+infix fun ISnowflake.`is`(other: ISnowflake) = this.idLong == other.idLong
 
 fun MessageReceivedEvent.isValidUser(guild: Guild?, user: User,
                                      channel: MessageChannel? = null)

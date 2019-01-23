@@ -253,8 +253,9 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     }
 
     /** Get all games of type [G] currently running */
-    inline fun <reified G:Game<out Player>> getRunningGames()
+    inline fun <reified G:Game<out Player>> getRunningGames(): List<G>
             = games.filter { it is G && it.isRunning }
+        .mapTo(mutableListOf()) {it as G}
 
     fun add(game: Game<out Player>) = this.games.add(game)
 
