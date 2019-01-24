@@ -48,7 +48,7 @@ data class ModerationData(val initDate: OffsetDateTime) {
  * @author Jonathan Augustine
  * @since 2.1.1
  */
-class CmdModeration : WeebotCommand("mod", "Moderation", emptyArray(), CAT_MOD, "",
+class CmdModeration : WeebotCommand("mod", "Moderation", emptyArray(), CAT_MOD,
     "View and edit Moderation settings like max user-reports.", guildOnly = true,
     userPerms = arrayOf(ADMINISTRATOR)) {
 
@@ -125,8 +125,8 @@ class CmdModeration : WeebotCommand("mod", "Moderation", emptyArray(), CAT_MOD, 
 }
 
 class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
-    "<@User> [@users...] [reason]", "Report users to the server moderators.",
-    cooldown = 20, cooldownScope = USER_GUILD, guildOnly = true) {
+    "Report users to the server moderators.", cooldown = 20, cooldownScope =
+    USER_GUILD, guildOnly = true) {
 
     fun name(guild: Guild, id: Long)
             = guild.getMemberById(id)?.effectiveName ?: getUser(id)?.name ?: "Unknown User"

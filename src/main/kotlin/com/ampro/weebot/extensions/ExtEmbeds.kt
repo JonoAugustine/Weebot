@@ -456,6 +456,8 @@ open class SelectablePaginator(users: Set<User> = emptySet(),
      */
     override fun display(channel: MessageChannel) = paginate(channel, 1)
 
+    open fun displayInPrivate(user: User) = user.openPrivateChannel().queue { display(it) }
+
     /**
      * Begins waitFor on page 1 displaying this Pagination by editing the provided
      * [Message][net.dv8tion.jda.core.entities.Message].

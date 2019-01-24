@@ -60,7 +60,7 @@ class FileLogger(name: String, val timeStamp: Boolean = true,
      * @param kClass the class of the logging
      * @param any The object to flog
      */
-    fun slog(kClass: KClass<*>?, any: Any = "") {
+    fun slog(kClass: KClass<*>?, any: Any? = "") {
         if (any.toString().isNotBlank()) {
             val out = StringBuilder()
             if (timeStamp) out.append("[${NOW_STR()}]")
@@ -77,7 +77,7 @@ class FileLogger(name: String, val timeStamp: Boolean = true,
      * @param kClass the class of the logging
      * @param any The object to flog
      */
-    fun elog(kClass: KClass<*>?, any: Any = "") {
+    fun elog(kClass: KClass<*>?, any: Any? = "") {
         if (any.toString().isNotBlank()) {
             val out = StringBuilder()
             if (timeStamp) out.append("[${NOW_STR()}]")

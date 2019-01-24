@@ -98,6 +98,7 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     CMD_CLIENT = WeebotCommandClient(listOf(alt), LINK_INVITEBOT, games.random(),
         CMD_POOL, (CMD_HELP.aliases + CMD_HELP.name).toList()) { event ->
         val args = event.splitArgs()
+        event.delete()
         if (args.isEmpty()) CMD_HELP.execute(event)
         else COMMANDS.forEach { cmd ->
             if (cmd.isCommandFor(args[0]) && (!cmd.isHidden || event.isOwner)) {
@@ -154,6 +155,7 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
         try {
             while (ON) {
                 for (j in 0 until SAVE_JOBS.size) Runnable(SAVE_JOBS[j]).run()
+                if (i % 10 == 0 && i % 100 != 0) slog("Save Cycle: ${i++}")
                 if (i % 100 == 0) MLOG.slog(null, "Save Cycle: ${i++}")
                 delay(SAVE_INTER * 1_000L)
             }

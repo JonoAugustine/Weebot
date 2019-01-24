@@ -33,7 +33,7 @@ import java.util.concurrent.TimeUnit.MINUTES
  * @since 2.1.0
  */
 class CmdTaskManager : WeebotCommand("taskmanager", "Task Manager",
-    arrayOf("task", "tasks"), CAT_GEN, "[commandName]",
+    arrayOf("task", "tasks"), CAT_GEN,
     "View all active passive commands in the guild or for the user.", cooldown = 60,
     cooldownScope = USER_SHARD, userPerms = arrayOf(ADMINISTRATOR)) {
     override fun execute(event: WeebotCommandEvent) {
@@ -84,7 +84,7 @@ class CmdTaskManager : WeebotCommand("taskmanager", "Task Manager",
  * @since 1.0
  */
 class CmdSettings : WeebotCommand("settings", null, arrayOf("setting", "config", "set"),
-    CAT_MOD, "[settingName] [newSetting]", "View or Change your weebot's settings",
+    CAT_MOD, "View or Change your weebot's settings",
     guildOnly = true, cooldown = 30,
     children = arrayOf(
         CmdSetName(), CmdSetPrefix(), CmdSetLogChannel(), CmdSetTracking(), CmdBlock(),
@@ -121,9 +121,8 @@ class CmdSettings : WeebotCommand("settings", null, arrayOf("setting", "config",
 }
 
 private class CmdSetName : WeebotCommand("nickname",null, arrayOf("name", "changename"),
-    CAT_MOD, "<name> [newSetting]", "Change your Weebot's nickname",
-    guildOnly = true, cooldown = 10, userPerms = arrayOf(NICKNAME_MANAGE),
-    botPerms = arrayOf(NICKNAME_CHANGE)) {
+    CAT_MOD, "Change your Weebot's nickname", guildOnly = true, cooldown = 10,
+    userPerms = arrayOf(NICKNAME_MANAGE), botPerms = arrayOf(NICKNAME_CHANGE)) {
 
     companion object {
         val normField: Field = Field("NickName",
@@ -144,8 +143,8 @@ private class CmdSetName : WeebotCommand("nickname",null, arrayOf("name", "chang
 }
 
 private class CmdSetPrefix : WeebotCommand("prefix", null,emptyArray(), CAT_MOD,
-    "[newPrefix]", "View or Change your weebot's prefix",
-    guildOnly = true, cooldown = 10, userPerms = arrayOf(NICKNAME_MANAGE)) {
+    "View or Change your weebot's prefix", guildOnly = true, cooldown = 10,
+    userPerms = arrayOf(NICKNAME_MANAGE)) {
 
     companion object {
         val normField: Field = Field("Prefix",
@@ -226,8 +225,8 @@ private class CmdSetPrefix : WeebotCommand("prefix", null,emptyArray(), CAT_MOD,
 
 private class CmdSetLogChannel : WeebotCommand("log",null,
     arrayOf("logchannel", "setlog", "logger"), CAT_MOD,
-    "[logChannel]", "View or Change your weebot's logging channel",
-    guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)) {
+    "View or Change your weebot's logging channel", guildOnly = true, cooldown = 10,
+    userPerms = arrayOf(ADMINISTRATOR)) {
 
     companion object {
         val normField: Field = Field("Bot Loggging Channel",
@@ -285,8 +284,7 @@ private class CmdSetLogChannel : WeebotCommand("log",null,
 }
 
 private class CmdSetTracking : WeebotCommand("skynet", null,arrayOf("track", "tracking"),
-    CAT_UNDER_CONSTRUCTION, "<skynet> [newSetting]",
-    "View or Change your weebot's tracking settings",
+    CAT_UNDER_CONSTRUCTION, "View or Change your weebot's tracking settings",
     guildOnly = true, cooldown = 10, userPerms = arrayOf(ADMINISTRATOR)) {
 
     companion object {
@@ -318,9 +316,8 @@ private class CmdSetTracking : WeebotCommand("skynet", null,arrayOf("track", "tr
 }
 
 private class CmdLock : WeebotCommand("lock", null,arrayOf("lockto", "open"), CAT_MOD,
-    "<commandName> [#textChannel]", "Lock a command to one or more TextChannels",
-    guildOnly = true, cooldown = 10, cooldownScope = USER_GUILD,
-    userPerms = arrayOf(ADMINISTRATOR)) {
+    "<commandName> [#textChannel]", guildOnly = true, cooldown = 10,
+    cooldownScope = USER_GUILD, userPerms = arrayOf(ADMINISTRATOR)) {
     companion object {
         val normField = Field("Lock Command", "Lock a Command to specific channels." +
                 "\n``set lock [#channelMentions...]``", true)
@@ -365,9 +362,8 @@ private class CmdLock : WeebotCommand("lock", null,arrayOf("lockto", "open"), CA
 }
 
 private class CmdBlock : WeebotCommand("block", null,emptyArray(), CAT_MOD,
-    "<commandName> [#textChannel]", "Block a command from a TextChannel or server",
-    guildOnly = true, cooldown = 10, cooldownScope = USER_GUILD,
-    userPerms = arrayOf(ADMINISTRATOR)) {
+    "Block a command from a TextChannel or server", guildOnly = true, cooldown = 10,
+    cooldownScope = USER_GUILD, userPerms = arrayOf(ADMINISTRATOR)) {
     companion object {
         val normField = Field("Block Command", "Block a Command from a channel or " +
                 "entirely\n``set block [#channelMention...]``", true)

@@ -28,8 +28,8 @@ import java.util.concurrent.TimeUnit.SECONDS
  * @since 2.2.1
  */
 class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reactor"),
-    CAT_FUN, "", "React with predefined emotes to any message.",
-    cooldown = 10, guildOnly = true, userPerms = arrayOf(MESSAGE_ADD_REACTION),
+    CAT_FUN, "React with predefined emotes to any message.", cooldown = 10,
+    guildOnly = true, userPerms = arrayOf(MESSAGE_ADD_REACTION),
     botPerms = arrayOf(MESSAGE_ADD_REACTION)
 ) {
 
@@ -124,7 +124,7 @@ class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reacto
  * @since 2.0
  */
 class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
-    "[on/off]", "React with \"THiS\" to a message or enable an auto-reactor for This",
+    "React with \"THiS\" to a message or enable an auto-reactor for This",
     cooldown = 10, guildOnly = true,userPerms = arrayOf(MESSAGE_ADD_REACTION),
     botPerms = arrayOf(MESSAGE_ADD_REACTION),
         helpBiConsumer = HelpBiConsumerBuilder("^This Reactor")
@@ -246,7 +246,7 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
  * @author Jonathan Augustine
  * @since 2.1
  */
-class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN, "",
+class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN,
     "Turn any sentence into Emoji", cooldown = 5) {
 
     private val numberSet = digi.mapIndexed { i, _ ->
@@ -273,7 +273,7 @@ class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN, "",
  * @since 2.0
  */
 class CmdHelloThere : WeebotCommand("hellothere", "Hello There",arrayOf("droppingin"),
-    CAT_FUN, "[@Member]", "*GENERAL KENOBI!*", cooldown = 360,
+    CAT_FUN, "*GENERAL KENOBI!*", cooldown = 360,
     userPerms = arrayOf(MESSAGE_EMBED_LINKS), botPerms = arrayOf(MESSAGE_EMBED_LINKS)
 ) {
     companion object {

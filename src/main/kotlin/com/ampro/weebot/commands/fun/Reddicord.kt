@@ -185,7 +185,7 @@ class Reddicord(channels: MutableList<TextChannel> = mutableListOf()) : IPassive
  * @since 2.0
  */
 class CmdReddicord : WeebotCommand("reddicord", "Redicord",
-    arrayOf("reddiscord", "redditcord"), CAT_FUN,  "[on/off/scores]",
+    arrayOf("reddiscord", "redditcord"), CAT_FUN,
     "Upvote and Downvote messages to gain points.",
     userPerms = arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
     botPerms =  arrayOf(MANAGE_CHANNEL, MANAGE_EMOTES, MESSAGE_ADD_REACTION),
@@ -195,7 +195,7 @@ class CmdReddicord : WeebotCommand("reddicord", "Redicord",
 ) {
 
     class SubCmdReset : WeebotCommand("reset", null, arrayOf("clear", "clearscores"),
-        CAT_FUN, "", "Set everyone's score to 0.", guildOnly = true, cooldown = 360,
+        CAT_FUN, "Set everyone's score to 0.", guildOnly = true, cooldown = 360,
         userPerms = arrayOf(ADMINISTRATOR)) {
         override fun execute(event: CommandEvent) {
             val bot = getWeebotOrNew(event.guild)
@@ -309,9 +309,8 @@ class CmdReddicord : WeebotCommand("reddicord", "Redicord",
  * @since 2.0
  */
 class SubCmdLeaderBoard(name: String, alias: Array<String>)
-    : WeebotCommand(name, null, alias, CAT_FUN, "[@/member @/member2...]",
-    "See the Reddicord leaderboard.", guildOnly = true, cooldown = 120, hidden = true,
-    cooldownScope = USER_CHANNEL) {
+    : WeebotCommand(name, null, alias, CAT_FUN, "See the Reddicord leaderboard.",
+    guildOnly = true, cooldown = 120, hidden = true, cooldownScope = USER_CHANNEL) {
 
     override fun execute(event: CommandEvent) {
         val bot = getWeebotOrNew(event.guild)

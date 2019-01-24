@@ -11,6 +11,7 @@ import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
+import com.jagrosh.jdautilities.command.Command.CooldownScope.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.entities.*
@@ -31,7 +32,7 @@ import java.util.regex.PatternSyntaxException
  * @since 2.0
  */
 class CmdRegexTest : WeebotCommand("regex", null,arrayOf("regtest", "regextest"),
-    CAT_PROG, "<regex> <word> [words...]","Test a Regex against one or more strings",
+    CAT_PROG, "Test a Regex against one or more strings",
     cooldown = 10) {
 
     init {
@@ -111,8 +112,7 @@ class CmdRegexTest : WeebotCommand("regex", null,arrayOf("regtest", "regextest")
  */
 class CmdEmbedMaker : WeebotCommand("embedmaker", "Embed Maker",
     arrayOf("embedbuilder", "embed", "makeembed", "sendembed"), CAT_PROG,
-    "", "Make a pretty MessageEmbed", cooldown = 30,
-    cooldownScope = CooldownScope.USER_CHANNEL) {
+    "Make a pretty MessageEmbed", cooldown = 30, cooldownScope = USER_CHANNEL) {
 
     val MAX_FIELDS = 10
 

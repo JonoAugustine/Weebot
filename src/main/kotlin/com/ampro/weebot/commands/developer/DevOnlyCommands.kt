@@ -46,8 +46,7 @@ import kotlin.text.*
  * @since 1.0
  */
 class CmdShutdown : WeebotCommand("shutdown", null, arrayOf("tite", "killbot", "devkill"),
-    CAT_DEV, "", "Shutdown the weebot", hidden = true, ownerOnly = true
-) {
+    CAT_DEV, "Shutdown the weebot", hidden = true, ownerOnly = true) {
 
     override fun execute(event: CommandEvent) = runBlocking {
         event.reactWarning()
@@ -59,8 +58,8 @@ class CmdShutdown : WeebotCommand("shutdown", null, arrayOf("tite", "killbot", "
 }
 
 class CmdStatsView : WeebotCommand("stats", null, arrayOf("viewstats", "statsview",
-    "statview", "viewstat"), CAT_DEV, "[commandName...]", "View Weebot statistics",
-    hidden = true, ownerOnly = true) {
+    "statview", "viewstat"), CAT_DEV, "View Weebot statistics", hidden = true,
+    ownerOnly = true) {
     override fun execute(event: CommandEvent) { GlobalScope.launch(CACHED_POOL) {
         val stats = STAT.commandUsage
         val bots = JDA_SHARD_MNGR.guilds.map { getWeebotOrNew(it) }
@@ -108,13 +107,11 @@ class CmdStatsView : WeebotCommand("stats", null, arrayOf("viewstats", "statsvie
  * @since 2.0
  */
 class CmdGuildList : WeebotCommand("guildlist", null, arrayOf("guilds", "servers"),
-    CAT_DEV, "[-s <[joindate][size]>]",
-    "Gets a paginated list of the guilds the bot is on.",
-        HelpBiConsumerBuilder("Guild List")
-            .setDescription("Gets a paginated list of the guilds the bot is on.").build(),
-        ownerOnly = true, userPerms = arrayOf(MESSAGE_EMBED_LINKS), hidden = true,
-        botPerms = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ADD_REACTION)
-) {
+    CAT_DEV, "Gets a paginated list of the guilds the bot is on.",
+    HelpBiConsumerBuilder("Guild List")
+        .setDescription("Gets a paginated list of the guilds the bot is on.").build(),
+    ownerOnly = true, userPerms = arrayOf(MESSAGE_EMBED_LINKS), hidden = true,
+    botPerms = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ADD_REACTION)) {
 
     val REG_DATE = Regex("(?i)-(d+a*t*e*)")
 

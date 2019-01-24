@@ -342,7 +342,8 @@ class GlobalWeebot : Weebot(-1L) {
     /**
      * @return The list of [Reminder]s linked to this user
      */
-    fun getReminders(user: User) = userReminders.getOrPut(user.idLong){mutableListOf()}!!
+    fun getReminders(user: User) = userReminders.getOrPut(user.idLong)
+    { mutableListOf() }!!
 
     fun getReminders() = userReminders.toMap()
 

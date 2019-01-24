@@ -104,7 +104,7 @@ fun getSuggById(id: String, event: CommandEvent): Suggestion? {
  * @since 1.0
  */
 open class CmdSuggestion : WeebotCommand("suggest", "Suggest",
-    arrayOf("suggestion", "sugg"), CAT_GEN, "See help embed.",
+    arrayOf("suggestion", "sugg"), CAT_GEN,
     "Submit and Vote for anonymous suggestions for the Weebot devs.",
     HelpBiConsumerBuilder("Weebot Suggestions", false).setDescription(
         "Submit an anonymous suggestion to the Weebot developers right from " +
@@ -267,7 +267,7 @@ fun sendSuggsDev(page: Int, event: CommandEvent, criteria: (Suggestion) -> Boole
  * @since 2.0
  */
 class CmdSeeSuggestions : WeebotCommand("-see", null, arrayOf("-s", "see"),
-    CAT_GEN, "", "", cooldown = 5) {
+    CAT_GEN, "", cooldown = 5) {
 
     // \sugg -s(ee) [-k <keyword>] [-r <accepted/unreviewed/completed/ignored>] [pagenum]
     override fun execute(event: CommandEvent) {
@@ -342,11 +342,9 @@ class CmdSeeSuggestions : WeebotCommand("-see", null, arrayOf("-s", "see"),
  * @since 2.0
  */
 class CmdDevSuggestions : WeebotCommand("dev", null, emptyArray(), CAT_DEV, "",
-    "", HelpBiConsumerBuilder("Weebot Suggestions", false).setDescription(
-        "Commands for devs to control suggestions"
-    ).addField("", "", false)
-        .build(), ownerOnly = true, cooldown = 0, hidden = true
-) {
+    HelpBiConsumerBuilder("Weebot Suggestions", false).setDescription(
+        "Commands for devs to control suggestions").build(), ownerOnly = true,
+    cooldown = 0, hidden = true) {
 
     override fun isAllowed(channel: TextChannel)
             = super.isAllowed(channel) || OFFICIAL_CHATS.contains(channel.idLong)
