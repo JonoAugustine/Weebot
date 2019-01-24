@@ -133,22 +133,10 @@
           "DATA": {
             "dead": false
           }
-        },
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
-          "DATA": {
-            "dead": false
-          }
         }
       ],
       "113450820942487552": [],
       "139167730237571072": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
-          "DATA": {
-            "dead": false
-          }
-        },
         {
           "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
           "DATA": {
@@ -160,11 +148,7 @@
     "REM_MAX": 10,
     "REM_MAX_PREM": 50,
     "userReminders": {
-      "186130584693637131": [],
-      "228574821590499329": [],
-      "139167730237571072": [
-        null
-      ]
+      "139167730237571072": []
     },
     "initDate": {
       "dateTime": {
@@ -224,6 +208,13 @@
       }
     },
     "notePads": [],
+    "cahGuildInfo": {
+      "leaderBoard": {
+        "scoredUsers": []
+      },
+      "favoritedDecks": [],
+      "guildId": -1
+    },
     "guildID": -1
   },
   "WEEBOTS": {
@@ -343,6 +334,70 @@
       "passives": [],
       "notePads": [],
       "guildID": 264445053596991498
+    },
+    "537585280333381643": {
+      "initDate": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 23
+          },
+          "time": {
+            "hour": 6,
+            "minute": 18,
+            "second": 5,
+            "nano": 12000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "settings": {
+        "prefixs": [],
+        "logchannel": -1,
+        "trackingEnabled": false,
+        "commandRestrictions": {},
+        "guildID": 537585280333381643
+      },
+      "passives": [],
+      "moderationData": {
+        "reportLimit": -1,
+        "reportLimitActions": [
+          "NOTIFY_USER",
+          "NOTIFY_ADMINS"
+        ],
+        "hierarchicalReports": false,
+        "reports": {},
+        "initDate": {
+          "dateTime": {
+            "date": {
+              "year": 2019,
+              "month": 1,
+              "day": 23
+            },
+            "time": {
+              "hour": 6,
+              "minute": 18,
+              "second": 5,
+              "nano": 13000000
+            }
+          },
+          "offset": {
+            "totalSeconds": -18000
+          }
+        }
+      },
+      "notePads": [],
+      "cahGuildInfo": {
+        "leaderBoard": {
+          "scoredUsers": []
+        },
+        "favoritedDecks": [],
+        "guildId": 537585280333381643
+      },
+      "guildID": 537585280333381643
     },
     "508669831101546502": {
       "initDate": {
@@ -1024,10 +1079,10 @@
             ],
             "scoreMap": {
               "185063150557593600": 10,
-              "277593092561829889": 11,
-              "186130584693637131": 14,
+              "277593092561829889": 12,
+              "186130584693637131": 21,
               "139167730237571072": 8,
-              "383656411789524995": 16
+              "383656411789524995": 17
             }
           }
         }
