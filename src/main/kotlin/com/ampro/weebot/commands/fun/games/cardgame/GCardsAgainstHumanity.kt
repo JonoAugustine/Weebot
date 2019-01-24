@@ -775,14 +775,15 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
                             players.add(u)
                             m.editMessage(gameState()).queue()
                         }
-                    }, Beginner to { m, u ->
+                    }, Beginner to start@{ m, u ->
                         val cah = CardsAgainstHumanity(event, decks, handSize, winCond)
                         players.forEach { cah.addUser(it) }
                         if (!cah.startGame()) {
-                            event.respondThenDelete("The are either too few or too " +
-                                    "many players ($MIN_PLAYERS--$MAX_PLAYERS)")
+                            return@start event.respondThenDelete("The are either too " +
+                                    "few or too many players ($MIN_PLAYERS--$MAX_PLAYERS)")
                         }
                         event.bot.games.add(cah)
+                        m.clearReactions().queue()
                     }
                 )) { it.delete().queue() }.display(event.channel)
             }
