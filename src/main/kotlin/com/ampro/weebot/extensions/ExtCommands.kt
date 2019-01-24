@@ -119,8 +119,7 @@ fun CommandEvent.delete(delay: Long = 0L) {
  * @since 2.0
  */
 abstract class WeebotCommand(name: String, val displayName: String?,
-                             aliases: Array<String>, category: Category,
-                             arguments: String, help: String,
+                             aliases: Array<String>, category: Category, help: String,
                              helpBiConsumer: BiConsumer<CommandEvent, Command>? = null,
                              guildOnly: Boolean = false, ownerOnly: Boolean = false,
                              hidden: Boolean = false,
@@ -137,7 +136,6 @@ abstract class WeebotCommand(name: String, val displayName: String?,
         super.category = category
         super.help = help
         super.helpBiConsumer = helpBiConsumer
-        super.arguments = arguments
         super.hidden = hidden
         super.guildOnly = guildOnly
         super.requiredRole = requiredRole

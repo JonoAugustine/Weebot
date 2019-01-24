@@ -59,6 +59,7 @@ val CMD_HELP            = CmdHelp()
 val CMD_OHC             = CmdOutHouse()
 val CMD_REM             = CmdReminder()
 val CMD_NOTE            = CmdNotePad()
+val CMD_TRANSLATE       = CmdTranslate()
 
 val CMD_VCGEN           = CmdVoiceChannelGenerator()
 val CMD_SELFDESTRUCT    = CmdSelfDestruct()
@@ -106,7 +107,7 @@ val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
         CMD_SETTINGS, CMD_PURGE, CMD_MODERATION, CMD_REPORT, CMD_TASKS, CMD_CHATLOCK,
         CMD_SELFDESTRUCT,
         CMD_REGEX, CMD_EMBED,
-        CMD_OHC, CMD_REM, CMD_NOTE,
+        CMD_OHC, CMD_REM, CMD_NOTE, CMD_TRANSLATE,
         CMD_VCR, CMD_VCGEN,
         CMD_CAH,
         CMD_NAMEGEN, CMD_ATGAL,

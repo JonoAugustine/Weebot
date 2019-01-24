@@ -5,22 +5,29 @@
 package com.ampro.weebot.commands.utilitycommands
 
 import com.ampro.weebot.*
-import com.ampro.weebot.commands.CAT_UTIL
-import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.commands.*
 import com.ampro.weebot.database.*
 import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.AlarmClock
+import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.*
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
+import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
+import java.io.InputStreamReader
+import java.io.BufferedReader
+import java.io.IOException
+import java.net.*
+import java.net.URLEncoder.*
+
 
 /** An instantiable representation of a User's OutHouse. */
 class OutHouse(user: User, var remainingMin: Long, val message: String,
@@ -85,7 +92,6 @@ class OutHouse(user: User, var remainingMin: Long, val message: String,
  * @since 1.0
  */
 class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UTIL,
-    "[Zd] [Xh] [Ym] [-f] [activity]",
     "Have the bot respond to anyone who mentions you for the given time.",
     cooldown = 30) {
 
@@ -161,9 +167,7 @@ class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UT
  * @since 2.0
  */
 class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remindme"),
-    CAT_UTIL, "[-private] [-t phoneNum] [Xm] [Yh] [Zd] [Reminder Message]",
-    "Set a Reminder from 1 minute to 30 days.", cooldown = 5
-) {
+    CAT_UTIL, "Set a Reminder from 1 minute to 30 days.", cooldown = 5) {
 
     /**
      * A [Reminder] is similar to the [OutHouse] in the way it tracks time
@@ -203,15 +207,13 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
             }
         }
 
-        fun formatTime(): String {
-            val d    = minutes / 60 / 24
-            val h   = (minutes / 60 ) - 24 * d
-            val m = minutes - (h * 60) - (d * 60 * 24)
-            return "${if(d > 0) "$d d, " else ""}${if(h > 0) "$h hr, " else ""
-            }${if(m > 0) "$m min " else ""}"
-        }
+        /**@return the remaining time formatted*/
+        fun formatTime() = (minutes * 60).formatTime()
+
+        fun selectableEmbed(author: User) { }//todo }
 
         override fun toString() = "$id = ${formatTime()} $message"
+
     }
 
     val remJobMap = ConcurrentHashMap<Long, Job>()
@@ -235,7 +237,9 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
     }
 
     fun init() {
-        DAO.GLOBAL_WEEBOT.getReminders().forEach {
+        DAO.GLOBAL_WEEBOT.getReminders()
+            .filter { it.value.filterNotNull().isNotEmpty() }
+            .forEach {
             remJobMap.putIfAbsent(it.key, remWatchJob(it.value))
         }
         /** Cleaner Job */ GlobalScope.launch(CACHED_POOL) {
@@ -246,15 +250,20 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
         }
     }
 
-    fun sendReminderList(event: CommandEvent) {
-        //TODO Reminder editor paginator
-        event.replyInDm(strdEmbedBuilder.setTitle(event.author.name + "'s Reminders")
-            .apply {
-                setDescription("")
-                DAO.GLOBAL_WEEBOT.getReminders(event.author).forEach {
-                    appendDescription("${it.id} : ${it.formatTime()}\n${it.message}\n\n")
+    private fun sendReminderList(event: CommandEvent) {
+        val rems = DAO.GLOBAL_WEEBOT.getReminders(event.author)
+            .apply { removeIf { it == null } }
+        if (rems.isEmpty()) return event.respondThenDeleteBoth("No reminders.")
+        SelectablePaginator(baseEmbed = makeEmbedBuilder(
+            event.author.name + "'s Reminders",null,"")// "Choose a reminder to edit it.")
+            .build(), itemsPerPage = -1,
+            items = rems.mapNotNull {
+                "${it.id} : ${it.formatTime()}\n${it.message}" to { _: Int, _: Message ->
+                    it.selectableEmbed(event.author)
                 }
-            }.build())
+            }, exitAction = { it.delete().queue() },
+            timeoutAction = { it.clearReactions().queue() }
+        ).displayInPrivate(event.author)
     }
 
     //[-private] [Xm] [Yh] [Zd] [Reminder Message]
@@ -338,4 +347,125 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
             .setAliases(aliases)
             .build()
     }
+}
+
+
+/**
+ *
+ *
+ * @author Jonathan Augustine
+ * @since 2.2.1
+ */
+class CmdTranslate : WeebotCommand("Translate", null, arrayOf("gtc", "trans"),
+    CAT_UTIL, "Translate a sentence to any language! (well not *any* language...)",
+    cooldown = 45, cooldownScope = USER_SHARD) {
+
+    /**
+     * Langages that Google translate cares about
+     * @param code the code for that language
+     */
+    private enum class Language(val code: String) {
+        Afrikaans("af"), Irish("ga"), Albanian("sq"), Italian("it"), Arabic("ar"),
+        Japanese("ja"), Azerbaijani("az"), Kannada("kn"), Basque("eu"), Korean("ko"),
+        Bengali("bn"), Latin("la"), Belarusian("be"), Latvian("lv"), Bulgarian("bg"),
+        Lithuanian("lt"), Catalan("ca"), Macedonian("mk"), ChineseSimplified("zh-CN"),
+        Malay("ms"), ChineseTraditional("zh-TW"), Maltese("mt"), Croatian("hr"),
+        Norwegian("no"), Czech("cs"), Persian("fa"), Danish("da"), Polish("pl"),
+        Dutch("nl"), Portuguese("pt"), English("en"), Romanian("ro"), Esperanto("eo"),
+        Russian("ru"), Estonian("et"), Serbian("sr"), Filipino("tl"), Slovak("sk"),
+        Finnish("fi"), Slovenian("sl"), French("fr"), Spanish("es"), Galician("gl"),
+        Swahili("sw"), Georgian("ka"), Swedish("sv"), German("de"), Tamil("ta"),
+        Greek("el"), Telugu("te"), Gujarati("gu"), Thai("th"), HaitianCreole("ht"),
+        Turkish("tr"), Hebrew("iw"), Ukrainian("uk"), Hindi("hi"), Urdu("ur"),
+        Hungarian("hu"), Vietnamese("vi"), Icelandic("is"), Welsh("cy"), Indonesian("id"),
+        Yiddish("yi");
+        companion object {
+            fun from(string: String) = values().firstOrNull {
+                it.code.equals(string, true) || it.name.equals(string, true)
+            }
+        }
+    }
+
+    private val baseUrl = "https://script.google.com/macros/s/AKfycbyDk3bTHxqZGZ2F6xWmzPmP0EE7ZQORTDIFlf_eNXeWI0GeGX6E/exec"
+
+    @Suppress("UNCHECKED_CAST")
+    override fun execute(event: WeebotCommandEvent) {
+        if (event.argList.isEmpty() || event.argList.size < 2) return
+        //[-s sourceLang] <targetLang> <the stuff to translate>
+        val args = event.argList.toMutableList()
+        val source: Language?
+        val target: Language
+        val sourceText: String
+        if (args[0].matches(REG_HYPHEN + "(s(ource)?|f(rom)?)")) {
+            if (args.size < 4) return event.respondThenDeleteBoth(
+                "You must specify a target language and text ``-s [sourceLang] " + "<targetLang> <stuff to translate>``",
+                20)
+            source = Language.from(args[1]) ?: return event.respondThenDeleteBoth(
+                "Unavailable language (${args[1]})").also { event.reactError() }
+            target = Language.from(args[2]) ?: return event.respondThenDeleteBoth(
+                "Unavailable language (${args[2]})").also { event.reactError() }
+            sourceText = args.subList(3).joinToString(" ")
+        } else {
+            source = null
+            target = Language.from(args[0]) ?: return event.respondThenDeleteBoth(
+                "Unavailable language (${args[0]})").also { event.reactError() }
+            sourceText = args.subList(1).joinToString(" ")
+        }
+        try {
+            makeEmbedBuilder("Translator", null, """
+                        Translating ${source?.name ?: "auto"}
+                        ```
+                        $sourceText
+                        ```
+                        to ${target.name}
+                        ```
+                        ${translate(source, target, sourceText)}
+                        ```
+                    """.trimIndent()).build().send(event.channel)
+        } catch (e: IOException) {
+            MLOG.elog("Failed to receive translation: " + """
+                {
+                    from: ${source?.name ?: "auto"}
+                    to: ${target.name}
+                    text: $sourceText
+                }
+            """.trimIndent())
+            event.respondThenDeleteBoth(GENERIC_ERR_MSG, 20)
+        }
+
+    }
+
+    @Throws(IOException::class)
+    private fun translate(from: Language?, langTo: Language, text: String): String {
+        // INSERT YOU URL HERE
+        val urlStr = "$baseUrl?q=${encode(text,"UTF-8")}&target=${langTo.code}&source=${
+        from?.code?:""}"
+        val url = URL(urlStr)
+        val response = StringBuilder()
+        val con = url.openConnection() as HttpURLConnection
+        con.setRequestProperty("User-Agent", "Mozilla/5.0")
+        val `in` = BufferedReader(InputStreamReader(con.inputStream))
+        var inputLine: String? = `in`.readLine()
+        while (inputLine != null) {
+            response.append(inputLine)
+            inputLine = `in`.readLine()
+        }
+        `in`.close()
+        return response.toString()
+    }
+
+    init {
+        helpBiConsumer = HelpBiConsumerBuilder("Translator", false)
+            .setAliases(aliases).setDescription("""
+                ``[-s sourceLang] <targetLang> <the stuff to translate or whatever>``
+                ``<targetLang>`` can be either the ID or the name
+                If ``[-s sourceLang]`` is not set, it will be auto-detected
+            """.trimIndent())
+            .addField("Available Language (Name:ID)", """
+                ```css
+                ${Language.values().joinToString { "${it.name}:${it.code}" }}
+                ```""".trimIndent()
+            ).build()
+    }
+
 }

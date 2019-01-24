@@ -427,12 +427,18 @@ class CardsAgainstHumanity(guild: Guild, author: User,
                 sendWhiteCards(*playerList.toTypedArray())
             }
             val e = baseEmbed().addField("Guide", """
-                $ArrowsCounterclockwise to load a new Black Card
+                $ArrowsCounterclockwise to refresh (if the game freezes up)
+                $FastForward to load a new Black Card
                 $Warning to report this Black Card and load a new one
             """.trimIndent(), true).build()
             SelectableEmbed(czar.user, false, e, listOf(
-                ArrowsCounterclockwise to cc@{  m, _ ->
-                    if (!isRunning) return@cc
+                ArrowsCounterclockwise to reload@{ m, _ ->
+                    if (!isRunning) return@reload
+                    m.delete().queueAfter(250, MILLISECONDS)
+                    sendBlackCard()
+                    sendWhiteCards(*playerList.toTypedArray())
+                }, FastForward to skip@{ m, _ ->
+                    if (!isRunning) return@skip
                     this.usedCardsBlack.add(this.blackCard)
                     reloadBlackCard()
                     m.delete().queueAfter(250, MILLISECONDS)
@@ -652,7 +658,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
  * @since 1.0
  */
 class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
-    arrayOf("cardsagainsthumanity"), CAT_UNDER_CONSTRUCTION, "<command> [arguments]",
+    arrayOf("cardsagainsthumanity"), CAT_UNDER_CONSTRUCTION,
     "Play a game of CardsAgainstHumanity or make custom cards.", guildOnly = true,
     children = arrayOf(SubCmdDeck(), SubCmdSeeReports())
 ) {
@@ -846,7 +852,7 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
  */
 private class SubCmdDeck : WeebotCommand("deck", null, arrayOf("decks"),
     CAT_UNDER_CONSTRUCTION,
-    "","", guildOnly = true, cooldown = 60, cooldownScope = USER_SHARD) {
+    "", guildOnly = true, cooldown = 60, cooldownScope = USER_SHARD) {
 
     override fun execute(event: WeebotCommandEvent) {
         val gDecks = event.bot.cahGuildInfo.decks
@@ -1333,7 +1339,7 @@ private class SubCmdDeck : WeebotCommand("deck", null, arrayOf("decks"),
  * @since 2.2.1
  */
 private class SubCmdSeeReports : WeebotCommand("reports", null, arrayOf("report", "rep"),
-    CAT_DEV, "", "", ownerOnly = true, hidden = true) {
+    CAT_DEV, "", ownerOnly = true, hidden = true) {
     override fun execute(event: WeebotCommandEvent) {
         val whiteCards = (DECK_CUST.map.map { it.value }.flatten() + DECK_STRD)
             .map { it.whiteCards }.flatten().filter { it.reports > 0 }

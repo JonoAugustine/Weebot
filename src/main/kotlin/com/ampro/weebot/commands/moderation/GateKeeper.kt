@@ -99,7 +99,7 @@ class GateKeeper : IPassive {
  * @since 2.1
  */
 class CmdWelcomeMsg : WeebotCommand("welcome", "Welcome Messages",
-    arrayOf("gatekeeper", "wmc", "gkc"), CAT_UNDER_CONSTRUCTION, "",
+    arrayOf("gatekeeper", "wmc", "gkc"), CAT_UNDER_CONSTRUCTION,
     "Set Messages to be sent and Roles to be set when a new Member joins",
     guildOnly = true, userPerms = arrayOf(ADMINISTRATOR)) {
 

@@ -22,7 +22,7 @@ import java.time.temporal.ChronoUnit
  * @since 1.0
  */
 class PingCommand : WeebotCommand("ping", null, arrayOf("pong"), CAT_MISC,
-    "", "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong", false)
+    "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong", false)
         .setDescription("Checks the bot's latency.").build(), false, cooldown = 10
 ) {
     override fun execute(event: CommandEvent) {
@@ -45,7 +45,7 @@ class PingCommand : WeebotCommand("ping", null, arrayOf("pong"), CAT_MISC,
  * @since 1.0
  */
 class CmdInviteLink : WeebotCommand("invitelink", "Invite Link" ,
-    arrayOf("ilc", "invite"), CAT_MISC, "", "Get an invite link for Weebot.",
+    arrayOf("ilc", "invite"), CAT_MISC, "Get an invite link for Weebot.",
     HelpBiConsumerBuilder("Get an invite link for Weebot")
         .setDescription("[`Or just invite me with this link I guess`]($LINK_INVITEBOT)")
         .setThumbnail(weebotAvatar).build(), cooldown = 360,
@@ -65,7 +65,7 @@ class CmdInviteLink : WeebotCommand("invitelink", "Invite Link" ,
  * @since 2.2.0
  */
 class CmdNameGenerator : WeebotCommand("namegen", "Name Generator", arrayOf("ngc"),
-    CAT_UNDER_CONSTRUCTION, "", "Generate a random name", cooldown = 15) {
+    CAT_UNDER_CONSTRUCTION, "Generate a random name", cooldown = 15) {
 
     private val BASE_URL = "https://uzby.com/api.php" //TODO java rejecting SSL cert
 
@@ -90,7 +90,7 @@ class CmdNameGenerator : WeebotCommand("namegen", "Name Generator", arrayOf("ngc
  * @since 2.2.0
  */
 class CmdApiToGetALife : WeebotCommand("fact", "APGL Facts", emptyArray(),
-    CAT_MISC, "", "Get random facts and images from api-to-get-a.life",
+    CAT_MISC, "Get random facts and images from api-to-get-a.life",
     cooldown = 20, cooldownScope = CooldownScope.USER, guildOnly = true) {
 
     private val BASE_URL = "https://api-to.get-a.life"

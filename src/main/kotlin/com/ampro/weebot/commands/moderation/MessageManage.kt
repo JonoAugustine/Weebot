@@ -42,8 +42,7 @@ import kotlin.system.measureTimeMillis
  */
 class CmdSelfDestruct : WeebotCommand("selfdestruct", "Self Destruct Message",
     arrayOf("deleteme","cleanthis","deletethis","covertracks","whome?","podh","sdc"),
-    CAT_MOD, "[-t delaySeconds] [message]",
-    "Deletes the marked message after the given amount of time (30 sec by default)",
+    CAT_MOD, "Deletes the marked message after the given amount of time (30 sec default)",
     HelpBiConsumerBuilder("SelfDestruct Message")
         .setDescription("Deletes the marked message after the given amount of" +
                 " time (30 sec by " + "default)")
@@ -71,7 +70,7 @@ class CmdSelfDestruct : WeebotCommand("selfdestruct", "Self Destruct Message",
  * @since 2.0
  */
 class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", "clear"),
-    CAT_MOD, "<number>", "Delete multiple messages, 2-1,000.", guildOnly = true,
+    CAT_MOD, "Delete multiple messages, 2-1,000.", guildOnly = true,
     botPerms = arrayOf(MESSAGE_MANAGE), userPerms = arrayOf(MESSAGE_MANAGE),
     cooldown = 3, cooldownScope = GUILD) {
 
@@ -128,7 +127,6 @@ class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", 
  */
 class CmdChatLock : WeebotCommand("chatlock", "Chat Lock",
     arrayOf("lockchat", "pausechat", "blockchat"), CAT_UNDER_CONSTRUCTION,
-    "<[-s seconds] [-m minutes]> [from @/Roles @/Members]",
     "Block messages to the TextChannel for a given time.",
     guildOnly = true, botPerms = arrayOf(MESSAGE_MANAGE, MANAGE_CHANNEL),
     userPerms = arrayOf(MANAGE_CHANNEL), cooldown = 15, cooldownScope = USER_CHANNEL
@@ -151,6 +149,7 @@ class CmdChatLock : WeebotCommand("chatlock", "Chat Lock",
     }
 
     override fun execute(event: CommandEvent) {
+        //"<[-s seconds] [-m minutes]> [from @/Roles @/Members]",
         val args = event.splitArgs()
         if (args.isEmpty()) {
             return event.respondThenDeleteBoth("*Please specify a time span.*")

@@ -30,7 +30,7 @@ const val LINK_HQTWITCH    = "https://www.twitch.tv/hqregent"
  * @since 2.0
  */
 class CmdAbout : WeebotCommand("about", "About", arrayOf("info"), CAT_GEN,
-    "[me/more]", "Get information about Weebot.", cooldown = 90,
+    "Get information about Weebot.", cooldown = 90,
     children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP)) {
 
     override fun execute(event: WeebotCommandEvent) {
@@ -111,7 +111,7 @@ class CmdAbout : WeebotCommand("about", "About", arrayOf("info"), CAT_GEN,
  * @since 2.0
  */
 class SubCmdAboutUser : WeebotCommand("me", null, arrayOf("aboutme"), CAT_GEN,
-    "", "Get information about yourself.", cooldown = 90, guildOnly = true
+    "Get information about yourself.", cooldown = 90, guildOnly = true
 ) {
     override fun execute(event: WeebotCommandEvent) {
         STAT.track(this, event.bot, event.author, event.creationTime)
@@ -137,7 +137,7 @@ class SubCmdAboutUser : WeebotCommand("me", null, arrayOf("aboutme"), CAT_GEN,
     }
 }
 
-class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, "", "",
+class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, "",
     cooldown = 90, cooldownScope = USER_CHANNEL, guildOnly = true
 ) {
     override fun execute(event: WeebotCommandEvent) {
@@ -197,9 +197,9 @@ class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, 
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), CAT_GEN,
-        "[category] [command name]", "Get information about Weebot Commands and Usage.",
-        cooldown = 30, guildOnly = false) {
+class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"),
+    CAT_GEN, "Get information about Weebot Commands and Usage.", cooldown = 30,
+    guildOnly = false) {
 
     private val catAll: Category = Category("All")
 
@@ -218,7 +218,6 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
                     sb.append("Guild Only: ${it.isGuildOnly}\n\n").toString()
                 }
         }
-        event.delete()
         val cats = listOf(catAll) + CATEGORIES.toMutableList().also {
             if (!event.isOwner) it.remove(CAT_DEV)
         }.filter { c -> COMMANDS.any { it.category == c } }
@@ -264,7 +263,7 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"), 
 }
 
 class CmdWatchaDoin : WeebotCommand("whatchadoin", "Whatcha Doin'?", arrayOf("whatsup"),
-    CAT_GEN, "","What am I up to?", cooldown = 0, cooldownScope = USER_SHARD,
+    CAT_GEN, "What am I up to?", cooldown = 0, cooldownScope = USER_SHARD,
     guildOnly = true) {
     override fun execute(event: WeebotCommandEvent) {
         val game = event.selfMember.game ?: games.random()
