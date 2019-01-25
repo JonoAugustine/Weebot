@@ -266,7 +266,7 @@ class CmdEmbedMaker : WeebotCommand("embedmaker", "Embed Maker",
                 }
             } else {
                 eb.setAuthor(event.author.name, null, event.author.avatarUrl)
-                    .setColor(event.member?.color ?: STD_GREEN)
+                    .setColor(event.member?.color ?: CLR_GREEN)
                     .setFooter("Run by Weebot", weebotAvatar)
                     .setTimestamp(event.creationTime)
                 m.delete().queueIgnore(1)

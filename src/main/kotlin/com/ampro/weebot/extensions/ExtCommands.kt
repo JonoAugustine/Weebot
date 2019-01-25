@@ -419,7 +419,8 @@ class WeebotCommandClient(val prefixes: List<String>,
 
         if (rawParts.isEmpty()) return
         val cmdCall: String = rawParts[0].toLowerCase()
-        val args = rawParts.subList(1).joinToString(" ")
+        val args = if (rawParts.size == 1) ""
+        else rawParts.subList(1).joinToString(" ")
 
         val wce = WeebotCommandEvent(event, args, event.guild?.bot ?: DAO.GLOBAL_WEEBOT)
         if (helpWords.contains(cmdCall.toLowerCase())) {

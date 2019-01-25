@@ -46,7 +46,7 @@ class CmdTaskManager : WeebotCommand("taskmanager", "Task Manager",
 
         SelectablePaginator(title = "Task manager",
             description = "All running background Commands & Games.",
-            color = event.guild?.roles?.get(0)?.color ?: STD_GREEN,
+            color = event.guild?.roles?.get(0)?.color ?: CLR_GREEN,
             items = passives.map { passive ->
                 passive::class.java.simpleName!! to { _:Int, _: Message ->
                     strdButtonMenu.setText("_")

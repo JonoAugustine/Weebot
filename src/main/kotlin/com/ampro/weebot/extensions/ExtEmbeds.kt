@@ -36,15 +36,15 @@ const val EMBED_MAX_AUTHOR = 256
 
 var weebotAvatar= "https://i1.sndcdn.com/avatars-000308662917-0cbsjo-t200x200.jpg"
 
-val STD_GREEN = Color(0x31FF00)
-val STD_RED   = Color(0xFF2400)
+val CLR_GREEN = Color(0x31FF00)
+val CLR_RED   = Color(0xFF2400)
 
 /**
  * @return EmbedBuilder with the standard green, Author set to "Weebot"
  * and footer
  */
 val strdEmbedBuilder: EmbedBuilder
-    get() = EmbedBuilder().setColor(STD_GREEN)
+    get() = EmbedBuilder().setColor(CLR_GREEN)
         .setAuthor("Weebot", null, weebotAvatar)
         .setFooter("Run by Weebot", weebotAvatar)
         .setTimestamp(Instant.now())
@@ -88,7 +88,7 @@ fun MessageEmbed.send(messageChannel: MessageChannel, success: (Message) -> Unit
 }
 
 val strdPaginator: Paginator.Builder
-    get() = Builder().setColor(STD_GREEN).setEventWaiter(WAITER)
+    get() = Builder().setColor(CLR_GREEN).setEventWaiter(WAITER)
         .waitOnSinglePage(false).useNumberedItems(false).showPageNumbers(true)
         .wrapPageEnds(true).setTimeout(3, MINUTES)
         .setFinalAction { m ->
@@ -103,11 +103,11 @@ val strdOrderedMenu: OrderedMenu.Builder
         .useCancelButton(true).setTimeout(3, MINUTES)
 
 /**
- * [WAITER], [STD_GREEN], 3 [MINUTES]
+ * [WAITER], [CLR_GREEN], 3 [MINUTES]
  */
 val strdButtonMenu: ButtonMenu.Builder
     get() = ButtonMenu.Builder().setEventWaiter(WAITER)
-        .setColor(STD_GREEN).setTimeout(3, MINUTES)
+        .setColor(CLR_GREEN).setTimeout(3, MINUTES)
 
 /**
  * A Paginator based on JAgrosh's [Paginator] that allows users to react with
@@ -126,7 +126,7 @@ class ButtonPaginator(users: Set<User> = emptySet(), roles: Set<Role> = emptySet
                       val bulkSkipNumber: Int = 0,
                       val wrapPageEnds: Boolean = true,
                       val thumbnail: String = "",
-                      val color: Color = STD_GREEN,
+                      val color: Color = CLR_GREEN,
                       val timeoutAction: (Message) -> Unit = { m ->
                               try {
                                   m.clearReactions().queueAfter(250, SECONDS)
@@ -368,13 +368,13 @@ open class SelectablePaginator(users: Set<User> = emptySet(),
                                val title: String, val description: String = "",
                                /** The items to be listed with an [Emoji] and consumer */
                                val items: List<Pair<String, (Int, Message) -> Any>>,
-                          var itemsPerPage: Int = 10,
-                          /**Disallow multiple reactions*/ val singleUse: Boolean = false,
-                          val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
-                          val thumbnail: String? = null, val color: Color = STD_GREEN,
-                          val fieldList: List<Field> = emptyList(),
-                          val exitAction: (Message) -> Unit = {},
-                          val timeoutAction: (Message) -> Unit = { m ->
+                               var itemsPerPage: Int = 10,
+                               /**Disallow multiple reactions*/ val singleUse: Boolean = false,
+                               val bulkSkipNumber: Int = 0, val wrapPageEnds: Boolean = true,
+                               val thumbnail: String? = null, val color: Color = CLR_GREEN,
+                               val fieldList: List<Field> = emptyList(),
+                               val exitAction: (Message) -> Unit = {},
+                               val timeoutAction: (Message) -> Unit = { m ->
                               try {
                                   m.clearReactions().queueAfter(250, SECONDS)
                               } catch (ignored: Exception) {
@@ -390,7 +390,7 @@ open class SelectablePaginator(users: Set<User> = emptySet(),
                 itemsPerPage: Int = 10,
                 /**Disallow multiple reactions*/ singleUse: Boolean = false,
                 bulkSkipNumber: Int = 0, wrapPageEnds: Boolean = true,
-                color: Color = STD_GREEN, exitAction: (Message) -> Unit = {},
+                color: Color = CLR_GREEN, exitAction: (Message) -> Unit = {},
                 timeoutAction: (Message) -> Unit = { m ->
                     try {
                         m.clearReactions().queueAfter(250, SECONDS)
@@ -673,7 +673,7 @@ class DynamicSelectablePaginator(users: Set<User> = emptySet(), roles: Set<Role>
                                  itemsPerPage: Int = 10,
                                  /**Disallow multiple reactions*/ singleUse: Boolean = false,
                                  bulkSkipNumber: Int = 0, wrapPageEnds: Boolean = true,
-                                 color: Color = STD_GREEN, exitAction: (Message) -> Unit = {},
+                                 color: Color = CLR_GREEN, exitAction: (Message) -> Unit = {},
                                  timeoutAction: (Message) -> Unit = { m ->
                                     try {
                                         m.clearReactions().queueAfter(250, SECONDS)

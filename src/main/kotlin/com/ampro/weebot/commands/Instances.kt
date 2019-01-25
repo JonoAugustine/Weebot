@@ -92,6 +92,7 @@ val CMD_EMBED           = CmdEmbedMaker()
 val CMD_NAMEGEN         = CmdNameGenerator()
 val CMD_ATGAL           = CmdApiToGetALife()
 
+val CMD_BIGGIFY         = CmdBiggifyEmoji()
 val CMD_HELLOTHERE      = CmdHelloThere()
 val CMD_EMOJIFY         = CmdEmojify()
 val CMD_THIS            = CmdThis()
@@ -111,5 +112,5 @@ val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
         CMD_VCR, CMD_VCGEN,
         CMD_CAH,
         CMD_NAMEGEN, CMD_ATGAL,
-        CMD_THIS, CMD_HELLOTHERE, CMD_EMOJIFY,
+        CMD_THIS, CMD_HELLOTHERE, CMD_EMOJIFY, CMD_BIGGIFY,
         CMD_REDDICORD, CMD_REDDICORD_SCORE)

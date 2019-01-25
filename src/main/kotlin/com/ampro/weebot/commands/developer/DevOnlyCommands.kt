@@ -51,7 +51,7 @@ class CmdShutdown : WeebotCommand("shutdown", null, arrayOf("tite", "killbot", "
     override fun execute(event: CommandEvent) = runBlocking {
         event.reactWarning()
         event.reply("Shutting down all Weebots...")
-        sendSMS(PHONE_JONO, "WEEBOT: Shutting Down")
+        //sendSMS(PHONE_JONO, "WEEBOT: Shutting Down")
         delay(2_000)
         shutdown(event.author)
     }
@@ -157,7 +157,7 @@ fun Guild.infoEmbed(event: CommandEvent): SelectableEmbed {
         **Custom Emotes:**  ${emotes.size}
     """.trimIndent()).setThumbnail(iconUrl).addField("Options", """
         $X_Red Remove Weebot from this guild""".trimIndent(), false)
-        .setColor(if (roles.isNotEmpty()) this.roles[0].color else STD_GREEN).build(),
+        .setColor(if (roles.isNotEmpty()) this.roles[0].color else CLR_GREEN).build(),
         listOf(X_Red to { _: Message, _: User ->
             event.reply("Are you sure? (yes/no) (30 sec timeout)")
             WAITER.waitForEvent(MessageReceivedEvent::class.java,

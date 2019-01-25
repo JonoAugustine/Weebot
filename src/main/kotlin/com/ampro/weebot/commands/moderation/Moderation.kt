@@ -250,7 +250,7 @@ class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
                             it.sendMessage(makeEmbedBuilder(
                                 "You hit the Report Limit! $Warning",null,
                                 "You have hit the maximum number of Reports " +
-                                        "in **${gld.name}**").setColor(STD_RED).build())
+                                        "in **${gld.name}**").setColor(CLR_RED).build())
                                 .queueIgnore()
                         }
                         NOTIFY_ADMINS -> {

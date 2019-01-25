@@ -28,9 +28,10 @@ operator fun ShardManager.get(shardIndex: Int): JDA = shards!![shardIndex]
 
 enum class MentionType { USER, ROLE, CHANNEL }
 
-val userMentionRegex: Regex = "^(<@!?\\d+>)$".toRegex()
-val roleMentionRegex: Regex = "^(<@&\\d+>)$".toRegex()
+val userMentionRegex = "^(<@!?\\d+>)$".toRegex()
+val roleMentionRegex = "^(<@&\\d+>)$".toRegex()
 val channelMentionRegex = "^(<#\\d+>)\$".toRegex()
+val emoteRegex = "^<[A-Za-z]*:[A-Za-z]+:\\d+>$".toRegex()
 
 /**
  * Attempt to get a [IMentionable] ID from a raw string

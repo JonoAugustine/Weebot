@@ -316,7 +316,7 @@ class VCGenerator(baseChannel: Long) : IPassive {
                     **User limit:** ${if (limit == 0) "Infinity" else "$limit"}
                     **Channel name:** ${ if (name.isNotBlank()) name else nameGen(member)}
                 """.trimIndent())
-                .setColor(member.color ?: STD_GREEN)
+                .setColor(member.color ?: CLR_GREEN)
         }
     }
 
@@ -435,7 +435,7 @@ class VCGenerator(baseChannel: Long) : IPassive {
                 description = desc).addField("Open Channels",
                 if (genChannels.isEmpty()) "none" else genChannels.map
                 { guild.getVoiceChannelById(it.value)?.name ?: "" }.joinToString(", "), false)
-                .setColor(guild.roles[0].color ?: STD_GREEN)
+                .setColor(guild.roles[0].color ?: CLR_GREEN)
         }
 
 }

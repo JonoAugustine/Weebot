@@ -411,6 +411,7 @@ class CmdTranslate : WeebotCommand("Translate", null, arrayOf("gtc", "trans"),
                 "Unavailable language (${args[0]})").also { event.reactError() }
             sourceText = args.subList(1).joinToString(" ")
         }
+        STAT.track(this, event.bot, event.author, event.creationTime)
         try {
             makeEmbedBuilder("Translator", null, """
                         Translating ${source?.name ?: "auto"}

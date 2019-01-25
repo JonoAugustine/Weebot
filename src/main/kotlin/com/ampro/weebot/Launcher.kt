@@ -149,13 +149,13 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     genSetup.joinAll() //Ensure all gensetup is finished
 
     SAVER_JOB = GlobalScope.launch(CACHED_POOL) {
-        var i = 1
+        var i = 0
         try {
             MLOG.slog(null, "Starting Save Job...")
             while (ON) {
+                i++
                 for (j in 0 until SAVE_JOBS.size) Runnable(SAVE_JOBS[j]).run()
-                if (i % 10 == 0 && i % 100 != 0) slog("Save Cycle: ${i}")
-                if (i % 100 == 0) MLOG.slog(null, "Save Cycle: ${i++}")
+                if (i % 100 == 0) MLOG.slog(null, "Save Cycle: $i")
                 delay(SAVE_INTER * 1_000L)
             }
         } catch (e: InterruptedException) {

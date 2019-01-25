@@ -4,6 +4,7 @@
 
 package com.ampro.weebot.commands.`fun`
 
+import com.ampro.weebot.GENERIC_ERR_MSG
 import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.commands.IPassive
@@ -13,12 +14,123 @@ import com.ampro.weebot.extensions.*
 import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.jagrosh.jdautilities.command.CommandEvent
-import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
-import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
+import net.dv8tion.jda.core.Permission.*
+import net.dv8tion.jda.core.entities.Emote
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.SECONDS
+
+
+/**
+ * A [WeebotCommand] with associated [IPassive] for replacing a single-emote-only
+ * message with a larger version within an embed.
+ *
+ * @author Jonathan Augustine
+ * @since 2.2.1
+ */
+class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
+    arrayOf("ebig", "bigemote"), CAT_FUN,
+    "Replace single-emote-messages with a bigger image", guildOnly = true, cooldown = 30,
+    userPerms = arrayOf(ADMINISTRATOR), botPerms = arrayOf(MESSAGE_MANAGE)) {
+
+    /**
+     * @author Jonathan Augustine
+     * @since 2.2.1
+     */
+    private class Biggifyer(var invoke: Char? = null) : IPassive {
+        private var dead = false
+        override fun dead() = dead
+
+        private fun Emote.mentioRegex()
+                = Regex("${invoke?:""}<[A-Za-z]*:$name:$id>")
+
+        override fun accept(bot: Weebot, event: Event) {
+            if (event !is GuildMessageReceivedEvent) return
+            val emotes = event.message.emotes.filterNotNull()
+            if (emotes.size != 1) return
+            val das = emotes.single()
+            val raw = event.message.contentRaw
+            if (!raw.matches(das.mentioRegex())) return
+            event.message.delete().queueAfter(250, MILLISECONDS)
+            strdEmbedBuilder.setAuthor(event.member.effectiveName, event.author.avatarUrl)
+                .setColor(event.member.color ?: CLR_GREEN).setImage(das.imageUrl)
+                .build().send(event.channel)
+        }
+
+    }
+
+    override fun execute(event: WeebotCommandEvent) {
+        var biggifyer = event.bot.getPassive<Biggifyer>()
+        if (event.argList.isEmpty()) return event.respondThenDeleteBoth("""
+            The Emote Biggifyer is ${if (biggifyer == null) "off" else "on"}.
+            Use ``biggify <on/off>`` to change the setting.""".trimIndent())
+
+        when {
+            event.argList[0].matchesAny(REG_ON, REG_ENABLE) -> {
+                if (biggifyer != null) return event.respondThenDeleteBoth(
+                    "The Biggifyer is already active.")
+                val invoke: Char? = if (event.argList.size == 2) {
+                    if (event.argList[1].length > 1) {
+                        return event.respondThenDeleteBoth(
+                            "Prefix must be ``1`` character (``g``, ``\\``, ``+``, etc)", 30)
+                    } else event.argList[1][0]
+                } else null
+                biggifyer = Biggifyer(invoke)
+                event.bot.add(biggifyer)
+                if (invoke == null) {
+                    event.replySuccess("Biggifyer Activated!")
+                } else {
+                    event.reply(makeEmbedBuilder("Biggifyer Activated!",null,"""
+                        Any custom emote can now be BIGGENED by using the prefix
+                        ``$invoke:emoteName:``""".trimIndent()).build())
+                }
+            }
+            event.argList[0].matchesAny(REG_OFF, REG_DISABLE) -> {
+                if (biggifyer == null) return event.respondThenDeleteBoth(
+                    "The Biggifyer is already off.")
+                return if (event.bot.passives.remove(biggifyer)) {
+                    event.replySuccess("Biggifyer deactivated.")
+                } else event.replyError(GENERIC_ERR_MSG)
+            }
+            event.argList[0].matches("(?i)-{0,2}p(re(fix)?)?") -> {
+                if (biggifyer == null) return event.respondThenDeleteBoth("No Biggifyer active.")
+                if (event.argList.size == 1) {
+                    return event.reply("The prefix is currently ``${biggifyer.invoke?: "not set"}``")
+                } else if (event.argList[1].length > 1) {
+                    if (event.argList[1].matchesAny(REG_OFF, REG_DISABLE)) {
+                        biggifyer.invoke = null
+                        event.replySuccess("Prefix removed. AutoBigging activated.")
+                    } else return event.respondThenDeleteBoth(
+                            "Must be ``1`` character (``g``, ``\\``, ``+``, etc)", 30)
+                } else {
+                    biggifyer.invoke = event.argList[1][0]
+                    event.replySuccess("Biggifyer prefix set to ``${biggifyer.invoke}``")
+                }
+            }
+            else -> return
+        }
+        STAT.track(this, event.bot, event.author, event.creationTime)
+    }
+
+    init {
+        helpBiConsumer = HelpBiConsumerBuilder("Emote Biggifyer", false)
+            .setDescription("Automatically (or manually) have weebot replace " +
+                    "any *custom* emote with a bigger version of the same emote.")
+            .addField("Commands", """
+                **Enable**
+                ``on [prefix]``
+                if the prefix is set, then put the prefix before the emote, e.g.``b:emoteName:``
+                otherwise, any message of a single emote will be **mBIggened**
+                **Change/remove the prefix**
+                ``pref <1_char or off>`` | ``off`` to set to autoBIggify
+                **Disable**
+                ``off``
+            """.trimIndent()).build()
+    }
+
+}
 
 
 /**
@@ -125,7 +237,7 @@ class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reacto
  */
 class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
     "React with \"THiS\" to a message or enable an auto-reactor for This",
-    cooldown = 10, guildOnly = true,userPerms = arrayOf(MESSAGE_ADD_REACTION),
+    cooldown = 10, guildOnly = true, userPerms = arrayOf(MESSAGE_ADD_REACTION),
     botPerms = arrayOf(MESSAGE_ADD_REACTION),
         helpBiConsumer = HelpBiConsumerBuilder("^This Reactor")
             .setDescription("Have me react with *\"THiS\"* to a message whenever someone types ")
