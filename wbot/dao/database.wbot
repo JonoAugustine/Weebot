@@ -21,7 +21,7 @@
           "totalSeconds": -18000
         }
       },
-      "state": "ACCEPTED",
+      "state": "COMPLETED",
       "votes": [],
       "suggestion": "For emote only text posts, find+replace emote with higher res picture"
     },
@@ -69,7 +69,7 @@
           "totalSeconds": -18000
         }
       },
-      "state": "ACCEPTED",
+      "state": "COMPLETED",
       "votes": [],
       "suggestion": "automatically change a message to emoji letters"
     },
@@ -127,28 +127,40 @@
     "PASSIVE_MAX": 10,
     "PASSIVE_MAX_PREM": 50,
     "userPassives": {
-      "451005806222245889": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
-          "DATA": {
-            "dead": false
-          }
-        }
-      ],
+      "451005806222245889": [],
       "113450820942487552": [],
-      "139167730237571072": [
-        {
-          "CLASSNAME": "com.ampro.weebot.commands.fun.games.cardgame.PlayerHandPassive",
-          "DATA": {
-            "dead": false
-          }
-        }
-      ]
+      "139167730237571072": []
     },
     "REM_MAX": 10,
     "REM_MAX_PREM": 50,
     "userReminders": {
-      "139167730237571072": []
+      "139167730237571072": [
+        {
+          "id": "REM:KNXKEAD",
+          "lastTime": {
+            "dateTime": {
+              "date": {
+                "year": 2019,
+                "month": 1,
+                "day": 25
+              },
+              "time": {
+                "hour": 13,
+                "minute": 4,
+                "second": 31,
+                "nano": 153000000
+              }
+            },
+            "offset": {
+              "totalSeconds": -18000
+            }
+          },
+          "userID": 139167730237571072,
+          "channel": 139168039634468865,
+          "minutes": 149,
+          "message": "biggify allow for space between prefix \\\\\\s+"
+        }
+      ]
     },
     "initDate": {
       "dateTime": {
@@ -464,39 +476,6 @@
       "passives": [],
       "notePads": [],
       "guildID": 528665849423200276
-    },
-    "110373943822540800": {
-      "initDate": {
-        "dateTime": {
-          "date": {
-            "year": 2019,
-            "month": 1,
-            "day": 1
-          },
-          "time": {
-            "hour": 18,
-            "minute": 15,
-            "second": 35,
-            "nano": 199000000
-          }
-        },
-        "offset": {
-          "totalSeconds": -18000
-        }
-      },
-      "settings": {
-        "prefixs": [
-          "\\",
-          "w!"
-        ],
-        "logchannel": -1,
-        "trackingEnabled": false,
-        "commandRestrictions": {},
-        "guildID": 110373943822540800
-      },
-      "passives": [],
-      "notePads": [],
-      "guildID": 110373943822540800
     },
     "525317303726768138": {
       "initDate": {
@@ -1079,11 +1058,17 @@
             ],
             "scoreMap": {
               "185063150557593600": 10,
-              "277593092561829889": 12,
-              "186130584693637131": 21,
-              "139167730237571072": 8,
+              "277593092561829889": 13,
+              "186130584693637131": 25,
+              "139167730237571072": 11,
               "383656411789524995": 17
             }
+          }
+        },
+        {
+          "CLASSNAME": "com.ampro.weebot.commands.fun.CmdBiggifyEmoji$Biggifyer",
+          "DATA": {
+            "dead": false
           }
         }
       ],

@@ -46,73 +46,13 @@
               "date": {
                 "year": 2019,
                 "month": 1,
-                "day": 24
+                "day": 25
               },
               "time": {
-                "hour": 17,
+                "hour": 7,
                 "minute": 50,
-                "second": 4,
-                "nano": 100000000
-              }
-            },
-            "offset": {
-              "totalSeconds": 0
-            }
-          }
-        }
-      ]
-    ],
-    [
-      {
-        "CLASSNAME": "kotlin.reflect.jvm.internal.KClassImpl"
-      },
-      [
-        {
-          "guildID": 537585280333381643,
-          "weebotInfo": {
-            "settings": {
-              "prefixs": [],
-              "logchannel": -1,
-              "trackingEnabled": false,
-              "commandRestrictions": {},
-              "guildID": 537585280333381643
-            },
-            "init": {
-              "dateTime": {
-                "date": {
-                  "year": 2019,
-                  "month": 1,
-                  "day": 23
-                },
-                "time": {
-                  "hour": 6,
-                  "minute": 18,
-                  "second": 5,
-                  "nano": 12000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -18000
-              }
-            },
-            "guildSize": 5,
-            "percentHuman": 0.4
-          },
-          "userInfo": {
-            "mutualGuilds": 1
-          },
-          "time": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 23
-              },
-              "time": {
-                "hour": 11,
-                "minute": 21,
-                "second": 39,
-                "nano": 777000000
+                "second": 32,
+                "nano": 88000000
               }
             },
             "offset": {
@@ -121,286 +61,53 @@
           }
         },
         {
-          "guildID": 537585280333381643,
-          "weebotInfo": {
-            "settings": {
-              "prefixs": [],
-              "logchannel": -1,
-              "trackingEnabled": false,
-              "commandRestrictions": {},
-              "guildID": 537585280333381643
-            },
-            "init": {
-              "dateTime": {
-                "date": {
-                  "year": 2019,
-                  "month": 1,
-                  "day": 23
-                },
-                "time": {
-                  "hour": 6,
-                  "minute": 18,
-                  "second": 5,
-                  "nano": 12000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -18000
-              }
-            },
-            "guildSize": 8,
-            "percentHuman": 0.625
-          },
-          "userInfo": {
-            "mutualGuilds": 1
-          },
-          "time": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 23
-              },
-              "time": {
-                "hour": 15,
-                "minute": 50,
-                "second": 23,
-                "nano": 140000000
-              }
-            },
-            "offset": {
-              "totalSeconds": 0
-            }
-          }
-        }
-      ]
-    ],
-    [
-      {
-        "CLASSNAME": "kotlin.reflect.jvm.internal.KClassImpl"
-      },
-      [
-        {
-          "guildID": 537585280333381643,
-          "weebotInfo": {
-            "settings": {
-              "prefixs": [],
-              "logchannel": -1,
-              "trackingEnabled": false,
-              "commandRestrictions": {},
-              "guildID": 537585280333381643
-            },
-            "init": {
-              "dateTime": {
-                "date": {
-                  "year": 2019,
-                  "month": 1,
-                  "day": 23
-                },
-                "time": {
-                  "hour": 6,
-                  "minute": 18,
-                  "second": 5,
-                  "nano": 12000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -18000
-              }
-            },
-            "guildSize": 5,
-            "percentHuman": 0.4
-          },
-          "userInfo": {
-            "mutualGuilds": 1
-          },
-          "time": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 23
-              },
-              "time": {
-                "hour": 11,
-                "minute": 22,
-                "second": 8,
-                "nano": 569000000
-              }
-            },
-            "offset": {
-              "totalSeconds": 0
-            }
-          }
-        },
-        {
-          "guildID": 264445053596991498,
+          "guildID": 139168039634468865,
           "weebotInfo": {
             "settings": {
               "prefixs": [
-                "\\",
-                "w!"
+                "\\"
               ],
-              "logchannel": -1,
-              "trackingEnabled": false,
+              "logchannel": 493111883814010899,
+              "trackingEnabled": true,
               "commandRestrictions": {},
-              "guildID": 264445053596991498
+              "guildID": 139168039634468865
             },
             "init": {
               "dateTime": {
                 "date": {
                   "year": 2018,
                   "month": 12,
-                  "day": 29
+                  "day": 12
                 },
                 "time": {
-                  "hour": 22,
-                  "minute": 43,
-                  "second": 15,
-                  "nano": 377000000
+                  "hour": 19,
+                  "minute": 13,
+                  "second": 12,
+                  "nano": 523000000
                 }
               },
               "offset": {
                 "totalSeconds": -18000
               }
             },
-            "guildSize": 34727,
-            "percentHuman": 0.8744204797419876
+            "guildSize": 90,
+            "percentHuman": 0.8444444444444444
           },
           "userInfo": {
-            "mutualGuilds": 1
+            "mutualGuilds": 7
           },
           "time": {
             "dateTime": {
               "date": {
                 "year": 2019,
                 "month": 1,
-                "day": 23
+                "day": 25
               },
               "time": {
-                "hour": 21,
-                "minute": 5,
-                "second": 50,
-                "nano": 193000000
-              }
-            },
-            "offset": {
-              "totalSeconds": 0
-            }
-          }
-        }
-      ]
-    ],
-    [
-      {
-        "CLASSNAME": "kotlin.reflect.jvm.internal.KClassImpl"
-      },
-      [
-        {
-          "guildID": 264445053596991498,
-          "weebotInfo": {
-            "settings": {
-              "prefixs": [
-                "\\",
-                "w!"
-              ],
-              "logchannel": -1,
-              "trackingEnabled": false,
-              "commandRestrictions": {},
-              "guildID": 264445053596991498
-            },
-            "init": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 12,
-                  "day": 29
-                },
-                "time": {
-                  "hour": 22,
-                  "minute": 43,
-                  "second": 15,
-                  "nano": 377000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -18000
-              }
-            },
-            "guildSize": 34696,
-            "percentHuman": 0.8742794558450542
-          },
-          "userInfo": {
-            "mutualGuilds": 1
-          },
-          "time": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 23
-              },
-              "time": {
-                "hour": 15,
-                "minute": 34,
-                "second": 44,
-                "nano": 801000000
-              }
-            },
-            "offset": {
-              "totalSeconds": 0
-            }
-          }
-        },
-        {
-          "guildID": 264445053596991498,
-          "weebotInfo": {
-            "settings": {
-              "prefixs": [
-                "\\",
-                "w!"
-              ],
-              "logchannel": -1,
-              "trackingEnabled": false,
-              "commandRestrictions": {},
-              "guildID": 264445053596991498
-            },
-            "init": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 12,
-                  "day": 29
-                },
-                "time": {
-                  "hour": 22,
-                  "minute": 43,
-                  "second": 15,
-                  "nano": 377000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -18000
-              }
-            },
-            "guildSize": 34816,
-            "percentHuman": 0.8747414981617647
-          },
-          "userInfo": {
-            "mutualGuilds": 1
-          },
-          "time": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 24
-              },
-              "time": {
-                "hour": 15,
-                "minute": 0,
-                "second": 3,
-                "nano": 399000000
+                "hour": 9,
+                "minute": 31,
+                "second": 34,
+                "nano": 130000000
               }
             },
             "offset": {
@@ -456,13 +163,13 @@
               "date": {
                 "year": 2019,
                 "month": 1,
-                "day": 24
+                "day": 25
               },
               "time": {
                 "hour": 8,
-                "minute": 18,
-                "second": 1,
-                "nano": 186000000
+                "minute": 32,
+                "second": 58,
+                "nano": 349000000
               }
             },
             "offset": {
@@ -518,190 +225,13 @@
               "date": {
                 "year": 2019,
                 "month": 1,
-                "day": 23
+                "day": 25
               },
               "time": {
-                "hour": 5,
-                "minute": 20,
-                "second": 38,
-                "nano": 477000000
-              }
-            },
-            "offset": {
-              "totalSeconds": 0
-            }
-          }
-        },
-        {
-          "guildID": 139168039634468865,
-          "weebotInfo": {
-            "settings": {
-              "prefixs": [
-                "\\"
-              ],
-              "logchannel": 493111883814010899,
-              "trackingEnabled": true,
-              "commandRestrictions": {},
-              "guildID": 139168039634468865
-            },
-            "init": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 12,
-                  "day": 12
-                },
-                "time": {
-                  "hour": 19,
-                  "minute": 13,
-                  "second": 12,
-                  "nano": 523000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -18000
-              }
-            },
-            "guildSize": 90,
-            "percentHuman": 0.8444444444444444
-          },
-          "userInfo": {
-            "mutualGuilds": 7
-          },
-          "time": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 23
-              },
-              "time": {
-                "hour": 5,
+                "hour": 7,
                 "minute": 47,
-                "second": 22,
-                "nano": 236000000
-              }
-            },
-            "offset": {
-              "totalSeconds": 0
-            }
-          }
-        }
-      ]
-    ],
-    [
-      {
-        "CLASSNAME": "kotlin.reflect.jvm.internal.KClassImpl"
-      },
-      [
-        {
-          "guildID": 537585280333381643,
-          "weebotInfo": {
-            "settings": {
-              "prefixs": [],
-              "logchannel": -1,
-              "trackingEnabled": false,
-              "commandRestrictions": {},
-              "guildID": 537585280333381643
-            },
-            "init": {
-              "dateTime": {
-                "date": {
-                  "year": 2019,
-                  "month": 1,
-                  "day": 23
-                },
-                "time": {
-                  "hour": 6,
-                  "minute": 18,
-                  "second": 5,
-                  "nano": 12000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -18000
-              }
-            },
-            "guildSize": 5,
-            "percentHuman": 0.4
-          },
-          "userInfo": {
-            "mutualGuilds": 1
-          },
-          "time": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 23
-              },
-              "time": {
-                "hour": 11,
-                "minute": 25,
-                "second": 34,
-                "nano": 307000000
-              }
-            },
-            "offset": {
-              "totalSeconds": 0
-            }
-          }
-        }
-      ]
-    ],
-    [
-      {
-        "CLASSNAME": "kotlin.reflect.jvm.internal.KClassImpl"
-      },
-      [
-        {
-          "guildID": 139168039634468865,
-          "weebotInfo": {
-            "settings": {
-              "prefixs": [
-                "\\"
-              ],
-              "logchannel": 493111883814010899,
-              "trackingEnabled": true,
-              "commandRestrictions": {},
-              "guildID": 139168039634468865
-            },
-            "init": {
-              "dateTime": {
-                "date": {
-                  "year": 2018,
-                  "month": 12,
-                  "day": 12
-                },
-                "time": {
-                  "hour": 19,
-                  "minute": 13,
-                  "second": 12,
-                  "nano": 523000000
-                }
-              },
-              "offset": {
-                "totalSeconds": -18000
-              }
-            },
-            "guildSize": 90,
-            "percentHuman": 0.8444444444444444
-          },
-          "userInfo": {
-            "mutualGuilds": 2
-          },
-          "time": {
-            "dateTime": {
-              "date": {
-                "year": 2019,
-                "month": 1,
-                "day": 24
-              },
-              "time": {
-                "hour": 12,
-                "minute": 41,
-                "second": 43,
-                "nano": 619000000
+                "second": 40,
+                "nano": 510000000
               }
             },
             "offset": {
