@@ -31,9 +31,9 @@ import java.util.concurrent.TimeUnit.SECONDS
  * @since 2.2.1
  */
 class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
-    arrayOf("ebig", "bigemote"), CAT_FUN,
-    "Replace single-emote-messages with a bigger image", guildOnly = true, cooldown = 30,
-    userPerms = arrayOf(ADMINISTRATOR), botPerms = arrayOf(MESSAGE_MANAGE)) {
+    arrayOf("ebig", "bigemote"), CAT_FUN,"Replace single-emote-messages with a bigger image",
+        guildOnly = true, cooldown = 30,
+        userPerms = arrayOf(ADMINISTRATOR), botPerms = arrayOf(MESSAGE_MANAGE)) {
 
     /**
      * @author Jonathan Augustine
@@ -44,7 +44,7 @@ class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
         override fun dead() = dead
 
         private fun Emote.mentioRegex()
-                = Regex("${invoke?:""}<[A-Za-z]*:$name:$id>")
+                = Regex("${ if (invoke!=null) "$invoke\\s+" else ""}<[A-Za-z]*:$name:$id>")
 
         override fun accept(bot: Weebot, event: Event) {
             if (event !is GuildMessageReceivedEvent) return
@@ -94,7 +94,7 @@ class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
                     event.replySuccess("Biggifyer deactivated.")
                 } else event.replyError(GENERIC_ERR_MSG)
             }
-            event.argList[0].matches("(?i)-{0,2}p(re(fix)?)?") -> {
+            event.argList[0].matches("(?i)-{0,2}p(ref(ix)?)?") -> {
                 if (biggifyer == null) return event.respondThenDeleteBoth("No Biggifyer active.")
                 if (event.argList.size == 1) {
                     return event.reply("The prefix is currently ``${biggifyer.invoke?: "not set"}``")
