@@ -4,6 +4,8 @@ import com.ampro.weebot.MLOG
 import com.ampro.weebot.commands.IPassive
 import com.google.gson.*
 import org.apache.commons.io.FileUtils
+import org.litote.kmongo.Id
+import org.litote.kmongo.toId
 import java.io.*
 import java.nio.file.FileAlreadyExistsException
 import kotlin.reflect.KClass
@@ -34,7 +36,11 @@ val GSON: Gson = GsonBuilder().enableComplexMapKeySerialization()
     .registerTypeAdapter(IPassive::class.java, InterfaceAdapter<IPassive>())
     .registerTypeAdapter(Class::class.java, CommandClassAdapter())
     .registerTypeAdapter(KClass::class.java, CommandKClassAdapter())
-    .create()
+    .registerTypeAdapter(Id::class.java,JsonSerializer<Id<Any>> { id, _, _ ->
+        JsonPrimitive(id?.toString())
+    }).registerTypeAdapter(Id::class.java, JsonDeserializer<Id<Any>> { id, _, _ ->
+        id.asString.toId()
+    }).create()
 
 
 fun BufferedWriter.writeLn(line: Any) {
