@@ -6,15 +6,20 @@ package com.ampro.weebot.extensions
 
 import com.ampro.weebot.*
 import com.ampro.weebot.commands.COMMANDS
-import com.ampro.weebot.database.*
+import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.DISCORD_BOTLIST_API
+import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.constants.DEV_IDS
 import com.ampro.weebot.database.constants.isDev
+import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.util.Emoji.*
 import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.*
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
 import jdk.nashorn.internal.ir.annotations.Ignore
-import kotlinx.coroutines.*
+import kotlinx.coroutines.ExecutorCoroutineDispatcher
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.*
@@ -22,7 +27,9 @@ import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
 import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import net.dv8tion.jda.core.entities.Game.listening
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
-import net.dv8tion.jda.core.events.*
+import net.dv8tion.jda.core.events.Event
+import net.dv8tion.jda.core.events.ReadyEvent
+import net.dv8tion.jda.core.events.ShutdownEvent
 import net.dv8tion.jda.core.events.guild.GuildJoinEvent
 import net.dv8tion.jda.core.events.guild.GuildLeaveEvent
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
@@ -49,7 +56,7 @@ fun CommandEvent.getInvocation(): String = this.message.contentStripped
  */
 fun CommandEvent.respondThenDelete(message: String, delay: Long = 10L,
                                    success: () -> Unit = {})
-        = reply("*$message*") {
+        = reply("*${message.trim()}*") {
     it.delete().reason(message).queueAfter(delay, SECONDS) {success()}
 }
 
@@ -69,7 +76,7 @@ fun CommandEvent.respondThenDelete(embed: MessageEmbed, delay: Long = 10L,
  * @param delay The delay in seconds between send & delete (default 10)
  */
 fun CommandEvent.respondThenDeleteBoth(reason: String, delay: Long = 10L) {
-    this.reply("*$reason*") { response ->
+    this.reply("*${reason.trim()}*") { response ->
         if (this.privateChannel != null) {
             response.delete().reason(reason).queueAfter(delay, SECONDS)
         } else response.delete().reason(reason).queueAfter(delay, SECONDS) {

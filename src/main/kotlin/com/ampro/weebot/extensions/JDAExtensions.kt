@@ -8,7 +8,9 @@ import com.ampro.weebot.WAITER
 import com.ampro.weebot.extensions.MentionType.*
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.bot.sharding.ShardManager
-import net.dv8tion.jda.core.*
+import net.dv8tion.jda.core.EmbedBuilder
+import net.dv8tion.jda.core.JDA
+import net.dv8tion.jda.core.Permission
 import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.ChannelType.TEXT
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
@@ -21,6 +23,8 @@ import java.util.concurrent.TimeUnit.SECONDS
 /*
  * Extension methods used for JDA elements
  */
+
+const val JDA_MESSAGE_HISTORY_MAX = 100
 
 fun TODO(event: CommandEvent) = event.reply("This action is still under construction.")
 

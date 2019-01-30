@@ -6,12 +6,21 @@ package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.*
 import com.ampro.weebot.commands.`fun`.games.cardgame.CmdCardsAgainstHumanity
-import com.ampro.weebot.commands.developer.*
-import com.ampro.weebot.commands.miscellaneous.*
+import com.ampro.weebot.commands.developer.CmdGuildList
+import com.ampro.weebot.commands.developer.CmdShutdown
+import com.ampro.weebot.commands.developer.CmdStatsView
+import com.ampro.weebot.commands.developer.CmdSuggestion
+import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife
+import com.ampro.weebot.commands.miscellaneous.CmdInviteLink
+import com.ampro.weebot.commands.miscellaneous.CmdNameGenerator
+import com.ampro.weebot.commands.miscellaneous.PingCommand
 import com.ampro.weebot.commands.moderation.*
 import com.ampro.weebot.commands.progammer.CmdEmbedMaker
 import com.ampro.weebot.commands.progammer.CmdRegexTest
-import com.ampro.weebot.commands.utilitycommands.*
+import com.ampro.weebot.commands.utilitycommands.CmdNotePad
+import com.ampro.weebot.commands.utilitycommands.CmdOutHouse
+import com.ampro.weebot.commands.utilitycommands.CmdReminder
+import com.ampro.weebot.commands.utilitycommands.CmdTranslate
 import com.jagrosh.jdautilities.command.Command.Category
 
 
@@ -74,6 +83,7 @@ val CMD_MODERATION      = CmdModeration()
 val CMD_REPORT          = CmdReport()
 val CMD_PURGE           = CmdPurge()
 val CMD_CHATLOCK        = CmdChatLock()
+val CMD_MOVECONVO       = CmdMoveConversation()
 val CMD_TASKS           = CmdTaskManager()
 val CMD_VCR             = CmdVoiceChannelRole()
 
@@ -106,7 +116,7 @@ val CMD_CAH             = CmdCardsAgainstHumanity()
 val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
         CMD_PING, CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT, CMD_WATCHADOIN, CMD_WELCOME,
         CMD_SETTINGS, CMD_PURGE, CMD_MODERATION, CMD_REPORT, CMD_TASKS, CMD_CHATLOCK,
-        CMD_SELFDESTRUCT,
+        CMD_SELFDESTRUCT, CMD_MOVECONVO,
         CMD_REGEX, CMD_EMBED,
         CMD_OHC, CMD_REM, CMD_NOTE, CMD_TRANSLATE,
         CMD_VCR, CMD_VCGEN,

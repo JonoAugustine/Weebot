@@ -16,13 +16,18 @@ import com.ampro.weebot.util.formatTime
 import com.jagrosh.jdautilities.command.Command.CooldownScope.GUILD
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.Permission.*
+import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.Message.MentionType.ROLE
 import net.dv8tion.jda.core.entities.Message.MentionType.USER
 import net.dv8tion.jda.core.entities.MessageHistory
 import net.dv8tion.jda.core.entities.TextChannel
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.system.measureTimeMillis
@@ -35,40 +40,60 @@ import kotlin.system.measureTimeMillis
 /**
  *
  */
- class CmdMoveConversation : WeebotCommand("mvm", "Move Conversation", 
-    arrayOf("mcc", "moveconvo", "convomove"), CAT_MOD, 
+ class CmdMoveConversation : WeebotCommand("mvm", "Move Conversation",
+    arrayOf("mcc", "moveconvo", "convomove"), CAT_MOD,
     "Copies and pastes message into a different channel",
-    guildOnly = true, botPerms = arrayOf(MESSAGE_MANAGE), 
+    guildOnly = true, botPerms = arrayOf(MESSAGE_MANAGE, MESSAGE_HISTORY),
     userPerms = arrayOf(MESSAGE_MANAGE)
 ) {
 
     override fun execute(event : WeebotCommandEvent) {
-        //mvm <#channel> [@/members...] [num_messages]
-        val ment = event.message.mentionedMembers.map { it.user }
-        val channel = event.message.mentionedChannels.firstOrNull()
-                        ?: return event.respondThenDeleteBoth(
-                            "A destination channel must be mentioned.", 15)
+        if (event.args.isBlank()) return
+        if (event.message.mentionedChannels.isEmpty())
+            return event.respondThenDeleteBoth("A destination channel must be mentioned.", 15)
+
+        //mvm [num_messages] <#channel> [@/members...]
+        val ment = event.message.mentionedMembers
+        val channel = event.message.mentionedChannels.first()
         val num = try {
-            event.argList[ment.size + 1].toInto()
-        } catch (e: NumberFormatException) {
-            return event.respondThenDeleteBoth(
-                "Please use a number 1 to ${Int.MAX_VALUE}")
-        } catch (e: IndexOutOfBoundsException) {
-            slog(event.args)
-            1
+            val i = event.argList[0].toInt()
+            if (i > JDA_MESSAGE_HISTORY_MAX) return event.respondThenDeleteBoth(
+                    "Can only move 1 to 100 messages", 15)
+            i
+        } catch (e: Exception) {1}
+
+        MessageHistory(event.textChannel).retrievePast(100).queue succ@{ his ->
+            his.removeIf { it.idLong == event.message.idLong }
+            val s = if (ment.isNotEmpty()) his.indexOfFirst { ment.any {
+                m -> m.user.id == it.author.id } } else 0
+            if (s == -1) return@succ event.respondThenDeleteBoth(
+                    "Could not locate any messages ${ment.joinToString { it.effectiveName }}", 20)
+            val target: MutableList<Message> = his.subList(s,
+                    if (num in s until his.size) num else his.size).apply {
+                if (ment.isNotEmpty())
+                    removeIf { mes -> ment.none { mem -> mem.user.idLong == mes.author.idLong } }
+                removeIf { it.contentDisplay.isNullOrBlank() }
+            }
+
+            if (target.isEmpty()) return@succ event.respondThenDeleteBoth(
+                    "Could not locate any messages ${ment.joinToString {
+                        it?.effectiveName ?:"" }}", 20)
+
+            val messages = target.map { "*``${event.guild.getMember(it.author).effectiveName
+            }``* : ${it.contentDisplay}" }.reversed()
+            /** time delay to ensure ordered messages */ var t = 0L
+            MessageBuilder("""***Moved messages from*** ${event.textChannel.asMention}
+                ${messages.joinToString("\n")}""".trimIndent()).buildAll()
+                .forEach { channel.sendMessage(it).queueAfter(t, MILLISECONDS); t += 50 }
+            event.respondThenDelete("${event.member.effectiveName
+            } moved ${target.size} messages to ${channel.asMention}", 30)
+            if (target.none { it.idLong == event.message.idLong }) target.add(event.message)
+            event.textChannel.deleteMessages(target).queueAfter(250, MILLISECONDS)
         }
-        event.channel.getHistoryAfter(event.message.id).queue(succ@{
-            val s = it.IndexOfFirst{ ment.any { m -> m.id == it.id } }
-            if (s == -1) return@succ
-            //TODO Collect messages then move them
-        }, {
-            //TODO Failure
-        })
     }
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Conversation Move", """
-        
             """.trimIndent())
             //TODO
             .build()
