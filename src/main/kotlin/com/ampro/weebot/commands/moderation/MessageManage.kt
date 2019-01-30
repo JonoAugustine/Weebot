@@ -33,6 +33,50 @@ import kotlin.system.measureTimeMillis
 
 
 /**
+ *
+ */
+ class CmdMoveConversation : WeebotCommand("mvm", "Move Conversation", 
+    arrayOf("mcc", "moveconvo", "convomove"), CAT_MOD, 
+    "Copies and pastes message into a different channel",
+    guildOnly = true, botPerms = arrayOf(MESSAGE_MANAGE), 
+    userPerms = arrayOf(MESSAGE_MANAGE)
+) {
+
+    override fun execute(event : WeebotCommandEvent) {
+        //mvm <#channel> [@/members...] [num_messages]
+        val ment = event.message.mentionedMembers.map { it.user }
+        val channel = event.message.mentionedChannels.firstOrNull()
+                        ?: return event.respondThenDeleteBoth(
+                            "A destination channel must be mentioned.", 15)
+        val num = try {
+            event.argList[ment.size + 1].toInto()
+        } catch (e: NumberFormatException) {
+            return event.respondThenDeleteBoth(
+                "Please use a number 1 to ${Int.MAX_VALUE}")
+        } catch (e: IndexOutOfBoundsException) {
+            slog(event.args)
+            1
+        }
+        event.channel.getHistoryAfter(event.message.id).queue(succ@{
+            val s = it.IndexOfFirst{ ment.any { m -> m.id == it.id } }
+            if (s == -1) return@succ
+            //TODO Collect messages then move them
+        }, {
+            //TODO Failure
+        })
+    }
+
+    init {
+        helpBiConsumer = HelpBiConsumerBuilder("Conversation Move", """
+        
+            """.trimIndent())
+            //TODO
+            .build()
+    }
+
+}
+
+/**
  * Automatically deletes the marked message after a given time or 30 seconds by default
  *
  * Formatted: \<deleteme> [-t time] [message]
