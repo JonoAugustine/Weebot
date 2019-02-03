@@ -32,7 +32,7 @@ val REG_DEFAULT = Regex("(?i)(d+e+f+a+u+l+t+)")
  * @author Jonathan Augustine
  * @since 2.0
  */
-open class IdGenerator(var idLeng: Long = 5L, val prefix: String = "") {
+open class IdGenerator(var idLeng: Long = 7L, val prefix: String = "") {
     fun next() : String {
         return prefix + RAND.ints(idLeng, 0, alphaDigi.length)
             .asSequence().map(alphaDigi::get).joinToString("")

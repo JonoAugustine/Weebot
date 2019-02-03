@@ -120,6 +120,54 @@
       "state": "UNREVIEWED",
       "votes": [],
       "suggestion": "add better support for reminders (ref: RemindMe!)"
+    },
+    {
+      "id": "S2XSZ",
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 29
+          },
+          "time": {
+            "hour": 21,
+            "minute": 6,
+            "second": 6,
+            "nano": 880000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "UNREVIEWED",
+      "votes": [],
+      "suggestion": "reddicord manual submission command using message ID"
+    },
+    {
+      "id": "SUG:WKC8837",
+      "submitTime": {
+        "dateTime": {
+          "date": {
+            "year": 2019,
+            "month": 1,
+            "day": 30
+          },
+          "time": {
+            "hour": 11,
+            "minute": 47,
+            "second": 4,
+            "nano": 55000000
+          }
+        },
+        "offset": {
+          "totalSeconds": -18000
+        }
+      },
+      "state": "UNREVIEWED",
+      "votes": [],
+      "suggestion": "moveto [# messages] [#channeltag] // defaults to 1"
     }
   ],
   "GLOBAL_WEEBOT": {
@@ -1031,18 +1079,20 @@
               417176543903744001
             ],
             "scoreMap": {
-              "185063150557593600": 10,
-              "277593092561829889": 10,
-              "186130584693637131": 24,
-              "139167730237571072": 4,
-              "383656411789524995": 17
+              "185063150557593600": 21,
+              "139188528012722176": 4,
+              "277593092561829889": 12,
+              "186130584693637131": 31,
+              "139167730237571072": 3,
+              "383656411789524995": 20
             }
           }
         },
         {
           "CLASSNAME": "com.ampro.weebot.commands.fun.CmdBiggifyEmoji$Biggifyer",
           "DATA": {
-            "dead": false
+            "dead": false,
+            "invoke": "b"
           }
         }
       ],

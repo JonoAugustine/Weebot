@@ -5,6 +5,7 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.commands.`fun`.*
+import com.ampro.weebot.commands.`fun`.games.TempCmdCheckReadMe
 import com.ampro.weebot.commands.`fun`.games.cardgame.CmdCardsAgainstHumanity
 import com.ampro.weebot.commands.developer.CmdGuildList
 import com.ampro.weebot.commands.developer.CmdShutdown
@@ -17,10 +18,10 @@ import com.ampro.weebot.commands.miscellaneous.PingCommand
 import com.ampro.weebot.commands.moderation.*
 import com.ampro.weebot.commands.progammer.CmdEmbedMaker
 import com.ampro.weebot.commands.progammer.CmdRegexTest
-import com.ampro.weebot.commands.utilitycommands.CmdNotePad
-import com.ampro.weebot.commands.utilitycommands.CmdOutHouse
-import com.ampro.weebot.commands.utilitycommands.CmdReminder
-import com.ampro.weebot.commands.utilitycommands.CmdTranslate
+import com.ampro.weebot.commands.utility.CmdNotePad
+import com.ampro.weebot.commands.utility.CmdOutHouse
+import com.ampro.weebot.commands.utility.CmdReminder
+import com.ampro.weebot.commands.utility.CmdTranslate
 import com.jagrosh.jdautilities.command.Command.Category
 
 
@@ -113,7 +114,7 @@ val CMD_CAH             = CmdCardsAgainstHumanity()
 
 
 
-val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,
+val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,TempCmdCheckReadMe(),
         CMD_PING, CMD_SUGG, CMD_INVITEBOT, CMD_ABOUT, CMD_WATCHADOIN, CMD_WELCOME,
         CMD_SETTINGS, CMD_PURGE, CMD_MODERATION, CMD_REPORT, CMD_TASKS, CMD_CHATLOCK,
         CMD_SELFDESTRUCT, CMD_MOVECONVO,

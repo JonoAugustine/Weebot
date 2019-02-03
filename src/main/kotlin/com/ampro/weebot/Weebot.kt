@@ -11,9 +11,9 @@ import com.ampro.weebot.commands.`fun`.games.Game
 import com.ampro.weebot.commands.`fun`.games.Player
 import com.ampro.weebot.commands.`fun`.games.cardgame.CahGuildInfo
 import com.ampro.weebot.commands.moderation.ModerationData
-import com.ampro.weebot.commands.utilitycommands.CmdReminder.Companion.remWatchJob
-import com.ampro.weebot.commands.utilitycommands.CmdReminder.Reminder
-import com.ampro.weebot.commands.utilitycommands.NotePad
+import com.ampro.weebot.commands.utility.CmdReminder.Companion.remWatchJob
+import com.ampro.weebot.commands.utility.CmdReminder.Reminder
+import com.ampro.weebot.commands.utility.NotePad
 import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.getGuild
 import com.ampro.weebot.extensions.WeebotCommand

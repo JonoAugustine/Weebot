@@ -4,14 +4,14 @@
 
 package com.ampro.weebot.commands.developer
 
+import com.ampro.weebot.SELF
 import com.ampro.weebot.commands.CAT_DEV
+import com.ampro.weebot.commands.CAT_GEN
 import com.ampro.weebot.commands.developer.Suggestion.State
 import com.ampro.weebot.commands.developer.Suggestion.State.*
 import com.ampro.weebot.database.*
 import com.ampro.weebot.database.constants.OFFICIAL_CHATS
 import com.ampro.weebot.extensions.*
-import com.ampro.weebot.SELF
-import com.ampro.weebot.commands.CAT_GEN
 import com.ampro.weebot.util.DD_MM_YYYY_HH_MM
 import com.ampro.weebot.util.IdGenerator
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -58,7 +58,7 @@ class Suggestion(val suggestion: String) {
         }
     }
 
-    companion object { val idGenerator = IdGenerator() }
+    companion object { val idGenerator = IdGenerator(7, "SUG:") }
 
     val id = idGenerator.next()
 
