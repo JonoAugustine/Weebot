@@ -32,10 +32,22 @@ operator fun ShardManager.get(shardIndex: Int): JDA = shards!![shardIndex]
 
 enum class MentionType { USER, ROLE, CHANNEL }
 
-val userMentionRegex = "^(<@!?\\d+>)$".toRegex()
-val roleMentionRegex = "^(<@&\\d+>)$".toRegex()
-val channelMentionRegex = "^(<#\\d+>)\$".toRegex()
-val emoteRegex = "^<[A-Za-z]*:[A-Za-z]+:\\d+>$".toRegex()
+val REG_MENTION_USER = "^(<@!?\\d+>)$".toRegex()
+val REG_MENTION_ROLE = "^(<@&\\d+>)$".toRegex()
+val REG_MENTION_CHANNEL = "^(<#\\d+>)\$".toRegex()
+val REG_EMOTE = "^<[A-Za-z]*:[A-Za-z]+:\\d+>$".toRegex()
+val REG_MESSAGE_LINK = "https://discordapp.com/channels/\\d{5,}/\\d{5,}/\\d{5,}".toRegex()
+
+/**
+ * Parse a [Message] id componests from a [String]
+ * @return [Triple] GuildID, ChannelID, MessageID
+ */
+fun String.parseMessageLink() : Triple<Long, Long, Long>? {
+    if (!matches(REG_MESSAGE_LINK)) return null
+    val split = removePrefix("https://discordapp.com/channels/").split("/")
+        .map { it.toLong() }
+    return Triple(split[0], split[1], split[2])
+}
 
 /**
  * Attempt to get a [IMentionable] ID from a raw string
@@ -43,7 +55,7 @@ val emoteRegex = "^<[A-Za-z]*:[A-Za-z]+:\\d+>$".toRegex()
  * @return the ID as a [Long] else -1
  */
 fun String.parseMentionId() : Long
-        = if (this.matchesAny(userMentionRegex, roleMentionRegex, channelMentionRegex)) {
+        = if (this.matchesAny(REG_MENTION_USER, REG_MENTION_ROLE, REG_MENTION_CHANNEL)) {
             try {
                 this.removeAll("[^0-9]".toRegex()).toLong()
             } catch (e: NumberFormatException) {
@@ -54,9 +66,9 @@ fun String.parseMentionId() : Long
 }
 
 fun String.mentionType() : MentionType?  = when {
-    this matches userMentionRegex -> USER
-    this matches roleMentionRegex -> ROLE
-    this matches channelMentionRegex -> CHANNEL
+    this matches REG_MENTION_USER -> USER
+    this matches REG_MENTION_ROLE -> ROLE
+    this matches REG_MENTION_CHANNEL -> CHANNEL
     else -> null
 }
 

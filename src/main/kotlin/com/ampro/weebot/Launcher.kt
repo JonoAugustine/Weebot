@@ -4,26 +4,59 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.CMD_HELP
+import com.ampro.weebot.commands.COMMANDS
+import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.commands.LINK_HQTWITCH
 import com.ampro.weebot.commands.developer.CLIENT_TWTICH_PUB
-import com.ampro.weebot.database.*
-import com.ampro.weebot.database.constants.*
-import com.ampro.weebot.extensions.*
-import com.ampro.weebot.util.*
+import com.ampro.weebot.database.GLOBAL_WEEBOT
+import com.ampro.weebot.database.bot
+import com.ampro.weebot.database.constants.BOT_DEV_CHAT
+import com.ampro.weebot.database.constants.LINK_INVITEBOT
+import com.ampro.weebot.database.constants.NL_GUILD
+import com.ampro.weebot.database.constants.PHONE_JONO
+import com.ampro.weebot.database.constants.TWITCH_HQR_ID
+import com.ampro.weebot.database.constants.jdaDevShardLogIn
+import com.ampro.weebot.database.constants.jdaShardLogIn
+import com.ampro.weebot.extensions.WeebotCommandClient
+import com.ampro.weebot.extensions.delete
+import com.ampro.weebot.extensions.get
+import com.ampro.weebot.extensions.matches
+import com.ampro.weebot.extensions.queueIgnore
+import com.ampro.weebot.extensions.splitArgs
+import com.ampro.weebot.extensions.weebotAvatar
 import com.ampro.weebot.util.Emoji.Rage
+import com.ampro.weebot.util.FileLogger
+import com.ampro.weebot.util.buildDirs
+import com.ampro.weebot.util.clearTempDirs
+import com.ampro.weebot.util.elog
+import com.ampro.weebot.util.sendSMS
+import com.ampro.weebot.util.setUpWebFuel
+import com.ampro.weebot.util.slog
 import com.jagrosh.jdautilities.commons.waiter.EventWaiter
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.asCoroutineDispatcher
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.joinAll
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.bot.sharding.ShardManager
 import net.dv8tion.jda.core.JDA.Status.CONNECTED
 import net.dv8tion.jda.core.JDA.Status.SHUTDOWN
-import net.dv8tion.jda.core.entities.Game.*
 import net.dv8tion.jda.core.entities.Game.GameType.STREAMING
+import net.dv8tion.jda.core.entities.Game.listening
+import net.dv8tion.jda.core.entities.Game.playing
+import net.dv8tion.jda.core.entities.Game.streaming
+import net.dv8tion.jda.core.entities.Game.watching
 import net.dv8tion.jda.core.entities.SelfUser
 import net.dv8tion.jda.core.entities.User
-import org.apache.commons.io.FileUtils
-import java.lang.Runnable
-import java.util.concurrent.*
+import net.dv8tion.jda.core.events.Event
+import net.dv8tion.jda.core.events.message.guild.react.GuildMessageReactionAddEvent
 import java.util.concurrent.Executors.newFixedThreadPool
+import java.util.concurrent.SynchronousQueue
+import java.util.concurrent.ThreadFactory
+import java.util.concurrent.ThreadPoolExecutor
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
 import javax.security.auth.login.LoginException
@@ -39,7 +72,7 @@ val CACHED_POOL = ThreadPoolExecutor(3, 5000, 10, MINUTES, SynchronousQueue()) {
     MLOG.slog(ThreadFactory::class, "Cached Thread Created")
     Thread(r, "CachedPool")
 }.asCoroutineDispatcher()
-val CMD_POOL    = newFixedThreadPool(50) { r -> Thread(r, "CommandPool") }
+val CMD_POOL = newFixedThreadPool(50) { r -> Thread(r, "CommandPool") }
     .asCoroutineDispatcher()
 
 /** Main Logger */
@@ -54,8 +87,7 @@ val WAITER: EventWaiter = EventWaiter()
 lateinit var SELF: SelfUser
 
 /** *Sorry, I tripped over my shoelaces. Please try that again later* */
-const val GENERIC_ERR_MSG
-        = "*Sorry, I tripped over my shoelaces. Please try that again later*"
+const val GENERIC_ERR_MSG = "*Sorry, I tripped over my shoelaces. Please try that again later*"
 
 val games = listOf(listening("@Weebot Help"), playing("with wires"),
     watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.2.1"),
@@ -108,19 +140,18 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
                     event.reply("*${cmd.help}*")
                 } else {
                     event.reply("*Help is currently unavailable for this " +
-                            "command. You can use ``@Weebot sugg`` to "
-                            + "send feedback to the Developers and remind "
-                            + "them they have a job to do!* $Rage")
+                        "command. You can use ``@Weebot sugg`` to "
+                        + "send feedback to the Developers and remind "
+                        + "them they have a job to do!* $Rage")
                 }
             }
         }
     }
 
-    //DATABASE
-    setUpDatabase()
     //LOGIN & LISTENERS
     JDA_SHARD_MNGR = (if (weebot) jdaShardLogIn() else jdaDevShardLogIn())
-        .addEventListeners(EventDispatcher(), CMD_CLIENT, WAITER).build()
+        .addEventListeners(CMD_CLIENT, WAITER)
+        .build().apply { addEventListener(EventDispatcher) }
     launch(CACHED_POOL) {
         delay(20_000)
         JDA_SHARD_MNGR.setGame(games.random())
@@ -135,18 +166,17 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     //WAIT FOR SHARD CONNECT
     MLOG.slog(null,
         "All ${JDA_SHARD_MNGR.shards.size} Shards connected! ${measureTimeMillis {
-        MLOG.slog(null, "Waiting for all ${JDA_SHARD_MNGR.shards.size} shards to connect...")
-        while (JDA_SHARD_MNGR.shards.any { it.status != CONNECTED }) Thread.sleep(250)
-    } / 1_000} seconds")
+            MLOG.slog(null,
+                "Waiting for all ${JDA_SHARD_MNGR.shards.size} shards to connect...")
+            while (JDA_SHARD_MNGR.shards.any { it.status != CONNECTED }) Thread.sleep(250)
+        } / 1_000} seconds")
 
     //SET SELF AND AVATAR URL
     SELF = JDA_SHARD_MNGR.shards[0].selfUser
     weebotAvatar = SELF.avatarUrl
+    JDA_SHARD_MNGR.shards
 
-    //Stats
-    setUpStatistics()
-
-    genSetup.joinAll() //Ensure all gensetup is finished
+    genSetup.joinAll() //Ensure all gen-setup is finished
 
     SAVER_JOB = GlobalScope.launch(CACHED_POOL) {
         var i = 0
@@ -163,7 +193,6 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
             sendSMS(PHONE_JONO, "WEEBOT: Save Job Failed")
         }
     }
-    SAVE_JOBS.add(daoStatSave())
 
     MLOG.slog(null, "Launch Complete!\n\n")
 
@@ -171,28 +200,41 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     JDA_SHARD_MNGR.getTextChannelById(BOT_DEV_CHAT).sendMessage("ONLINE!")
         .queueAfter(250, MILLISECONDS) { it.delete().queueIgnore(30) }
 
+    NL_GUILD!!.bot.add(object : IPassive {
+        override fun dead(): Boolean = false
+        override fun accept(bot: Weebot, event: Event) {
+            if (event is GuildMessageReactionAddEvent) {
+
+            }
+        }
+    })
+
     //Watch HQStream
-    launch(CACHED_POOL) { while (ON) {
-        MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
-        CLIENT_TWTICH_PUB.helix.getStreams("", "", null, null, null, null,
-            listOf("127416768"), null).observe().subscribe { streamList ->
-            streamList.streams.firstOrNull { it.userId == TWITCH_HQR_ID }?.also {
-                JDA_SHARD_MNGR.setGame(streaming(it.title, LINK_HQTWITCH))
-                MLOG.slog(null, "\nOnline. Set watching")
+    launch(CACHED_POOL) {
+        while (ON) {
+            MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
+            CLIENT_TWTICH_PUB.helix.getStreams(
+                "", "", null, 1, null, null, null, listOf(127416768), null
+            ).observe().subscribe { streamList ->
+                streamList.streams.firstOrNull { it.userId == TWITCH_HQR_ID }?.also {
+                    JDA_SHARD_MNGR.setGame(streaming(it.title, LINK_HQTWITCH))
+                    MLOG.slog(null, "\nOnline. Set watching")
+                }
             }
-        }
-        delay(20 * 60 * 1_000)
-        MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
-        CLIENT_TWTICH_PUB.helix.getStreams("", "", null, null, null, null,
-            listOf("127416768"), null).observe().subscribe { streamList ->
-            if (streamList.streams.none { it.userId == TWITCH_HQR_ID }
+            delay(20 * 60 * 1_000)
+            MLOG.slog(null, "Checking HQRegent Twitch Live Stream")
+            CLIENT_TWTICH_PUB.helix.getStreams(
+                "", "", null, 1, null, null, null, listOf(127416768), null
+            ).observe().subscribe { streamList ->
+                if (streamList.streams.none { it.userId == TWITCH_HQR_ID }
                     && JDA_SHARD_MNGR[0].presence.game == STREAMING) {
-                JDA_SHARD_MNGR.setGame(games.random())
-                MLOG.slog(null, "\nOffline. Set random")
+                    JDA_SHARD_MNGR.setGame(games.random())
+                    MLOG.slog(null, "\nOffline. Set random")
+                }
             }
+            delay(20 * 60 * 1_000)
         }
-        delay(20 * 60 * 1_000)
-    }}
+    }
     //Watch HQTwitter
     /*launch(CACHED_POOL) {
         val stream = TwitterStreamFactory(TWITTER_CONFIG).instance
@@ -238,58 +280,6 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
     }*/
 }
 
-/**
- * Attempts to load Statistics data from file. Sets [STAT] to the loaded data
- * or makes a new instance
- */
-fun setUpStatistics() {
-    MLOG.slog(null, "Setting up Statistics...")
-    MLOG.slog(null, "\tLoading Statistics...")
-    val stat: Statistics? = loadJson<Statistics>(STAT_SAVE)
-    if (stat == null) {
-        MLOG.slog(null, "\t\tUnable to load Statistics, creating new instance.")
-        STAT = Statistics()
-        if (STAT.saveJson(STAT_SAVE, true) == -1) {
-            MLOG.slog(null, "\tFAILED")
-            return
-        }
-        MLOG.slog(null, "\tStatistics instance created and saved to file.")
-    } else {
-        MLOG.slog(null, "\tStatistics located.")
-        STAT = stat
-    }
-    MLOG.slog(null, "\tBacking up Statistics.")
-    STAT.saveJson(STAT_BK)
-    MLOG.slog(null, "\t...DONE")
-    MLOG.slog(null, "...DONE")
-}
-
-/**
- * Attempts to loadDao a database from file.
- * If a database could not be loaded, a new one is created.
- * Is called only once during setup.
- */
-private fun setUpDatabase() {
-    MLOG.slog(null, "Setting up Database...")
-    MLOG.slog(null, "\tLoading database...")
-    var tdao = loadDao()
-    if (tdao == null) {
-        MLOG.slog(null, "\t\tUnable to loadDao database, creating new database.")
-        tdao = Dao()
-        MLOG.slog(null, "\t\tLoading known Guilds")
-        tdao.save()
-        MLOG.slog(null, "\tDatabase created and saved to file.")
-        DAO = tdao
-    } else {
-        MLOG.slog(null, "\tDatabase located. Updating registered Guilds.")
-        DAO = tdao
-    }
-    //DAO.updatePremiumUsers()
-    MLOG.slog(null, "\tBacking up database.")
-    DAO.backUp()
-    MLOG.slog(null, "\t...DONE")
-    MLOG.slog(null, "...DONE")
-}
 
 /**
  * Calls the update method for each Weebot to setup NickNames
@@ -297,69 +287,21 @@ private fun setUpDatabase() {
  */
 private fun startupWeebots() {
     MLOG.slog(null, "Starting Weebots...")
-    //Update the Weebots in the database after downtime.
-    JDA_SHARD_MNGR.guilds.filterNot { DAO.WEEBOTS.contains(it.idLong) }
-        .forEach {
-            DAO.addBot(Weebot(it))
-            askTracking(it)
-        }
-    DAO.GLOBAL_WEEBOT.startUp()
-    DAO.WEEBOTS.values.forEach { bot -> bot.startUp() }
-}
-
-/**
- * Saves a database backup each interval.
- * Listens for a shutdown event to save the the main file
- */
-@Synchronized
-private fun daoStatSave(): () -> Unit = {
-    try {
-        DAO.backUp()
-        synchronized(STAT) { STAT.saveJson(STAT_BK, true) }
-        FileUtils.cleanDirectory(TEMP_OUT)
-        FileUtils.cleanDirectory(TEMP_IN)
-    } catch (e: InterruptedException) {
-        e.printStackTrace()
-        sendSMS(PHONE_JONO, "WEEBOT: Save Job Failed")
-    }
+    (JDA_SHARD_MNGR.guilds.map { it.bot } + GLOBAL_WEEBOT).forEach { it.startUp() }
 }
 
 /** Begin the shutdown sequence. Backup and save database.  */
 fun shutdown(user: User? = null) {
-    if (user != null)
-        MLOG.elog(null, "Shutdown signal received from ${user.name} (${user.id}).")
-
-    MLOG.elog(null, "\tShutting down Global Weebot Reminder pools...")
-    //DAO.GLOBAL_WEEBOT.reminderPools.forEach { _, pool -> pool.shutdown() }
-    MLOG.elog(null, "\tBacking up database...")
-    if (DAO.backUp() < 1)
-        MLOG.elog(null, "\t\tFailed to backup database!")
-    else {
-        MLOG.elog(null, "\tSaving Database...")
-        when (DAO.save()) {
-            -1   -> MLOG.elog(null, "\t\tCould not save backup due to file exception.")
-            -2   -> MLOG.elog(null, "\t\tCould not save backup due to corrupt Json.")
-            else -> MLOG.elog(null, "\t\tDatabase saved.")
-        }
-    }
-    MLOG.elog(null, "\tBacking up Statistics...")
-    if (STAT.saveJson(STAT_BK, true) < 1)
-        MLOG.elog(null, "\t\tFailed to backup Statistics!")
-    else {
-        MLOG.elog(null, "\tSaving Statistics...")
-        when (STAT.saveJson(STAT_SAVE, true)) {
-            -1   -> MLOG.elog(null, "\t\tCould not save due to file exception.")
-            -2   -> MLOG.elog(null, "\t\tCould not save due to corrupt Json.")
-            else -> MLOG.elog(null, "\t\tStatistics saved.")
-        }
-    }
+    MLOG.elog(null, "Shutdown signal received ${
+    if (user != null) "from " + user.name + " (${user.id})." else ""}")
 
     MLOG.elog(null, "\tClearing temp directories...")
     clearTempDirs()
 
     JDA_SHARD_MNGR.shutdown()
-    JDA_SHARD_MNGR.statuses.forEach { _, status ->
-        while (status != SHUTDOWN) {}
+    JDA_SHARD_MNGR.statuses.forEach { (_, status) ->
+        while (status != SHUTDOWN) {
+        }
     }
 
     CACHED_POOL.close()

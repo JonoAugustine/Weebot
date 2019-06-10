@@ -17,6 +17,7 @@ import com.ampro.weebot.util.*
 import com.ampro.weebot.util.Emoji.*
 import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
 import net.dv8tion.jda.core.entities.*
@@ -36,14 +37,14 @@ private const val LINK_CAH = "https://cardsagainsthumanity.com/"
 private const val LINK_CAH_THUMBNAIL
         = "https://cardsagainsthumanity.com/v8/images/social-3f4a4c57.png"
 
-internal const val MIN_PLAYERS   = 3
-internal const val MAX_PLAYERS   = 25
-internal const val HAND_SIZE_MAX = 10
+private const val MIN_PLAYERS   = 3
+private const val MAX_PLAYERS   = 25
+private const val HAND_SIZE_MAX = 10
 /** Default Hand Size */
-internal const val HAND_SIZE_DEF = 5
-internal const val HAND_SIZE_MIN = 4
+private const val HAND_SIZE_DEF = 5
+private const val HAND_SIZE_MIN = 4
 
-internal val IDGEN_CAH   = IdGenerator(7, "CAH:")
+private val IDGEN_CAH   = IdGenerator(7, "CAH:")
 
 val DIR_CAH             = File(DIR_RES, "CAH")
 val FILE_C_BLACK        = File(DIR_CAH, "CAH_C_BLACK")
@@ -165,7 +166,7 @@ data class CAHDeck(var name: String, val authorID: Long = -1L,
      */
     fun asEmbed(g: Guild) = makeEmbedBuilder(name, null, """
         ID: ``$id``
-        Author: ${getUser(authorID)?.asMention ?: "*Unknown User*"}
+        Author: ${authorID.user?.asMention ?: "*Unknown User*"}
         Created ${init.format(WKDAY_MONTH_YEAR)}
         ${if (public) "Public for all Weebot users $GiftHeart" else ""}
         ${if (public && popularity > 0) "Times Used: $popularity" else ""}
@@ -261,8 +262,7 @@ private class PlayerHandPassive(@Transient private val player: CAHPlayer,
         player.hand.forEachIndexed { i, wc -> sb.append("``${i+1})`` ${wc.text}\n") }
         eb.addField("Your Cards", sb.toString(), false)
 
-        val u = getUser(player.user.idLong)
-        u?.openPrivateChannel()?.queue { pmc ->
+        val u = player.user.idLong.user?.openPrivateChannel()?.queue { pmc ->
             eb.build().send(pmc, {
                 message?.delete()?.queueIgnore()
                 message = it
@@ -499,7 +499,7 @@ class CardsAgainstHumanity(guild: Guild, author: User,
         players.filterNot { it.user.isBot }.forEach { p ->
             playerHandMenus.getOrPut(p) {
                 val php = PlayerHandPassive(p, this@CardsAgainstHumanity)
-                DAO.GLOBAL_WEEBOT.addUserPassive(p.user, php)
+                GLOBAL_WEEBOT.addUserPassive(p.user, php)
                 return@getOrPut php
             }.send()
         }
@@ -619,10 +619,9 @@ class CardsAgainstHumanity(guild: Guild, author: User,
             .forEach { it.popularity++ }
         val sortedList = playerList.sortedByDescending { it.cardsWon.size }
         val winner = sortedList.first()
-        val bot = getWeebotOrNew(guildID)
-        bot.games.remove(this)
-
-        val cgi = bot.cahGuildInfo
+        val cgi = runBlocking { getWeebotOrNew(guildID) }
+            .apply { games.remove(this@CardsAgainstHumanity) }
+            .let { it.cahGuildInfo }
 
         cgi.leaderBoard.addUser(winner.user, winner.cardsWon.size)
 
@@ -657,10 +656,11 @@ class CardsAgainstHumanity(guild: Guild, author: User,
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
+class CmdCardsAgainstHumanity : WeebotCommand(
+    "cah", "GAMECAH", "Cards Against Humanity",
     arrayOf("cardsagainsthumanity"), CAT_UNDER_CONSTRUCTION,
-    "Play a game of CardsAgainstHumanity or make custom cards.", guildOnly = true,
-    children = arrayOf(SubCmdDeck(), SubCmdSeeReports())
+    "Play a game of CardsAgainstHumanity or make custom cards.",
+    guildOnly = true, children = arrayOf(SubCmdDeck(), SubCmdSeeReports())
 ) {
 
     //Setup, Join, & leaderboard
@@ -792,7 +792,7 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
             //start
             event.argList[0].matches("(?i)sta?rt") -> {
                 TODO(event)
-                STAT.track(this, event.bot, event.author, event.creationTime)
+                track(this, event.bot, event.author, event.creationTime)
             }
             //Get your cards re-sent
             event.argList[0].matches("(?i)((my)?hand|(re)?send)") -> TODO(event)
@@ -851,9 +851,11 @@ class CmdCardsAgainstHumanity : WeebotCommand("cah", "Cards Against Humanity",
  * @author Jonathan Augustine
  * @since 2.2.1
  */
-private class SubCmdDeck : WeebotCommand("deck", null, arrayOf("decks"),
-    CAT_UNDER_CONSTRUCTION,
-    "", guildOnly = true, cooldown = 60, cooldownScope = USER_SHARD) {
+private class SubCmdDeck : WeebotCommand(
+    "deck", "GAMECAHDECK", null, arrayOf("decks"),
+    CAT_UNDER_CONSTRUCTION, "", guildOnly = true,
+    cooldown = 60, cooldownScope = USER_SHARD
+) {
 
     override fun execute(event: WeebotCommandEvent) {
         val gDecks = event.bot.cahGuildInfo.decks
@@ -925,7 +927,7 @@ private class SubCmdDeck : WeebotCommand("deck", null, arrayOf("decks"),
                                 it.author.idLong, pub, event.creationTime)
                             gDecks.add(deck)
                             sendNewDeck(event, deck)
-                            STAT.track(this, event.bot, event.author, event.creationTime)
+                            track(this, event.bot, event.author, event.creationTime)
                         }
                     }
                 } else {
@@ -950,7 +952,7 @@ private class SubCmdDeck : WeebotCommand("deck", null, arrayOf("decks"),
                                 event.creationTime)
                             gDecks.add(deck)
                             sendNewDeck(event, deck)
-                            STAT.track(this, event.bot, event.author, event.creationTime)
+                            track(this, event.bot, event.author, event.creationTime)
                         }
                     }
 
@@ -1339,8 +1341,10 @@ private class SubCmdDeck : WeebotCommand("deck", null, arrayOf("decks"),
  * @author Jonathan Augustine
  * @since 2.2.1
  */
-private class SubCmdSeeReports : WeebotCommand("reports", null, arrayOf("report", "rep"),
-    CAT_DEV, "", ownerOnly = true, hidden = true) {
+private class SubCmdSeeReports : WeebotCommand(
+    "reports", "GAMECAHREPORTS", null, arrayOf("report", "rep"),
+    CAT_DEV, "", ownerOnly = true, hidden = true
+) {
     override fun execute(event: WeebotCommandEvent) {
         val whiteCards = (DECK_CUST.map.map { it.value }.flatten() + DECK_STRD)
             .map { it.whiteCards }.flatten().filter { it.reports > 0 }

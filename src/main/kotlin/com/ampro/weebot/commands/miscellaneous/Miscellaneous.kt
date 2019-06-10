@@ -5,11 +5,28 @@
 package com.ampro.weebot.commands.miscellaneous
 
 import com.ampro.weebot.GENERIC_ERR_MSG
-import com.ampro.weebot.commands.*
-import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.*
-import com.ampro.weebot.database.*
+import com.ampro.weebot.commands.CAT_MISC
+import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
+import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.FACT_CAT
+import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.FACT_DOG
+import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.FACT_PANDA
+import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.IMG_CAT
+import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.IMG_DOG
+import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.IMG_PANDA
+import com.ampro.weebot.database.GLOBAL_WEEBOT
+import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.constants.LINK_INVITEBOT
-import com.ampro.weebot.extensions.*
+import com.ampro.weebot.database.track
+import com.ampro.weebot.extensions.TODO
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
+import com.ampro.weebot.extensions.creationTime
+import com.ampro.weebot.extensions.getInvocation
+import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.ampro.weebot.extensions.matches
+import com.ampro.weebot.extensions.respondThenDeleteBoth
+import com.ampro.weebot.extensions.send
+import com.ampro.weebot.extensions.weebotAvatar
 import com.ampro.weebot.util.Link
 import com.ampro.weebot.util.get
 import com.github.kittinunf.fuel.httpGet
@@ -21,19 +38,19 @@ import java.time.temporal.ChronoUnit
  * @author Jonathan Augustine
  * @since 1.0
  */
-class PingCommand : WeebotCommand("ping", null, arrayOf("pong"), CAT_MISC,
-    "Checks the bot's latency.", HelpBiConsumerBuilder("Ping ~ Pong", false)
-        .setDescription("Checks the bot's latency.").build(), false, cooldown = 10
+class PingCommand : WeebotCommand(
+    "ping", "PING", null, arrayOf("pong"), CAT_MISC, "Checks the bot's latency.",
+    HelpBiConsumerBuilder("Ping ~ Pong", false)
+        .setDescription("Checks the bot's latency.").build(),
+    false, cooldown = 10
 ) {
     override fun execute(event: CommandEvent) {
-        STAT.track(this,
-                if (event.guild != null) getWeebotOrNew(event.guild) else DAO.GLOBAL_WEEBOT,
-                event.author, event.creationTime)
+        track(this, event.guild?.bot ?: GLOBAL_WEEBOT, event.author, event.creationTime)
         val r = if (event.getInvocation().toLowerCase() == "pong") "Ping" else "Pong"
         event.reply("$r: ...") { m ->
             val ping = event.message.creationTime.until(m.creationTime, ChronoUnit.MILLIS)
             m.editMessage("$r! :ping_pong: Ping: " + ping + "ms | Websocket: "
-                    + event.jda.ping + "ms").queue()
+                + event.jda.ping + "ms").queue()
         }
     }
 }
@@ -44,16 +61,18 @@ class PingCommand : WeebotCommand("ping", null, arrayOf("pong"), CAT_MISC,
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdInviteLink : WeebotCommand("invitelink", "Invite Link" ,
-    arrayOf("ilc", "invite"), CAT_MISC, "Get an invite link for Weebot.",
+class CmdInviteLink : WeebotCommand(
+    "invitelink", "INVITELINK", "Invite Link", arrayOf("ilc", "invite"),
+    CAT_MISC, "Get an invite link for Weebot.",
     HelpBiConsumerBuilder("Get an invite link for Weebot")
         .setDescription("[`Or just invite me with this link I guess`]($LINK_INVITEBOT)")
-        .setThumbnail(weebotAvatar).build(), cooldown = 360,
+        .setThumbnail(weebotAvatar).build(),
+    cooldown = 360,
     botPerms = arrayOf(Permission.MESSAGE_EMBED_LINKS),
     userPerms = arrayOf(Permission.MESSAGE_EMBED_LINKS)
 ) {
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+        track(this, event.guild?.bot ?: GLOBAL_WEEBOT, event.author, event.creationTime)
         makeEmbedBuilder("Invite me to another server!", LINK_INVITEBOT,
             "[`Invite me with dis thing here`]($LINK_INVITEBOT)")
             .setThumbnail(weebotAvatar).build().send(event.channel)
@@ -64,8 +83,10 @@ class CmdInviteLink : WeebotCommand("invitelink", "Invite Link" ,
  * @author Jonathan Augustine
  * @since 2.2.0
  */
-class CmdNameGenerator : WeebotCommand("namegen", "Name Generator", arrayOf("ngc"),
-    CAT_UNDER_CONSTRUCTION, "Generate a random name", cooldown = 15) {
+class CmdNameGenerator : WeebotCommand(
+    "namegen", "NAMEGENERATER", "Name Generater", arrayOf("ngc"),
+    CAT_UNDER_CONSTRUCTION, "Generate a random name", cooldown = 15
+) {
 
     private val BASE_URL = "https://uzby.com/api.php" //TODO java rejecting SSL cert
 
@@ -89,9 +110,11 @@ class CmdNameGenerator : WeebotCommand("namegen", "Name Generator", arrayOf("ngc
  * @author Jonathan Augustine
  * @since 2.2.0
  */
-class CmdApiToGetALife : WeebotCommand("fact", "APGL Facts", emptyArray(),
+class CmdApiToGetALife : WeebotCommand(
+    "fact", "FACTSAPIS", "APGL Facts", emptyArray(),
     CAT_MISC, "Get random facts and images from api-to-get-a.life",
-    cooldown = 20, cooldownScope = CooldownScope.USER, guildOnly = true) {
+    cooldown = 20, cooldownScope = CooldownScope.USER, guildOnly = true
+) {
 
     private val BASE_URL = "https://api-to.get-a.life"
 
@@ -99,8 +122,10 @@ class CmdApiToGetALife : WeebotCommand("fact", "APGL Facts", emptyArray(),
         FACT_DOG("/dogfact"), FACT_CAT("/catfact"), FACT_PANDA("/pandafact"),
         IMG_DOG("/dogimg"), IMG_CAT("/catimg"), IMG_PANDA("/pandaimg"),
         IMG_REDPANDA("/redpandaimg"), IMG_BIRD("/birbimg"), IMG_PIKACHU("/pikachuimg");
+
         override fun toString() = this.endPoint
     }
+
     private data class Fact(val fact: String)
 
     override fun execute(event: WeebotCommandEvent) {
@@ -112,21 +137,21 @@ class CmdApiToGetALife : WeebotCommand("fact", "APGL Facts", emptyArray(),
             event.args.matches("(?i)dog") -> {
                 (BASE_URL + FACT_DOG).get<Fact>().component1()?.also {
                     makeEmbedBuilder("Doggo Fact", null, it.fact)
-                        .setImage((BASE_URL+IMG_DOG).get<Link>().component1()?.link)
+                        .setImage((BASE_URL + IMG_DOG).get<Link>().component1()?.link)
                         .build().send(event.channel)
                 } ?: event.respondThenDeleteBoth(GENERIC_ERR_MSG)
             }
             event.args.matches("(?i)cat") -> {
                 (BASE_URL + FACT_CAT).get<Fact>().component1()?.also {
                     makeEmbedBuilder("Kat Fact", null, it.fact)
-                        .setImage((BASE_URL+IMG_CAT).get<Link>().component1()?.link)
+                        .setImage((BASE_URL + IMG_CAT).get<Link>().component1()?.link)
                         .build().send(event.channel)
                 } ?: event.respondThenDeleteBoth(GENERIC_ERR_MSG)
             }
             event.args.matches("(?i)panda") -> {
                 (BASE_URL + FACT_PANDA).get<Fact>().component1()?.also {
                     makeEmbedBuilder("Giant Panda Fact", null, it.fact)
-                        .setImage((BASE_URL+IMG_PANDA).get<Link>().component1()?.link)
+                        .setImage((BASE_URL + IMG_PANDA).get<Link>().component1()?.link)
                         .build().send(event.channel)
                 } ?: event.respondThenDeleteBoth(GENERIC_ERR_MSG)
             }

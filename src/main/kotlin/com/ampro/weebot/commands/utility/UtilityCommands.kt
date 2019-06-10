@@ -4,30 +4,60 @@
 
 package com.ampro.weebot.commands.utility
 
-import com.ampro.weebot.*
-import com.ampro.weebot.commands.*
-import com.ampro.weebot.database.*
-import com.ampro.weebot.extensions.*
-import com.ampro.weebot.util.*
+import com.ampro.weebot.CACHED_POOL
+import com.ampro.weebot.GENERIC_ERR_MSG
+import com.ampro.weebot.JDA_SHARD_MNGR
+import com.ampro.weebot.MLOG
+import com.ampro.weebot.ON
+import com.ampro.weebot.Weebot
+import com.ampro.weebot.commands.CAT_UTIL
+import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.database.GLOBAL_WEEBOT
+import com.ampro.weebot.database.bot
+import com.ampro.weebot.database.track
+import com.ampro.weebot.database.user
+import com.ampro.weebot.extensions.SelectablePaginator
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
+import com.ampro.weebot.extensions.`is`
+import com.ampro.weebot.extensions.contains
+import com.ampro.weebot.extensions.creationTime
+import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.ampro.weebot.extensions.plus
+import com.ampro.weebot.extensions.removeAll
+import com.ampro.weebot.extensions.removeIf
+import com.ampro.weebot.extensions.respondThenDeleteBoth
+import com.ampro.weebot.extensions.send
+import com.ampro.weebot.extensions.splitArgs
+import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.extensions.subList
 import com.ampro.weebot.util.Emoji.AlarmClock
+import com.ampro.weebot.util.IdGenerator
+import com.ampro.weebot.util.NOW
+import com.ampro.weebot.util.REG_HYPHEN
+import com.ampro.weebot.util.formatTime
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.net.HttpURLConnection
+import java.net.URL
+import java.net.URLDecoder.decode
+import java.net.URLEncoder.encode
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
 import java.util.concurrent.ConcurrentHashMap
-import java.io.InputStreamReader
-import java.io.BufferedReader
-import java.io.IOException
-import java.net.*
-import java.net.URLDecoder.*
-import java.net.URLEncoder.*
 
 
 /** An instantiable representation of a User's OutHouse. */
@@ -62,7 +92,7 @@ class OutHouse(user: User, var remainingMin: Long, val message: String,
         } else if (mess.mentionedUsers.any { it.idLong == userId }) {
             //Respond as bot
             val sb = StringBuilder().append("*Sorry, ")
-                .append(getUser(userId)?.asMention ?: "that user")
+                .append(userId.user?.asMention ?: "that user")
             if (message.isNotBlank()) sb.append(" is out $message. ")
             else sb.append(" is currently unavailable. ")
             sb.append("Please try mentioning them again after ")
@@ -75,7 +105,7 @@ class OutHouse(user: User, var remainingMin: Long, val message: String,
                 val a = "${author.name} (${guild.getMember(author).effectiveName})"
                 val e = strdEmbedBuilder.setAuthor(a)
                     .setTitle("Message from ${guild.name}").setDescription(m).build()
-                getUser(userId)?.openPrivateChannel()?.queue {
+                userId.user?.openPrivateChannel()?.queue {
                     it.sendMessage(e).queue()
                 }
             }
@@ -92,9 +122,11 @@ class OutHouse(user: User, var remainingMin: Long, val message: String,
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UTIL,
+class CmdOutHouse : WeebotCommand(
+    "outhouse", "OUTHOUSE", "OutHouse", arrayOf("ohc"), CAT_UTIL,
     "Have the bot respond to anyone who mentions you for the given time.",
-    cooldown = 30) {
+    cooldown = 30
+) {
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("OutHouse Command")
@@ -102,19 +134,18 @@ class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UT
             .addToDesc("\nYou can also forward any message that mentions you to a ")
             .addToDesc("private channel.")
             .addField("Arguments", "[Zd] [Xh] [Ym] [-f] [afk-message]" +
-                    "\ndays, hours, minutes. -f enables message forwarding to private " +
-                    "chat.")
+                "\ndays, hours, minutes. -f enables message forwarding to private " +
+                "chat.")
             .addField("Alias", "outhouse")
             .build()
     }
 
     override fun execute(event: CommandEvent) {
         //ohc [hours] [message here]
-        val bot = if (event.isFromType(PRIVATE)) DAO.GLOBAL_WEEBOT
-        else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author, event.creationTime)
+        val bot = if (event.isFromType(PRIVATE)) GLOBAL_WEEBOT else event.guild.bot
+        track(this, bot, event.author, event.creationTime)
 
-        DAO.GLOBAL_WEEBOT.getUserPassive<OutHouse>(event.author)?.apply {
+        GLOBAL_WEEBOT.getUserPassive<OutHouse>(event.author)?.apply {
             event.reply("*You're already in the outhouse* ${
             (remainingMin * 60L).formatTime()}")
         } ?: run {
@@ -122,15 +153,16 @@ class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UT
             val args = event.splitArgs()
 
             //check days
-            val d = args.firstOrNull{ it.matches("\\d+[Dd]".toRegex()) }
+            val d = args.firstOrNull { it.matches("\\d+[Dd]".toRegex()) }
                 ?.removeAll("[^\\d]+")?.toInt() ?: 0
-            val h = args.firstOrNull{ it.matches("\\d+[Hh]".toRegex()) }
+            val h = args.firstOrNull { it.matches("\\d+[Hh]".toRegex()) }
                 ?.removeAll("[^\\d]+")?.toInt() ?: 0
-            val m = args.firstOrNull{ it.matches("\\d+[Mm]".toRegex()) }
+            val m = args.firstOrNull { it.matches("\\d+[Mm]".toRegex()) }
                 ?.removeAll("[^\\d]+")?.toInt() ?: 0
 
-            val min = if(d == 0 && h == 0 && m == 0) { 60 }
-            else (d * 24 * 60) + (h * 60) + m
+            val min = if (d == 0 && h == 0 && m == 0) {
+                60
+            } else (d * 24 * 60) + (h * 60) + m
 
             //check for forwarding
             val forward = args.contains("(?i)-f(orward(ing)?)?".toRegex())
@@ -146,13 +178,13 @@ class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UT
             } else ""
 
             val oh = OutHouse(event.author, min.toLong(), message, forward)
-            if (DAO.GLOBAL_WEEBOT.addUserPassive(event.author, oh)) {
+            if (GLOBAL_WEEBOT.addUserPassive(event.author, oh)) {
                 event.reply("I will hold down the fort while you're away! :guardsman:"
-                        + " see you in ${(min * 60L).formatTime()}")
+                    + " see you in ${(min * 60L).formatTime()}")
                 return@run oh
-            }
-            else {
-                event.reply("Sorry, You have already reached the maximum number of Passives")
+            } else {
+                event.reply(
+                    "Sorry, You have already reached the maximum number of Passives")
                 return@run null
             }
         }
@@ -167,8 +199,10 @@ class CmdOutHouse : WeebotCommand("outhouse", "OutHouse" ,arrayOf("ohc"), CAT_UT
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remindme"),
-    CAT_UTIL, "Set a Reminder from 1 minute to 30 days.", cooldown = 5) {
+class CmdReminder : WeebotCommand(
+    "reminder", "REMINDER", null, arrayOf("rc", "rem", "remindme"),
+    CAT_UTIL, "Set a Reminder from 1 minute to 30 days.", cooldown = 5
+) {
 
     /**
      * A [Reminder] is similar to the [OutHouse] in the way it tracks time
@@ -179,7 +213,9 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
     class Reminder(val userID: Long, val channel: Long?, var minutes: Long,
                    val message: String) {
 
-        companion object { private val REM_ID_GEN = IdGenerator(7, "REM:") }
+        companion object {
+            private val REM_ID_GEN = IdGenerator(7, "REM:")
+        }
 
         val id = REM_ID_GEN.next()
         var lastTime: OffsetDateTime? = NOW()
@@ -191,14 +227,15 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
                 lastTime = NOW()
             }
         }
+
         fun isDone() = minutes <= 0L
 
         /**
          * Sends the user their reminder
          */
         fun send() {
-            getUser(userID)?.apply {
-                val m = MessageBuilder(makeEmbedBuilder("Weebot Reminder", null,message)
+            userID.user?.apply {
+                val m = MessageBuilder(makeEmbedBuilder("Weebot Reminder", null, message)
                     .build()).append(this).build()
                 if (channel == null) {
                     openPrivateChannel()?.queue { it.sendMessage(m).queue() }
@@ -211,7 +248,7 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
         /**@return the remaining time formatted*/
         fun formatTime() = (minutes * 60).formatTime()
 
-        fun selectableEmbed(author: User) { }//todo }
+        fun selectableEmbed(author: User) {} //todo }
 
         override fun toString() = "$id = ${formatTime()} $message"
 
@@ -238,12 +275,13 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
     }
 
     fun init() {
-        DAO.GLOBAL_WEEBOT.getReminders()
+        GLOBAL_WEEBOT.getReminders()
             .filter { it.value.filterNotNull().isNotEmpty() }
             .forEach {
-            remJobMap.putIfAbsent(it.key, remWatchJob(it.value))
-        }
-        /** Cleaner Job */ GlobalScope.launch(CACHED_POOL) {
+                remJobMap.putIfAbsent(it.key, remWatchJob(it.value))
+            }
+        /** Cleaner Job */
+        GlobalScope.launch(CACHED_POOL) {
             while (ON) {
                 delay(60 * 60 * 1_000)
                 synchronized(remJobMap) { remJobMap.removeIf { _, v -> !v.isActive } }
@@ -252,11 +290,12 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
     }
 
     private fun sendReminderList(event: CommandEvent) {
-        val rems = DAO.GLOBAL_WEEBOT.getReminders(event.author)
+        val rems = GLOBAL_WEEBOT.getReminders(event.author)
             .apply { removeIf { it == null } }
         if (rems.isEmpty()) return event.respondThenDeleteBoth("No reminders.")
         SelectablePaginator(baseEmbed = makeEmbedBuilder(
-            event.author.name + "'s Reminders",null,"")// "Choose a reminder to edit it.")
+            event.author.name + "'s Reminders", null,
+            "") // "Choose a reminder to edit it.")
             .build(), itemsPerPage = -1,
             items = rems.mapNotNull {
                 "${it.id} : ${it.formatTime()}\n${it.message}" to { _: Int, _: Message ->
@@ -271,12 +310,11 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
     //TODO send texts
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
-        val bot = if (event.isFromType(PRIVATE)) DAO.GLOBAL_WEEBOT
-        else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author, event.creationTime)
+        val bot = if (event.isFromType(PRIVATE)) GLOBAL_WEEBOT else event.guild.bot
+        track(this, bot, event.author, event.creationTime)
 
         when {
-            args.isEmpty() || args[0].matches(Regex("(?i)-s(e)*"))-> {
+            args.isEmpty() || args[0].matches(Regex("(?i)-s(e)*")) -> {
                 sendReminderList(event)
                 return
             }
@@ -286,7 +324,7 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
                     event.reply("*You must specify one or more Reminders to remove*")
                     return
                 }
-                val rems = DAO.GLOBAL_WEEBOT.getReminders(event.author)
+                val rems = GLOBAL_WEEBOT.getReminders(event.author)
                 synchronized(rems) {
                     for (i in 1 until args.size) {
                         rems.removeAll { it.id.equals(args[i], true) }
@@ -328,7 +366,7 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
                 val r = Reminder(event.author.idLong,
                     if (private) null else event.textChannel?.idLong, min, message)
 
-                if (DAO.GLOBAL_WEEBOT.addReminder(event.author, r)) {
+                if (GLOBAL_WEEBOT.addReminder(event.author, r)) {
                     event.reactSuccess()
                 } else {
                     event.reactError()
@@ -342,7 +380,7 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
         helpBiConsumer = HelpBiConsumerBuilder("Weebot Reminders $AlarmClock")
             .setDescription("Set a Reminder from 1 minute to 30 days.")
             .addField("Set a Reminder", "[-p] [Xmin] [Yhr] [Zd] [Reminder Message]\n" +
-                    "-p (-private) sends the reminder as a private message", true)
+                "-p (-private) sends the reminder as a private message", true)
             .addField("See Your Reminders", "-s (-see)", true)
             .addField("Remove a Reminder", "-r (-remove) <Reminder IDs...>", true)
             .setAliases(aliases)
@@ -357,9 +395,11 @@ class CmdReminder : WeebotCommand("reminder", null, arrayOf("rc", "rem", "remind
  * @author Jonathan Augustine
  * @since 2.2.1
  */
-class CmdTranslate : WeebotCommand("Translate", null, arrayOf("gtc", "trans"),
+class CmdTranslate : WeebotCommand(
+    "Translate", "TRANSLATE", null, arrayOf("gtc", "trans"),
     CAT_UTIL, "Translate a sentence to any language! (well not *any* language...)",
-    cooldown = 45, cooldownScope = USER_SHARD) {
+    cooldown = 45, cooldownScope = USER_SHARD
+) {
 
     /**
      * Langages that Google translate cares about
@@ -380,6 +420,7 @@ class CmdTranslate : WeebotCommand("Translate", null, arrayOf("gtc", "trans"),
         Turkish("tr"), Hebrew("iw"), Ukrainian("uk"), Hindi("hi"), Urdu("ur"),
         Hungarian("hu"), Vietnamese("vi"), Icelandic("is"), Welsh("cy"), Indonesian("id"),
         Yiddish("yi");
+
         companion object {
             fun from(string: String) = values().firstOrNull {
                 it.code.equals(string, true) || it.name.equals(string, true)
@@ -412,7 +453,7 @@ class CmdTranslate : WeebotCommand("Translate", null, arrayOf("gtc", "trans"),
                 "Unavailable language (${args[0]})").also { event.reactError() }
             sourceText = args.subList(1).joinToString(" ")
         }
-        STAT.track(this, event.bot, event.author, event.creationTime)
+        track(this, event.bot, event.author, event.creationTime)
         try {
             makeEmbedBuilder("Translator", null, """
                         Translating ${source?.name ?: "auto"}
@@ -440,8 +481,8 @@ class CmdTranslate : WeebotCommand("Translate", null, arrayOf("gtc", "trans"),
     @Throws(IOException::class)
     private fun translate(from: Language?, langTo: Language, text: String): String {
         // INSERT YOU URL HERE
-        val urlStr = "$baseUrl?q=${encode(text,"UTF-8")}&target=${langTo.code}&source=${
-        from?.code?:""}"
+        val urlStr = "$baseUrl?q=${encode(text, "UTF-8")}&target=${langTo.code}&source=${
+        from?.code ?: ""}"
         val url = URL(urlStr)
         val response = StringBuilder()
         val con = url.openConnection() as HttpURLConnection

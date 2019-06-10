@@ -10,7 +10,7 @@ import java.io.File
 
 
 //TODO
-class TempCmdCheckReadMe : WeebotCommand("rpg", null, emptyArray(),
+class TempCmdCheckReadMe : WeebotCommand("rpg", "GAMERPG", null, emptyArray(),
         CAT_DEV, "", ownerOnly = true) {
     override fun execute(event: WeebotCommandEvent) {
         val sb = StringBuilder()

@@ -4,29 +4,43 @@
 
 package com.ampro.weebot.extensions
 
-import com.ampro.weebot.*
+import com.ampro.weebot.CMD_CLIENT
+import com.ampro.weebot.JDA_SHARD_MNGR
+import com.ampro.weebot.MLOG
+import com.ampro.weebot.SELF
+import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.COMMANDS
-import com.ampro.weebot.database.DAO
 import com.ampro.weebot.database.DISCORD_BOTLIST_API
+import com.ampro.weebot.database.GLOBAL_WEEBOT
+import com.ampro.weebot.database.allows
 import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.constants.DEV_IDS
 import com.ampro.weebot.database.constants.isDev
-import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.util.Emoji.*
+import com.ampro.weebot.util.Emoji.Warning
+import com.ampro.weebot.util.Emoji.WhiteCheckMark
+import com.ampro.weebot.util.Emoji.X_Red
 import com.ampro.weebot.util.NOW
-import com.jagrosh.jdautilities.command.*
+import com.jagrosh.jdautilities.command.Command
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER
+import com.jagrosh.jdautilities.command.CommandClient
+import com.jagrosh.jdautilities.command.CommandEvent
+import com.jagrosh.jdautilities.command.CommandListener
+import com.jagrosh.jdautilities.command.GuildSettingsManager
 import jdk.nashorn.internal.ir.annotations.Ignore
 import kotlinx.coroutines.ExecutorCoroutineDispatcher
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission
-import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
 import net.dv8tion.jda.core.entities.ChannelType.TEXT
+import net.dv8tion.jda.core.entities.Game
 import net.dv8tion.jda.core.entities.Game.listening
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.MessageEmbed
 import net.dv8tion.jda.core.entities.MessageEmbed.Field
+import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.ReadyEvent
 import net.dv8tion.jda.core.events.ShutdownEvent
@@ -66,7 +80,6 @@ fun CommandEvent.respondThenDelete(message: String, delay: Long = 10L,
 fun CommandEvent.respondThenDelete(embed: MessageEmbed, delay: Long = 10L,
                                    success: () -> Unit = {})
         = reply(embed) { it.delete().queueAfter(delay, SECONDS) {success()} }
-
 
 
 /**
@@ -115,26 +128,34 @@ fun CommandEvent.delete(delay: Long = 0L) {
     }
 }
 
+
 /**
  * A wrapper class for [Command] holding functions used by Weebots
  *
  * @param name Name of the Command
  * @param aliases Alternative names for the command
- * @param
+ * @property permaID The Command ID that wont change with Command-name changes
  *
  * @author Jonathan Augustine
  * @since 2.0
  */
-abstract class WeebotCommand(name: String, val displayName: String?,
-                             aliases: Array<String>, category: Category, help: String,
-                             helpBiConsumer: BiConsumer<CommandEvent, Command>? = null,
-                             guildOnly: Boolean = false, ownerOnly: Boolean = false,
-                             hidden: Boolean = false,
-                             children: Array<out Command>? = emptyArray(),
-                             requiredRole: String? = null, cooldown: Int = 0,
-                             cooldownScope: CooldownScope = USER,
-                             userPerms: Array<Permission> = emptyArray(),
-                             botPerms: Array<Permission> = emptyArray()
+abstract class WeebotCommand(
+    name: String,
+    val permaID: String,
+    val displayName: String?,
+    aliases: Array<String>,
+    category: Category,
+    help: String,
+    helpBiConsumer: BiConsumer<CommandEvent, Command>? = null,
+    guildOnly: Boolean = false,
+    ownerOnly: Boolean = false,
+    hidden: Boolean = false,
+    children: Array<out Command>? = emptyArray(),
+    requiredRole: String? = null,
+    cooldown: Int = 0,
+    cooldownScope: CooldownScope = USER,
+    userPerms: Array<Permission> = emptyArray(),
+    botPerms: Array<Permission> = emptyArray()
 ) : Command() {
 
     init {
@@ -266,10 +287,8 @@ abstract class WeebotCommand(name: String, val displayName: String?,
 
     }
 
-    override fun isAllowed(channel: TextChannel): Boolean {
-        return getWeebotOrNew(channel.guild).settings.isAllowed(this, channel)
-                && super.isAllowed(channel)
-    }
+    override fun isAllowed(channel: TextChannel) =
+        channel.guild.bot.settings.isAllowed(this, channel) && super.isAllowed(channel)
 
     fun getHelpBiConsumer(): BiConsumer<CommandEvent, Command>? = this.helpBiConsumer
 
@@ -290,12 +309,13 @@ class WeebotCommandEvent(event: MessageReceivedEvent, arg: String, val bot: Weeb
  * @author Jonathan Augustine
  * @since 2.2.0
  */
-class WeebotCommandClient(val prefixes: List<String>,
-                          private val serverInvite: String,
-                          private val game: Game?,
-                          private val coroutinePool: ExecutorCoroutineDispatcher,
-                          helpWords: List<String>,
-                          private val helpConsumer: (WeebotCommandEvent) -> Unit
+class WeebotCommandClient(
+    val prefixes: List<String>,
+    private val serverInvite: String,
+    private val game: Game?,
+    private val coroutinePool: ExecutorCoroutineDispatcher,
+    helpWords: List<String>,
+    private val helpConsumer: (WeebotCommandEvent) -> Unit
 ) : CommandClient, EventListener {
 
     val initTime: OffsetDateTime = NOW()
@@ -309,6 +329,10 @@ class WeebotCommandClient(val prefixes: List<String>,
 
     init {
         COMMANDS.forEachIndexed { i, cmd ->
+            if ((COMMANDS - cmd).any { it.permaID.equals(cmd.permaID, true) }) {
+                MLOG.elog(this::class, "Command has conflicting PermaID")
+                com.ampro.weebot.shutdown()
+            }
             (cmd.aliases.map { it.toLowerCase() } + cmd.name.toLowerCase()).forEach {
                 if (commandIndexMap.containsKey(it)) {
                     MLOG.elog(this::class, "Command added has a conflicting " +
@@ -401,12 +425,11 @@ class WeebotCommandClient(val prefixes: List<String>,
         /** each string from raw content. the first arg will be the command name */
         var rawParts = event.splitArgsRaw().toMutableList()
 
-        val settings = if (event.guild != null) getWeebotOrNew(event.guild).settings
-        else DAO.GLOBAL_WEEBOT.settings
+        val settings = event.guild?.bot?.settings ?: GLOBAL_WEEBOT.settings
 
         when {
             //Check for @Mention
-            rawParts[0].matches(userMentionRegex)
+            rawParts[0].matches(REG_MENTION_USER)
                     && SELF.idLong == rawParts[0].removeAll("[^0-9]+").toLong() -> {
                 rawParts = rawParts.subList(1)
             }
@@ -429,11 +452,13 @@ class WeebotCommandClient(val prefixes: List<String>,
         val args = if (rawParts.size == 1) ""
         else rawParts.subList(1).joinToString(" ")
 
-        val wce = WeebotCommandEvent(event, args, event.guild?.bot ?: DAO.GLOBAL_WEEBOT)
+        val wce = WeebotCommandEvent(event, args, event.guild?.bot ?: GLOBAL_WEEBOT)
         if (helpWords.contains(cmdCall.toLowerCase())) {
             helpConsumer(wce)
         } else if (event.isFromType(PRIVATE) || event.textChannel.canTalk()) {
-            commandIndexMap[cmdCall]?.let { COMMANDS[it].run(wce) }
+            commandIndexMap[cmdCall]
+                ?.takeIf { COMMANDS[it] allows event.author }
+                ?.let { COMMANDS[it].run(wce) }
         }
 
     }

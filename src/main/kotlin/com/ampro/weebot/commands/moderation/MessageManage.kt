@@ -8,9 +8,18 @@ import com.ampro.weebot.CACHED_POOL
 import com.ampro.weebot.ON
 import com.ampro.weebot.commands.CAT_MOD
 import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
-import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.*
+import com.ampro.weebot.database.track
+import com.ampro.weebot.extensions.JDA_MESSAGE_HISTORY_MAX
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
+import com.ampro.weebot.extensions.creationTime
+import com.ampro.weebot.extensions.plus
+import com.ampro.weebot.extensions.removeIf
+import com.ampro.weebot.extensions.respondThenDelete
+import com.ampro.weebot.extensions.respondThenDeleteBoth
+import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.util.REG_HYPHEN
 import com.ampro.weebot.util.formatTime
 import com.jagrosh.jdautilities.command.Command.CooldownScope.GUILD
@@ -20,7 +29,10 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.core.MessageBuilder
-import net.dv8tion.jda.core.Permission.*
+import net.dv8tion.jda.core.Permission.MANAGE_CHANNEL
+import net.dv8tion.jda.core.Permission.MESSAGE_HISTORY
+import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
+import net.dv8tion.jda.core.Permission.MESSAGE_WRITE
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.Message.MentionType.ROLE
 import net.dv8tion.jda.core.entities.Message.MentionType.USER
@@ -30,19 +42,34 @@ import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.collections.MutableList
+import kotlin.collections.any
+import kotlin.collections.filterNot
+import kotlin.collections.first
+import kotlin.collections.forEach
+import kotlin.collections.indexOfFirst
+import kotlin.collections.isNotEmpty
+import kotlin.collections.joinToString
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.mutableListOf
+import kotlin.collections.none
+import kotlin.collections.reversed
+import kotlin.collections.set
 import kotlin.system.measureTimeMillis
 
 /**
- * A File contating [WeebotCommand]s regarding [Message] Management (deletion, etc(?))
+ * A File containing [WeebotCommand]s regarding [Message] Management (deletion, etc(?))
  */
 
 
 /**
  *
  */
- class CmdMoveConversation : WeebotCommand("mvm", "Move Conversation",
-    arrayOf("mcc", "moveconvo", "convomove"), CAT_MOD,
-    "Copies and pastes message into a different channel",
+ class CmdMoveConversation : WeebotCommand(
+    "mvm", "MOVECOVO", "Move Conversation",
+    arrayOf("mcc", "moveconvo", "convomove"),
+    CAT_MOD, "Copies and pastes message into a different channel",
     guildOnly = true, botPerms = arrayOf(MESSAGE_MANAGE, MESSAGE_HISTORY),
     userPerms = arrayOf(MESSAGE_MANAGE)
 ) {
@@ -109,18 +136,21 @@ import kotlin.system.measureTimeMillis
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdSelfDestruct : WeebotCommand("selfdestruct", "Self Destruct Message",
+class CmdSelfDestruct : WeebotCommand(
+    "selfdestruct", "SELFDESTRUCT", "Self Destruct Message",
     arrayOf("deleteme","cleanthis","deletethis","covertracks","whome?","podh","sdc"),
-    CAT_MOD, "Deletes the marked message after the given amount of time (30 sec default)",
+    CAT_MOD,
+    "Deletes the marked message after the given amount of time (30 sec default)",
     HelpBiConsumerBuilder("SelfDestruct Message")
         .setDescription("Deletes the marked message after the given amount of" +
-                " time (30 sec by " + "default)")
+            " time (30 sec by " + "default)")
         .addField("Arguments", "[-t delaySeconds] [message]")
         .addField("Aliases", "deleteme, cleanthis, deletethis, covertracks, whome?, podh,sdc")
-        .build(), true, cooldown = 0, botPerms = arrayOf(MESSAGE_MANAGE)
+        .build(),
+    true, cooldown = 0, botPerms = arrayOf(MESSAGE_MANAGE)
 ) {
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+        track(this, event.guild.bot, event.author, event.creationTime)
         val args = event.splitArgs()
         val delay = try {
             if (args[0].matches(Regex("^-[t|T]$"))) {
@@ -138,10 +168,12 @@ class CmdSelfDestruct : WeebotCommand("selfdestruct", "Self Destruct Message",
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", "clear"),
-    CAT_MOD, "Delete multiple messages, 2-1,000.", guildOnly = true,
-    botPerms = arrayOf(MESSAGE_MANAGE), userPerms = arrayOf(MESSAGE_MANAGE),
-    cooldown = 3, cooldownScope = GUILD) {
+class CmdPurge : WeebotCommand(
+    "purge", "PURGE", "Chat Purge", arrayOf("prune", "clean", "clear"),
+    CAT_MOD, "Delete multiple messages, 2-1,000.",
+    guildOnly = true, cooldown = 3, cooldownScope = GUILD,
+    botPerms = arrayOf(MESSAGE_MANAGE), userPerms = arrayOf(MESSAGE_MANAGE)
+) {
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Chat Purge", false).setDescription(
@@ -160,7 +192,7 @@ class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", 
             event.respondThenDeleteBoth("You must choose a number between 2 and 1,000.")
             return
         }
-        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+        track(this, event.guild.bot, event.author, event.creationTime)
         val list = mutableListOf<Int>()
         while (toDelete > 0) {
             if (toDelete >= 100) {
@@ -194,11 +226,13 @@ class CmdPurge : WeebotCommand("purge", "Chat Purge", arrayOf("prune", "clean", 
  * @author Jonathan Augustine
  * @since 2.1
  */
-class CmdChatLock : WeebotCommand("chatlock", "Chat Lock",
-    arrayOf("lockchat", "pausechat", "blockchat"), CAT_UNDER_CONSTRUCTION,
-    "Block messages to the TextChannel for a given time.",
-    guildOnly = true, botPerms = arrayOf(MESSAGE_MANAGE, MANAGE_CHANNEL),
-    userPerms = arrayOf(MANAGE_CHANNEL), cooldown = 15, cooldownScope = USER_CHANNEL
+class CmdChatLock : WeebotCommand(
+    "chatlock", "CHATLOCK", "Chat Lock",
+    arrayOf("lockchat", "pausechat", "blockchat"),
+    CAT_UNDER_CONSTRUCTION, "Block messages to the TextChannel for a given time.",
+    guildOnly = true, cooldown = 15, cooldownScope = USER_CHANNEL,
+    botPerms = arrayOf(MESSAGE_MANAGE, MANAGE_CHANNEL),
+    userPerms = arrayOf(MANAGE_CHANNEL)
 ) {
 
     /** [TextChannel.getIdLong] -> [AtomicInteger] remaining time, ([Long] -> [Unit]) */

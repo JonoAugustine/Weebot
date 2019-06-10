@@ -130,8 +130,6 @@ If not, then they go off on idk who knos what. Random encounters, I suppose.
 - 2D
 	- Textures
 		- Environment Textures
-	- Heightmap data (If applicable)
-		- List required data required - Example: DEM data of the entire UK.
 	- Etc.
 - 3D
 	- Characters List

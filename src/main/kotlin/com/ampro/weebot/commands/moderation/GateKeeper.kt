@@ -4,17 +4,27 @@ import com.ampro.weebot.WAITER
 import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.database.STAT
-import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.*
-import com.ampro.weebot.util.Emoji.*
+import com.ampro.weebot.database.bot
+import com.ampro.weebot.database.track
+import com.ampro.weebot.extensions.SelectableEmbed
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.creationTime
+import com.ampro.weebot.extensions.isValidUser
+import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.ampro.weebot.extensions.respondThenDeleteBoth
+import com.ampro.weebot.util.Emoji.Beginner
+import com.ampro.weebot.util.Emoji.InboxTray
+import com.ampro.weebot.util.Emoji.IncomingEnvelope
+import com.ampro.weebot.util.Emoji.OutboxTray
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
 import net.dv8tion.jda.core.entities.Member
 import net.dv8tion.jda.core.entities.TextChannel
 import net.dv8tion.jda.core.events.Event
-import net.dv8tion.jda.core.events.guild.member.*
+import net.dv8tion.jda.core.events.guild.member.GenericGuildMemberEvent
+import net.dv8tion.jda.core.events.guild.member.GuildMemberJoinEvent
+import net.dv8tion.jda.core.events.guild.member.GuildMemberLeaveEvent
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import org.apache.commons.lang3.tuple.MutablePair
 import java.util.concurrent.TimeUnit.MINUTES
@@ -65,7 +75,7 @@ class GateKeeper : IPassive {
 
         autoRoles.removeIf { event.guild.getRoleById(it) == null }
         val member = event.member
-        val bot = getWeebotOrNew(event.guild)
+        val bot = event.guild.bot
 
         when (event) {
             is GuildMemberJoinEvent -> {
@@ -98,10 +108,12 @@ class GateKeeper : IPassive {
  * @author Jonathan Augustine
  * @since 2.1
  */
-class CmdWelcomeMsg : WeebotCommand("welcome", "Welcome Messages",
+class CmdWelcomeMsg : WeebotCommand(
+    "welcome", "GATEKEEPER", "Welcome Messages",
     arrayOf("gatekeeper", "wmc", "gkc"), CAT_UNDER_CONSTRUCTION,
     "Set Messages to be sent and Roles to be set when a new Member joins",
-    guildOnly = true, userPerms = arrayOf(ADMINISTRATOR)) {
+    guildOnly = true, userPerms = arrayOf(ADMINISTRATOR)
+) {
 
     val eb: EmbedBuilder get() {
         return makeEmbedBuilder("Gate Keeper", null, """
@@ -116,8 +128,8 @@ class CmdWelcomeMsg : WeebotCommand("welcome", "Welcome Messages",
     }
 
     override fun execute(event: CommandEvent) {
-        val bot = getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author, event.creationTime)
+        val bot = event.guild.bot
+        track(this, bot, event.author, event.creationTime)
         val gk: GateKeeper = bot.getPassive() ?: run {
             val gk = GateKeeper()
             bot.add(gk)

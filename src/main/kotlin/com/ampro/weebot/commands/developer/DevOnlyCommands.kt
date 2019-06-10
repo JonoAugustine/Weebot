@@ -4,16 +4,33 @@
 
 package com.ampro.weebot.commands.developer
 
-import com.ampro.weebot.*
+import com.ampro.weebot.CACHED_POOL
+import com.ampro.weebot.JDA_SHARD_MNGR
+import com.ampro.weebot.SELF
+import com.ampro.weebot.WAITER
 import com.ampro.weebot.commands.CAT_DEV
-import com.ampro.weebot.database.STAT
-import com.ampro.weebot.database.constants.PHONE_JONO
+import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.getGuild
+import com.ampro.weebot.database.getStatPlot
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.database.summarize
-import com.ampro.weebot.extensions.*
-import com.ampro.weebot.util.*
+import com.ampro.weebot.extensions.CLR_GREEN
+import com.ampro.weebot.extensions.SelectableEmbed
+import com.ampro.weebot.extensions.SelectablePaginator
+import com.ampro.weebot.extensions.TODO
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.creationTime
+import com.ampro.weebot.extensions.isValidUser
+import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.ampro.weebot.extensions.size
+import com.ampro.weebot.extensions.strdPaginator
+import com.ampro.weebot.extensions.trueSize
+import com.ampro.weebot.shutdown
+import com.ampro.weebot.util.DD_MM_YYYY_HH_MM
 import com.ampro.weebot.util.Emoji.X_Red
+import com.ampro.weebot.util.NOW
+import com.ampro.weebot.util.REG_NO
+import com.ampro.weebot.util.REG_YES
+import com.ampro.weebot.util.formatTime
 import com.jagrosh.jdautilities.command.CommandEvent
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.delay
@@ -27,12 +44,13 @@ import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.TimeUnit.*
+import java.util.concurrent.TimeUnit.MILLISECONDS
+import java.util.concurrent.TimeUnit.MINUTES
+import java.util.concurrent.TimeUnit.SECONDS
 import java.util.concurrent.atomic.AtomicInteger
 import kotlin.math.ceil
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
-import kotlin.text.*
 
 
 /**
@@ -45,8 +63,16 @@ import kotlin.text.*
  * @author Jonathan Augustine
  * @since 1.0
  */
-class CmdShutdown : WeebotCommand("shutdown", null, arrayOf("tite", "killbot", "devkill"),
-    CAT_DEV, "Shutdown the weebot", hidden = true, ownerOnly = true) {
+class CmdShutdown : WeebotCommand(
+    "shutdown",
+    "SHUTDOWN",
+    null,
+    arrayOf("tite", "killbot", "devkill"),
+    CAT_DEV,
+    "Shutdown the weebot",
+    hidden = true,
+    ownerOnly = true
+) {
 
     override fun execute(event: CommandEvent) = runBlocking {
         event.reactWarning()
@@ -57,61 +83,44 @@ class CmdShutdown : WeebotCommand("shutdown", null, arrayOf("tite", "killbot", "
     }
 }
 
-class CmdStatsView : WeebotCommand("stats", null, arrayOf("viewstats", "statsview",
-    "statview", "viewstat"), CAT_DEV, "View Weebot statistics", hidden = true,
-    ownerOnly = true) {
-    override fun execute(event: CommandEvent) { GlobalScope.launch(CACHED_POOL) {
-        val stats = STAT.commandUsage
-        val bots = JDA_SHARD_MNGR.guilds.map { getWeebotOrNew(it) }
-        val enabled: List<Boolean> = bots.map { it.settings.trackingEnabled }
-        if (stats.isEmpty()) {
-            if (enabled.none { it }) {
-                event.reply("No Weebots have Tracking Enabled.")
-            } else event.reply("No Statistics available.")
-            return@launch
+class CmdStatsView : WeebotCommand(
+    "stats",
+    "STATS",
+    null,
+    arrayOf("viewstats", "statsview", "statview", "viewstat"),
+    CAT_DEV,
+    "View Weebot statistics",
+    hidden = true,
+    ownerOnly = true
+) {
+    override fun execute(event: CommandEvent) {
+        GlobalScope.launch(CACHED_POOL) {
+            // TODO List all commands or parse requested command and display
+            // stat plot summaries
+            TODO(event)
         }
-
-        val restrictions = HashMap<KClass<out WeebotCommand>, AtomicInteger>()
-
-        bots.map { it.settings.commandRestrictions.filter { it.value.guildWide }
-            .forEach { restrictions.getOrPut(it.key) {AtomicInteger(0)}.incrementAndGet() }
-        }
-
-        if (restrictions.isNotEmpty()) {
-            val rList = restrictions.map { it.key to it.value.get() }
-                .sortedBy { it.second }.map { "**${it.first.simpleName}:** ${it.second}" }
-
-            strdPaginator.useNumberedItems(true).setText("Blocked Command Stats")
-                .setUsers(event.author).setItemsPerPage(6).apply {
-                    rList.forEach { addItems(it) }
-                }.build().display(event.channel)
-        }
-
-        val size = enabled.filter { it }.size
-        val perc = ceil((size / enabled.size.toDouble()) * 100).toInt()
-
-        strdPaginator.useNumberedItems(true).setText("Usage Stats from $size ($perc%)")
-            .setUsers(event.author).setItemsPerPage(6).apply {
-                stats.map {
-                    """${it.key}:
-                    ${it.value.summarize()}
-                """.trimIndent()
-                }.forEach { addItems(it) }
-            }.build().display(event.channel)
-    }}
+    }
 }
 
 /**
  *
- * @author John Grosh (jagrosh)
+ * @author
  * @since 2.0
  */
-class CmdGuildList : WeebotCommand("guildlist", null, arrayOf("guilds", "servers"),
-    CAT_DEV, "Gets a paginated list of the guilds the bot is on.",
+class CmdGuildList : WeebotCommand(
+    "guildlist",
+    "ALLGUILDS",
+    null,
+    arrayOf("guilds", "servers"),
+    CAT_DEV,
+    "Gets a paginated list of the guilds the bot is on.",
     HelpBiConsumerBuilder("Guild List")
         .setDescription("Gets a paginated list of the guilds the bot is on.").build(),
-    ownerOnly = true, userPerms = arrayOf(MESSAGE_EMBED_LINKS), hidden = true,
-    botPerms = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ADD_REACTION)) {
+    ownerOnly = true,
+    userPerms = arrayOf(MESSAGE_EMBED_LINKS),
+    hidden = true,
+    botPerms = arrayOf(MESSAGE_EMBED_LINKS, MESSAGE_ADD_REACTION)
+) {
 
     val REG_DATE = Regex("(?i)-(d+a*t*e*)")
 
@@ -125,20 +134,24 @@ class CmdGuildList : WeebotCommand("guildlist", null, arrayOf("guilds", "servers
                 Total Unique Users: ${String.format("%,d", JDA_SHARD_MNGR.users.size)}
                 Total Shards: ${JDA_SHARD_MNGR.shards.size}
                 """.trimIndent(),
-            items = gs.asSequence().sortedByDescending { if (sortByDate)
-                it.selfMember.joinDate.until(NOW(), ChronoUnit.MINUTES) * -1
-            else it.trueSize.toLong() }.map {
+            items = gs.asSequence().sortedByDescending {
+                if (sortByDate)
+                    it.selfMember.joinDate.until(NOW(), ChronoUnit.MINUTES) * -1
+                else it.trueSize.toLong()
+            }.map {
                 "**${it.name}** ~ ${it.size} (${((
-                        it.trueSize/it.size.toDouble())*100).roundToInt()}%)" +
-                        " on ${getGuildShard(it)?.shardId ?: "N/A"}" to { _: Int, _: Message -> it.infoEmbed(event).display(event.channel)
+                    it.trueSize / it.size.toDouble()) * 100).roundToInt()}%)" +
+                    " on ${getGuildShard(it)?.shardId
+                        ?: "N/A"}" to { _: Int, _: Message ->
+                    it.infoEmbed(event).display(event.channel)
                 }
             }.toList(), itemsPerPage = 10)
             .display(event.channel)
 
     }
 
-    private fun getGuildShard(g: Guild): JDA.ShardInfo?
-        = JDA_SHARD_MNGR.shards.find { s -> s.guilds.any { it.id == g.id } }?.shardInfo
+    private fun getGuildShard(
+        g: Guild): JDA.ShardInfo? = JDA_SHARD_MNGR.shards.find { s -> s.guilds.any { it.id == g.id } }?.shardInfo
 
 }
 
@@ -161,15 +174,16 @@ fun Guild.infoEmbed(event: CommandEvent): SelectableEmbed {
         listOf(X_Red to { _: Message, _: User ->
             event.reply("Are you sure? (yes/no) (30 sec timeout)")
             WAITER.waitForEvent(MessageReceivedEvent::class.java,
-                { e -> e.isValidUser(event.guild, setOf(event.author))}, {
+                { e -> e.isValidUser(event.guild, setOf(event.author)) }, {
                     if (it.message.contentDisplay.matches(REG_YES)) {
                         event.reply("Reason? (send ``null`` if nothing)")
                         WAITER.waitForEvent(MessageReceivedEvent::class.java,
-                            { e -> e.isValidUser(event.guild, setOf(event.author))}, {
-                                if (!it.message.contentDisplay.matches(Regex("(?i)null"))) {
-                                    val g = getGuild(this.idLong)//update guild info
+                            { e -> e.isValidUser(event.guild, setOf(event.author)) }, {
+                                if (!it.message.contentDisplay.matches(
+                                        Regex("(?i)null"))) {
+                                    val g = getGuild(this.idLong) //update guild info
                                     if (g != null) {
-                                        getWeebotOrNew(g).settings.sendLog(it.message)
+                                        g.bot.settings.sendLog(it.message)
                                         g.leave().queue {
                                             event.reply("*Weebot left ${g.name}*")
                                         }

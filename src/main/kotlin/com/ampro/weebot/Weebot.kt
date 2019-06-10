@@ -6,7 +6,8 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.commands.*
+import com.ampro.weebot.commands.CMD_REM
+import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.`fun`.games.Game
 import com.ampro.weebot.commands.`fun`.games.Player
 import com.ampro.weebot.commands.`fun`.games.cardgame.CahGuildInfo
@@ -14,7 +15,7 @@ import com.ampro.weebot.commands.moderation.ModerationData
 import com.ampro.weebot.commands.utility.CmdReminder.Companion.remWatchJob
 import com.ampro.weebot.commands.utility.CmdReminder.Reminder
 import com.ampro.weebot.commands.utility.NotePad
-import com.ampro.weebot.database.DAO
+import com.ampro.weebot.database.data
 import com.ampro.weebot.database.getGuild
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.makeEmbedBuilder
@@ -24,11 +25,15 @@ import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.dv8tion.jda.core.MessageBuilder
-import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.IMentionable
+import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.MessageEmbed
+import net.dv8tion.jda.core.entities.TextChannel
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.Event
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.reflect.KClass
 
 /**
  * A store of settings for a Weebot. This class exists to make compliance with
@@ -41,7 +46,7 @@ class WeebotSettings(val guildID: Long) {
 
     /** Bot's nickname in hosting guild  */
     val nickname: String
-        get() { return getGuild(guildID)?.selfMember?.nickname ?: "Weebot" }
+        get() = getGuild(guildID)?.selfMember?.nickname ?: "Weebot"
 
     /** Guild's command string to call the bot.*/
     @SerializedName("prefixs")
@@ -97,16 +102,15 @@ class WeebotSettings(val guildID: Long) {
     /** [TextChannel.getIdLong] -> [Pair]<[MutableList]<Class<[WeebotCommand]>>
      *     Pair<lockedTo, BlockedFrom>
      */
-    var commandRestrictions: ConcurrentHashMap<KClass<out WeebotCommand>,
-            CommandRestriction> = ConcurrentHashMap()
+    var cmdRestrictions: ConcurrentHashMap<String, CommandRestriction> =
+        ConcurrentHashMap()
         get() {
             if (field == null) field = ConcurrentHashMap()
             return field
         }
 
-    fun isAllowed(cmd: WeebotCommand, textChannel: TextChannel): Boolean {
-        return commandRestrictions[cmd::class]?.allows(textChannel) != false
-    }
+    fun isAllowed(cmd: WeebotCommand, textChannel: TextChannel) =
+        cmdRestrictions[cmd.permaID]?.allows(textChannel) != false
 
     /**
      * Sneds a log message to the log channel if it is set
@@ -138,18 +142,19 @@ class WeebotSettings(val guildID: Long) {
 }
 
 /**
- * A representation of a Weebot entity linked to a Guild.<br></br>
- * Contains a reference to the Guild hosting the bot and
- * the settings applied to the bot by said Guild. <br></br><br></br>
- * Each Weebot is assigned an ID String consisting of the
- * hosting Guild's unique ID + "W" (e.g. "1234W") <br></br><br></br>
+ * A representation of a Weebot entity linked to a Guild.
  *
- * @param guildID The ID of the host guild
+ * Contains a reference to the Guild hosting the bot and
+ * the settings applied to the bot by said Guild.
+ *
+ * @param guildID The ID of the host guild.
+ * @param _id The internal ID of the bot. Defaults to the [guildID].
  *
  * @author Jonathan Augustine
  * @since 1.0
  */
-open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
+//@Serializable
+open class Weebot(val guildID: Long, val _id: String = guildID.toString())
     : Comparable<Weebot> {
 
     /** @param guild The host guild */
@@ -162,8 +167,10 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
     /** The date the bot was added to the Database. */
     val initDate: OffsetDateTime = OffsetDateTime.now()
 
+    /** The date the bot was last used  */
+    var leaveDate: OffsetDateTime? = null
+
     /** Whether the bot can accept commands or not */
-    @Transient
     var locked: Boolean = false
 
     /*************************************************
@@ -275,7 +282,7 @@ open class Weebot(/**The ID of the host guild.*/ val guildID: Long)
  * @author Jonathan Augusitine
  * @since 1.0
  */
-class GlobalWeebot : Weebot(-1L) {
+object GlobalWeebot : Weebot(-1L, "GLOBAL") {
 
     init {
         this.settings.prefixes = mutableListOf("", "w!", "\\", "!")
@@ -305,7 +312,7 @@ class GlobalWeebot : Weebot(-1L) {
      */
     fun addUserPassive(user: User, iPassive: IPassive): Boolean {
         val list = userPassives.getOrPut(user.idLong) { mutableListOf()}
-        return if (DAO.isPremium(user)) {
+        return if (user.data?.status?.on == true) {
             when {
                 list.size >= PASSIVE_MAX_PREM -> false
                 else -> { list.add(iPassive); true }
@@ -349,7 +356,7 @@ class GlobalWeebot : Weebot(-1L) {
 
     fun addReminder(user: User, reminder: Reminder) = synchronized(userReminders) {
         val list = userReminders.getOrPut(user.idLong) { mutableListOf() }
-        val added = if (DAO.isPremium(user)) when {
+        val added = if (user.data?.status?.on == true) when {
             list.size >= REM_MAX_PREM -> false
             else -> { list.add(reminder); true }
         } else when {

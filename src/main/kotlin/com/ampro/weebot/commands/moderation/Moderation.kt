@@ -6,17 +6,43 @@ package com.ampro.weebot.commands.moderation
 
 import com.ampro.weebot.WAITER
 import com.ampro.weebot.commands.CAT_MOD
-import com.ampro.weebot.commands.moderation.ModerationData.ModAction.*
-import com.ampro.weebot.database.*
-import com.ampro.weebot.extensions.*
-import com.ampro.weebot.util.*
+import com.ampro.weebot.commands.moderation.ModerationData.ModAction.BAN
+import com.ampro.weebot.commands.moderation.ModerationData.ModAction.KICK
+import com.ampro.weebot.commands.moderation.ModerationData.ModAction.NOTIFY_ADMINS
+import com.ampro.weebot.commands.moderation.ModerationData.ModAction.NOTIFY_USER
+import com.ampro.weebot.commands.moderation.ModerationData.ModAction.valueOf
+import com.ampro.weebot.commands.moderation.ModerationData.ModAction.values
+import com.ampro.weebot.database.bot
+import com.ampro.weebot.database.track
+import com.ampro.weebot.database.user
+import com.ampro.weebot.extensions.CLR_RED
+import com.ampro.weebot.extensions.REG_MENTION_USER
+import com.ampro.weebot.extensions.SelectablePaginator
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.`is`
+import com.ampro.weebot.extensions.creationTime
+import com.ampro.weebot.extensions.hasPerm
+import com.ampro.weebot.extensions.isValidUser
+import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.ampro.weebot.extensions.matchesAny
+import com.ampro.weebot.extensions.outRanks
+import com.ampro.weebot.extensions.plus
+import com.ampro.weebot.extensions.queueIgnore
+import com.ampro.weebot.extensions.respondThenDeleteBoth
+import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.util.Emoji.Warning
+import com.ampro.weebot.util.REG_HYPHEN
+import com.ampro.weebot.util.REG_NO
+import com.ampro.weebot.util.REG_OFF
+import com.ampro.weebot.util.REG_ON
+import com.ampro.weebot.util.REG_YES
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_GUILD
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
 import net.dv8tion.jda.core.Permission.ADMINISTRATOR
 import net.dv8tion.jda.core.Permission.KICK_MEMBERS
-import net.dv8tion.jda.core.entities.*
+import net.dv8tion.jda.core.entities.Guild
+import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.time.OffsetDateTime
 import java.util.concurrent.ConcurrentHashMap
@@ -48,21 +74,23 @@ data class ModerationData(val initDate: OffsetDateTime) {
  * @author Jonathan Augustine
  * @since 2.1.1
  */
-class CmdModeration : WeebotCommand("mod", "Moderation", emptyArray(), CAT_MOD,
-    "View and edit Moderation settings like max user-reports.", guildOnly = true,
-    userPerms = arrayOf(ADMINISTRATOR)) {
+class CmdModeration : WeebotCommand(
+    "mod", "MOD", "Moderation", emptyArray(), CAT_MOD,
+    "View and edit Moderation settings like max user-reports.",
+    guildOnly = true, userPerms = arrayOf(ADMINISTRATOR)
+) {
 
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
         val g = event.guild
-        val bot = getWeebotOrNew(g)
+        val bot = g.bot
         val moderationData = bot.moderationData ?: let {
             bot.moderationData = ModerationData(event.creationTime)
             return@let bot.moderationData!!
         }
 
         if (args.isEmpty()) return event.reply(moderationData.asEmbed(g).build())
-        else STAT.track(this, bot, event.author, event.creationTime)
+        else track(this, bot, event.author, event.creationTime)
 
         when {
             args[0].matches(REG_HYPHEN + "rl") && args.size >= 2  -> {
@@ -124,16 +152,18 @@ class CmdModeration : WeebotCommand("mod", "Moderation", emptyArray(), CAT_MOD,
     }
 }
 
-class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
-    "Report users to the server moderators.", cooldown = 20, cooldownScope =
-    USER_GUILD, guildOnly = true) {
+class CmdReport : WeebotCommand(
+    "report", "MODREPORT", null, arrayOf("reports"), CAT_MOD,
+    "Report users to the server moderators.", cooldown = 20,
+    cooldownScope = USER_GUILD, guildOnly = true
+) {
 
     fun name(guild: Guild, id: Long)
-            = guild.getMemberById(id)?.effectiveName ?: getUser(id)?.name ?: "Unknown User"
+            = guild.getMemberById(id)?.effectiveName ?: id.user?.name ?: "Unknown User"
 
     override fun execute(event: CommandEvent) {
         val gld = event.guild
-        val bot = getWeebotOrNew(gld)
+        val bot = gld.bot
         if (event.args.isNullOrBlank()) return
         val args = event.splitArgs()
         val mentions = event.message.mentionedMembers.filterNot {
@@ -200,12 +230,12 @@ class CmdReport : WeebotCommand("report", null, arrayOf("reports"), CAT_MOD,
             } else event.respondThenDeleteBoth("There are no user reports to see.")
         } else {
             //Report actions
-            STAT.track(this, bot, event.author, event.creationTime)
+            track(this, bot, event.author, event.creationTime)
             if (mentions.isEmpty())
                 return event.respondThenDeleteBoth("No user was mentioned in the report.")
 
             val reas = event.args.split(Regex("\\s+"))
-                .filterNot { it.matchesAny(userMentionRegex) }.joinToString(" ")
+                .filterNot { it.matchesAny(REG_MENTION_USER) }.joinToString(" ")
             if (reas.isBlank()) return event.respondThenDeleteBoth("No reason given.")
 
             if (modData.hierarchicalReports)

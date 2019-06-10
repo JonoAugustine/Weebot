@@ -8,13 +8,43 @@ import com.ampro.weebot.GENERIC_ERR_MSG
 import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_FUN
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.*
-import com.ampro.weebot.util.*
-import com.ampro.weebot.util.Emoji.*
+import com.ampro.weebot.database.track
+import com.ampro.weebot.extensions.CLR_GREEN
+import com.ampro.weebot.extensions.EMBED_MAX_DESCRIPTION
+import com.ampro.weebot.extensions.EMBED_MAX_TITLE
+import com.ampro.weebot.extensions.TODO
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
+import com.ampro.weebot.extensions.creationTime
+import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.ampro.weebot.extensions.matches
+import com.ampro.weebot.extensions.matchesAny
+import com.ampro.weebot.extensions.replace
+import com.ampro.weebot.extensions.respondThenDeleteBoth
+import com.ampro.weebot.extensions.send
+import com.ampro.weebot.extensions.splitArgs
+import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.extensions.subList
+import com.ampro.weebot.util.Emoji.ArrowUp
+import com.ampro.weebot.util.Emoji.H
+import com.ampro.weebot.util.Emoji.I_lowercase
+import com.ampro.weebot.util.Emoji.S
+import com.ampro.weebot.util.Emoji.T
+import com.ampro.weebot.util.Emoji.Zero
+import com.ampro.weebot.util.EmojiNumbers
+import com.ampro.weebot.util.REG_DISABLE
+import com.ampro.weebot.util.REG_ENABLE
+import com.ampro.weebot.util.REG_OFF
+import com.ampro.weebot.util.REG_ON
+import com.ampro.weebot.util.digi
+import com.ampro.weebot.util.reactWith
 import com.jagrosh.jdautilities.command.CommandEvent
-import net.dv8tion.jda.core.Permission.*
+import net.dv8tion.jda.core.Permission.ADMINISTRATOR
+import net.dv8tion.jda.core.Permission.MESSAGE_ADD_REACTION
+import net.dv8tion.jda.core.Permission.MESSAGE_EMBED_LINKS
+import net.dv8tion.jda.core.Permission.MESSAGE_MANAGE
 import net.dv8tion.jda.core.entities.Emote
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.events.Event
@@ -30,10 +60,12 @@ import java.util.concurrent.TimeUnit.SECONDS
  * @author Jonathan Augustine
  * @since 2.2.1
  */
-class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
-    arrayOf("ebig", "bigemote"), CAT_FUN,"Replace single-emote-messages with a bigger image",
-        guildOnly = true, cooldown = 30,
-        userPerms = arrayOf(ADMINISTRATOR), botPerms = arrayOf(MESSAGE_MANAGE)) {
+class CmdBiggifyEmoji : WeebotCommand(
+    "biggify", "BIGEMOJI", "Emote Biggify", arrayOf("ebig", "bigemote"),
+    CAT_FUN, "Replace single-emote-messages with a bigger image",
+    guildOnly = true, cooldown = 30,
+    userPerms = arrayOf(ADMINISTRATOR), botPerms = arrayOf(MESSAGE_MANAGE)
+) {
 
     /**
      * @author Jonathan Augustine
@@ -43,8 +75,8 @@ class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
         private var dead = false
         override fun dead() = dead
 
-        private fun Emote.mentioRegex()
-                = Regex("${ if (invoke!=null) "$invoke\\s+" else ""}<[A-Za-z]*:$name:$id>")
+        private fun Emote.mentioRegex() = Regex(
+            "${if (invoke != null) "$invoke\\s+" else ""}<[A-Za-z]*:$name:$id>")
 
         override fun accept(bot: Weebot, event: Event) {
             if (event !is GuildMessageReceivedEvent) return
@@ -74,7 +106,8 @@ class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
                 val invoke: Char? = if (event.argList.size == 2) {
                     if (event.argList[1].length > 1) {
                         return event.respondThenDeleteBoth(
-                            "Prefix must be ``1`` character (``g``, ``\\``, ``+``, etc)", 30)
+                            "Prefix must be ``1`` character (``g``, ``\\``, ``+``, etc)",
+                            30)
                     } else event.argList[1][0]
                 } else null
                 biggifyer = Biggifyer(invoke)
@@ -82,7 +115,7 @@ class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
                 if (invoke == null) {
                     event.replySuccess("Biggifyer Activated!")
                 } else {
-                    event.reply(makeEmbedBuilder("Biggifyer Activated!",null,"""
+                    event.reply(makeEmbedBuilder("Biggifyer Activated!", null, """
                         Any custom emote can now be BIGGENED by using the prefix
                         ``$invoke:emoteName:``""".trimIndent()).build())
                 }
@@ -95,15 +128,17 @@ class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
                 } else event.replyError(GENERIC_ERR_MSG)
             }
             event.argList[0].matches("(?i)-{0,2}p(ref(ix)?)?") -> {
-                if (biggifyer == null) return event.respondThenDeleteBoth("No Biggifyer active.")
+                if (biggifyer == null) return event.respondThenDeleteBoth(
+                    "No Biggifyer active.")
                 if (event.argList.size == 1) {
-                    return event.reply("The prefix is currently ``${biggifyer.invoke?: "not set"}``")
+                    return event.reply(
+                        "The prefix is currently ``${biggifyer.invoke ?: "not set"}``")
                 } else if (event.argList[1].length > 1) {
                     if (event.argList[1].matchesAny(REG_OFF, REG_DISABLE)) {
                         biggifyer.invoke = null
                         event.replySuccess("Prefix removed. AutoBigging activated.")
                     } else return event.respondThenDeleteBoth(
-                            "Must be ``1`` character (``g``, ``\\``, ``+``, etc)", 30)
+                        "Must be ``1`` character (``g``, ``\\``, ``+``, etc)", 30)
                 } else {
                     biggifyer.invoke = event.argList[1][0]
                     event.replySuccess("Biggifyer prefix set to ``${biggifyer.invoke}``")
@@ -111,13 +146,13 @@ class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
             }
             else -> return
         }
-        STAT.track(this, event.bot, event.author, event.creationTime)
+        track(this, event.bot, event.author, event.creationTime)
     }
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Emote Biggifyer", false)
             .setDescription("Automatically (or manually) have weebot replace " +
-                    "any *custom* emote with a bigger version of the same emote.")
+                "any *custom* emote with a bigger version of the same emote.")
             .addField("Commands", """
                 **Enable**
                 ``on [prefix]``
@@ -139,14 +174,15 @@ class CmdBiggifyEmoji : WeebotCommand("biggify", "Emote Biggify",
  * @author Jonathan Augustine
  * @since 2.2.1
  */
-class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reactor"),
-    CAT_FUN, "React with predefined emotes to any message.", cooldown = 10,
-    guildOnly = true, userPerms = arrayOf(MESSAGE_ADD_REACTION),
+class CmdReacter : WeebotCommand(
+    "reacter", "REACTER", null, arrayOf("reac", "mrc", "reactor"),
+    CAT_FUN, "React with predefined emotes to any message.",
+    cooldown = 10, guildOnly = true, userPerms = arrayOf(MESSAGE_ADD_REACTION),
     botPerms = arrayOf(MESSAGE_ADD_REACTION)
 ) {
 
     /**
-     * @author Jonathan Augstine
+     * @author Jonathan Augustine
      * @since 2.0
      */
     private class Reactor(var invoke: Regex, var reaction: List<String>) : IPassive {
@@ -161,8 +197,9 @@ class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reacto
          *
          * @return The first message that doesnt match \^(t+h+i+s+|t+h+a+t+) or null
          */
-        fun getNonThis(messages: List<Message>)
-                = messages.firstOrNull { !it.contentDisplay.matches(invoke) }
+        fun getNonThis(messages: List<Message>) = messages.firstOrNull {
+            !it.contentDisplay.matches(invoke)
+        }
 
         override fun accept(bot: Weebot, event: Event) {
             if (event !is GuildMessageReceivedEvent) return
@@ -176,7 +213,7 @@ class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reacto
                             0
                         }
                         (getNonThis(his.retrievedHistory.subList(dex))
-                                ?: his.retrievedHistory[0]).reactWith(reaction)
+                            ?: his.retrievedHistory[0]).reactWith(reaction)
                     }
                     return
                 }
@@ -186,7 +223,7 @@ class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reacto
 
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
-        val bot = getWeebotOrNew(event.guild)
+        val bot = event.guild.bot
         val reactors = bot.getPassives<Reactor>()
 
         if (args.isEmpty()) {
@@ -197,7 +234,7 @@ class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reacto
                 "messages up to react to. ``^this 4``").build())
         }
 
-        STAT.track(this, bot, event.author, event.creationTime)
+        track(this, bot, event.author, event.creationTime)
 
         //on <invoke> <r e a c t i o n e m o t e s>
         when {
@@ -210,7 +247,7 @@ class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reacto
             }
             else -> {
                 event.respondThenDeleteBoth("Sorry, I had trouble understanding " +
-                        "${args[0]}. Try using " + "``on`` or ``off``.", 20)
+                    "${args[0]}. Try using " + "``on`` or ``off``.", 20)
             }
         }
 
@@ -235,25 +272,29 @@ class CmdReacter : WeebotCommand("reacter", null ,arrayOf("reac", "mrc", "reacto
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
-    "React with \"THiS\" to a message or enable an auto-reactor for This",
+class CmdThis : WeebotCommand(
+    "^this", "REACTTHIS", null, arrayOf("^that"),
+    CAT_FUN, "React with \"THiS\" to a message or enable an auto-reactor for This",
     cooldown = 10, guildOnly = true, userPerms = arrayOf(MESSAGE_ADD_REACTION),
     botPerms = arrayOf(MESSAGE_ADD_REACTION),
-        helpBiConsumer = HelpBiConsumerBuilder("^This Reactor")
-            .setDescription("Have me react with *\"THiS\"* to a message whenever someone types ")
-            .addToDesc("\"^this\" or \"^that\".")
-            .addField("Arguments", "[on/off]").addField("Aliases", "^that")
-            .build { it.reactWith(ArrowUp, T, H, I_lowercase, S) }
+    helpBiConsumer = HelpBiConsumerBuilder("^This Reactor")
+        .setDescription(
+            "Have me react with *\"THiS\"* to a message whenever someone types ")
+        .addToDesc("\"^this\" or \"^that\".")
+        .addField("Arguments", "[on/off]").addField("Aliases", "^that")
+        .build { it.reactWith(ArrowUp, T, H, I_lowercase, S) }
 ) {
 
     /**
      * Watcher for "^this" or "^that" messages.
      *
-     * @author Jonathan Augstine
+     * @author Jonathan Augustine
      * @since 2.0
      */
     class ThisReactor : IPassive {
-        companion object { val THIS_REG = Regex("\\^(t+h+i+s+|t+h+a+t+)") }
+        companion object {
+            val THIS_REG = Regex("\\^(t+h+i+s+|t+h+a+t+)")
+        }
 
         var dead = false
         override fun dead() = dead
@@ -287,7 +328,7 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
                             0
                         }
                         (getNonThis(it.retrievedHistory, dex)
-                                ?: it.retrievedHistory[0]).reactWith(ArrowUp, T, H,
+                            ?: it.retrievedHistory[0]).reactWith(ArrowUp, T, H,
                             I_lowercase, S)
                     }
                     return
@@ -298,9 +339,9 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
 
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
-        val bot = getWeebotOrNew(event.guild)
+        val bot = event.guild.bot
         val reactor = bot.getPassive<ThisReactor>()
-        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+        track(this, event.guild.bot, event.author, event.creationTime)
 
         //Check for ThisReactor enabling
         // \thisreactor on
@@ -343,7 +384,7 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
                 else -> {
                     event.respondThenDeleteBoth(
                         "Sorry, I had trouble understanding ${args[0]}. Try using " +
-                                "``on`` or ``off``.", 30)
+                            "``on`` or ``off``.", 30)
                 }
             }
         }
@@ -358,8 +399,10 @@ class CmdThis : WeebotCommand("^this", null ,arrayOf("^that"), CAT_FUN,
  * @author Jonathan Augustine
  * @since 2.1
  */
-class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN,
-    "Turn any sentence into Emoji", cooldown = 5) {
+class CmdEmojify : WeebotCommand(
+    "emojify", "EMOJIFY", "Emojify", arrayOf(),
+    CAT_FUN, "Turn any sentence into Emoji", cooldown = 5
+) {
 
     private val numberSet = digi.mapIndexed { i, _ ->
         Regex("(?i)$i") to (listOf(Zero) + EmojiNumbers)[i].unicode
@@ -371,8 +414,9 @@ class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN,
             return event.respondThenDeleteBoth("Too long", 5)
 
         val s = event.args.replace(Regex("\\s"), "\t")
-            .replace(Regex("(?i)[A-z]")) { ":regional_indicator_${it.value.toLowerCase()}:"
-        }.replace(*numberSet)
+            .replace(Regex("(?i)[A-z]")) {
+                ":regional_indicator_${it.value.toLowerCase()}:"
+            }.replace(*numberSet)
 
         event.reply(s)
     }
@@ -384,17 +428,19 @@ class CmdEmojify : WeebotCommand("emojify", "Emojify", arrayOf(), CAT_FUN,
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdHelloThere : WeebotCommand("hellothere", "Hello There",arrayOf("droppingin"),
+class CmdHelloThere : WeebotCommand(
+    "hellothere", "KENOBI", "Hello There", arrayOf("droppingin"),
     CAT_FUN, "*GENERAL KENOBI!*", cooldown = 360,
     userPerms = arrayOf(MESSAGE_EMBED_LINKS), botPerms = arrayOf(MESSAGE_EMBED_LINKS)
 ) {
     companion object {
-        val HELLO_THERE_GIFS = listOf("https://media.giphy.com/media/Nx0rz3jtxtEre/giphy.gif",
-        "https://media1.tenor.com/images/4735f34b4dd3b86333341fa17b203004/tenor.gif?itemid=8729471")
+        val HELLO_THERE_GIFS = listOf(
+            "https://media.giphy.com/media/Nx0rz3jtxtEre/giphy.gif",
+            "https://media1.tenor.com/images/4735f34b4dd3b86333341fa17b203004/tenor.gif?itemid=8729471")
     }
 
     override fun execute(event: CommandEvent) {
-        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+        track(this, event.guild.bot, event.author, event.creationTime)
         val e = strdEmbedBuilder.apply {
             val sb = StringBuilder()
             event.message.mentionedUsers.forEach {
@@ -404,7 +450,7 @@ class CmdHelloThere : WeebotCommand("hellothere", "Hello There",arrayOf("droppin
                 sb.append("${it.asMention} ")
             }
             setDescription("Hello There $sb")
-            }.setAuthor(event.member.effectiveName)
+        }.setAuthor(event.member.effectiveName)
             .setImage(HELLO_THERE_GIFS.random()).build()
 
         event.reply(e) { event.message.delete().queueAfter(1, SECONDS) }

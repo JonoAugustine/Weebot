@@ -6,16 +6,46 @@ package com.ampro.weebot.commands.progammer
 
 import com.ampro.weebot.WAITER
 import com.ampro.weebot.commands.CAT_PROG
-import com.ampro.weebot.database.STAT
+import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.getWeebotOrNew
-import com.ampro.weebot.extensions.*
-import com.ampro.weebot.util.*
-import com.ampro.weebot.util.Emoji.*
-import com.jagrosh.jdautilities.command.Command.CooldownScope.*
+import com.ampro.weebot.database.track
+import com.ampro.weebot.extensions.CLR_GREEN
+import com.ampro.weebot.extensions.EMBED_MAX_DESCRIPTION
+import com.ampro.weebot.extensions.EMBED_MAX_FIELD_NAME
+import com.ampro.weebot.extensions.EMBED_MAX_FIELD_VAL
+import com.ampro.weebot.extensions.EMBED_MAX_TITLE
+import com.ampro.weebot.extensions.SelectableEmbed
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.creationTime
+import com.ampro.weebot.extensions.delete
+import com.ampro.weebot.extensions.isValidUser
+import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.ampro.weebot.extensions.matchesAny
+import com.ampro.weebot.extensions.plus
+import com.ampro.weebot.extensions.queueIgnore
+import com.ampro.weebot.extensions.respondThenDelete
+import com.ampro.weebot.extensions.splitArgs
+import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.extensions.weebotAvatar
+import com.ampro.weebot.util.Emoji.D
+import com.ampro.weebot.util.Emoji.F
+import com.ampro.weebot.util.Emoji.FrowningFace
+import com.ampro.weebot.util.Emoji.H
+import com.ampro.weebot.util.Emoji.IncomingEnvelope
+import com.ampro.weebot.util.Emoji.P
+import com.ampro.weebot.util.Emoji.T
+import com.ampro.weebot.util.REG_DISABLE
+import com.ampro.weebot.util.REG_ENABLE
+import com.ampro.weebot.util.REG_HYPHEN
+import com.ampro.weebot.util.REG_NO
+import com.ampro.weebot.util.REG_YES
+import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
 import com.jagrosh.jdautilities.command.CommandEvent
 import net.dv8tion.jda.core.EmbedBuilder
-import net.dv8tion.jda.core.entities.*
 import net.dv8tion.jda.core.entities.ChannelType.TEXT
+import net.dv8tion.jda.core.entities.Message
+import net.dv8tion.jda.core.entities.MessageEmbed
+import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.message.MessageReceivedEvent
 import java.net.URL
 import java.util.concurrent.TimeUnit.MINUTES
@@ -31,9 +61,10 @@ import java.util.regex.PatternSyntaxException
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdRegexTest : WeebotCommand("regex", null,arrayOf("regtest", "regextest"),
-    CAT_PROG, "Test a Regex against one or more strings",
-    cooldown = 10) {
+class CmdRegexTest : WeebotCommand(
+    "regex", "REGEX", null, arrayOf("regtest", "regextest"),
+    CAT_PROG, "Test a Regex against one or more strings", cooldown = 10
+) {
 
     init {
         helpBiConsumer = HelpBiConsumerBuilder("Regex Tester",
@@ -73,7 +104,7 @@ class CmdRegexTest : WeebotCommand("regex", null,arrayOf("regtest", "regextest")
     override fun execute(event: CommandEvent) {
         val args = event.splitArgs()
         if (args.size < 2) return
-        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+        track(this, event.guild.bot, event.author, event.creationTime)
         val regex: Regex
         val strings: List<String>
         try {
@@ -110,15 +141,18 @@ class CmdRegexTest : WeebotCommand("regex", null,arrayOf("regtest", "regextest")
  * @author Jonathan Augustine
  * @since 2.1
  */
-class CmdEmbedMaker : WeebotCommand("embedmaker", "Embed Maker",
-    arrayOf("embedbuilder", "embed", "makeembed", "sendembed"), CAT_PROG,
-    "Make a pretty MessageEmbed", cooldown = 30, cooldownScope = USER_CHANNEL) {
+class CmdEmbedMaker : WeebotCommand(
+    "embedmaker", "EMBEDMAKER", "Embed Maker",
+    arrayOf("embedbuilder", "embed", "makeembed", "sendembed"),
+    CAT_PROG, "Make a pretty MessageEmbed",
+    cooldown = 30, cooldownScope = USER_CHANNEL
+) {
 
     val MAX_FIELDS = 10
 
     override fun execute(event: CommandEvent) {
         if (event.channelType == TEXT)
-            STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+            track(this, event.guild.bot, event.author, event.creationTime)
 
         fun waitThen(predicate: (MessageReceivedEvent) -> Boolean = {true},
                      action: (MessageReceivedEvent) -> Unit) {

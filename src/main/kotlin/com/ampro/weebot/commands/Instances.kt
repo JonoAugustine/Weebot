@@ -43,6 +43,8 @@ val CAT_UNDER_CONSTRUCTION = Category("Under Construction",
 val CATEGORIES = listOf(CAT_GEN, CAT_DEV, CAT_MOD, CAT_PROG, CAT_GAME, CAT_FUN,
         CAT_SOC, CAT_UTIL, CAT_MISC)
 
+// TODO Change commands to objects
+
 /* *******************************
  *       Developer Commands      *
  ********************************/

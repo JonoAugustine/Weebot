@@ -4,17 +4,35 @@
 
 package com.ampro.weebot.commands
 
-import com.ampro.weebot.*
+import com.ampro.weebot.CMD_CLIENT
+import com.ampro.weebot.JDA_SHARD_MNGR
+import com.ampro.weebot.SELF
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
-import com.ampro.weebot.database.*
-import com.ampro.weebot.database.constants.*
-import com.ampro.weebot.extensions.*
+import com.ampro.weebot.database.GLOBAL_WEEBOT
+import com.ampro.weebot.database.bot
+import com.ampro.weebot.database.constants.LINK_DISCORD_BOTS
+import com.ampro.weebot.database.constants.LINK_DISCORD_BOTS_LIST
+import com.ampro.weebot.database.constants.LINK_INVITEBOT
+import com.ampro.weebot.database.track
+import com.ampro.weebot.extensions.EMBED_MAX_FIELD_VAL
+import com.ampro.weebot.extensions.SelectablePaginator
+import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
+import com.ampro.weebot.extensions.creationTime
+import com.ampro.weebot.extensions.makeEmbedBuilder
+import com.ampro.weebot.extensions.size
+import com.ampro.weebot.extensions.strdEmbedBuilder
+import com.ampro.weebot.extensions.strdPaginator
+import com.ampro.weebot.extensions.trueSize
+import com.ampro.weebot.games
 import com.ampro.weebot.util.WKDAY_MONTH_YEAR_TIME
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_CHANNEL
 import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
-import com.jagrosh.jdautilities.command.CommandEvent
-import net.dv8tion.jda.core.entities.ChannelType
-import net.dv8tion.jda.core.entities.Game.GameType.*
+import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
+import net.dv8tion.jda.core.entities.Game.GameType.DEFAULT
+import net.dv8tion.jda.core.entities.Game.GameType.LISTENING
+import net.dv8tion.jda.core.entities.Game.GameType.STREAMING
+import net.dv8tion.jda.core.entities.Game.GameType.WATCHING
 import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.Role.DEFAULT_COLOR_RAW
 import kotlin.math.ceil
@@ -29,12 +47,14 @@ const val LINK_HQTWITCH    = "https://www.twitch.tv/hqregent"
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdAbout : WeebotCommand("about", "About", arrayOf("info"), CAT_GEN,
+class CmdAbout : WeebotCommand(
+    "about", "ABOUT", "About", arrayOf("info"), CAT_GEN,
     "Get information about Weebot.", cooldown = 90,
-    children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP)) {
+    children = arrayOf(SubCmdAboutUser(), SubCmdAboutGuild(), CMD_HELP)
+) {
 
     override fun execute(event: WeebotCommandEvent) {
-        STAT.track(this, event.bot, event.author, event.creationTime)
+        track(this, event.bot, event.author, event.creationTime)
 
         val eb = strdEmbedBuilder.setTitle("All about Weebot")
             .setThumbnail(CmdHelloThere.HELLO_THERE_GIFS[0])
@@ -110,11 +130,12 @@ class CmdAbout : WeebotCommand("about", "About", arrayOf("info"), CAT_GEN,
  * @author Jonathan Augustine
  * @since 2.0
  */
-class SubCmdAboutUser : WeebotCommand("me", null, arrayOf("aboutme"), CAT_GEN,
+class SubCmdAboutUser : WeebotCommand(
+    "me", "ABOUTUSER", null, arrayOf("aboutme"), CAT_GEN,
     "Get information about yourself.", cooldown = 90, guildOnly = true
 ) {
     override fun execute(event: WeebotCommandEvent) {
-        STAT.track(this, event.bot, event.author, event.creationTime)
+        track(this, event.bot, event.author, event.creationTime)
         val roles = event.member.roles
         event.reply(
                 strdEmbedBuilder.apply {
@@ -137,7 +158,8 @@ class SubCmdAboutUser : WeebotCommand("me", null, arrayOf("aboutme"), CAT_GEN,
     }
 }
 
-class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, "",
+class SubCmdAboutGuild : WeebotCommand(
+    "guild", "ABOUTGUILD", null, arrayOf("here"), CAT_GEN, "",
     cooldown = 90, cooldownScope = USER_CHANNEL, guildOnly = true
 ) {
     override fun execute(event: WeebotCommandEvent) {
@@ -197,16 +219,17 @@ class SubCmdAboutGuild : WeebotCommand("guild", null, arrayOf("here"), CAT_GEN, 
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"),
-    CAT_GEN, "Get information about Weebot Commands and Usage.", cooldown = 30,
-    guildOnly = false) {
+class CmdHelp : WeebotCommand(
+    "help", "HELP", "Help", arrayOf("helpo", "more", "halp"),
+    CAT_GEN, "Get information about Weebot Commands and Usage.",
+    cooldown = 30, guildOnly = false
+) {
 
     private val catAll: Category = Category("All")
 
     override fun execute(event: WeebotCommandEvent) {
-        val bot = if (event.isFromType(ChannelType.PRIVATE)) DAO.GLOBAL_WEEBOT
-        else getWeebotOrNew(event.guild)
-        STAT.track(this, bot, event.author, event.creationTime)
+        val bot = if (event.isFromType(PRIVATE)) GLOBAL_WEEBOT else event.guild.bot
+        track(this, bot, event.author, event.creationTime)
         fun filterAndMap(predicate: (WeebotCommand) -> Boolean): List<String> {
             val sb = StringBuilder()
             return COMMANDS.filter(predicate).sortedBy { it.displayName ?: it.name }.map {
@@ -262,9 +285,10 @@ class CmdHelp : WeebotCommand("help", "Help", arrayOf("helpo", "more", "halp"),
 
 }
 
-class CmdWatchaDoin : WeebotCommand("whatchadoin", "Whatcha Doin'?", arrayOf("whatsup"),
-    CAT_GEN, "What am I up to?", cooldown = 0, cooldownScope = USER_SHARD,
-    guildOnly = true) {
+class CmdWatchaDoin : WeebotCommand(
+    "whatchadoin", "WHATDOING", "Whatcha Doin'?", arrayOf("whatsup"), CAT_GEN,
+    "What am I up to?", cooldown = 0, cooldownScope = USER_SHARD, guildOnly = true
+) {
     override fun execute(event: WeebotCommandEvent) {
         val game = event.selfMember.game ?: games.random()
         val s: String = when (game.type) {

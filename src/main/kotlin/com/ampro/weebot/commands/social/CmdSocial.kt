@@ -3,10 +3,12 @@ package com.ampro.weebot.commands.social
 import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_SOC
 import com.ampro.weebot.commands.IPassive
+import com.ampro.weebot.commands.social.GuildSocialSettings.CurrencySettings
+import com.ampro.weebot.commands.social.GuildSocialSettings.LevelSettings
+import com.ampro.weebot.commands.social.GuildSocialSettings.ProfileSettings
+import com.ampro.weebot.database.bot
+import com.ampro.weebot.database.track
 import com.ampro.weebot.extensions.WeebotCommand
-import com.ampro.weebot.commands.social.GuildSocialSettings.*
-import com.ampro.weebot.database.STAT
-import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.creationTime
 import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -142,15 +144,17 @@ data class GuildSocialSettings(val guildID: Long, var profiles: ProfileSettings?
 }
 
 
-class CmdSocial : WeebotCommand("social", null, arrayOf(), CAT_SOC,
-        "Control Social features like Currency, Profiles, & Levels",
-        HelpBiConsumerBuilder("Social Features", false)
-            .setDescription("Control Social features like Currency, Profiles, & Levels")
-            .build(), true, cooldown = 30, userPerms = arrayOf(ADMINISTRATOR),
-        botPerms = arrayOf(MESSAGE_READ)
+class CmdSocial : WeebotCommand(
+    "social", "SOCIAL", null, arrayOf(),
+    CAT_SOC, "Control Social features like Currency, Profiles, & Levels",
+    HelpBiConsumerBuilder("Social Features", false)
+        .setDescription("Control Social features like Currency, Profiles, & Levels")
+        .build(),
+    true, cooldown = 30,
+    userPerms = arrayOf(ADMINISTRATOR), botPerms = arrayOf(MESSAGE_READ)
 ) {
     override fun execute(event: CommandEvent) {
         //TODO
-        STAT.track(this, getWeebotOrNew(event.guild), event.author, event.creationTime)
+        track(this, event.guild.bot, event.author, event.creationTime)
     }
 }

@@ -62,7 +62,6 @@ val KEY_BOTS_ON_DISCORD_XYZ = {TODO()}
 const val LINK_DISCORD_BOTS = "https://discordbots.org/bot/437851896263213056"
 const val LINK_DISCORD_BOTS_LIST = "https://discordbotlist.com/bots/437851896263213056"
 
-
 val LINK_INVITEBOT = "https://discordapp.com/api/oauth2/authorize?client_id=437851896263213056&permissions=500296919&scope=bot"
 
 val LINK_INVITE_TESTBOT = "https://discordapp.com/oauth2/authorize?client_id=444323732010303488&permissions=8&scope=bot"
@@ -70,7 +69,7 @@ val LINK_INVITE_TESTBOT = "https://discordapp.com/oauth2/authorize?client_id=444
 private const val TOKEN_WBT =
         "NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA.Etf9Q9wuk1YCUnUox0IbIon1dUk"
 const val CLIENT_WBT = 437851896263213056
-private const val TOKEN_TEST = "NDQ0MzIzNzMyMDEwMzAzNDg4.DdaQyQ.ztloAQmeuUffaC-DC9zE-LFwPq4"
+private const val TOKEN_TEST = "UAE-i4FFQakMds56XakTKI8TyMCFn2jg"
 
 /**
  * Initiates `Launcher` data and connects to Weebot API.
