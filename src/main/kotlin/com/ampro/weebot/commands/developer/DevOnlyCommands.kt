@@ -8,22 +8,23 @@ import com.ampro.weebot.CACHED_POOL
 import com.ampro.weebot.JDA_SHARD_MNGR
 import com.ampro.weebot.SELF
 import com.ampro.weebot.WAITER
+import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_DEV
 import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.getGuild
-import com.ampro.weebot.database.getStatPlot
-import com.ampro.weebot.database.getWeebotOrNew
 import com.ampro.weebot.extensions.CLR_GREEN
 import com.ampro.weebot.extensions.SelectableEmbed
 import com.ampro.weebot.extensions.SelectablePaginator
 import com.ampro.weebot.extensions.TODO
 import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
 import com.ampro.weebot.extensions.creationTime
 import com.ampro.weebot.extensions.isValidUser
 import com.ampro.weebot.extensions.makeEmbedBuilder
 import com.ampro.weebot.extensions.size
-import com.ampro.weebot.extensions.strdPaginator
+import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.extensions.trueSize
+import com.ampro.weebot.extensions.unit
 import com.ampro.weebot.shutdown
 import com.ampro.weebot.util.DD_MM_YYYY_HH_MM
 import com.ampro.weebot.util.Emoji.X_Red
@@ -47,10 +48,7 @@ import java.time.temporal.ChronoUnit
 import java.util.concurrent.TimeUnit.MILLISECONDS
 import java.util.concurrent.TimeUnit.MINUTES
 import java.util.concurrent.TimeUnit.SECONDS
-import java.util.concurrent.atomic.AtomicInteger
-import kotlin.math.ceil
 import kotlin.math.roundToInt
-import kotlin.reflect.KClass
 
 
 /**
@@ -64,17 +62,13 @@ import kotlin.reflect.KClass
  * @since 1.0
  */
 class CmdShutdown : WeebotCommand(
-    "shutdown",
-    "SHUTDOWN",
-    null,
+    "shutdown", "SHUTDOWN", null,
     arrayOf("tite", "killbot", "devkill"),
-    CAT_DEV,
-    "Shutdown the weebot",
-    hidden = true,
-    ownerOnly = true
+    CAT_DEV, "Shutdown the weebot",
+    hidden = true, ownerOnly = true
 ) {
 
-    override fun execute(event: CommandEvent) = runBlocking {
+    override fun execute(event: WeebotCommandEvent) = runBlocking {
         event.reactWarning()
         event.reply("Shutting down all Weebots...")
         //sendSMS(PHONE_JONO, "WEEBOT: Shutting Down")
@@ -84,23 +78,18 @@ class CmdShutdown : WeebotCommand(
 }
 
 class CmdStatsView : WeebotCommand(
-    "stats",
-    "STATS",
-    null,
+    "stats", "STATS", null,
     arrayOf("viewstats", "statsview", "statview", "viewstat"),
-    CAT_DEV,
-    "View Weebot statistics",
-    hidden = true,
-    ownerOnly = true
-) {
-    override fun execute(event: CommandEvent) {
-        GlobalScope.launch(CACHED_POOL) {
-            // TODO List all commands or parse requested command and display
-            // stat plot summaries
-            TODO(event)
-        }
+    CAT_DEV, "View Weebot statistics",
+    hidden = true, ownerOnly = true,
+    execution = {
+        println(argList)
+        // TODO List all commands or parse requested command and display
+        // stat plot summaries
+        TODO(this)
     }
-}
+)
+
 
 /**
  *
@@ -124,7 +113,7 @@ class CmdGuildList : WeebotCommand(
 
     val REG_DATE = Regex("(?i)-(d+a*t*e*)")
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val gs = JDA_SHARD_MNGR.guilds
         val sortByDate = event.args.matches(REG_DATE)
 
@@ -150,8 +139,8 @@ class CmdGuildList : WeebotCommand(
 
     }
 
-    private fun getGuildShard(
-        g: Guild): JDA.ShardInfo? = JDA_SHARD_MNGR.shards.find { s -> s.guilds.any { it.id == g.id } }?.shardInfo
+    private fun getGuildShard(g: Guild): JDA.ShardInfo? =
+        JDA_SHARD_MNGR.shards.find { s -> s.guilds.any { it.id == g.id } }?.shardInfo
 
 }
 

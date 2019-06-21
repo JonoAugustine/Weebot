@@ -4,13 +4,15 @@
 
 package com.ampro.weebot
 
+import com.ampro.weebot.Poolcounts.cachedPoolCount
+import com.ampro.weebot.Poolcounts.cmdPoolCount
 import com.ampro.weebot.commands.CMD_HELP
 import com.ampro.weebot.commands.COMMANDS
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.LINK_HQTWITCH
 import com.ampro.weebot.commands.developer.CLIENT_TWTICH_PUB
-import com.ampro.weebot.database.GLOBAL_WEEBOT
 import com.ampro.weebot.database.bot
+import com.ampro.weebot.database.bots
 import com.ampro.weebot.database.constants.BOT_DEV_CHAT
 import com.ampro.weebot.database.constants.LINK_INVITEBOT
 import com.ampro.weebot.database.constants.NL_GUILD
@@ -18,6 +20,7 @@ import com.ampro.weebot.database.constants.PHONE_JONO
 import com.ampro.weebot.database.constants.TWITCH_HQR_ID
 import com.ampro.weebot.database.constants.jdaDevShardLogIn
 import com.ampro.weebot.database.constants.jdaShardLogIn
+import com.ampro.weebot.database.save
 import com.ampro.weebot.extensions.WeebotCommandClient
 import com.ampro.weebot.extensions.delete
 import com.ampro.weebot.extensions.get
@@ -64,16 +67,22 @@ import kotlin.system.measureTimeMillis
 
 
 private lateinit var SAVER_JOB: Job
-val SAVE_JOBS = mutableListOf<() -> Unit>()
+val SAVE_JOBS = mutableListOf<() -> Unit>({ bots.forEach { runBlocking { it.save() } }})
 /** How ofter to asve to file in Seconds */
-private const val SAVE_INTER = 30
+private const val SAVE_INTER = 120
 
-val CACHED_POOL = ThreadPoolExecutor(3, 5000, 10, MINUTES, SynchronousQueue()) { r ->
-    MLOG.slog(ThreadFactory::class, "Cached Thread Created")
-    Thread(r, "CachedPool")
+private object Poolcounts {
+    var cachedPoolCount = 0
+    var cmdPoolCount = 0
+}
+val CACHED_POOL = ThreadPoolExecutor(8, 100, 10, MINUTES, SynchronousQueue()) { r ->
+    MLOG.slog(ThreadFactory::class, "Cached Thread Created: ${++cachedPoolCount}")
+    Thread(r, "CachedPool-$cachedPoolCount")
 }.asCoroutineDispatcher()
-val CMD_POOL = newFixedThreadPool(50) { r -> Thread(r, "CommandPool") }
-    .asCoroutineDispatcher()
+val CMD_POOL = newFixedThreadPool(25) { r ->
+    MLOG.slog(ThreadFactory::class, "Command Thread Created: ${++cmdPoolCount}")
+    Thread(r, "CommandPool-$cmdPoolCount")
+}.asCoroutineDispatcher()
 
 /** Main Logger */
 lateinit var MLOG: FileLogger
@@ -90,7 +99,7 @@ lateinit var SELF: SelfUser
 const val GENERIC_ERR_MSG = "*Sorry, I tripped over my shoelaces. Please try that again later*"
 
 val games = listOf(listening("@Weebot Help"), playing("with wires"),
-    watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.2.1"),
+    watching("Humans Poop"), listening("your thoughts"), playing("Weebot 2.3.0"),
     listening("crying enemies"), watching("HQR's life fall apart"))
 
 /**
@@ -287,8 +296,10 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
  */
 private fun startupWeebots() {
     MLOG.slog(null, "Starting Weebots...")
-    (JDA_SHARD_MNGR.guilds.map { it.bot } + GLOBAL_WEEBOT).forEach { it.startUp() }
+    (JDA_SHARD_MNGR.guilds.map { it.bot } + GlobalWeebot).forEach { it.startUp() }
 }
+
+
 
 /** Begin the shutdown sequence. Backup and save database.  */
 fun shutdown(user: User? = null) {
@@ -297,6 +308,7 @@ fun shutdown(user: User? = null) {
 
     MLOG.elog(null, "\tClearing temp directories...")
     clearTempDirs()
+    SAVE_JOBS.forEach { it() }
 
     JDA_SHARD_MNGR.shutdown()
     JDA_SHARD_MNGR.statuses.forEach { (_, status) ->

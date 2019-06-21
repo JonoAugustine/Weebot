@@ -4,8 +4,10 @@
 
 package com.ampro.weebot.commands.developer
 
+import com.ampro.weebot.GlobalWeebot
 import com.ampro.weebot.commands.CAT_DEV
 import com.ampro.weebot.commands.CAT_GEN
+import com.ampro.weebot.commands.CMD_SUGG
 import com.ampro.weebot.commands.developer.Suggestion.State
 import com.ampro.weebot.commands.developer.Suggestion.State.COMPLETED
 import com.ampro.weebot.commands.developer.Suggestion.State.Companion.read
@@ -108,16 +110,6 @@ class Suggestion(val suggestion: String) {
 }
 
 /**
- * Get a [Suggestion] from the [DAO] or send a message that no sugg was found
- * and return null
- */
-private suspend fun getSuggById(id: String, event: CommandEvent) =
-    getSuggestion(id) ?: run {
-        event.respondThenDeleteBoth("*No suggestion matched the ID provided.*", 30)
-        null
-    }
-
-/**
  * A way for anyone in a Guild hosting a Weebot to make suggestions to the
  * developers.
  *
@@ -139,68 +131,54 @@ open class CmdSuggestion : WeebotCommand("suggest", "SUGG", "Suggest",
                 + "\n Review states: accepted/unreviewed/completed/ignored", true)
         .addField("To vote for a suggestion", "-v[ote] <suggestionID>", true)
         .build(), cooldown = 60,
-    children = arrayOf(CmdDevSuggestions(), CmdSeeSuggestions())
-) {
-
-    // \sugg [-g[ive]] <suggestion>
-    // \sugg -v(ote) <suggID>
-    override fun execute(event: WeebotCommandEvent) {
-        val args = event.splitArgs()
-        val message = event.args.replace(REG_MENTION_USER, "@/ User")
+    children = arrayOf(CmdDevSuggestions(), CmdSeeSuggestions()),
+    execution = e@{
+        // \sugg [-g[ive]] <suggestion>
+        // \sugg -v(ote) <suggID>
+        val message = args.replace(REG_MENTION_USER, "@/ User")
+        val args = argList
 
         when {
-            //Ignore empty COMMANDS
-            args.isEmpty() -> return
             //When submitting
             args[0].matches(giveRegi) || !args[0].matchesAny(voteRegi, seeRegi) -> {
-                track(this, event.guild.bot, event.author, event.creationTime)
+                track(CMD_SUGG, guild?.bot ?: GlobalWeebot, author, creationTime)
                 when {
-                    args.size < 4 -> {
-                        event.reply(
-                            "*Sorry, your suggestion is a bit short "
-                                + "-- can you include more detail? Thank you!*")
-                        return
-                    }
-                    message.length > EMBED_MAX_DESCRIPTION -> {
-                        return event.reply(
-                            "*Sorry, your suggestion is a too long " +
-                                "(max=$EMBED_MAX_FIELD_VAL char) -- can you try " +
-                                "and be more concise? Thank you!*")
-                    }
-                    else -> {
-                        runBlocking { Suggestion(message.removeAll(giveRegi)).save() }
-                        event.reply(
+                    args.size < 4 -> reply(
+                        "*Sorry, your suggestion is a bit short "
+                            + "-- can you include more detail? Thank you!*")
+                    message.length > EMBED_MAX_DESCRIPTION -> reply(
+                        "*Sorry, your suggestion is a too long " +
+                            "(max=$EMBED_MAX_FIELD_VAL char) -- can you try " +
+                            "and be more concise? Thank you!*")
+                    else -> runBlocking {
+                        Suggestion(message.removeAll(giveRegi)).save()
+                        replySuccess(
                             "*Thank you for your suggestion! We're working hard to"
                                 + " make Weebot as awesome as possible, and we "
                                 + "will try our best to include your suggestion!*")
-                        event.reactSuccess()
-                        return
                     }
                 }
             }
             //When voting
             args[0].matches(voteRegi) -> {
                 if (args.size < 2) {
-                    event.respondThenDeleteBoth("*No suggestion ID was provided.*", 30)
-                    return
+                    respondThenDeleteBoth("*No suggestion ID was provided.*", 30)
                 }
-                track(this, event.guild.bot, event.author, event.creationTime)
-                val sugg = runBlocking { getSuggById(args[1], event) } ?: return
-                if (!sugg.votes.contains(event.author.idLong)) {
-                    sugg.votes.add(event.author.idLong)
-                    event.reactSuccess()
-                    event.reply("*You voted for suggestion ${sugg._id}! " +
+                track(CMD_SUGG, guild.bot, author, creationTime)
+                val sugg = runBlocking { getSuggestion(args[1]) }
+                    ?: return@e respondThenDeleteBoth(
+                        "*No suggestion matched the ID provided.*", 30)
+                if (!sugg.votes.contains(author.idLong)) {
+                    sugg.votes.add(author.idLong)
+                    replySuccess("*You voted for suggestion ${sugg._id}! " +
                         "Bringing the score up to ${sugg.score}!*")
                 } else {
-                    event.reactError()
-                    event.reply("*You have already voted for this suggestion!*")
+                    replyError("*You have already voted for this suggestion!*")
                 }
             }
-        } //end when
-
+        } //Ignore empty COMMANDS
     }
-
-}
+)
 
 /** How many suggestions per embed page */
 const val PAGE_LENGTH = 6
@@ -294,7 +272,7 @@ class CmdSeeSuggestions : WeebotCommand("-see", "SUGGSEE", null, arrayOf("-s", "
     CAT_GEN, "", cooldown = 5) {
 
     // \sugg -s(ee) [-k <keyword>] [-r <accepted/unreviewed/completed/ignored>] [pagenum]
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val args = event.splitArgs()
         val keyWords = mutableListOf<String>()
         val reviewStates = mutableListOf<State>()

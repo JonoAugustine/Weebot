@@ -44,6 +44,7 @@ dependencies {
     implementation("com.github.kittinunf.fuel:fuel:1.16.0")
     implementation("com.github.kittinunf.fuel:fuel-gson:1.16.0")
     implementation("com.github.kittinunf.fuel:fuel-coroutines:1.16.0")
+    implementation("io.javalin:javalin:3.0.0") // Javalin
     //Database
     implementation("org.litote.kmongo:kmongo-coroutine:3.10.2")
     //implementation("org.mongodb:mongodb-driver-sync:3.9.1")

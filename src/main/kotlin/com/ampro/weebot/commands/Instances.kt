@@ -4,7 +4,12 @@
 
 package com.ampro.weebot.commands
 
-import com.ampro.weebot.commands.`fun`.*
+import com.ampro.weebot.commands.`fun`.CmdBiggifyEmoji
+import com.ampro.weebot.commands.`fun`.CmdEmojify
+import com.ampro.weebot.commands.`fun`.CmdHelloThere
+import com.ampro.weebot.commands.`fun`.CmdReddicord
+import com.ampro.weebot.commands.`fun`.CmdThis
+import com.ampro.weebot.commands.`fun`.SubCmdLeaderBoard
 import com.ampro.weebot.commands.`fun`.games.TempCmdCheckReadMe
 import com.ampro.weebot.commands.`fun`.games.cardgame.CmdCardsAgainstHumanity
 import com.ampro.weebot.commands.developer.CmdGuildList
@@ -15,15 +20,22 @@ import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife
 import com.ampro.weebot.commands.miscellaneous.CmdInviteLink
 import com.ampro.weebot.commands.miscellaneous.CmdNameGenerator
 import com.ampro.weebot.commands.miscellaneous.PingCommand
-import com.ampro.weebot.commands.moderation.*
+import com.ampro.weebot.commands.moderation.CmdChatLock
+import com.ampro.weebot.commands.moderation.CmdModeration
+import com.ampro.weebot.commands.moderation.CmdMoveConversation
+import com.ampro.weebot.commands.moderation.CmdPurge
+import com.ampro.weebot.commands.moderation.CmdReport
+import com.ampro.weebot.commands.moderation.CmdSelfDestruct
+import com.ampro.weebot.commands.moderation.CmdSettings
+import com.ampro.weebot.commands.moderation.CmdTaskManager
+import com.ampro.weebot.commands.moderation.CmdVoiceChannelGenerator
+import com.ampro.weebot.commands.moderation.CmdVoiceChannelRole
+import com.ampro.weebot.commands.moderation.CmdWelcomeMsg
 import com.ampro.weebot.commands.progammer.CmdEmbedMaker
 import com.ampro.weebot.commands.progammer.CmdRegexTest
 import com.ampro.weebot.commands.utility.CmdNotePad
 import com.ampro.weebot.commands.utility.CmdOutHouse
-import com.ampro.weebot.commands.utility.CmdReminder
-import com.ampro.weebot.commands.utility.CmdTranslate
 import com.jagrosh.jdautilities.command.Command.Category
-
 
 
 private const val GEN_FAILURE_MESSAGE = "You do not have access to this command."
@@ -49,70 +61,70 @@ val CATEGORIES = listOf(CAT_GEN, CAT_DEV, CAT_MOD, CAT_PROG, CAT_GAME, CAT_FUN,
  *       Developer Commands      *
  ********************************/
 
-val CMD_SHUTDOWN        = CmdShutdown()
-val CMD_GUILDLIST       = CmdGuildList()
-val CMD_STATS           = CmdStatsView()
-val CMD_PING            = PingCommand() //Public
-val CMD_SUGG            = CmdSuggestion() //Public
+val CMD_SHUTDOWN        by lazy { CmdShutdown() }
+val CMD_GUILDLIST       by lazy { CmdGuildList() }
+val CMD_STATS           by lazy { CmdStatsView() }
+val CMD_PING            by lazy { PingCommand() }//Public
+val CMD_SUGG            by lazy { CmdSuggestion() }//Public
 
 /* *******************************
  *         About Commands        *
  ********************************/
 
-val CMD_ABOUT           = CmdAbout()
-val CMD_WATCHADOIN      = CmdWatchaDoin()
+val CMD_ABOUT           by lazy { CmdAbout() }
+val CMD_WATCHADOIN      by lazy { CmdWatchaDoin() }
 
 /* *******************************
  *       Utility Commands      *
  ********************************/
 
-val CMD_INVITEBOT       = CmdInviteLink()
-val CMD_HELP            = CmdHelp()
-val CMD_OHC             = CmdOutHouse()
-val CMD_REM             = CmdReminder()
-val CMD_NOTE            = CmdNotePad()
-val CMD_TRANSLATE       = CmdTranslate()
+val CMD_INVITEBOT       by lazy { CmdInviteLink() }
+val CMD_HELP            by lazy { CmdHelp() }
+val CMD_OHC             by lazy { CmdOutHouse() }
+//val CMD_REM             by lazy { CmdReminder() }
+val CMD_NOTE            by lazy { CmdNotePad() }
+//val CMD_TRANSLATE       by lazy { CmdTranslate() }
 
-val CMD_VCGEN           = CmdVoiceChannelGenerator()
-val CMD_SELFDESTRUCT    = CmdSelfDestruct()
+val CMD_VCGEN           by lazy { CmdVoiceChannelGenerator() }
+val CMD_SELFDESTRUCT    by lazy { CmdSelfDestruct() }
 
 /* *******************************
  *         Admin Commands        *
  ********************************/
 
-val CMD_SETTINGS        = CmdSettings()
-val CMD_WELCOME         = CmdWelcomeMsg()
-val CMD_MODERATION      = CmdModeration()
-val CMD_REPORT          = CmdReport()
-val CMD_PURGE           = CmdPurge()
-val CMD_CHATLOCK        = CmdChatLock()
-val CMD_MOVECONVO       = CmdMoveConversation()
-val CMD_TASKS           = CmdTaskManager()
-val CMD_VCR             = CmdVoiceChannelRole()
+val CMD_SETTINGS        by lazy { CmdSettings() }
+val CMD_WELCOME         by lazy { CmdWelcomeMsg() }
+val CMD_MODERATION      by lazy { CmdModeration() }
+val CMD_REPORT          by lazy { CmdReport() }
+val CMD_PURGE           by lazy { CmdPurge() }
+val CMD_CHATLOCK        by lazy { CmdChatLock() }
+val CMD_MOVECONVO       by lazy { CmdMoveConversation() }
+val CMD_TASKS           by lazy { CmdTaskManager() }
+val CMD_VCR             by lazy { CmdVoiceChannelRole() }
 
 /* *******************************
  *        Programmer Stuff       *
  *********************************/
 
-val CMD_REGEX           = CmdRegexTest()
-val CMD_EMBED           = CmdEmbedMaker()
+val CMD_REGEX           by lazy { CmdRegexTest() }
+val CMD_EMBED           by lazy { CmdEmbedMaker() }
 
 /* *******************************
  *              Fun              *
  *********************************/
 
 //Random
-val CMD_NAMEGEN         = CmdNameGenerator()
-val CMD_ATGAL           = CmdApiToGetALife()
+val CMD_NAMEGEN         by lazy { CmdNameGenerator() }
+val CMD_ATGAL           by lazy { CmdApiToGetALife() }
 
-val CMD_BIGGIFY         = CmdBiggifyEmoji()
-val CMD_HELLOTHERE      = CmdHelloThere()
-val CMD_EMOJIFY         = CmdEmojify()
-val CMD_THIS            = CmdThis()
+val CMD_BIGGIFY         by lazy { CmdBiggifyEmoji() }
+val CMD_HELLOTHERE      by lazy { CmdHelloThere() }
+val CMD_EMOJIFY         by lazy { CmdEmojify() }
+val CMD_THIS            by lazy { CmdThis() }
 //Structured
-val CMD_REDDICORD       = CmdReddicord()
-val CMD_REDDICORD_SCORE = SubCmdLeaderBoard("reddiscore", arrayOf("reddiscores"))
-val CMD_CAH             = CmdCardsAgainstHumanity()
+val CMD_REDDICORD       by lazy { CmdReddicord() }
+val CMD_REDDICORD_SCORE by lazy { SubCmdLeaderBoard("reddiscore", arrayOf("reddiscores"))}
+val CMD_CAH             by lazy { CmdCardsAgainstHumanity() }
 
 
 
@@ -121,7 +133,7 @@ val COMMANDS = listOf(CMD_SHUTDOWN, CMD_GUILDLIST, CMD_STATS,TempCmdCheckReadMe(
         CMD_SETTINGS, CMD_PURGE, CMD_MODERATION, CMD_REPORT, CMD_TASKS, CMD_CHATLOCK,
         CMD_SELFDESTRUCT, CMD_MOVECONVO,
         CMD_REGEX, CMD_EMBED,
-        CMD_OHC, CMD_REM, CMD_NOTE, CMD_TRANSLATE,
+        CMD_OHC, CMD_NOTE, //CMD_TRANSLATE, CMD_REM,
         CMD_VCR, CMD_VCGEN,
         CMD_CAH,
         CMD_NAMEGEN, CMD_ATGAL,

@@ -4,22 +4,27 @@
 
 package com.ampro.weebot.database
 
+import com.ampro.weebot.CACHED_POOL
 import com.ampro.weebot.GlobalWeebot
 import com.ampro.weebot.JDA_SHARD_MNGR
 import com.ampro.weebot.Weebot
+import com.ampro.weebot.commands.`fun`.games.cardgame.CahInfo
 import com.ampro.weebot.commands.developer.Suggestion
+import com.ampro.weebot.commands.utility.NotePadCollection
 import com.ampro.weebot.database.constants.CLIENT_WBT
 import com.ampro.weebot.database.constants.KEY_DISCORD_BOTS_ORG
 import com.ampro.weebot.extensions.WeebotCommand
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.mongodb.reactivestreams.client.MongoCollection
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.User
 import org.discordbots.api.client.DiscordBotListAPI
 import org.litote.kmongo.`in`
 import org.litote.kmongo.coroutine.coroutine
-import org.litote.kmongo.eq
 import org.litote.kmongo.reactivestreams.KMongo
 import java.util.concurrent.TimeUnit
 import kotlin.reflect.KClass
@@ -59,18 +64,30 @@ private object Database {
     val stats by lazy { mongo.getCollection<StatisticPlot>() }
     /** Internal Data collection */
     val userData by lazy { mongo.getCollection<UserData>() }
+
+    /** Cards Against Humanity customizations. */
+    val cah by lazy { mongo.getCollection<CahInfo>() }
+
+    val notes by lazy { mongo.getCollection<NotePadCollection>("notePad") }
 }
 
 /* ************************
         Cache
  *************************/
 
-private object Cache {
+object Cache {
+
+    // Base //
+
     val bots by lazy {
         Caffeine.newBuilder()
-            .maximumSize((JDA_SHARD_MNGR.guilds.size * 1.3).toLong())
+            .expireAfterWrite(5, TimeUnit.MINUTES)
             .expireAfterAccess(10, TimeUnit.MINUTES)
-            .recordStats()
+            .removalListener<Long, Weebot> { _, v, cause ->
+                GlobalScope.launch(CACHED_POOL) {
+                    v.takeIf { cause.wasEvicted() }?.save()
+                }
+            }.recordStats()
             .build { id: Long ->
                 runBlocking { Database.bots.findOneById(id.toString()) }
             }
@@ -80,6 +97,11 @@ private object Cache {
         Caffeine.newBuilder()
             .expireAfterWrite(1, TimeUnit.MINUTES)
             .expireAfterAccess(5, TimeUnit.MINUTES)
+            .removalListener<String, Suggestion> { _, v, cause ->
+                GlobalScope.launch(CACHED_POOL) {
+                    v.takeIf { cause.wasEvicted() }?.save()
+                }
+            }
             .recordStats()
             .build { id: String ->
                 runBlocking { Database.suggestions.findOneById(id) }
@@ -93,43 +115,71 @@ private object Cache {
 
     val userData by lazy {
         Caffeine.newBuilder()
-            .maximumSize((JDA_SHARD_MNGR.users.size * 0.5).toLong())
             .expireAfterWrite(5, TimeUnit.MINUTES)
-            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .removalListener<Long, UserData> { _, v, cause ->
+                GlobalScope.launch(CACHED_POOL) {
+                    v.takeIf { cause.wasEvicted() }?.save()
+                }
+            }
             .recordStats()
             .build { id: Long ->
                 runBlocking { Database.userData.findOneById(id.toString()) }
             }
     }
+
+    // Unique //
+
+    val cahInfo by lazy {
+        Caffeine.newBuilder()
+            .expireAfterWrite(10, TimeUnit.MINUTES)
+            .expireAfterAccess(5, TimeUnit.MINUTES)
+            .removalListener<String, CahInfo> { _, v, cause ->
+                GlobalScope.launch(CACHED_POOL) {
+                    v.takeIf { cause.wasEvicted() }?.save()
+                }
+            }
+            .recordStats()
+            .build<String, CahInfo> {
+                runBlocking { Database.cah.findOneById(it) }
+            }
+    }
+
+    val notes by lazy {
+        Caffeine.newBuilder()
+            .expireAfterWrite(5, TimeUnit.MINUTES)
+            .expireAfterAccess(10, TimeUnit.MINUTES)
+            .removalListener<String, NotePadCollection> { _, v, cause ->
+                GlobalScope.launch(CACHED_POOL) {
+                    v.takeIf { cause.wasEvicted() }?.save()
+                }
+            }
+            .recordStats()
+            .build<String, NotePadCollection> {
+                runBlocking { Database.notes.findOneById(it) }
+            }
+    }
+
 }
 
 /* ************************
           Access
  *************************/
 
-val GLOBAL_WEEBOT: GlobalWeebot by lazy {
-    runBlocking {
-        Database.bots.findOne(Weebot::_id eq "GLOBAL") as? GlobalWeebot
-            ?: GlobalWeebot
-                .takeIf { Database.bots.save(it)?.wasAcknowledged() == true }
-            ?: throw RuntimeException("Failed to initialize Global Weebot")
-    }
-}
-
-suspend fun GlobalWeebot.save() = Database.bots.save(this)?.wasAcknowledged() == true
-
 // Guild & Bot //
 
 /** Get the [Weebot] assigned to this [Guild] or create a new one. */
 val Guild.bot: Weebot get() = runBlocking { getWeebotOrNew(this@bot) }
 
-/** Attempt to pull a [Weebot] from cache. */
-fun getWeebot(guildID: Long) = Cache.bots[guildID]
-
 suspend fun getWeebotOrNew(guild: Guild) = getWeebotOrNew(guild.idLong)
 
 suspend fun getWeebotOrNew(guildID: Long) = getWeebot(guildID)
     ?: run { Weebot(guildID).also { Database.bots.save(it) } }
+
+/** Attempt to pull a [Weebot] from cache. */
+fun getWeebot(guildID: Long) = Cache.bots[guildID]
+
+val bots get() = JDA_SHARD_MNGR.guilds.map { it.bot }
 
 /**
  * Get a guild matching the ID given.
@@ -138,6 +188,8 @@ suspend fun getWeebotOrNew(guildID: Long) = getWeebot(guildID)
  * @return requested Guild <br></br> null if not found.
  */
 fun getGuild(id: Long): Guild? = JDA_SHARD_MNGR.getGuildById(id)
+
+suspend fun Weebot.save() = Database.bots.save(this)?.wasAcknowledged() == true
 
 // User //
 
@@ -171,12 +223,23 @@ suspend fun Suggestion.delete() = Database.suggestions.deleteOneById(_id)
 
 suspend fun Suggestion.save() = Database.suggestions.save(this)?.wasAcknowledged() == true
 
-fun getStatPlot(id: String) = Cache.statistics[id]
-    ?: runBlocking {
-        StatisticPlot(id).also {
-            Database.stats.save(it)
-            Cache.statistics[it._id] = it
-        }
+fun getStatPlot(id: String) = Cache.statistics[id] ?: runBlocking {
+    StatisticPlot(id).also {
+        Database.stats.save(it)
+        Cache.statistics[it._id] = it
     }
+}
 
 suspend fun StatisticPlot.save() = Database.stats.save(this)?.wasAcknowledged() == true
+
+// Other //
+
+fun getCahInfo(guildID: Long): CahInfo? = Cache.cahInfo[guildID.toString()]
+
+fun getCahInfoAll(): MutableMap<String, CahInfo> =
+    Cache.cahInfo.getAll(JDA_SHARD_MNGR.guilds.map { it.id })
+
+suspend fun CahInfo.save() = Database.cah.save(this)?.wasAcknowledged() == true
+
+suspend fun NotePadCollection.save() = Database.notes.save(
+    this)?.wasAcknowledged() == true

@@ -5,6 +5,7 @@
 package com.ampro.weebot.commands.miscellaneous
 
 import com.ampro.weebot.GENERIC_ERR_MSG
+import com.ampro.weebot.GlobalWeebot
 import com.ampro.weebot.commands.CAT_MISC
 import com.ampro.weebot.commands.CAT_UNDER_CONSTRUCTION
 import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.FACT_CAT
@@ -13,7 +14,6 @@ import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.FACT_PA
 import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.IMG_CAT
 import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.IMG_DOG
 import com.ampro.weebot.commands.miscellaneous.CmdApiToGetALife.EndPoint.IMG_PANDA
-import com.ampro.weebot.database.GLOBAL_WEEBOT
 import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.constants.LINK_INVITEBOT
 import com.ampro.weebot.database.track
@@ -44,8 +44,8 @@ class PingCommand : WeebotCommand(
         .setDescription("Checks the bot's latency.").build(),
     false, cooldown = 10
 ) {
-    override fun execute(event: CommandEvent) {
-        track(this, event.guild?.bot ?: GLOBAL_WEEBOT, event.author, event.creationTime)
+    override fun execute(event: WeebotCommandEvent) {
+        track(this, event.guild?.bot ?: GlobalWeebot, event.author, event.creationTime)
         val r = if (event.getInvocation().toLowerCase() == "pong") "Ping" else "Pong"
         event.reply("$r: ...") { m ->
             val ping = event.message.creationTime.until(m.creationTime, ChronoUnit.MILLIS)
@@ -71,8 +71,8 @@ class CmdInviteLink : WeebotCommand(
     botPerms = arrayOf(Permission.MESSAGE_EMBED_LINKS),
     userPerms = arrayOf(Permission.MESSAGE_EMBED_LINKS)
 ) {
-    override fun execute(event: CommandEvent) {
-        track(this, event.guild?.bot ?: GLOBAL_WEEBOT, event.author, event.creationTime)
+    override fun execute(event: WeebotCommandEvent) {
+        track(this, event.guild?.bot ?: GlobalWeebot, event.author, event.creationTime)
         makeEmbedBuilder("Invite me to another server!", LINK_INVITEBOT,
             "[`Invite me with dis thing here`]($LINK_INVITEBOT)")
             .setThumbnail(weebotAvatar).build().send(event.channel)
@@ -90,7 +90,7 @@ class CmdNameGenerator : WeebotCommand(
 
     private val BASE_URL = "https://uzby.com/api.php" //TODO java rejecting SSL cert
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val result = BASE_URL.httpGet(listOf("min" to 2, "max" to 40)).response()
     }
 

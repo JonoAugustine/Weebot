@@ -18,6 +18,7 @@ import com.ampro.weebot.extensions.CLR_GREEN
 import com.ampro.weebot.extensions.SelectableEmbed
 import com.ampro.weebot.extensions.SelectablePaginator
 import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
 import com.ampro.weebot.extensions.creationTime
 import com.ampro.weebot.extensions.hasPerm
 import com.ampro.weebot.extensions.isValidUser
@@ -236,7 +237,7 @@ class CmdVoiceChannelRole : WeebotCommand(
             """.trimMargin()).build()
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = event.guild.bot
         val args = event.splitArgs()
         track(this, bot, event.author, event.creationTime)
@@ -521,7 +522,7 @@ class CmdVoiceChannelGenerator : WeebotCommand(
         "", guildOnly = true, cooldown = 30, botPerms = arrayOf(MANAGE_CHANNEL),
         userPerms = arrayOf(MANAGE_CHANNEL)
     ) {
-        public override fun execute(event: CommandEvent) {
+        public override fun execute(event: WeebotCommandEvent) {
             val bot = event.guild.bot
             fun newChannel(message: Message, action: () -> Unit) {
                 event.reply("Please enter a name for the new voice channel:") { sm ->
@@ -642,7 +643,7 @@ class CmdVoiceChannelGenerator : WeebotCommand(
         guildOnly = true, cooldown = 30,
         botPerms = arrayOf(MANAGE_CHANNEL), userPerms = arrayOf(MANAGE_CHANNEL)
     ) {
-        public override fun execute(event: CommandEvent) {
+        public override fun execute(event: WeebotCommandEvent) {
             event.guild.bot.also { bot ->
                 bot.getPassive<VCGenerator>()?.also {
                     track(this, bot, event.author, event.creationTime)
@@ -662,7 +663,7 @@ class CmdVoiceChannelGenerator : WeebotCommand(
         CAT_MOD, "", userPerms = arrayOf(MANAGE_CHANNEL),
         guildOnly = true, cooldown = 30
     ) {
-        override fun execute(event: CommandEvent) {
+        override fun execute(event: WeebotCommandEvent) {
             event.guild.bot.also { bot ->
                 bot.getPassive<VCGenerator>()?.also { vcg ->
                     track(this, bot, event.author, event.creationTime)
@@ -810,7 +811,7 @@ class CmdVoiceChannelGenerator : WeebotCommand(
         "set", "VOICETEMPUSERDEFAULTS", null, arrayOf("mydef", "my"),
         CAT_UTIL, "", cooldown = 30, guildOnly = true
     ) {
-        override fun execute(event: CommandEvent) {
+        override fun execute(event: WeebotCommandEvent) {
             event.guild.bot.also { bot ->
                 track(this, bot, event.author, event.creationTime)
                 bot.getPassive<VCGenerator>()?.also { vcg ->
@@ -883,7 +884,7 @@ class CmdVoiceChannelGenerator : WeebotCommand(
         CAT_UTIL, "", cooldown = 30, guildOnly = true,
         userPerms = arrayOf(MANAGE_CHANNEL), botPerms = arrayOf(MANAGE_CHANNEL)
     ) {
-        override fun execute(event: CommandEvent) {
+        override fun execute(event: WeebotCommandEvent) {
             event.guild.bot.also { bot ->
                 track(this, bot, event.author, event.creationTime)
                 val vcg = bot.getPassive() ?: VCGenerator(-1).apply {
@@ -966,7 +967,7 @@ class CmdVoiceChannelGenerator : WeebotCommand(
         }
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val vcGenerator = event.guild.bot.getPassive<VCGenerator>()
         val embed: MessageEmbed = vcGenerator?.asEmbed(event.guild)?.build() ?: run {
             event.reply("*No Voice Channel Generator active. Use ``vcg on`` to start!*")

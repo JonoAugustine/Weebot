@@ -9,6 +9,7 @@ import com.ampro.weebot.commands.social.GuildSocialSettings.ProfileSettings
 import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.track
 import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
 import com.ampro.weebot.extensions.creationTime
 import com.ampro.weebot.util.NOW
 import com.jagrosh.jdautilities.command.CommandEvent
@@ -153,7 +154,7 @@ class CmdSocial : WeebotCommand(
     true, cooldown = 30,
     userPerms = arrayOf(ADMINISTRATOR), botPerms = arrayOf(MESSAGE_READ)
 ) {
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         //TODO
         track(this, event.guild.bot, event.author, event.creationTime)
     }

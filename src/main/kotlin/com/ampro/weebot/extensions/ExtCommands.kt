@@ -5,13 +5,14 @@
 package com.ampro.weebot.extensions
 
 import com.ampro.weebot.CMD_CLIENT
+import com.ampro.weebot.CMD_POOL
+import com.ampro.weebot.GlobalWeebot
 import com.ampro.weebot.JDA_SHARD_MNGR
 import com.ampro.weebot.MLOG
 import com.ampro.weebot.SELF
 import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.COMMANDS
 import com.ampro.weebot.database.DISCORD_BOTLIST_API
-import com.ampro.weebot.database.GLOBAL_WEEBOT
 import com.ampro.weebot.database.allows
 import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.constants.DEV_IDS
@@ -155,7 +156,8 @@ abstract class WeebotCommand(
     cooldown: Int = 0,
     cooldownScope: CooldownScope = USER,
     userPerms: Array<Permission> = emptyArray(),
-    botPerms: Array<Permission> = emptyArray()
+    botPerms: Array<Permission> = emptyArray(),
+    open val execution: suspend WeebotCommandEvent.(Weebot) -> Unit = {}
 ) : Command() {
 
     init {
@@ -281,11 +283,10 @@ abstract class WeebotCommand(
         }
     }
 
-    override fun execute(event: CommandEvent) = this.execute(event as WeebotCommandEvent)
+    final override fun execute(event: CommandEvent) = execute(event as WeebotCommandEvent)
 
-    open fun execute(event: WeebotCommandEvent) {
-
-    }
+    open fun execute(event: WeebotCommandEvent) =
+        GlobalScope.launch(CMD_POOL) { execution(event, event.bot) }.unit
 
     override fun isAllowed(channel: TextChannel) =
         channel.guild.bot.settings.isAllowed(this, channel) && super.isAllowed(channel)
@@ -425,7 +426,7 @@ class WeebotCommandClient(
         /** each string from raw content. the first arg will be the command name */
         var rawParts = event.splitArgsRaw().toMutableList()
 
-        val settings = event.guild?.bot?.settings ?: GLOBAL_WEEBOT.settings
+        val settings = event.guild?.bot?.settings ?: GlobalWeebot.settings
 
         when {
             //Check for @Mention
@@ -452,7 +453,7 @@ class WeebotCommandClient(
         val args = if (rawParts.size == 1) ""
         else rawParts.subList(1).joinToString(" ")
 
-        val wce = WeebotCommandEvent(event, args, event.guild?.bot ?: GLOBAL_WEEBOT)
+        val wce = WeebotCommandEvent(event, args, event.guild?.bot ?: GlobalWeebot)
         if (helpWords.contains(cmdCall.toLowerCase())) {
             helpConsumer(wce)
         } else if (event.isFromType(PRIVATE) || event.textChannel.canTalk()) {

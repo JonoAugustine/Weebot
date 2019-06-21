@@ -19,6 +19,7 @@ import com.ampro.weebot.extensions.CLR_RED
 import com.ampro.weebot.extensions.REG_MENTION_USER
 import com.ampro.weebot.extensions.SelectablePaginator
 import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
 import com.ampro.weebot.extensions.`is`
 import com.ampro.weebot.extensions.creationTime
 import com.ampro.weebot.extensions.hasPerm
@@ -80,7 +81,7 @@ class CmdModeration : WeebotCommand(
     guildOnly = true, userPerms = arrayOf(ADMINISTRATOR)
 ) {
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val args = event.splitArgs()
         val g = event.guild
         val bot = g.bot
@@ -161,7 +162,7 @@ class CmdReport : WeebotCommand(
     fun name(guild: Guild, id: Long)
             = guild.getMemberById(id)?.effectiveName ?: id.user?.name ?: "Unknown User"
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val gld = event.guild
         val bot = gld.bot
         if (event.args.isNullOrBlank()) return

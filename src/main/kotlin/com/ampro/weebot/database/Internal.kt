@@ -4,15 +4,18 @@
 
 package com.ampro.weebot.database
 
+import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.extensions.WeebotCommand
 import java.time.OffsetDateTime
 import kotlin.reflect.KClass
 
 data class UserData(
     val _id: String,
-    val blacklists: HashSet<KClass<out WeebotCommand>> = hashSetOf(),
-    val tracked: Boolean = false,
-    var status: PremiumStatus? = null
-) {
-    data class PremiumStatus(var initDate: OffsetDateTime, val on: Boolean = true)
-}
+    var tracked: Boolean = false, // TODO
+    var status: PremiumStatus? = null,
+    val globalPassives: MutableList<IPassive> = mutableListOf(),
+    //val reminders: MutableList<Reminder> = mutableListOf(),
+    val blacklists: HashSet<KClass<out WeebotCommand>> = hashSetOf()
+)
+
+data class PremiumStatus(var initDate: OffsetDateTime, val on: Boolean = true)

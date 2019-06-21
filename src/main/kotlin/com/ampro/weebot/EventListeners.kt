@@ -4,7 +4,6 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.database.GLOBAL_WEEBOT
 import com.ampro.weebot.database.bot
 import com.ampro.weebot.extensions.SelectableEmbed
 import com.ampro.weebot.extensions.hasPerm
@@ -39,7 +38,7 @@ import java.util.concurrent.TimeUnit.MILLISECONDS
 object EventDispatcher : ListenerAdapter() {
 
     /** Feed all events to the Global Weebot */
-    override fun onGenericEvent(event: Event) = GLOBAL_WEEBOT.feedPassives(event)
+    override fun onGenericEvent(event: Event) = GlobalWeebot.feedPassives(event)
 
     /************************************************
      *               Generic Events                 *
@@ -65,9 +64,8 @@ object EventDispatcher : ListenerAdapter() {
             ?.feedPassives(event)
     }
 
-    override fun onGenericPrivateMessage(event: GenericPrivateMessageEvent) {
-        GLOBAL_WEEBOT.feedPassives(event)
-    }
+    override fun onGenericPrivateMessage(event: GenericPrivateMessageEvent) =
+        GlobalWeebot.feedPassives(event)
 
     /* ************************
      *          Voice          *

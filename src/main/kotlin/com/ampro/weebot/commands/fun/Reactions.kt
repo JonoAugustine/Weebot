@@ -71,7 +71,7 @@ class CmdBiggifyEmoji : WeebotCommand(
      * @author Jonathan Augustine
      * @since 2.2.1
      */
-    private class Biggifyer(var invoke: Char? = null) : IPassive {
+    class Biggifyer(var invoke: Char? = null) : IPassive {
         private var dead = false
         override fun dead() = dead
 
@@ -185,7 +185,7 @@ class CmdReacter : WeebotCommand(
      * @author Jonathan Augustine
      * @since 2.0
      */
-    private class Reactor(var invoke: Regex, var reaction: List<String>) : IPassive {
+    class Reactor(var invoke: Regex, var reaction: List<String>) : IPassive {
         var dead = false
         override fun dead() = dead
 
@@ -221,7 +221,7 @@ class CmdReacter : WeebotCommand(
         }
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val args = event.splitArgs()
         val bot = event.guild.bot
         val reactors = bot.getPassives<Reactor>()
@@ -337,7 +337,7 @@ class CmdThis : WeebotCommand(
         }
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val args = event.splitArgs()
         val bot = event.guild.bot
         val reactor = bot.getPassive<ThisReactor>()
@@ -408,7 +408,7 @@ class CmdEmojify : WeebotCommand(
         Regex("(?i)$i") to (listOf(Zero) + EmojiNumbers)[i].unicode
     }.toTypedArray()
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         if (event.args.isNullOrBlank()) return
         if (event.args.length * 6 > EMBED_MAX_DESCRIPTION)
             return event.respondThenDeleteBoth("Too long", 5)
@@ -439,7 +439,7 @@ class CmdHelloThere : WeebotCommand(
             "https://media1.tenor.com/images/4735f34b4dd3b86333341fa17b203004/tenor.gif?itemid=8729471")
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         track(this, event.guild.bot, event.author, event.creationTime)
         val e = strdEmbedBuilder.apply {
             val sb = StringBuilder()

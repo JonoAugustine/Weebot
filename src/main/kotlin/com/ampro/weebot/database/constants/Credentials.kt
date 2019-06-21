@@ -112,7 +112,7 @@ fun jdaDevLogIn() : JDA {
 fun jdaShardLogIn() : DefaultShardManagerBuilder {
     MLOG.slog(null, "Logging in to Weebot JDA shards...")
     return DefaultShardManagerBuilder().setToken(TOKEN_WBT)
-        .setShardsTotal(-1).setCorePoolSize(50)
+        .setShardsTotal(-1).setCorePoolSize(25)
 }
 
 /**

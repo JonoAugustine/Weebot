@@ -8,5 +8,5 @@ pluginManagement {
     }
 }
 
-rootProject.name = 'weebot'
+rootProject.name = "weebot"
 

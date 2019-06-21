@@ -6,17 +6,19 @@
 
 package com.ampro.weebot
 
-import com.ampro.weebot.commands.CMD_REM
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.`fun`.games.Game
 import com.ampro.weebot.commands.`fun`.games.Player
-import com.ampro.weebot.commands.`fun`.games.cardgame.CahGuildInfo
+import com.ampro.weebot.commands.`fun`.games.cardgame.CahInfo
 import com.ampro.weebot.commands.moderation.ModerationData
-import com.ampro.weebot.commands.utility.CmdReminder.Companion.remWatchJob
-import com.ampro.weebot.commands.utility.CmdReminder.Reminder
 import com.ampro.weebot.commands.utility.NotePad
+import com.ampro.weebot.commands.utility.NotePadCollection
+import com.ampro.weebot.database.Cache
+import com.ampro.weebot.database.UserData
 import com.ampro.weebot.database.data
+import com.ampro.weebot.database.getCahInfo
 import com.ampro.weebot.database.getGuild
+import com.ampro.weebot.database.save
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.makeEmbedBuilder
 import com.ampro.weebot.util.NOW
@@ -24,6 +26,7 @@ import com.google.gson.annotations.SerializedName
 import com.jagrosh.jdautilities.command.GuildSettingsProvider
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.Guild
 import net.dv8tion.jda.core.entities.IMentionable
@@ -73,24 +76,28 @@ class WeebotSettings(val guildID: Long) {
             lockedTo.clear()
             blockedFrom.clear()
         }
+
         /** GuildWide Block */
         fun close() {
             guildWide = true
             lockedTo.clear()
             blockedFrom.clear()
         }
+
         /** Lock to [channels] */
         fun lockTo(channels: Iterable<TextChannel>) {
             val ids = channels.map { it.idLong }
             lockedTo.addAll(ids)
             blockedFrom.removeIf { ids.contains(it) }
         }
+
         /** Block from [channels] */
         fun blockFrom(channels: Iterable<TextChannel>) {
             val ids = channels.map { it.idLong }
             blockedFrom.addAll(ids)
             lockedTo.removeIf { ids.contains(it) }
         }
+
         fun allows(textChannel: TextChannel) = when {
             guildWide -> false
             lockedTo.isNotEmpty() -> lockedTo.contains(textChannel.idLong)
@@ -127,7 +134,7 @@ class WeebotSettings(val guildID: Long) {
                 consumer: (Message) -> Unit = {}) {
         getGuild(guildID)?.getTextChannelById(logchannel)?.apply {
             val msg = MessageBuilder(
-                makeEmbedBuilder("${SELF.name} Log",null,message).build())
+                makeEmbedBuilder("${SELF.name} Log", null, message).build())
                 .also { mentions.forEach { m -> it.append(m) } }
                 .build()
             sendMessage(msg).queue { consumer(it) }
@@ -154,8 +161,10 @@ class WeebotSettings(val guildID: Long) {
  * @since 1.0
  */
 //@Serializable
-open class Weebot(val guildID: Long, val _id: String = guildID.toString())
-    : Comparable<Weebot> {
+open class Weebot(
+    val guildID: Long,
+    val _id: String = guildID.toString()
+) : Comparable<Weebot> {
 
     /** @param guild The host guild */
     constructor(guild: Guild) : this(guild.idLong)
@@ -201,19 +210,8 @@ open class Weebot(val guildID: Long, val _id: String = guildID.toString())
             return field
         }
 
-    /** [NotePad]s */
-    @get:Synchronized
-    val notePads = mutableListOf<NotePad>()
-
-    @get:Synchronized
-    var cahGuildInfo: CahGuildInfo = CahGuildInfo(this.guildID)
-        get() {
-            if (field == null) field = CahGuildInfo(this.guildID)
-            return field
-        }
-
     /*************************************************
-        *               INIT                       *
+     *               INIT                       *
      *************************************************/
 
     init {
@@ -223,28 +221,30 @@ open class Weebot(val guildID: Long, val _id: String = guildID.toString())
     /**
      * @return The first [IPassive] of the given class or null
      */
-    inline fun <reified C:IPassive> getPassive()
-            = passives.firstOrNull {  it::class == C::class } as C?
+    inline fun <reified C : IPassive> getPassive() = passives.firstOrNull { it::class == C::class } as C?
 
     /**
      * @param predicate The conditions on which to return
      * @return The first [IPassive] of the given class or null
      */
-    inline fun <reified C:IPassive> getPassive(predicate: (C) -> Boolean)
-            = passives.firstOrNull { it::class == C::class && predicate(it as C) } as C?
+    inline fun <reified C : IPassive> getPassive(
+        predicate: (C) -> Boolean) = passives.firstOrNull {
+        it::class == C::class && predicate(it as C)
+    } as C?
 
     /** @return never-null list of all [IPassive]s of the type [C] */
-    inline fun <reified C:IPassive> getPassives()
-            = passives.filter {  it::class == C::class } as MutableList<*>
+    inline fun <reified C : IPassive> getPassives() = passives.filter { it::class == C::class } as MutableList<*>
 
     /**
      * @param predicate The conditions on which to return
      * @return The all [IPassive]s of the type [C] held by this [Weebot] that match
      * the given [predicate]
      */
-    inline fun <reified C:IPassive> getPassives(predicate: (C) -> Boolean)
-            = passives.filter { it::class == C::class && predicate(it as C) }
-            as MutableList<*>
+    inline fun <reified C : IPassive> getPassives(
+        predicate: (C) -> Boolean) = passives.filter {
+        it::class == C::class && predicate(it as C)
+    }
+        as MutableList<*>
 
     fun add(passive: IPassive) = this.passives.add(passive)
 
@@ -254,15 +254,15 @@ open class Weebot(val guildID: Long, val _id: String = guildID.toString())
      *
      * @param event The event to distribute
      */
-    open fun feedPassives(event: Event)
-            = passives.apply { removeIf(IPassive::dead) }.forEach{
+    open fun feedPassives(event: Event) = passives.apply {
+        removeIf(IPassive::dead)
+    }.forEach {
         GlobalScope.launch(CACHED_POOL) { it.accept(this@Weebot, event) }
     }
 
     /** Get all games of type [G] currently running */
-    inline fun <reified G:Game<out Player>> getRunningGames(): List<G>
-            = games.filter { it is G && it.isRunning }
-        .mapTo(mutableListOf()) {it as G}
+    inline fun <reified G : Game<out Player>> getRunningGames(): List<G> = games.filter { it is G && it.isRunning }
+        .mapTo(mutableListOf()) { it as G }
 
     fun add(game: Game<out Player>) = this.games.add(game)
 
@@ -274,6 +274,15 @@ open class Weebot(val guildID: Long, val _id: String = guildID.toString())
     override fun compareTo(other: Weebot) = (this.guildID - other.guildID).toInt()
 
 }
+
+@get:Synchronized
+val Weebot.cahInfo
+    get() = getCahInfo(guildID) ?: CahInfo(guildID.toString())
+
+/** [NotePad]s */
+@get:Synchronized
+val Weebot.notePads
+    get() = Cache.notes[guildID.toString()] ?: NotePadCollection(guildID.toString())
 
 
 /**
@@ -288,21 +297,11 @@ object GlobalWeebot : Weebot(-1L, "GLOBAL") {
         this.settings.prefixes = mutableListOf("", "w!", "\\", "!")
     }
 
-    /** A list of user IDs that have enabled personal tracking */
-    val trackedUsers = ArrayList<Long>(1000)
+    operator fun <T> invoke(block: GlobalWeebot.() -> T) = block(this)
 
-    val PASSIVE_MAX = 10
+    val PASSIVE_MAX = 1
     val PASSIVE_MAX_PREM = 50
 
-    private val userPassives  = ConcurrentHashMap<Long, MutableList<IPassive>>()
-
-    /**
-     * @return The list of [IPassive]s linked to this user. If one does not exist,
-     *          it is created, added to the map and returned
-     */
-    fun getUserPassiveList(user: User) = userPassives.getOrPut(user.idLong) {
-        mutableListOf()
-    }!!
 
     /**
      * Adds a [IPassive] to the user's lists of global passives if the user
@@ -310,66 +309,49 @@ object GlobalWeebot : Weebot(-1L, "GLOBAL") {
      *
      * @return true if the passive was added, false if the max had been reached
      */
-    fun addUserPassive(user: User, iPassive: IPassive): Boolean {
-        val list = userPassives.getOrPut(user.idLong) { mutableListOf()}
-        return if (user.data?.status?.on == true) {
-            when {
-                list.size >= PASSIVE_MAX_PREM -> false
-                else -> { list.add(iPassive); true }
-            }
-        } else {
-            when {
-                list.size >= PASSIVE_MAX -> false
-                else -> { list.add(iPassive); true }
-            }
-        }
+    fun User.addPassive(iPassive: IPassive): Boolean = data?.globalPassives?.let {
+        if (it.size < when {
+                data?.status?.on == true -> PASSIVE_MAX_PREM
+                else -> PASSIVE_MAX
+            }) add(iPassive).also { GlobalScope.launch { data?.save() } }
+        else false
+    } ?: runBlocking {
+        UserData(id, globalPassives = mutableListOf(iPassive)).save()
     }
 
-    inline fun <reified T:IPassive> getUserPassive(user: User)
-            = getUserPassiveList(user).firstOrNull { it::class == T::class } as T?
 
-    inline fun <reified T:IPassive> getUserPassives(user: User): MutableList<T>
-            = getUserPassiveList(user).filter { it::class == T::class }
-        .mapTo(mutableListOf()) { it as T }
+    inline fun <reified T : IPassive> User.getPassive() =
+        data?.globalPassives?.firstOrNull { it::class == T::class } as T?
 
     override fun feedPassives(event: Event) {
-        userPassives.values.forEach { it ->
-            GlobalScope.launch {
-                it.removeIf(IPassive::dead)
-                it.forEach { it.accept(this@GlobalWeebot, event) }
+        Cache.userData.asMap().values
+            .map { it.globalPassives }
+            .forEach { it ->
+                GlobalScope.launch {
+                    it.removeIf(IPassive::dead)
+                    it.forEach { it.accept(this@GlobalWeebot, event) }
+                    // TODO
+                }
             }
-        }
     }
 
     val REM_MAX = 10
     val REM_MAX_PREM = 50
-
-    private val userReminders = ConcurrentHashMap<Long, MutableList<Reminder>>()
-
-    /**
-     * @return The list of [Reminder]s linked to this user
-     */
-    fun getReminders(user: User) = userReminders.getOrPut(user.idLong)
-    { mutableListOf() }!!
-
-    fun getReminders() = userReminders.toMap()
-
-    fun addReminder(user: User, reminder: Reminder) = synchronized(userReminders) {
-        val list = userReminders.getOrPut(user.idLong) { mutableListOf() }
-        val added = if (user.data?.status?.on == true) when {
-            list.size >= REM_MAX_PREM -> false
-            else -> { list.add(reminder); true }
-        } else when {
-            list.size >= REM_MAX -> false
-            else -> { list.add(reminder); true }
-        }
-
-        if (added) { CMD_REM.remJobMap.putIfAbsent(user.idLong, remWatchJob(list)) }
-        return@synchronized added
+/*
+    fun User.addReminder(reminder: Reminder): Boolean = data?.reminders?.let {
+        if (it.size < when {
+                data?.status?.on == true -> REM_MAX_PREM
+                else -> REM_MAX
+            }) it.add(reminder).apply {
+            GlobalScope.launch { data?.save() }
+            CMD_REM.remJobMap.putIfAbsent(idLong, remWatchJob(it))
+        } else false
+    } ?: runBlocking {
+        UserData(id, reminders = mutableListOf(reminder)).save()
     }
 
     override fun startUp() {
         CMD_REM.init()
     }
-
+*/
 }

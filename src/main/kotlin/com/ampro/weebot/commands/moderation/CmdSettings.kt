@@ -17,8 +17,8 @@ import com.ampro.weebot.commands.COMMANDS
 import com.ampro.weebot.commands.IPassive
 import com.ampro.weebot.commands.`fun`.games.Game
 import com.ampro.weebot.commands.`fun`.games.Player
-import com.ampro.weebot.database.GLOBAL_WEEBOT
 import com.ampro.weebot.database.bot
+import com.ampro.weebot.database.data
 import com.ampro.weebot.database.track
 import com.ampro.weebot.extensions.CLR_GREEN
 import com.ampro.weebot.extensions.MentionType.CHANNEL
@@ -73,7 +73,7 @@ class CmdTaskManager : WeebotCommand(
 ) {
     override fun execute(event: WeebotCommandEvent) {
         val passives = event.guild?.bot?.passives
-            ?: GLOBAL_WEEBOT.getUserPassiveList(event.author)
+            ?: event.author.data?.globalPassives ?: mutableListOf()
         val games = event.bot.games.filter(Game<out Player>::isRunning)
 
         if (passives.isEmpty() && games.isEmpty())
@@ -135,7 +135,7 @@ class CmdSettings : WeebotCommand(
             .build()
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = event.guild.bot
         track(this, bot, event.author, event.creationTime)
         val config = bot.settings
@@ -170,7 +170,7 @@ private class CmdSetName : WeebotCommand(
             true)
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         track(this, event.guild.bot, event.author, event.creationTime)
         if (event.args.isBlank()) return
         val name = event.splitArgs().joinToString(" ")
@@ -194,7 +194,7 @@ private class CmdSetPrefix : WeebotCommand(
             true)
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = event.guild.bot
         val prfx = (if (bot.settings.prefixes.isNotEmpty())
             bot.settings.prefixes else CMD_CLIENT.prefixes).joinToString(", ")
@@ -277,7 +277,7 @@ private class CmdSetLogChannel : WeebotCommand(
             true)
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = event.guild.bot
         track(this, bot, event.author, event.creationTime)
         val channels = event.message.mentionedChannels
@@ -339,7 +339,7 @@ private class CmdSetTracking : WeebotCommand(
                 "[on/off]``\nAliases: track, tracking", true)
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = event.guild.bot
         track(this, bot, event.author, event.creationTime)
         val args = event.splitArgs()
@@ -372,7 +372,7 @@ private class CmdLock : WeebotCommand(
             "\n``set lock [#channelMentions...]``", true)
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = event.guild.bot
         val args = event.splitArgs()
         if (args.isEmpty()) {
@@ -423,7 +423,7 @@ private class CmdBlock : WeebotCommand(
             "entirely\n``set block [#channelMention...]``", true)
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = event.guild.bot
         val args = event.splitArgs()
         if (args.isEmpty()) {

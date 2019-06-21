@@ -149,7 +149,7 @@ class CmdSelfDestruct : WeebotCommand(
         .build(),
     true, cooldown = 0, botPerms = arrayOf(MESSAGE_MANAGE)
 ) {
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         track(this, event.guild.bot, event.author, event.creationTime)
         val args = event.splitArgs()
         val delay = try {
@@ -182,7 +182,7 @@ class CmdPurge : WeebotCommand(
     }
 
     // \purge #
-    override fun execute(event: CommandEvent)  {
+    override fun execute(event: WeebotCommandEvent)  {
         var toDelete = try {
             event.splitArgs()[0].toInt() + 1
         } catch (e: Exception) { return }
@@ -238,20 +238,22 @@ class CmdChatLock : WeebotCommand(
     /** [TextChannel.getIdLong] -> [AtomicInteger] remaining time, ([Long] -> [Unit]) */
     private var lockMap = ConcurrentHashMap<Long, Pair<AtomicInteger, (Long) -> Unit>>()
 
-    private val lockWaiter = GlobalScope.launch(CACHED_POOL) {
-        while(ON) {
-            lockMap.forEach {
-                if (it.value.first.decrementAndGet() <= 0)
-                    it.value.second(it.key)
+    private val lockWaiter by lazy {
+        GlobalScope.launch(CACHED_POOL) {
+            while (ON) {
+                lockMap.forEach {
+                    if (it.value.first.decrementAndGet() <= 0)
+                        it.value.second(it.key)
+                }
+                val delay = 1_000 - measureTimeMillis {
+                    lockMap.removeIf { _, pair -> pair.first.get() <= 0 }
+                }
+                if (delay >= 0L) delay(delay)
             }
-            val delay = 1_000 - measureTimeMillis {
-                lockMap.removeIf { _, pair -> pair.first.get() <= 0 }
-            }
-            if (delay >= 0L) delay(delay)
         }
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         //"<[-s seconds] [-m minutes]> [from @/Roles @/Members]",
         val args = event.splitArgs()
         if (args.isEmpty()) {

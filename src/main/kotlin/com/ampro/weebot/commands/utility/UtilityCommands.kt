@@ -4,60 +4,30 @@
 
 package com.ampro.weebot.commands.utility
 
-import com.ampro.weebot.CACHED_POOL
-import com.ampro.weebot.GENERIC_ERR_MSG
-import com.ampro.weebot.JDA_SHARD_MNGR
-import com.ampro.weebot.MLOG
-import com.ampro.weebot.ON
+import com.ampro.weebot.GlobalWeebot
 import com.ampro.weebot.Weebot
 import com.ampro.weebot.commands.CAT_UTIL
 import com.ampro.weebot.commands.IPassive
-import com.ampro.weebot.database.GLOBAL_WEEBOT
 import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.track
 import com.ampro.weebot.database.user
-import com.ampro.weebot.extensions.SelectablePaginator
 import com.ampro.weebot.extensions.WeebotCommand
 import com.ampro.weebot.extensions.WeebotCommandEvent
 import com.ampro.weebot.extensions.`is`
 import com.ampro.weebot.extensions.contains
 import com.ampro.weebot.extensions.creationTime
-import com.ampro.weebot.extensions.makeEmbedBuilder
-import com.ampro.weebot.extensions.plus
 import com.ampro.weebot.extensions.removeAll
-import com.ampro.weebot.extensions.removeIf
-import com.ampro.weebot.extensions.respondThenDeleteBoth
-import com.ampro.weebot.extensions.send
 import com.ampro.weebot.extensions.splitArgs
 import com.ampro.weebot.extensions.strdEmbedBuilder
-import com.ampro.weebot.extensions.subList
-import com.ampro.weebot.util.Emoji.AlarmClock
-import com.ampro.weebot.util.IdGenerator
 import com.ampro.weebot.util.NOW
-import com.ampro.weebot.util.REG_HYPHEN
 import com.ampro.weebot.util.formatTime
-import com.jagrosh.jdautilities.command.Command.CooldownScope.USER_SHARD
 import com.jagrosh.jdautilities.command.CommandEvent
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import net.dv8tion.jda.core.MessageBuilder
 import net.dv8tion.jda.core.entities.ChannelType.PRIVATE
-import net.dv8tion.jda.core.entities.Message
 import net.dv8tion.jda.core.entities.User
 import net.dv8tion.jda.core.events.Event
 import net.dv8tion.jda.core.events.message.guild.GuildMessageReceivedEvent
-import java.io.BufferedReader
-import java.io.IOException
-import java.io.InputStreamReader
-import java.net.HttpURLConnection
-import java.net.URL
-import java.net.URLDecoder.decode
-import java.net.URLEncoder.encode
 import java.time.OffsetDateTime
 import java.time.temporal.ChronoUnit
-import java.util.concurrent.ConcurrentHashMap
 
 
 /** An instantiable representation of a User's OutHouse. */
@@ -140,12 +110,12 @@ class CmdOutHouse : WeebotCommand(
             .build()
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         //ohc [hours] [message here]
-        val bot = if (event.isFromType(PRIVATE)) GLOBAL_WEEBOT else event.guild.bot
+        val bot = if (event.isFromType(PRIVATE)) GlobalWeebot else event.guild.bot
         track(this, bot, event.author, event.creationTime)
 
-        GLOBAL_WEEBOT.getUserPassive<OutHouse>(event.author)?.apply {
+        GlobalWeebot { event.author.getPassive<OutHouse>() }?.apply {
             event.reply("*You're already in the outhouse* ${
             (remainingMin * 60L).formatTime()}")
         } ?: run {
@@ -178,7 +148,7 @@ class CmdOutHouse : WeebotCommand(
             } else ""
 
             val oh = OutHouse(event.author, min.toLong(), message, forward)
-            if (GLOBAL_WEEBOT.addUserPassive(event.author, oh)) {
+            if (GlobalWeebot { event.author.addPassive(oh) }) {
                 event.reply("I will hold down the fort while you're away! :guardsman:"
                     + " see you in ${(min * 60L).formatTime()}")
                 return@run oh
@@ -192,6 +162,8 @@ class CmdOutHouse : WeebotCommand(
 
 }
 
+//TODO fix reminders
+/*
 
 /**
  * A Command to set a Reminder for up to 30 Days.
@@ -214,7 +186,7 @@ class CmdReminder : WeebotCommand(
                    val message: String) {
 
         companion object {
-            private val REM_ID_GEN = IdGenerator(7, "REM:")
+            private val REM_ID_GEN = IdGenerator(7, "REM")
         }
 
         val id = REM_ID_GEN.next()
@@ -275,8 +247,8 @@ class CmdReminder : WeebotCommand(
     }
 
     fun init() {
-        GLOBAL_WEEBOT.getReminders()
-            .filter { it.value.filterNotNull().isNotEmpty() }
+        Cache.userData.asMap().map { it.value.reminders }
+            .filter { it.isNotEmpty() }
             .forEach {
                 remJobMap.putIfAbsent(it.key, remWatchJob(it.value))
             }
@@ -308,7 +280,7 @@ class CmdReminder : WeebotCommand(
 
     //[-private] [Xm] [Yh] [Zd] [Reminder Message]
     //TODO send texts
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val args = event.splitArgs()
         val bot = if (event.isFromType(PRIVATE)) GLOBAL_WEEBOT else event.guild.bot
         track(this, bot, event.author, event.creationTime)
@@ -512,3 +484,4 @@ class CmdTranslate : WeebotCommand(
     }
 
 }
+*/

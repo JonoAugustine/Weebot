@@ -225,7 +225,7 @@ class CmdReddicord : WeebotCommand(
     private class SubCmdReset : WeebotCommand("reset", "REDDITRESET", null,
         arrayOf("clear", "clearscores"), CAT_FUN, "Set everyone's score to 0.",
         guildOnly = true, cooldown = 360, userPerms = arrayOf(ADMINISTRATOR)) {
-        override fun execute(event: CommandEvent) {
+        override fun execute(event: WeebotCommandEvent) {
             val bot = event.guild.bot
             bot.getPassive<Reddicord>()?.also { rCord ->
                 if (rCord.scoreMap.isNotEmpty()) {
@@ -395,7 +395,7 @@ class SubCmdLeaderBoard(name: String, alias: Array<String>) : WeebotCommand(
     guildOnly = true, cooldown = 120, hidden = true, cooldownScope = USER_CHANNEL
 ) {
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = event.guild.bot
         val rCord = bot.getPassive<Reddicord>()
         val mentions = event.message.mentionedUsers

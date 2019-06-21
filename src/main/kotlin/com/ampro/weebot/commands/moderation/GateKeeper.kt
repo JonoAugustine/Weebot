@@ -8,6 +8,7 @@ import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.track
 import com.ampro.weebot.extensions.SelectableEmbed
 import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
 import com.ampro.weebot.extensions.creationTime
 import com.ampro.weebot.extensions.isValidUser
 import com.ampro.weebot.extensions.makeEmbedBuilder
@@ -127,7 +128,7 @@ class CmdWelcomeMsg : WeebotCommand(
                 """.trimIndent(), true)
     }
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val bot = event.guild.bot
         track(this, bot, event.author, event.creationTime)
         val gk: GateKeeper = bot.getPassive() ?: run {

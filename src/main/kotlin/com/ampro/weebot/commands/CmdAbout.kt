@@ -5,10 +5,10 @@
 package com.ampro.weebot.commands
 
 import com.ampro.weebot.CMD_CLIENT
+import com.ampro.weebot.GlobalWeebot
 import com.ampro.weebot.JDA_SHARD_MNGR
 import com.ampro.weebot.SELF
 import com.ampro.weebot.commands.`fun`.CmdHelloThere
-import com.ampro.weebot.database.GLOBAL_WEEBOT
 import com.ampro.weebot.database.bot
 import com.ampro.weebot.database.constants.LINK_DISCORD_BOTS
 import com.ampro.weebot.database.constants.LINK_DISCORD_BOTS_LIST
@@ -228,7 +228,7 @@ class CmdHelp : WeebotCommand(
     private val catAll: Category = Category("All")
 
     override fun execute(event: WeebotCommandEvent) {
-        val bot = if (event.isFromType(PRIVATE)) GLOBAL_WEEBOT else event.guild.bot
+        val bot = if (event.isFromType(PRIVATE)) GlobalWeebot else event.guild.bot
         track(this, bot, event.author, event.creationTime)
         fun filterAndMap(predicate: (WeebotCommand) -> Boolean): List<String> {
             val sb = StringBuilder()

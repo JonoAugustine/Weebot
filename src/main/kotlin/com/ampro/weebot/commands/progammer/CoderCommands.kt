@@ -16,6 +16,7 @@ import com.ampro.weebot.extensions.EMBED_MAX_FIELD_VAL
 import com.ampro.weebot.extensions.EMBED_MAX_TITLE
 import com.ampro.weebot.extensions.SelectableEmbed
 import com.ampro.weebot.extensions.WeebotCommand
+import com.ampro.weebot.extensions.WeebotCommandEvent
 import com.ampro.weebot.extensions.creationTime
 import com.ampro.weebot.extensions.delete
 import com.ampro.weebot.extensions.isValidUser
@@ -101,7 +102,7 @@ class CmdRegexTest : WeebotCommand(
         } else { FrowningFace.unicode }}")
         .build()
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         val args = event.splitArgs()
         if (args.size < 2) return
         track(this, event.guild.bot, event.author, event.creationTime)
@@ -150,7 +151,7 @@ class CmdEmbedMaker : WeebotCommand(
 
     val MAX_FIELDS = 10
 
-    override fun execute(event: CommandEvent) {
+    override fun execute(event: WeebotCommandEvent) {
         if (event.channelType == TEXT)
             track(this, event.guild.bot, event.author, event.creationTime)
 
