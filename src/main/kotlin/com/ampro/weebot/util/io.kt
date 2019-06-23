@@ -107,7 +107,6 @@ fun Any.saveJson(file: File, overWrite: Boolean = false): Int {
  * @param file The file to loadDao from
  * @return The parsed object or null if it was not found or an exception was thrown.
  */
-@Synchronized
 inline fun <reified T> loadJson(file: File): T? {
     return try {
         FileReader(file).use { GSON.fromJson(it, T::class.java) }

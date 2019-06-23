@@ -69,7 +69,8 @@ val LINK_INVITE_TESTBOT = "https://discordapp.com/oauth2/authorize?client_id=444
 private const val TOKEN_WBT =
         "NDM3ODUxODk2MjYzMjEzMDU2.DcN_lA.Etf9Q9wuk1YCUnUox0IbIon1dUk"
 const val CLIENT_WBT = 437851896263213056
-private const val TOKEN_TEST = "UAE-i4FFQakMds56XakTKI8TyMCFn2jg"
+private const val TOKEN_TEST =
+    "NDQ0MzIzNzMyMDEwMzAzNDg4.XQ_2iA._CRfB3lgQGcMYaMvuLcVSr33yUA"
 
 /**
  * Initiates `Launcher` data and connects to Weebot API.

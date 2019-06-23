@@ -6,6 +6,7 @@ package com.ampro.weebot
 
 import com.ampro.weebot.Poolcounts.cachedPoolCount
 import com.ampro.weebot.Poolcounts.cmdPoolCount
+import com.ampro.weebot.api.javalin
 import com.ampro.weebot.commands.CMD_HELP
 import com.ampro.weebot.commands.COMMANDS
 import com.ampro.weebot.commands.IPassive
@@ -117,7 +118,6 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
         elog("\tFAILED: Build Dir | shutting down...")
         System.exit(-1)
     }
-    slog("\t...DONE")
     slog("Initializing Main Logger\n\n")
     //LOGIN & LISTENERS
     val weebot = (args_.isNotEmpty() && args_[0].matches("(?i)(t|tobeew|test)")).not()
@@ -126,7 +126,8 @@ fun main(args_: Array<String>) = runBlocking<Unit> {
 
     /** Setup for random methods and stuff that is needed before launch */
     val genSetup = listOf(
-        launch { setUpWebFuel() }
+        launch { setUpWebFuel() },
+        launch { javalin.start(System.getenv("PORT")?.toInt() ?: 6900) }
     )
 
     //Debug

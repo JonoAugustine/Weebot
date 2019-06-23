@@ -3,12 +3,10 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 plugins {
     java
     application
-    kotlin("jvm") version "1.3.31"
-    kotlin("kapt") version "1.3.31"
-    id("kotlinx-serialization") version "1.3.30"
+    kotlin("jvm") version "1.3.40"
+    kotlin("kapt") version "1.3.40"
+    id("kotlinx-serialization") version "1.3.40"
     id("com.github.johnrengelman.shadow") version "4.0.3"
-    //id("com.sedmelluq.jdaction") version "1.0.2" Incompat w/ Gradle 4.10
-    //id("org.springframework.boot")
 }
 
 group = "com.ampro"
@@ -23,10 +21,13 @@ repositories {
     jcenter()
     maven(url = "https://jitpack.io")
     maven(url = "http://jcenter.bintray.com")
+    maven(url = "https://kotlin.bintray.com/kotlinx")
     maven(url = "https://oss.jfrog.org/artifactory/libs-release")
 }
 
 dependencies {
+    implementation(kotlin("stdlib"))
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.11.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0-M1")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.30")
     implementation(kotlin("stdlib-jdk8"))
