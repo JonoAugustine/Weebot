@@ -11,4 +11,4 @@ import kotlinx.serialization.Serializable
 data class Weebot(
     val guildID: Long,
     var prefix: String = WeebotInfo.defaultPrefix
-)
+) : Memory

@@ -8,6 +8,7 @@ import com.ampro.weebot.*
 import com.ampro.weebot.Extensions.RegexShorthand.ic
 import com.ampro.weebot.bot.WeebotInfo
 import com.ampro.weebot.bot.commands.Help.calls
+import com.ampro.weebot.bot.memory
 import com.ampro.weebot.bot.wEmbed
 import com.serebit.strife.BotBuilder
 import com.serebit.strife.StrifeInfo
@@ -29,23 +30,24 @@ object Help : Command {
 
     override val install: BotBuilder.() -> Unit = {
         onMessage {
-            val bot = message.guild?.bot ?: globalWeebot
-            if (!message.content.calls(bot.prefix)) return@onMessage
-
-            if (message.args.size == 1) {
-                message.reply(wEmbed(context) {
-                    title("${context.selfUser.username} Commands")
-                    liveCommands.values.forEach { fields.add(it.help) }
-                })
-            } else {
-                commandOf(message.args[1])?.let {
+            memory(message.guild?.id ?: -1) {
+                if (!message.content.calls(prefix)) return@memory
+                if (message.args.size == 1) {
                     message.reply(wEmbed(context) {
-                        title("${it.name} Help")
-                        fields.add(it.help)
+                        title("${context.selfUser.username} Commands")
+                        liveCommands.values.forEach { fields.add(it.help) }
                     })
-                } ?: message.reply("I do not have a command called ${message.args[1]}.")
+                } else {
+                    commandOf(message.args[1])?.let {
+                        message.reply(wEmbed(context) {
+                            title("${it.name} Help")
+                            fields.add(it.help)
+                        })
+                    } ?: message.reply(
+                        "I do not have a command called ${message.args[1]}."
+                    )
+                }
             }
-
         }
     }
 }

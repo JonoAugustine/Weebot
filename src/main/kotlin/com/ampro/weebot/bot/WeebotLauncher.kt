@@ -24,6 +24,9 @@ suspend fun initWeebot(weebot: Boolean? = null) {
 
     bot(if (weebot == true) Tokens.weebot else Tokens.tobeew) {
         logToConsole = weebot?.not() ?: true
+        install(object : BotFeatureProvider<MemoryFeature> {
+            override fun provide() = MemoryFeature
+        })
         wCom(Help)
         wCom(About)
         wCom(Settings)

@@ -6,6 +6,8 @@ package com.ampro.weebot
 
 
 import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.stats.BotStatistic
+import com.ampro.weebot.stats.SiteStatistic
 import com.serebit.strife.entities.Guild
 import io.kweb.shoebox.Shoebox
 import java.io.File
@@ -21,10 +23,34 @@ val DIR = File("wbot")
         }
     }
 
-private val botStore by lazy { Shoebox<Weebot>(DIR.resolve("dao\\").toPath()) }
+private val BOT = DIR.resolve("dao\\")
+private val STAT = DIR.resolve("stat\\")
+private val STAT_BOT = STAT.resolve("bot\\")
+private val STAT_SITE = STAT.resolve("site\\")
+
+private val botStore by lazy {
+    Shoebox<Weebot>(BOT.toPath()).apply {
+        onNew { (key), source ->
+            logger.trace("Weebot added at $key. ($source)")
+        }
+        onChange { _, (key, _), source ->
+            logger.trace("Weebot updated at $key. ($source)")
+        }
+        onRemove { (key), source ->
+            logger.trace("Weebot removed from $key. ($source)")
+        }
+    }
+}
+private val statStore_bot by lazy {
+    Shoebox<BotStatistic>(STAT_BOT.toPath())
+}
+private val statStore_site by lazy {
+    Shoebox<SiteStatistic>(STAT_SITE.toPath())
+}
+
 
 /** All current [Weebot] instances. */
-val bots = botStore.entries.map { it.value }
+val bots get() = botStore.entries.map { it.value }
 
 val globalWeebot by lazy {
     botStore["-1"] ?: Weebot(-1, "").also { botStore["-1"] = it }
@@ -33,8 +59,11 @@ val globalWeebot by lazy {
 val Guild.bot get() = bot(id)
 
 /** Retrieve a [Weebot] for the [guildID]. */
-fun bot(guildID: Long): Weebot = botStore[guildID.toString()] ?: Weebot(
-    guildID).also { botStore[guildID.toString()] = it }
+fun bot(guildID: Long): Weebot = botStore[guildID.toString()]
+    ?: Weebot(guildID).also { botStore[guildID.toString()] = it }
 
-fun Weebot.modify(modify: Weebot.() -> Unit) =
-    botStore.modify(guildID.toString()) { this.apply(modify) }
+suspend fun Weebot.modify(modify: suspend Weebot.() -> Unit) =
+    apply { modify(this) }
+        .let { nb -> botStore.modify(guildID.toString()) { nb } }
+
+fun remove(botID: Long) = botStore.remove(botID.toString())
