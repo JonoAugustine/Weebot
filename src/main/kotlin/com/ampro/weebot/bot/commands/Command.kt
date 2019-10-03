@@ -4,33 +4,117 @@
 
 package com.ampro.weebot.bot.commands
 
+import com.ampro.weebot.bot.StrifeExtensions.args
+import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.bot.WeebotInfo
+import com.ampro.weebot.bot.memory
+import com.ampro.weebot.util.and
 import com.serebit.strife.BotBuilder
-import com.serebit.strife.entities.EmbedBuilder
+import com.serebit.strife.events.MessageCreateEvent
+import com.serebit.strife.onMessageCreate
+import org.joda.time.DateTime
+import kotlin.time.seconds
 
-interface Command {
+typealias Prefix = String
 
-    val name: String
+/**
+ * TODO
+ *
+ * @property name
+ * @property aliases
+ * @property children
+ * @property enabled
+ * @property guildOnly
+ * @property rateLimit Number of seconds to wait after use
+ * @property predicate
+ * @property action
+ */
+abstract class Command(
+    val name: String,
+    val aliases: List<String> = emptyList(),
+    val children: List<Command> = emptyList(),
+    var enabled: Boolean = true,
+    val rateLimit: Int = 0,
+    val guildOnly: Boolean,
+    val predicate: suspend MessageCreateEvent.(Weebot) -> Boolean = { true },
+    val action: suspend MessageCreateEvent.(Weebot) -> Unit
+) {
 
-    val matcherBase: Regex
+    protected val rateLimitMap = mutableMapOf<Long, DateTime>()
 
-    val help: EmbedBuilder.FieldBuilder
+    open fun preCheck(event: MessageCreateEvent): Boolean {
+        val m = event.message
+        val a = m.author ?: return false
+        // 1 steps
+        return when {
+            a.isBot -> false
+            a.id in WeebotInfo.devIDs -> true
+            guildOnly && m.guild == null -> false
+            rateLimitMap[a.id]?.isAfterNow == true -> false
+            else -> true
+        }
+    }
 
-    val install: BotBuilder.() -> Unit
+    /**
+     * Runs the command or child command
+     *
+     * @param event
+     * @param bot
+     * @param arg The invoking arg
+     */
+    open suspend fun run(event: MessageCreateEvent, bot: Weebot, arg: Int = 0) {
+        // check child commands if there could be additional commands
+        if (event.message.args.size > arg + 1) {
+            children
+                .firstOrNull { "" and event.message.args[1] invokes it }
+                ?.apply { return run(event, bot) }
+        }
 
-    fun String.calls(prefix: String): Boolean =
-        trim().takeIf { it.startsWith(prefix) }
-            ?.removePrefix(prefix)
-            ?.matches(matcherBase) == true
+        // Run prechecks
+        preCheck(event)
+        // Run predicate
+        if (!predicate(event, bot)) return
+        // Run command
+        action(event, bot)
+        // Run post
+        postRun(event)
+    }
+
+    open fun postRun(event: MessageCreateEvent) {
+        if (rateLimit > 0) {
+            rateLimitMap[event.message.author!!.id] =
+                DateTime.now().plusSeconds(rateLimit)
+        }
+        TODO("Bot Statistics")
+    }
 
 }
 
-fun BotBuilder.wCom(command: Command) = command.also {
-    it.install(this)
-    _liveCommands[command.name.toLowerCase()] = command
+private val _commands = mutableMapOf<String, Command>()
+val commands get() = _commands.toMap()
+
+/**
+ * Prefix + Arg invokes command?
+ *
+ * @param command
+ * @return
+ */
+private infix fun Pair<Prefix, String>.invokes(command: Command): Boolean {
+    val names = buildString {
+        append('(').append(command.name)
+        append(command.aliases.joinToString("|"))
+        append(')')
+    }
+    return "$first$second".matches(Regex("(?i)^${first}${names}\\s?.?"))
 }
 
-private val _liveCommands: MutableMap<String, Command> = mutableMapOf()
-
-val liveCommands: Map<String, Command> get() = _liveCommands.toMap()
-
-fun commandOf(name: String) = _liveCommands[name.toLowerCase()]
+fun BotBuilder.commands() {
+    onMessageCreate {
+        memory(message.guild?.id ?: -1) {
+            _commands.values
+                .filter { it.enabled }
+                .firstOrNull { prefix and message.content invokes it }
+                ?.run(this@onMessageCreate, this)
+        }
+    }
+}

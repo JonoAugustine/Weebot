@@ -4,72 +4,72 @@
 
 package com.ampro.weebot.bot.commands
 
-import com.ampro.weebot.*
-import com.ampro.weebot.Extensions.RegexShorthand.ic
+import com.ampro.weebot.args
+import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.bot.WeebotInfo
-import com.ampro.weebot.bot.commands.Help.calls
-import com.ampro.weebot.bot.memory
 import com.ampro.weebot.bot.wEmbed
 import com.serebit.strife.BotBuilder
 import com.serebit.strife.StrifeInfo
 import com.serebit.strife.entities.EmbedBuilder.FieldBuilder
 import com.serebit.strife.entities.reply
 import com.serebit.strife.entities.title
-import com.serebit.strife.onMessage
+import com.serebit.strife.events.MessageCreateEvent
 
 object Help : Command {
 
-    override val name = "Help"
+    override val name = "Help" with emptyList()
+    override var enabled = true
 
-    override val matcherBase: Regex = "$ic$name(\\s+.+)?".toRegex()
-
-    override val help: FieldBuilder = FieldBuilder(name, """
+    override val help: FieldBuilder = FieldBuilder(
+        "$name", """
         Get a list of all my commands or extra information about a particular command
         Usage: `help <command_name>`
-    """.trimIndent())
+    """.trimIndent()
+    )
 
-    override val install: BotBuilder.() -> Unit = {
-        onMessage {
-            memory(message.guild?.id ?: -1) {
-                if (!message.content.calls(prefix)) return@memory
-                if (message.args.size == 1) {
-                    message.reply(wEmbed(context) {
-                        title("${context.selfUser.username} Commands")
-                        liveCommands.values.forEach { fields.add(it.help) }
+    override val predicate: suspend MessageCreateEvent.(BotBuilder) -> Boolean
+        get() = { true }
+
+    override val action: suspend BotBuilder.(MessageCreateEvent, Weebot) -> Unit
+        get() = { e, w ->
+            if (e.message.args.size == 1) {
+                e.message.reply(wEmbed(e.context) {
+                    title("${e.context.selfUser.username} Commands")
+                    liveCommands.values.forEach { fields.add(it.help) }
+                })
+            } else {
+                commandAt(e.message.args[1])?.let {
+                    e.message.reply(wEmbed(e.context) {
+                        title("${it.name} Help")
+                        fields.add(it.help)
                     })
-                } else {
-                    commandOf(message.args[1])?.let {
-                        message.reply(wEmbed(context) {
-                            title("${it.name} Help")
-                            fields.add(it.help)
-                        })
-                    } ?: message.reply(
-                        "I do not have a command called ${message.args[1]}."
-                    )
-                }
+                } ?: e.message.reply(
+                    "I do not have a command called ${e.message.args[1]}."
+                )
             }
         }
-    }
+
 }
 
 object About : Command {
 
-    override val name = "About"
+    override var enabled = true
+    override val name get() = "About" with listOf()//WeebotInfo.name)
 
-    override val matcherBase = "${ic}about".toRegex()
-
-    override val help = FieldBuilder(name, """
+    override val help get() = FieldBuilder(
+        "$name", """
         Get cool info about me and how I was made!
         Usage: `about`
-    """.trimIndent())
+    """.trimIndent()
+    )
 
-    override val install: BotBuilder.() -> Unit = {
-        onMessage {
-            val bot = message.guild?.bot ?: globalWeebot
-            if (!message.content.calls(bot.prefix)) return@onMessage
+    override val predicate: suspend MessageCreateEvent.(BotBuilder) -> Boolean
+        get() = { true }
 
-            message.reply(embed = wEmbed(context) {
-                title(name)
+    override val action: suspend BotBuilder.(MessageCreateEvent, Weebot) -> Unit
+        get() = { e, w ->
+            e.message.reply(embed = wEmbed(e.context) {
+                title("$name")
                 description = "I was made by [Jono](${WeebotInfo.jonoGitLab}) " +
                     "using [Kotlin](https://kotlinlang.org) and " +
                     "[Strife](${StrifeInfo.sourceUri}). I am currently running " +
@@ -78,6 +78,5 @@ object About : Command {
                     "may not have been remade yet! Thank you for your patience."
             })
         }
-    }
 
 }

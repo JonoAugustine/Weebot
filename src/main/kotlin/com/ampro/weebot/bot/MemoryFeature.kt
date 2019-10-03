@@ -5,6 +5,7 @@
 package com.ampro.weebot.bot
 
 import com.ampro.weebot.*
+import com.ampro.weebot.Cache.bots
 import com.serebit.strife.BotBuilder
 import com.serebit.strife.BotFeature
 import com.serebit.strife.entities.Guild
@@ -65,29 +66,15 @@ object MemoryFeature : BotFeature {
     /** Use this lambda to determine how memories are created. */
     val memoryFunction: BotBuilder.() -> Unit = {
         onEvent<GuildCreateEvent> { bot(guild.id) }
-        onEvent<GuildDeleteEvent> { remove(guildID) }
+        onEvent<GuildDeleteEvent> { bot(guildID).delete() }
     }
-
-    /** Get an immutable version of all Memories. */
-    val memories: Map<Long, Weebot> = bots.associateBy { it.guildID }
 
     /** Get the [memory][M] at the given [key]. */
     fun getMemory(key: Long): Weebot? = bot(key)
 
-    /** Remove the [Memory] at the given [key]. */
-    fun forget(key: Long): Weebot? = remove(key)
-
     override fun installTo(scope: BotBuilder) = memoryFunction(scope)
 
 }
-
-/**
- * Retrieve all [memories][Memory] of type [M] currently held by the bot client.
- *
- * Note: The type [M] must be the same type used to install the [MemoryFeatureProvider].
- */
-fun BotBuilder.memories() = getFeature<MemoryFeature>()?.memories
-    ?: error("BotMemory feature not installed.")
 
 /**
  * Retrieve the [Memory] of type [M] associated with the given [id] and run the lambda [scope] with the memory.

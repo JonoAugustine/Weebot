@@ -4,19 +4,31 @@
 
 package com.ampro.weebot.stats
 
-import kotlinx.serialization.Serializable
+import com.ampro.weebot.bot.commands.*
+import org.bson.codecs.pojo.annotations.BsonId
 
-@Serializable
 interface Statistic
 
-@Serializable
+/** Used to hold  */
+data class BotStatCollection(
+    @BsonId val command: String,
+    val stats: MutableList<BotStatistic> = mutableListOf()
+)
+
+/**
+ * Used to track usage stats of commands.
+ *
+ * @property guildSize The size of the guild the command was used in. -1 if
+ * a DmChannel.
+ * @property command The command's [display name][Name.display].
+ * @property invokation The call used to invoke the command.
+ */
 data class BotStatistic(
-    val size: Int,
-    val commandName: String,
-    val userRank: Pair<Int, Int>
+    val guildSize: Int = -1,
+    val command: String,
+    val invokation: String = command
 ) : Statistic
 
-@Serializable
 data class SiteStatistic(
     val temp: Nothing
 ) : Statistic

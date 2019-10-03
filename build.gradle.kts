@@ -21,37 +21,38 @@ repositories {
     maven(url = "https://jitpack.io")
     maven(url = "http://jcenter.bintray.com")
     maven("https://kotlin.bintray.com/kotlinx")
+    maven("https://dl.bintray.com/serebit/snapshot")
 }
 
 dependencies {
     implementation(kotlin("stdlib"))
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.11.1")
+    compile("org.jetbrains.kotlinx:kotlinx-serialization-runtime:0.11.1")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.3.0-M1")
     implementation("org.jetbrains.kotlin:kotlin-reflect:1.3.30")
     implementation(kotlin("stdlib-jdk8"))
     testCompile("junit", "junit", "4.12")
 
-    implementation(group = "com.serebit.strife", name = "strife-client-jvm", version = "0.2.1")
+    implementation("com.serebit.strife:strife-client-jvm:master-fb34d68e")
 
     //Utils
     //implementation("com.gitlab.JonoAugustine:KPack:a098e9b2")
     implementation("org.slf4j:slf4j-simple:1.6.1")
-    implementation("joda-time:joda-time:2.2")
+    //implementation("joda-time:joda-time:2.2")
     implementation("commons-io:commons-io:2.6")
     //implementation("com.google.code.gson:gson:2.8.5")
-    //implementation("com.github.ben-manes.caffeine:caffeine:2.6.2")
     implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:4.3.0")
 
     //Web
-    implementation("com.github.kittinunf.fuel:fuel:1.16.0")
-    implementation("com.github.kittinunf.fuel:fuel-gson:1.16.0")
-    implementation("com.github.kittinunf.fuel:fuel-coroutines:1.16.0")
-    implementation("io.javalin:javalin:3.0.0") // Javalin
+    //implementation("com.github.kittinunf.fuel:fuel:1.16.0")
+    //implementation("com.github.kittinunf.fuel:fuel-gson:1.16.0")
+    //implementation("com.github.kittinunf.fuel:fuel-coroutines:1.16.0")
+    //implementation("io.javalin:javalin:3.0.0") // Javalin
     implementation("com.github.kwebio:kweb-core:0.5.5") // kweb
 
     //Database
-    implementation("com.github.kwebio:shoebox:0.2.30")
-    //implementation("org.litote.kmongo:kmongo-coroutine:3.10.2")
+    //implementation("com.github.kwebio:shoebox:0.2.30")
+    implementation("com.github.ben-manes.caffeine:caffeine:2.6.2")
+    implementation("org.litote.kmongo:kmongo-coroutine:3.10.2")
     //implementation("org.mongodb:mongodb-driver-sync:3.9.1")
     //implementation("org.mongodb:mongodb-driver-async:3.9.1")
 

@@ -4,19 +4,18 @@
 
 package com.ampro.weebot.bot.commands
 
-import com.ampro.weebot.Extensions.RegexShorthand.ic
 import com.ampro.weebot.args
-import com.ampro.weebot.bot.memory
+import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.bot.wEmbed
 import com.serebit.strife.BotBuilder
-import com.serebit.strife.entities.EmbedBuilder
-import com.serebit.strife.entities.reply
-import com.serebit.strife.entities.title
-import com.serebit.strife.onMessage
+import com.serebit.strife.entities.*
+import com.serebit.strife.events.MessageCreateEvent
 
 object Settings : Command {
 
-    override val name = "Settings"
+    override val name = "Settings" with listOf("set")
+
+    override var enabled = true
 
     override val help by lazy {
         EmbedBuilder.FieldBuilder(
@@ -26,37 +25,32 @@ object Settings : Command {
         )
     }
 
-    override val matcherBase = "$ic$name".toRegex()
+    override val predicate: suspend MessageCreateEvent.(BotBuilder) -> Boolean
+        get() = { message.guild != null }
 
-    override val install: BotBuilder.() -> Unit = {
-        onMessage {
-            memory(message.guild?.id) {
-                if (!message.content.calls(prefix)) return@memory
-                message.reply(wEmbed(context) {
-                    title("${message.guild!!.name} Settings")
-                })
-            }
+    override val action: suspend BotBuilder.(MessageCreateEvent, Weebot) -> Unit
+        get() = { e, w ->
+            e.message.reply(wEmbed(e.context) {
+                title("${e.message.guild!!.name} Settings")
+                inlineField("Prefix") { w.prefix }
+            })
         }
-    }
 
     object Prefix : Command {
-        override val name = "Prefix"
+        override val name = "Prefix" with listOf("pref")
+        override var enabled = true
+        override val help get() = TODO()
 
-        override val matcherBase = Regex("$ic$name\\s+.{1,3}")
-
-        override val help by lazy {
-            EmbedBuilder.FieldBuilder("Prefix", "TODO")
-        }
-
-        override val install: BotBuilder.() -> Unit = {
-            onMessage {
-                memory(message.guild?.id) {
-                    if (!message.content.calls(prefix)) return@memory
-                    prefix = message.args[1]
-                    message.reply("Prefix set to $prefix")
-                }
+        override val predicate: suspend MessageCreateEvent.(BotBuilder) -> Boolean
+            get() = {
+                message.guild != null && message.args.size == 2
             }
-        }
 
+        override val action: suspend BotBuilder.(MessageCreateEvent, Weebot) -> Unit
+            get() = { e, w ->
+                w.prefix = e.message.args[1]
+                e.message.reply("Prefix set to ${w.prefix}")
+            }
     }
 }
+
