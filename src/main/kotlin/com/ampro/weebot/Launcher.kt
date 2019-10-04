@@ -17,5 +17,5 @@ val logger = Logger().apply {
 
 suspend fun main(args: Array<String>) {
     initJavalin()
-    initWeebot(args.getOrNull(0)?.equals("-w") ?: false)
+    //initWeebot(args.getOrNull(0)?.equals("-w") ?: false)
 }
