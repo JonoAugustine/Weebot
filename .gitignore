@@ -3,9 +3,14 @@
 /.idea/
 Weebot.iml
 /out/
-build/
 /local.properties
 /.flooignore
 /.floo
 *.flog
-/wbot/temp/dbstemp.wbot
+/build/classes/
+/build/distributions/
+/build/generated
+/build/scripts
+/build/scriptsShadow
+/build/kotlin
+/build/tmp
