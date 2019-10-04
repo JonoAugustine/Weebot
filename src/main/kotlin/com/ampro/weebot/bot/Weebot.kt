@@ -1,5 +1,7 @@
 package com.ampro.weebot.bot
 
+import com.serebit.strife.data.Permission
+import com.serebit.strife.entities.GuildMember
 import kotlinx.serialization.Serializable
 import org.bson.codecs.pojo.annotations.BsonId
 
@@ -20,5 +22,16 @@ object WeebotInfo {
 @Serializable
 data class Weebot(
     @BsonId val guildID: Long,
-    var prefix: String = WeebotInfo.defaultPrefix
+    var prefix: String = WeebotInfo.defaultPrefix,
+    val cmdSettings: MutableMap<String, CommandSettings> = mutableMapOf()
 ) : Memory
+
+data class CommandSettings(
+    val permissions: MutableList<Permission>,
+    val roles: MutableList<Long> = mutableListOf()
+) {
+    fun check(guildMember: GuildMember?): Boolean = guildMember?.run {
+        roles.any { it.id in this@CommandSettings.roles } ||
+            permissions.any { it in this@CommandSettings.permissions }
+    } ?: false
+}

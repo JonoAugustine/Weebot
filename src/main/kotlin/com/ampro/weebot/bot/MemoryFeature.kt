@@ -6,6 +6,7 @@ package com.ampro.weebot.bot
 
 import com.ampro.weebot.*
 import com.ampro.weebot.Cache.bots
+import com.ampro.weebot.bot.strifeExtensions.getFeature
 import com.serebit.strife.BotBuilder
 import com.serebit.strife.BotFeature
 import com.serebit.strife.entities.Guild
@@ -78,8 +79,6 @@ object MemoryFeature : BotFeature {
 
 /**
  * Retrieve the [Memory] of type [M] associated with the given [id] and run the lambda [scope] with the memory.
- *
- * Note: [M] must be the same type used to install the [MemoryFeatureProvider].
  */
 suspend fun BotBuilder.memory(id: Long?, scope: suspend Weebot.() -> Unit) =
     id?.let {

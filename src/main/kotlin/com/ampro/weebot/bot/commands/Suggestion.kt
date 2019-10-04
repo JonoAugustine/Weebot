@@ -4,8 +4,14 @@
 
 package com.ampro.weebot.bot.commands
 
+import com.ampro.weebot.bot.commands.SuggestionCmd.add
+import com.ampro.weebot.bot.commands.SuggestionCmd.see
+import com.ampro.weebot.bot.commands.SuggestionCmd.vote
+import com.ampro.weebot.bot.strifeExtensions.args
 import com.ampro.weebot.util.DD_MM_YYY_HH_MM
 import com.ampro.weebot.util.IdGenerator
+import com.ampro.weebot.util.Regecies
+import com.serebit.strife.entities.reply
 import com.soywiz.klock.DateTime
 import com.soywiz.klock.DateTimeTz
 
@@ -90,15 +96,58 @@ data class Suggestion(
         append(')')
     }
 
-    companion object { val idGenerator = IdGenerator(7, "SUG_") }
+    companion object {
+        val idGenerator = IdGenerator(7, "SUG_")
+    }
 
 }
 
-object SuggestionCmd : Command {
-
-
-
-    object Dev : Command {
-
+object SuggestionCmd : Command(
+    "Suggestion",
+    listOf("sugg"),
+    listOf(Dev),
+    rateLimit = 90,
+    details = buildString {
+        append("Submit a suggestion to my developers for new features!\n")
+        append("actions: a(dd), s(ee), v(ote)\n")
+        append("value: add=new_suggestion, see=review_state (")
+        append("unreviewed, accepted, completed)")
+        append("vote=suggestion_ID")
+    },
+    params = listOfParams("action", "value" to true),
+    predicate = {
+        val args = message.args
+        when {
+            args[1].matches(add) -> if (args.size < 6) {
+                message.reply(
+                    "Suggestion is too short, please include more detail."
+                )
+                false
+            } else true
+            args[1].matches(vote) -> if (args.size != 3) {
+                message.reply("Please provide a suggestion ID to vote for.")
+                false
+            } else true
+            else -> args[1].matches(see)
+        }
+    },
+    action = {
+         TODO()
     }
+) {
+
+    object Dev : DeveloperCommand(
+        "dev",
+        params = listOfParams("id"),
+        details = "view and edit a command",
+        action = {
+            TODO()
+        }
+    )
+
+    private val add = Regex("${Regecies.ic}ad?")
+    private val see =  Regex("${Regecies.ic}se?")
+    private val vote =  Regex("${Regecies.ic}v(ote)?")
+
+
 }

@@ -9,6 +9,10 @@ import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.bot.commands.Suggestion
 import com.ampro.weebot.stats.BotStatistic
 import com.github.benmanes.caffeine.cache.Caffeine
+import com.github.michaelbull.retry.policy.binaryExponentialBackoff
+import com.github.michaelbull.retry.policy.limitAttempts
+import com.github.michaelbull.retry.policy.plus
+import com.github.michaelbull.retry.retry
 import com.serebit.strife.entities.Guild
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -19,7 +23,10 @@ import org.litote.kmongo.coroutine.coroutine
 import org.litote.kmongo.reactivestreams.KMongo
 import java.io.File
 import java.nio.file.Files
-import java.util.concurrent.TimeUnit.*
+import java.util.concurrent.TimeUnit.MINUTES
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 import kotlin.concurrent.fixedRateTimer
 import kotlin.reflect.KProperty1
 import kotlin.time.ExperimentalTime
@@ -35,7 +42,7 @@ val DIR = File("wbot")
         }
     }
 
-val globalWeebot = Cache.bots[-1]!!
+val globalWeebot = Cache.bots[0]!!
 
 /** Retrieve a [Weebot] for the guild. */
 val Guild.bot get() = bot(id)
@@ -47,18 +54,18 @@ fun suggestion(id: String): Suggestion? = Cache.suggestions[id]
 
 suspend fun botCount() = Dao.bots.estimatedDocumentCount()
 
-suspend fun Weebot.save() = Dao.bots.save(this)?.wasAcknowledged() == true
-
-suspend fun Suggestion.save() =
-    Dao.suggestions.save(this)?.wasAcknowledged() == true
+fun Weebot.save() = Dao.BackupQueue.Bots.enqueue(this)
 
 suspend fun Weebot.modify(modify: suspend Weebot.() -> Unit) = apply {
-        modify(this)
-        save()
-    }
+    modify(this)
+    save()
+}
 
 /** Queue this bot for deletion. */
 fun Weebot.delete() = Dao.DeletionQueue.Bots.enqueue(this)
+
+suspend fun Suggestion.save() =
+    Dao.suggestions.save(this)?.wasAcknowledged() == true
 
 private object Dao {
 
@@ -90,24 +97,87 @@ private object Dao {
 
         @ExperimentalTime
         private val timer = fixedRateTimer(
-            collection.namespace.collectionName,
+            collection.namespace.collectionName + "_DELETE",
             daemon = true,
             period = 5.minutes.toLongMilliseconds()
         ) {
             if (queue.isNotEmpty()) {
                 runBlocking {
-                    collection.deleteMany(id `in` queue)
+                    retry(
+                        limitAttempts(3) + binaryExponentialBackoff(10, 5000)
+                    ) {
+                        if (
+                            !collection.deleteMany(id `in` queue)
+                                .wasAcknowledged()
+                        ) {
+                            logger.error("Failed to delete bot queue.")
+                            throw Exception()
+                        } else {
+                            logger.error("Successfully deleted bot queue.")
+                            queue.clear()
+                        }
+                    }
                 }
             }
         }
 
         /** Add an object to the deletion queue */
-        fun enqueue(t: T): Boolean {
-            val s = id(t).toString()
-            return queue.add(s)
-        }
+        fun enqueue(t: T): Boolean = queue.add(id(t).toString())
 
         object Bots : DeletionQueue<Weebot>(bots, Weebot::guildID)
+
+    }
+
+    sealed class BackupQueue<T : Any>(
+        val collection: CoroutineCollection<T>,
+        val id: KProperty1<T, Any>
+    ) {
+
+        private val queue = mutableMapOf<String, T>()
+        private val name = collection.namespace.collectionName
+
+        @ExperimentalTime
+        private val timer = fixedRateTimer(
+            name + "_SAVE", daemon = true,
+            period = 5.minutes.toLongMilliseconds()
+        ) {
+            if (queue.isNotEmpty()) {
+                runBlocking {
+                    retry(
+                        limitAttempts(3) + binaryExponentialBackoff(10, 5000)
+                    ) {
+                        logger.trace(
+                            "Attempting backup of collection ${
+                            collection.namespace.collectionName}"
+                        )
+                        val sr = queue
+                            .mapValues { (_, v) -> collection.save(v) }
+                            .mapValues { it.value?.wasAcknowledged() == true }
+                        val s = sr.count { it.value }
+                        val f = sr.size - s
+                        sr.filterValues { it }
+                            .forEach { queue.remove(it.key) }
+                        if (s > 0) {
+                            logger.trace(
+                                "Successfully saved $s/${sr.size} from $name"
+                            )
+                        } else {
+                            logger.error(
+                                "Failed to save $f/${sr.size} from $name."
+                            )
+                            throw Exception()
+                        }
+                    }
+                }
+            }
+        }
+
+        /** Add an object to the deletion queue */
+        fun enqueue(t: T) {
+            queue[id(t).toString()] = t
+        }
+
+        object Bots : BackupQueue<Weebot>(bots, Weebot::guildID)
 
     }
 

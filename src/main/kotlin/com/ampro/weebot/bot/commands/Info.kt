@@ -4,79 +4,56 @@
 
 package com.ampro.weebot.bot.commands
 
-import com.ampro.weebot.args
-import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.bot.WeebotInfo
-import com.ampro.weebot.bot.wEmbed
-import com.serebit.strife.BotBuilder
+import com.ampro.weebot.bot.strifeExtensions.args
+import com.ampro.weebot.bot.strifeExtensions.sendWEmbed
 import com.serebit.strife.StrifeInfo
-import com.serebit.strife.entities.EmbedBuilder.FieldBuilder
 import com.serebit.strife.entities.reply
 import com.serebit.strife.entities.title
-import com.serebit.strife.events.MessageCreateEvent
 
-object Help : Command {
-
-    override val name = "Help" with emptyList()
-    override var enabled = true
-
-    override val help: FieldBuilder = FieldBuilder(
-        "$name", """
-        Get a list of all my commands or extra information about a particular command
-        Usage: `help <command_name>`
-    """.trimIndent()
-    )
-
-    override val predicate: suspend MessageCreateEvent.(BotBuilder) -> Boolean
-        get() = { true }
-
-    override val action: suspend BotBuilder.(MessageCreateEvent, Weebot) -> Unit
-        get() = { e, w ->
-            if (e.message.args.size == 1) {
-                e.message.reply(wEmbed(e.context) {
-                    title("${e.context.selfUser.username} Commands")
-                    liveCommands.values.forEach { fields.add(it.help) }
-                })
-            } else {
-                commandAt(e.message.args[1])?.let {
-                    e.message.reply(wEmbed(e.context) {
-                        title("${it.name} Help")
-                        fields.add(it.help)
-                    })
-                } ?: e.message.reply(
-                    "I do not have a command called ${e.message.args[1]}."
-                )
+object Help : Command(
+    name = "Help",
+    rateLimit = 60,
+    params = listOfParams("command_name" to true),
+    details = "Get a list of all my commands or extra information about a particular command",
+    action = {
+        if (message.args.size == 1) {
+            message.author?.createDmChannel()?.sendWEmbed {
+                title("${context.selfUser.username} Commands")
+                commands.values
+                    .distinct()
+                    .filterNot {
+                        it.devOnly && message.author?.id !in WeebotInfo.devIDs
+                    }
+                    .forEach { fields.add(it.help) }
             }
+        } else {
+            commands[message.args[1]]?.let {
+                if (it.devOnly && message.author?.id !in WeebotInfo.devIDs)
+                    return@let null
+                message.author?.createDmChannel()?.sendWEmbed {
+                    title("${it.name} Help")
+                    fields.add(it.help)
+                }
+            } ?: message.reply(
+                "I do not have a command called ${message.args[1]}."
+            )
         }
+    }
+)
 
-}
-
-object About : Command {
-
-    override var enabled = true
-    override val name get() = "About" with listOf()//WeebotInfo.name)
-
-    override val help get() = FieldBuilder(
-        "$name", """
-        Get cool info about me and how I was made!
-        Usage: `about`
-    """.trimIndent()
-    )
-
-    override val predicate: suspend MessageCreateEvent.(BotBuilder) -> Boolean
-        get() = { true }
-
-    override val action: suspend BotBuilder.(MessageCreateEvent, Weebot) -> Unit
-        get() = { e, w ->
-            e.message.reply(embed = wEmbed(e.context) {
-                title("$name")
-                description = "I was made by [Jono](${WeebotInfo.jonoGitLab}) " +
-                    "using [Kotlin](https://kotlinlang.org) and " +
-                    "[Strife](${StrifeInfo.sourceUri}). I am currently running " +
-                    "my version ${WeebotInfo.version} build. I am currently in " +
-                    "the alpha stage of ${WeebotInfo.version}, so old features " +
-                    "may not have been remade yet! Thank you for your patience."
-            })
+object About : Command(
+    "About",
+    details = "Get cool info about me and how I was made!",
+    action = {
+        message.sendWEmbed {
+            title("About ${WeebotInfo.name}")
+            description = "I was made by [Jono](${WeebotInfo.jonoGitLab}) " +
+                "using [Kotlin](https://kotlinlang.org) and " +
+                "[Strife](${StrifeInfo.sourceUri}). I am currently running " +
+                "my version ${WeebotInfo.version} build. I am currently in " +
+                "the alpha stage of ${WeebotInfo.version}, so old features " +
+                "may not have been remade yet. Thank you for your patience!."
         }
-
-}
+    }
+)

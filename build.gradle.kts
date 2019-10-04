@@ -22,6 +22,7 @@ repositories {
     maven(url = "http://jcenter.bintray.com")
     maven("https://kotlin.bintray.com/kotlinx")
     maven("https://dl.bintray.com/serebit/snapshot")
+    maven(url = "https://dl.bintray.com/michaelbull/maven")
 }
 
 dependencies {
@@ -35,12 +36,13 @@ dependencies {
     implementation("com.serebit.strife:strife-client-jvm:master-fb34d68e")
 
     //Utils
-    //implementation("com.gitlab.JonoAugustine:KPack:a098e9b2")
     implementation("org.slf4j:slf4j-simple:1.6.1")
-    //implementation("joda-time:joda-time:2.2")
+    implementation("com.michael-bull.kotlin-retry:kotlin-retry:1.0.1")
     implementation("commons-io:commons-io:2.6")
-    //implementation("com.google.code.gson:gson:2.8.5")
     implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:4.3.0")
+    //implementation("joda-time:joda-time:2.2")
+    //implementation("com.google.code.gson:gson:2.8.5")
+    //implementation("com.gitlab.JonoAugustine:KPack:a098e9b2")
 
     //Web
     //implementation("com.github.kittinunf.fuel:fuel:1.16.0")

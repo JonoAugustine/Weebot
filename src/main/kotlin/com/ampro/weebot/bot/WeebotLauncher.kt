@@ -7,15 +7,15 @@ package com.ampro.weebot.bot
 import com.ampro.weebot.bot.Credentials.Tokens
 import com.ampro.weebot.bot.commands.*
 import com.ampro.weebot.botCount
+import com.ampro.weebot.delete
 import com.ampro.weebot.logger
-import com.serebit.strife.*
+import com.ampro.weebot.save
+import com.serebit.strife.BotClient
+import com.serebit.strife.BotFeatureProvider
+import com.serebit.strife.bot
 import com.serebit.strife.data.Activity
-import com.serebit.strife.data.Color
 import com.serebit.strife.data.OnlineStatus
-import com.serebit.strife.entities.EmbedBuilder
-import com.serebit.strife.entities.author
-import com.serebit.strife.entities.embed
-import com.serebit.strife.entities.footer
+import com.serebit.strife.onReady
 import kotlinx.coroutines.delay
 import kotlin.random.Random
 
@@ -30,14 +30,16 @@ suspend fun initWeebot(weebot: Boolean? = null) {
             override fun provide() = MemoryFeature
         })
 
-        wCom(Help)
-        wCom(About)
+        commands()
 
-        wCom(Settings)
-        wCom(Settings.Prefix)
+        cmd(Help)
+        cmd(About)
 
-        wCom(Shutdown)
-        wCom(ToggleEnable)
+        cmd(Settings)
+        cmd(Settings.Prefix)
+
+        cmd(Shutdown)
+        cmd(ToggleEnable)
 
         onReady {
             WeebotInfo.name = context.selfUser.username
@@ -55,30 +57,8 @@ private val presences = mutableListOf(
 
 val timer: suspend BotClient.() -> Unit = {
     while (true) {
+        logger.trace("Updating presence")
         updatePresence(OnlineStatus.ONLINE, presences.random())
         delay(Random(69420).nextLong(60_000, 600_000))
     }
 }
-
-/**
- * Get an [EmbedBuilder] with the [author][EmbedBuilder.author],
- * [footer][EmbedBuilder.footer], [color][EmbedBuilder.color] setup.
- *
- * @param context The bot client context to use for names and avatars
- * @param run Additional scope to modify the embed
- * @return The new [EmbedBuilder].
- */
-fun wEmbed(
-    context: BotClient,
-    run: EmbedBuilder.() -> Unit
-): EmbedBuilder = embed {
-    color = Color.GREEN
-    author {
-        name = context.selfUser.username
-        imgUrl = context.selfUser.avatar.uri
-    }
-    footer {
-        text = "Run by ${context.selfUser.username} with Strife"
-        imgUrl = StrifeInfo.logoUri
-    }
-}.apply(run)
