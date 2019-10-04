@@ -38,6 +38,9 @@ suspend fun initWeebot(weebot: Boolean? = null) {
         cmd(Settings)
         cmd(Settings.Prefix)
 
+        cmd(OutHouseCmd)
+        cmd(RegexTest)
+
         cmd(Shutdown)
         cmd(ToggleEnable)
 

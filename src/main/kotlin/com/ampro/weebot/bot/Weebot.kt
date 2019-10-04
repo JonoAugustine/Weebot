@@ -1,7 +1,9 @@
 package com.ampro.weebot.bot
 
+import com.serebit.strife.BotClient
 import com.serebit.strife.data.Permission
 import com.serebit.strife.entities.GuildMember
+import com.serebit.strife.getGuild
 import kotlinx.serialization.Serializable
 import org.bson.codecs.pojo.annotations.BsonId
 
@@ -25,6 +27,8 @@ data class Weebot(
     var prefix: String = WeebotInfo.defaultPrefix,
     val cmdSettings: MutableMap<String, CommandSettings> = mutableMapOf()
 ) : Memory
+
+suspend fun Weebot.guild(context: BotClient) = context.getGuild(guildID)
 
 data class CommandSettings(
     val permissions: MutableList<Permission>,

@@ -9,6 +9,7 @@ import com.ampro.weebot.globalWeebot
 import com.ampro.weebot.modify
 import com.serebit.strife.BotBuilder
 import com.serebit.strife.entities.Guild
+import com.serebit.strife.entities.User
 import com.serebit.strife.events.Event
 import com.serebit.strife.events.GuildEvent
 import com.serebit.strife.onAnyEvent
@@ -19,31 +20,38 @@ interface Passive {
     suspend fun consume(event: Event, bot: Weebot)
 }
 
-/** Map of GuildID to passives. Global passives are at `0` */
+/** Map of GuildID or User to passives. */
 val passives = mutableMapOf<Long, MutableList<Passive>>()
 
-fun <P : Passive> addPassive(guildID: Long, passive: P) {
-    passives.getOrPut(guildID, { mutableListOf() }).add(passive)
+fun <P : Passive> addPassive(id: Long, passive: P) {
+    passives.getOrPut(id, { mutableListOf() }).add(passive)
 }
 
-inline fun <reified P : Passive> getPassives(guildID: Long): List<P>? {
-    return passives[guildID]?.filterIsInstance<P>()
+inline fun <reified P : Passive> getPassives(id: Long): List<P>? {
+    return passives[id]?.filterIsInstance<P>()
 }
 
 fun <P : Passive> Guild.add(passive: P) {
     addPassive(id, passive)
 }
 
+fun <P : Passive> User.add(passive: P) {
+    addPassive(id, passive)
+}
+
 inline fun <reified P : Passive> Guild.getAll() = getPassives<P>(id)
+inline fun <reified P : Passive> User.getAll() = getPassives<P>(id)
 
 fun BotBuilder.passives() {
     onAnyEvent {
+        passives[0]?.retainAll{ it.active }
         passives[0]
             ?.filter { it.active }
             ?.filter { it.predicate(this, globalWeebot) }
             ?.forEach { it.consume(this, globalWeebot) }
         if (this is GuildEvent) {
             passives.forEach { (id, list) ->
+                list.retainAll{ it.active }
                 list
                     .filter { it.active }
                     .filter { it.predicate(this, bot(id)) }

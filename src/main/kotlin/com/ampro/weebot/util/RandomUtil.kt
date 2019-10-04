@@ -9,6 +9,8 @@ import java.util.*
 import java.util.concurrent.ThreadLocalRandom
 import kotlin.streams.asSequence
 
+val Any?.unit get() = Unit
+
 /** The root random instance */
 val RAND by lazy { Random(420_69_98_4829 / (DateTime.now().minutes + 1)) }
 

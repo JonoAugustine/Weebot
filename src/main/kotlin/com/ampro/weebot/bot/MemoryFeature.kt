@@ -31,7 +31,7 @@ sealed class MemoryType(val name: String) {
 
     /** A [Message] MemoryType. */
     @Serializable
-    object Message : MemoryType("message")
+    object Message : MemoryType("note")
 
     /** A [Guild] MemoryType. */
     @Serializable
