@@ -5,15 +5,13 @@
 package com.ampro.weebot.site
 
 import com.ampro.weebot.logger
+import com.sun.deploy.Environment
 import io.kweb.Kweb
 import io.kweb.dom.element.creation.tags.h1
 import io.kweb.dom.element.new
 
-val port = 6900
-
 fun initKweb() {
-    logger.info("Serving KWeb at http://localhost:$port")
-    Kweb(port) {
+    Kweb(System.getenv("PORT")!!.toInt()) {
         doc.body.new {
             h1().text("Weebot Site")
         }
