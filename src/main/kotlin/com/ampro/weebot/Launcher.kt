@@ -5,12 +5,10 @@
 package com.ampro.weebot
 
 import com.ampro.weebot.bot.initWeebot
-import com.ampro.weebot.site.initKweb
+import com.ampro.weebot.api.initJavalin
 import com.serebit.logkat.LogLevel
 import com.serebit.logkat.Logger
 import com.serebit.logkat.writers.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 val logger = Logger().apply {
     level = LogLevel.TRACE
@@ -18,6 +16,6 @@ val logger = Logger().apply {
 }
 
 suspend fun main(args: Array<String>) {
-    initKweb()
+    initJavalin()
     initWeebot(args.getOrNull(0)?.equals("-w") ?: false)
 }

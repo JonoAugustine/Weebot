@@ -38,7 +38,6 @@ dependencies {
     //Utils
     implementation("org.slf4j:slf4j-simple:1.6.1")
     implementation("com.michael-bull.kotlin-retry:kotlin-retry:1.0.1")
-    implementation("commons-io:commons-io:2.6")
     implementation("com.github.vladimir-bukhtoyarov:bucket4j-core:4.3.0")
     //implementation("joda-time:joda-time:2.2")
     //implementation("com.google.code.gson:gson:2.8.5")
@@ -48,8 +47,8 @@ dependencies {
     //implementation("com.github.kittinunf.fuel:fuel:1.16.0")
     //implementation("com.github.kittinunf.fuel:fuel-gson:1.16.0")
     //implementation("com.github.kittinunf.fuel:fuel-coroutines:1.16.0")
-    //implementation("io.javalin:javalin:3.0.0") // Javalin
-    implementation("com.github.kwebio:kweb-core:0.5.5") // kweb
+    implementation("io.javalin:javalin:3.5.0") // Javalin
+    //implementation("com.github.kwebio:kweb-core:0.5.5") // kweb
 
     //Database
     //implementation("com.github.kwebio:shoebox:0.2.30")
