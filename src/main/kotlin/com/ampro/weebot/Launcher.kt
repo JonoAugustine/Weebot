@@ -18,6 +18,6 @@ val logger = Logger().apply {
 }
 
 suspend fun main(args: Array<String>) {
-    GlobalScope.launch { initKweb() }
+    initKweb()
     initWeebot(args.getOrNull(0)?.equals("-w") ?: false)
 }
