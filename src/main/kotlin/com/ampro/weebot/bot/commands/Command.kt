@@ -9,6 +9,7 @@ import com.ampro.weebot.bot.WeebotInfo
 import com.ampro.weebot.bot.memory
 import com.ampro.weebot.bot.strifeExtensions.args
 import com.ampro.weebot.logger
+import com.ampro.weebot.util.Regecies
 import com.ampro.weebot.util.and
 import com.serebit.strife.BotBuilder
 import com.serebit.strife.entities.EmbedBuilder
@@ -195,7 +196,8 @@ private infix fun Pair<Prefix, String>.invokes(command: Command): Boolean {
             append('|').append(command.aliases.joinToString("|"))
         append(')')
     }
-    return "$first$second".matches(Regex("(?i)^${first}${names}(\\s+.*)?"))
+    val m = second.matches(Regex("${Regecies.ic}${first}${names}(\\s+.*)?"))
+    return m
 }
 
 fun BotBuilder.commands() {
@@ -205,7 +207,7 @@ fun BotBuilder.commands() {
                 .distinct()
                 .filter { it.enabled }
                 .firstOrNull {
-                    prefix and message.content.removePrefix(prefix) invokes it
+                    prefix and message.content invokes it
                 }
                 ?.run(this@onMessageCreate, this)
         }
