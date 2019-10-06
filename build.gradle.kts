@@ -44,10 +44,8 @@ dependencies {
     //implementation("com.gitlab.JonoAugustine:KPack:a098e9b2")
 
     //Web
-    //implementation("com.github.kittinunf.fuel:fuel:1.16.0")
-    //implementation("com.github.kittinunf.fuel:fuel-gson:1.16.0")
-    //implementation("com.github.kittinunf.fuel:fuel-coroutines:1.16.0")
     implementation("io.javalin:javalin:3.5.0") // Javalin
+    implementation("io.github.rybalkinsd:kohttp:0.11.0")
     //implementation("com.github.kwebio:kweb-core:0.5.5") // kweb
 
     //Database
