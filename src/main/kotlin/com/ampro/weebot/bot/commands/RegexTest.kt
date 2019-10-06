@@ -42,7 +42,7 @@ object RegexTest : Command(
     ),
     rateLimit = 10,
     predicate = {
-        if (message.args[0].matches(Regecies.hyphen + "p(hrase)?$"))
+        if (message.args[1].matches(Regecies.hyphen + "p(hrase)?$"))
             message.args.size > 3
         else true
     },
@@ -51,8 +51,8 @@ object RegexTest : Command(
         val regex: Regex
         val strings: List<String>
         try {
-            if (args[0].matches(Regecies.hyphen + "p(hrase)?$")) {
-                //\regex phrase <regex> <phrase here>
+            if (args[1].matches(Regecies.hyphen + "p(hrase)?$")) {
+                //\regex -phrase <regex> <phrase here>
                 regex = args[2].toRegex()
                 strings = message.content.substring(
                     message.content.indexOf(regex.pattern) +
@@ -60,7 +60,7 @@ object RegexTest : Command(
                 ).split(Regex("\\n"))
             } else { //\regex <regex> word word word
                 regex = args[1].toRegex()
-                strings = args.subList(2, args.size)
+                strings = args.subList(2, args.size).map(String::trim)
             }
             val matches = strings.filter { regex.matches(it) }
             message.sendWEmbed {
@@ -71,7 +71,7 @@ object RegexTest : Command(
                     append("```css\n${strings.joinToString(", ")}\n```\n")
                     append("Found ${matches.size} matches")
                     if (matches.isNotEmpty()) {
-                        append("!\n```css")
+                        append("!\n```css\n")
                         matches.forEach { append("$it\n") }
                         append("```")
                     } else append(UnicodeEmoji.Frowning)

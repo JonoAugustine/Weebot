@@ -50,7 +50,7 @@ data class Param(
 fun listOfParams(vararg params: Any): List<Param> = params.map {
     when (it) {
         is Pair<*, *> -> Param(it.first as String, it.second as Boolean)
-        else          -> Param(it as String)
+        else -> Param(it as String)
     }
 }
 
@@ -116,16 +116,16 @@ abstract class Command(
         val a = m.author ?: return false
         return when {
             m.args.size - arg < params.filterNot { it.optional }.size -> false
-            a.isBot                                                   -> false
-            a.id in WeebotInfo.devIDs                                 -> true
-            devOnly && a.id !in WeebotInfo.devIDs                     -> false
-            guildOnly && m.guild == null                              -> false
-            rateLimitMap[a.id]?.isAfterNow == true                    -> false
-            rateLimitMap[a.id]?.isBeforeNow == true                   -> {
+            a.isBot -> false
+            a.id in WeebotInfo.devIDs -> true
+            devOnly && a.id !in WeebotInfo.devIDs -> false
+            guildOnly && m.guild == null -> false
+            rateLimitMap[a.id]?.isAfterNow == true -> false
+            rateLimitMap[a.id]?.isBeforeNow == true -> {
                 rateLimitMap.remove(a.id)
                 true
             }
-            else                                                      -> m.guild?.let {
+            else -> m.guild?.let {
                 bot.cmdSettings[name]
                     ?.check(m.guild!!.getMember(a.id))
                     ?: true
@@ -153,10 +153,10 @@ abstract class Command(
         when {
             !preCheck(event, bot, arg) -> return
             // Run predicate
-            !predicate(event, bot)     -> return
+            !predicate(event, bot) -> return
             // Run command
             // Run post
-            else                       -> {
+            else -> {
                 action(event, bot)
                 // Run post
                 postRun(event, bot, arg)
@@ -164,7 +164,11 @@ abstract class Command(
         }
     }
 
-    open suspend fun postRun(event: MessageCreateEvent, bot: Weebot, arg: Int = 0) {
+    open suspend fun postRun(
+        event: MessageCreateEvent,
+        bot: Weebot,
+        arg: Int = 0
+    ) {
         if (rateLimit > 0) {
             rateLimitMap[event.message.author!!.id] =
                 DateTime.now().plusSeconds(rateLimit)
@@ -216,7 +220,7 @@ fun BotBuilder.commands() {
             _commands.values
                 .distinct()
                 .filter { it.enabled }
-                .firstOrNull { prefix and message.content invokes it }
+                .firstOrNull { prefix and message.args[0] invokes it }
                 ?.run(this@onMessageCreate, this)
         }
     }
