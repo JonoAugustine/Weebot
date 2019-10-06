@@ -4,7 +4,6 @@
 
 package com.ampro.weebot.stats
 
-import com.ampro.weebot.bot.commands.*
 import org.bson.codecs.pojo.annotations.BsonId
 
 interface Statistic
@@ -20,15 +19,9 @@ data class BotStatCollection(
  *
  * @property guildSize The size of the guild the command was used in. -1 if
  * a DmChannel.
- * @property command The command's [display name][Name.display].
  * @property invokation The call used to invoke the command.
  */
 data class BotStatistic(
-    val guildSize: Int = -1,
-    val command: String,
-    val invokation: String = command
-) : Statistic
-
-data class SiteStatistic(
-    val temp: Nothing
-) : Statistic
+    val invokation: String,
+    val guildSize: Int = -1
+)

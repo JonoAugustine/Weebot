@@ -6,7 +6,9 @@ package com.ampro.weebot
 
 
 import com.ampro.weebot.bot.Weebot
+import com.ampro.weebot.bot.commands.Command
 import com.ampro.weebot.bot.commands.Suggestion
+import com.ampro.weebot.stats.BotStatCollection
 import com.ampro.weebot.stats.BotStatistic
 import com.github.benmanes.caffeine.cache.Caffeine
 import com.github.michaelbull.retry.policy.binaryExponentialBackoff
@@ -20,6 +22,7 @@ import kotlinx.coroutines.runBlocking
 import org.litote.kmongo.`in`
 import org.litote.kmongo.coroutine.CoroutineCollection
 import org.litote.kmongo.coroutine.coroutine
+import org.litote.kmongo.nin
 import org.litote.kmongo.reactivestreams.KMongo
 import java.io.File
 import java.nio.file.Files
@@ -36,11 +39,13 @@ import kotlin.time.minutes
 val DIR = File("wbot")
     get() = when {
         field.exists() && field.isDirectory -> field
-        else -> {
+        else                                -> {
             Files.createDirectory(field.toPath())
             field
         }
     }
+
+// Weebot
 
 val globalWeebot = Cache.bots[0]!!
 
@@ -50,11 +55,9 @@ val Guild.bot get() = bot(id)
 /** Retrieve a [Weebot] for the [guildID]. */
 fun bot(guildID: Long): Weebot = Cache.bots[guildID]!!
 
-fun suggestion(id: String): Suggestion? = Cache.suggestions[id]
+fun Weebot.save() = Dao.SaveQueue.Bots.enqueue(this)
 
 suspend fun botCount() = Dao.bots.estimatedDocumentCount()
-
-fun Weebot.save() = Dao.BackupQueue.Bots.enqueue(this)
 
 suspend fun Weebot.modify(modify: suspend Weebot.() -> Unit) = apply {
     modify(this)
@@ -64,8 +67,43 @@ suspend fun Weebot.modify(modify: suspend Weebot.() -> Unit) = apply {
 /** Queue this bot for deletion. */
 fun Weebot.delete() = Dao.DeletionQueue.Bots.enqueue(this)
 
-suspend fun Suggestion.save() =
-    Dao.suggestions.save(this)?.wasAcknowledged() == true
+// Suggestion
+
+suspend fun suggestions() = Cache.suggestions.asMap().toMutableMap()
+    .apply {
+        putAll(
+            Dao.suggestions.find(Suggestion::_id nin keys)
+                .toList()
+                .associateBy(Suggestion::_id)
+        )
+    }
+
+fun suggestion(id: String): Suggestion? = Cache.suggestions[id]
+
+fun Suggestion.save() = Dao.SaveQueue.Suggestions.enqueue(this)
+
+suspend fun Suggestion.modify(modify: suspend Suggestion.() -> Unit) = apply {
+    modify(this)
+    save()
+}
+
+fun Suggestion.delete() = Dao.DeletionQueue.Suggestions.enqueue(this)
+
+// Statistics
+
+fun statistic(cmdName: String) = Cache.statistics[cmdName]!!
+
+val Command.statistic get() = statistic(name)
+
+fun BotStatCollection.addPoint(stat: BotStatistic) = apply {
+    stats.add(stat)
+    save()
+}
+
+fun BotStatCollection.save() = Dao.SaveQueue.Statistic.enqueue(this)
+
+
+// Objects
 
 private object Dao {
 
@@ -81,7 +119,7 @@ private object Dao {
     /** [Suggestion] collection. */
     val suggestions by lazy { mongo.getCollection<Suggestion>() }
     /** [BotStatistic] collection. */
-    val stats by lazy { mongo.getCollection<BotStatistic>() }
+    val stats by lazy { mongo.getCollection<BotStatCollection>() }
     /** Internal Data collection */
     //val userData by lazy { mongo.getCollection<UserData>() }
     /** Cards Against Humanity customizations. */
@@ -126,9 +164,15 @@ private object Dao {
 
         object Bots : DeletionQueue<Weebot>(bots, Weebot::guildID)
 
+        object Suggestions : DeletionQueue<Suggestion>(suggestions, Suggestion::_id)
+
+        object Statistic : DeletionQueue<BotStatCollection>(
+            stats, BotStatCollection::command
+        )
+
     }
 
-    sealed class BackupQueue<T : Any>(
+    sealed class SaveQueue<T : Any>(
         val collection: CoroutineCollection<T>,
         val id: KProperty1<T, Any>
     ) {
@@ -177,7 +221,13 @@ private object Dao {
             queue[id(t).toString()] = t
         }
 
-        object Bots : BackupQueue<Weebot>(bots, Weebot::guildID)
+        object Bots : SaveQueue<Weebot>(bots, Weebot::guildID)
+
+        object Suggestions : SaveQueue<Suggestion>(suggestions, Suggestion::_id)
+
+        object Statistic : SaveQueue<BotStatCollection>(
+            stats, BotStatCollection::command
+        )
 
     }
 
@@ -214,6 +264,21 @@ object Cache {
             .recordStats()
             .build { id: String ->
                 runBlocking { Dao.suggestions.findOneById(id) }
+            }
+    }
+
+    val statistics by lazy {
+        Caffeine.newBuilder()
+            .maximumSize(500)
+            .removalListener<String, BotStatCollection> { _, v, cause ->
+                GlobalScope.launch {
+                    v.takeIf { cause.wasEvicted() }?.save()
+                }
+            }
+            .recordStats()
+            .build { cmdName: String ->
+                runBlocking { Dao.stats.findOneById(cmdName) }
+                    ?: BotStatCollection(cmdName).apply { save() }
             }
     }
 
