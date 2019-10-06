@@ -71,4 +71,4 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 
-defaultTasks("clean", "build")
+tasks["stage"].dependsOn("build")
