@@ -1,6 +1,7 @@
 package com.ampro.weebot.bot
 
 import com.ampro.weebot.bot.commands.GateKeeper
+import com.ampro.weebot.bot.commands.Reddicord
 import com.serebit.strife.BotClient
 import com.serebit.strife.data.Permission
 import com.serebit.strife.entities.GuildMember
@@ -30,10 +31,12 @@ data class Weebot(
     @BsonId val guildID: Long,
     var prefix: String = WeebotInfo.defaultPrefix,
     val cmdSettings: MutableMap<String, CommandSettings> = mutableMapOf(),
-    var gateKeeper: GateKeeper? = null
+    var gateKeeper: GateKeeper? = null,
+    var reddicord: Reddicord? = null
 ) {
     init {
         gateKeeper?.let { addPassive(guildID, it) }
+        reddicord?.let { addPassive(guildID, it) }
     }
 }
 
