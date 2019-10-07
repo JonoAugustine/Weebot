@@ -57,7 +57,7 @@ object RegexTest : Command(
                 strings = message.content.substring(
                     message.content.indexOf(regex.pattern) +
                         regex.pattern.length
-                ).split(Regex("\\n"))
+                ).split(Regex("\\n")).map { it.trim() }
             } else { //\regex <regex> word word word
                 regex = args[1].toRegex()
                 strings = args.subList(2, args.size).map(String::trim)

@@ -8,7 +8,6 @@ import com.ampro.weebot.bot.Credentials.Tokens
 import com.ampro.weebot.bot.commands.*
 import com.ampro.weebot.botCount
 import com.ampro.weebot.logger
-import com.serebit.strife.BotFeatureProvider
 import com.serebit.strife.bot
 import com.serebit.strife.data.Activity
 import com.serebit.strife.data.OnlineStatus
@@ -27,9 +26,6 @@ suspend fun initWeebot(weebot: Boolean? = null) {
 
     bot(if (weebot == true) Tokens.weebot else Tokens.tobeew) {
         logToConsole = weebot?.not() ?: true
-        install(object : BotFeatureProvider<MemoryFeature> {
-            override fun provide() = MemoryFeature
-        })
 
         cmd(Help)
         cmd(About)
@@ -38,6 +34,7 @@ suspend fun initWeebot(weebot: Boolean? = null) {
         cmd(Settings)
         cmd(Settings.Prefix)
 
+        //cmd(GateKeeperCmd)
         cmd(OutHouseCmd)
         cmd(RegexTest)
 

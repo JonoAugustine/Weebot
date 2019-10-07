@@ -4,14 +4,11 @@
 
 package com.ampro.weebot.bot.commands
 
-import com.ampro.weebot.addPoint
+import com.ampro.weebot.*
 import com.ampro.weebot.bot.Weebot
 import com.ampro.weebot.bot.WeebotInfo
 import com.ampro.weebot.bot.guild
-import com.ampro.weebot.bot.memory
 import com.ampro.weebot.bot.strifeExtensions.args
-import com.ampro.weebot.logger
-import com.ampro.weebot.statistic
 import com.ampro.weebot.stats.BotStatistic
 import com.ampro.weebot.util.Regecies
 import com.ampro.weebot.util.and
@@ -20,6 +17,8 @@ import com.serebit.strife.entities.EmbedBuilder
 import com.serebit.strife.events.MessageCreateEvent
 import com.serebit.strife.onMessageCreate
 import org.joda.time.DateTime
+
+// TODO: Better command restrictions
 
 /** Alias for command prefixes. */
 typealias Prefix = String
@@ -225,10 +224,11 @@ fun <C : Command> BotBuilder.cmd(command: C) {
         }
     onMessageCreate {
         if (command.enabled)
-            memory(message.guild?.id ?: -1) {
+            bot(message.guild?.id ?: 0).modify {
                 if (prefix and message.args[0] invokes command)
                     command.run(this@onMessageCreate, this)
             }
+
     }
     logger.trace("Registered command with name ${command.name}")
 }

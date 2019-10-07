@@ -1,5 +1,6 @@
 package com.ampro.weebot.bot
 
+import com.ampro.weebot.bot.commands.GateKeeper
 import com.serebit.strife.BotClient
 import com.serebit.strife.data.Permission
 import com.serebit.strife.entities.GuildMember
@@ -21,14 +22,20 @@ object WeebotInfo {
     val devIDs = listOf(139167730237571072L, 186130584693637131L)
 }
 
+suspend fun Weebot.guild(context: BotClient) = context.getGuild(guildID)
+
+
 @Serializable
 data class Weebot(
     @BsonId val guildID: Long,
     var prefix: String = WeebotInfo.defaultPrefix,
-    val cmdSettings: MutableMap<String, CommandSettings> = mutableMapOf()
-) : Memory
-
-suspend fun Weebot.guild(context: BotClient) = context.getGuild(guildID)
+    val cmdSettings: MutableMap<String, CommandSettings> = mutableMapOf(),
+    var gateKeeper: GateKeeper? = null
+) {
+    init {
+        gateKeeper?.let { addPassive(guildID, it) }
+    }
+}
 
 data class CommandSettings(
     val permissions: MutableList<Permission>,
