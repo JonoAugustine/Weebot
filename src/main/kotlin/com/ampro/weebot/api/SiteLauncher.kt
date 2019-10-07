@@ -6,14 +6,14 @@ package com.ampro.weebot.api
 
 import com.ampro.weebot.botCount
 import com.ampro.weebot.logger
-import io.github.rybalkinsd.kohttp.ext.httpGet
+import io.github.rybalkinsd.kohttp.ext.httpGetAsync
 import io.javalin.Javalin
 import io.javalin.apibuilder.ApiBuilder.get
 import io.javalin.apibuilder.ApiBuilder.path
 import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.timer
 import kotlin.time.ExperimentalTime
-import kotlin.time.milliseconds
+import kotlin.time.seconds
 
 
 const val site = "https://weebot-2.herokuapp.com"
@@ -35,11 +35,11 @@ fun initJavalin() {
         .start(port)
     timer(
         "site_probe", true,
-        30.milliseconds.toLongMilliseconds(),
-        90.milliseconds.toLongMilliseconds()
+        30.seconds.toLongMilliseconds(),
+        90.seconds.toLongMilliseconds()
     ) {
         logger.trace("Probing site")
-        site.httpGet()
+        site.httpGetAsync()
     }
 }
 

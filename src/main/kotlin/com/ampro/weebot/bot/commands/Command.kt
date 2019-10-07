@@ -214,19 +214,7 @@ private infix fun Pair<Prefix, String>.invokes(command: Command): Boolean {
     return m
 }
 
-fun BotBuilder.commands() {
-    onMessageCreate {
-        memory(message.guild?.id ?: -1) {
-            _commands.values
-                .distinct()
-                .filter { it.enabled }
-                .firstOrNull { prefix and message.args[0] invokes it }
-                ?.run(this@onMessageCreate, this)
-        }
-    }
-}
-
-fun <C : Command> cmd(command: C) {
+fun <C : Command> BotBuilder.cmd(command: C) {
     (command.aliases + command.name)
         .map { it.toLowerCase() }
         .forEach {
@@ -235,5 +223,12 @@ fun <C : Command> cmd(command: C) {
             }
             _commands[it] = command
         }
+    onMessageCreate {
+        if (command.enabled)
+            memory(message.guild?.id ?: -1) {
+                if (prefix and message.args[0] invokes command)
+                    command.run(this@onMessageCreate, this)
+            }
+    }
     logger.trace("Registered command with name ${command.name}")
 }

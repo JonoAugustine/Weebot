@@ -8,17 +8,15 @@ import com.ampro.weebot.bot.Credentials.Tokens
 import com.ampro.weebot.bot.commands.*
 import com.ampro.weebot.botCount
 import com.ampro.weebot.logger
-import com.serebit.strife.BotClient
 import com.serebit.strife.BotFeatureProvider
 import com.serebit.strife.bot
 import com.serebit.strife.data.Activity
 import com.serebit.strife.data.OnlineStatus
 import com.serebit.strife.onReady
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.runBlocking
 import kotlin.concurrent.timer
-import kotlin.random.Random
 import kotlin.time.ExperimentalTime
+import kotlin.time.minutes
 import kotlin.time.seconds
 
 /** Initialize the Weebot. */
@@ -33,10 +31,9 @@ suspend fun initWeebot(weebot: Boolean? = null) {
             override fun provide() = MemoryFeature
         })
 
-        commands()
-
         cmd(Help)
         cmd(About)
+        cmd(SuggestionCmd)
 
         cmd(Settings)
         cmd(Settings.Prefix)
@@ -45,11 +42,17 @@ suspend fun initWeebot(weebot: Boolean? = null) {
         cmd(RegexTest)
 
         cmd(Shutdown)
+        cmd(Statistics)
         cmd(ToggleEnable)
 
         onReady {
             WeebotInfo.name = context.selfUser.username
-            timer("presence", true, 30L, 90.seconds.toLongMilliseconds()) {
+            timer(
+                "presence",
+                true,
+                30.seconds.toLongMilliseconds(),
+                10.minutes.toLongMilliseconds()
+            ) {
                 logger.trace("Updating presence")
                 runBlocking {
                     context.updatePresence(
