@@ -28,14 +28,25 @@ import java.util.concurrent.TimeUnit.MINUTES
     VC Roles
  *****************/
 
+
+import com.ampro.weebot.bot.Passive
+import com.ampro.weebot.bot.Weebot
+import com.serebit.strife.data.Permission
+import com.serebit.strife.entities.EmbedBuilder
+import com.serebit.strife.entities.Guild
+import com.serebit.strife.entities.GuildRole
+import com.serebit.strife.entities.GuildVoiceChannel
+import com.serebit.strife.events.Event
+import com.serebit.strife.events.VoiceStateUpdateEvent
+
 /**
- * The [IPassive] manager that creates, assigns, removes, and deletes
+ * The [Passive] manager that creates, assigns, removes, and deletes
  * VoiceChannel roles.
  *
  * @author Jonathan Augustine
  * @since 2.0
  */
-class VCRoleManager(var limit: Limit = ALL) : IPassive {
+class VCRoleManager(var limit: Limit = Limit.ALL) : Passive {
 
     /** Defines which voice channels will have roles made for them */
     enum class Limit {
@@ -45,108 +56,64 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
         PUBLIC
     }
 
-    /** Whether the [IPassive] is set to be destroyed */
-    var dead = false
-    override fun dead() = dead
+    override var active: Boolean = true
 
-    /** [VoiceChannel.getIdLong] mapped to [Role.getIdLong] */
-    private val genRoles = ConcurrentHashMap<Long, Long>()
+    /** VC to RoleID */
+    private val generatedRoles = mutableMapOf<Long, Long>()
+
+    override suspend fun predicate(event: Event, bot: Weebot) =
+        event is VoiceStateUpdateEvent
+
+    override suspend fun consume(event: Event, bot: Weebot) {
+        event as VoiceStateUpdateEvent
+        val channel = event.voiceState.voiceChannel
+
+        if (channel != null) {
+            // Check the voice channel for existing roles
+            channel.getGeneratedRole()?.id?.let {
+                event.member.addRole(it) }
+        } else {
+            TODO()
+        }
+    }
+
+    /** Gets a guild role */
+    suspend fun GuildVoiceChannel.getGeneratedRole(): GuildRole? {
+        return TODO()
+    }
 
     /** Deletes all roles created for [VCRoleManager] */
-    fun clean(guild: Guild) {
-        genRoles.values.forEach { guild.getRoleById(it)?.delete()?.queue() }
-        genRoles.clear()
-    }
-
-    /**
-     * Check if the voice channel allows VCRoles.
-     *
-     * @param voiceChannel The [VoiceChannel] to check
-     */
-    private fun limitSafe(voiceChannel: VoiceChannel) = if (limit == ALL) true
-    else voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)?.allowed?.contains(VOICE_CONNECT) != false
-            || voiceChannel.getPermissionOverride(voiceChannel.guild.publicRole)?.denied?.contains(VOICE_CONNECT) == false
-
-    /**
-     * When a user joins a voice channel, assign the Member a role named after
-     * the VoiceChannel. If the role does not exist, it is made. When there are
-     * no members in the voice channel, the role is deleted.
-     */
-    override fun accept(bot: Weebot, event: Event) {
-        when (event) {
-            is GuildVoiceJoinEvent -> {
-                val guild = event.guild
-                val channel = event.channelJoined
-                if (!limitSafe(channel)) return
-                val controller = guild.controller
-                //Check the voice channel for existing roles
-                genRoles[event.channelJoined.idLong]?.also {
-                    guild.getRoleById(it)?.also { role ->
-                        controller.addSingleRoleToMember(event.member, role)
-                        return
-                    }
-                }
-                guild.roles.find { it.name.equals(channel.name, true) }?.also { role ->
-                    controller.addRolesToMember(event.member, role).queue()
-                    genRoles[event.channelJoined.idLong] = role.idLong
-                } ?: guild.controller.createRole().setName(channel.name)
-                    .setHoisted(false).setMentionable(true)
-                    .setPermissions(guild.publicRole.permissions).queue({
-                        controller.addRolesToMember(event.member, it).queue()
-                        genRoles[event.channelJoined.idLong] = it.idLong
-                    }, {
-                        bot.settings.sendLog(
-                            """Failed to assign VoiceChannel Role: ${channel.name}
-                            |To Member: ${event.member.effectiveName}
-                            """.trimMargin())
-                    })
-            }
-            is GuildVoiceUpdateEvent-> {
-                val guild = event.guild
-                val channel = event.channelLeft
-                if (!limitSafe(channel)) return
-                val controller = guild.controller
-                genRoles[channel.idLong]?.also { ID ->
-                    guild.getRoleById(ID)?.also { role ->
-                        controller.removeSingleRoleFromMember(event.member, role)
-                            .queue({}) {
-                                bot.settings.sendLog("""Failed to Remove VoiceChannel Role: ${channel.name}
-                                |From Member: ${event.member.effectiveName}
-                                |""".trimMargin())
-                            }
-                        return
-                    }
-                }
-                guild.roles.find {  it.name.equals(channel.name, true) }?.also { role ->
-                    controller.removeSingleRoleFromMember(event.member, role).queue({
-                        if (channel.members.isEmpty()) {
-                            role.delete().reason("VCRoleManager").queue({}) {
-                                bot.settings.sendLog("Failed to delete VoiceChannel Role: ${channel.name}")
-                            }
-                        }
-                    }, {
-                        bot.settings.sendLog(
-                            """Failed to Remove VoiceChannel Role: ${channel.name}
-                            |From Member: ${event.member.effectiveName}""".trimMargin())
-                    })
-                }
-            }
+    suspend fun clean(guild: Guild) = generatedRoles.apply {
+        toMap().forEach { (k, v) ->
+            if (guild.deleteRole(v))
+                generatedRoles.remove(k)
         }
+    }.size
 
+    /** Check if the voice channel allows VCRoles. */
+    private fun limitSafe(channel: GuildVoiceChannel) = when (limit) {
+        Limit.PUBLIC -> {
+            channel.permissionOverrides
+                .firstOrNull { it.id == channel.guild.id }
+                ?.allow?.contains(Permission.Connect) == true
+        }
+        else -> true
     }
 
-    internal fun asEmbed(guild: Guild) : EmbedBuilder {
+    fun asEmbed(guild: Guild): EmbedBuilder {
         val list = if (genRoles.isNotEmpty())
             """All live Voice Channel Roles in **${guild.name}:**
                 ```css
-                ${genRoles.map { guild.getRoleById(it.value)?.name ?: ""}
+                ${genRoles.map { guild.getRoleById(it.value)?.name ?: "" }
                 .filterNot { it.isBlank() }.joinToString(", ")}
                 ```""".trimIndent()
         else "No Roles Yet"
-        return makeEmbedBuilder("Voice Channel Role Manager", null, """
+        return makeEmbedBuilder(
+            "Voice Channel Role Manager", null, """
             $list
         ${if (limit != ALL) "(Limited to **Public** Channels)" else ""}
-        """.trimIndent())
+        """.trimIndent()
+        )
     }
 
 }
@@ -158,7 +125,8 @@ class VCRoleManager(var limit: Limit = ALL) : IPassive {
  * @author Jonathan Augustine
  * @since 2.0
  */
-class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Roles",
+class CmdVoiceChannelRole : WeebotCommand(
+    "voicechannelrole", "Voice Channel Roles",
     arrayOf("vcr", "vcrole"), CAT_UTIL, "[enable/disable] [limit] or [limit]",
     "A manager that creates, assigns, removes, and deletes VoiceChannel roles.",
     cooldown = 10, userPerms = arrayOf(MANAGE_ROLES),
@@ -174,8 +142,10 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
             .addToDesc("which channels get roles by their publicity (all ")
             .addToDesc("channels or only channels public to @/everyone)")
             .addField("Enable/Disable", "<on/off> /limit/", true)
-            .addField("Change Limit", """Changes the Channels that will have roles
-                |``<all/public>``""".trimMargin(), true)
+            .addField(
+                "Change Limit", """Changes the Channels that will have roles
+                |``<all/public>``""".trimMargin(), true
+            )
             .setAliases(aliases)
             .build()
     }
@@ -184,11 +154,13 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
         val activatedEmbed: MessageEmbed
             get() = strdEmbedBuilder
                 .setTitle("Voice Channel Roles Activated!")
-                .setDescription("""
+                .setDescription(
+                    """
                 |The next time someone joins a voice channel, they will
                 |be assigned a Role with the same name of the channel that can
                 |be mentioned by anyone.
-            """.trimMargin()).build()
+            """.trimMargin()
+                ).build()
     }
 
     override fun execute(event: CommandEvent) {
@@ -200,7 +172,9 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
             args.isEmpty() -> {
                 vcRoleManager?.asEmbed(event.guild)?.build()?.also {
                     event.reply(it)
-                } ?: event.respondThenDelete("No Voice Channel Role Manager active.")
+                } ?: event.respondThenDelete(
+                    "No Voice Channel Role Manager active."
+                )
             }
             args[0].matchesAny(REG_ON, REG_ENABLE) -> {
                 if (vcRoleManager == null) {
@@ -208,15 +182,21 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
                         try {
                             VCRoleManager.Limit.valueOf(args[1].toUpperCase())
                         } catch (e: Exception) {
-                            event.reply("${args[1]} is not a valid restriction. ``w!help vcrole``")
+                            event.reply(
+                                "${args[1]} is not a valid restriction. ``w!help vcrole``"
+                            )
                             return
                         }
-                    } else { ALL }
+                    } else {
+                        ALL
+                    }
                     bot.add(VCRoleManager(lim))
                     event.reply(activatedEmbed)
                     return
                 } else {
-                    event.reply("*The VoiceChannelRole is already enabled.* ``w!help vcrole``")
+                    event.reply(
+                        "*The VoiceChannelRole is already enabled.* ``w!help vcrole``"
+                    )
                     return
                 }
             }
@@ -234,7 +214,9 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
             args[0].matches(REG_HYPHEN + "al+") -> {
                 vcRoleManager?.also {
                     it.limit = ALL
-                    event.reply("*Voice Channel Role Manager set to watch All Channels.*")
+                    event.reply(
+                        "*Voice Channel Role Manager set to watch All Channels.*"
+                    )
                 } ?: event.respondThenDelete(
                     "There is no VCRole Manager active. Use ``vcr on``"
                 )
@@ -243,7 +225,8 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
                 vcRoleManager?.also {
                     it.limit = PUBLIC
                     event.reply(
-                        "*Voice Channel Role Manager set to only watch Public Channels.*")
+                        "*Voice Channel Role Manager set to only watch Public Channels.*"
+                    )
                 } ?: event.respondThenDelete(
                     "There is no VCRole Manager active. Use ``vcr on``"
                 )
@@ -261,6 +244,7 @@ class CmdVoiceChannelRole : WeebotCommand("voicechannelrole", "Voice Channel Rol
     }
 
 }
+
 
 /* *******************
     Personal Auto VCGen

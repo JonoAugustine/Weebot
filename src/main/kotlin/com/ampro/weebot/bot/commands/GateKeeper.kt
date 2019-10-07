@@ -102,7 +102,7 @@ object GateKeeperCmd : Command(
         append("Use ").append("{USER}".inlineCode).append(" in place of the ")
         append("member's name. You can also include ")
         append("#channel_mentions".inlineCode).append(" and ")
-        append("@user_mentions".inlineCode).append(" ")
+        append("@user_mentions".inlineCode).append(".")
     },
     guildOnly = true,
     rateLimit = 30,
