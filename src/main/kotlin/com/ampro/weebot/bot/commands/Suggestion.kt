@@ -187,8 +187,8 @@ object SuggestionCmd : Command(
         TODO()
     }
 
-    private val add = Regex("${Regecies.ic}ad?")
-    private val see = Regex("${Regecies.ic}se?")
+    private val add = Regex("${Regecies.ic}ad{0,3}")
+    private val see = Regex("${Regecies.ic}se{0,3}")
     private val vote = Regex("${Regecies.ic}v(ote)?")
 
 }
