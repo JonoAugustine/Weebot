@@ -13,6 +13,8 @@ import com.serebit.strife.entities.User
 import com.serebit.strife.events.Event
 import com.serebit.strife.events.GuildEvent
 import com.serebit.strife.onAnyEvent
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 interface Passive {
     var active: Boolean
@@ -25,6 +27,7 @@ val passives = mutableMapOf<Long, MutableList<Passive>>()
 
 fun <P : Passive> addPassive(id: Long, passive: P) {
     passives.getOrPut(id, { mutableListOf() }).add(passive)
+    bot(id).passives.add(passive)
 }
 
 inline fun <reified P : Passive> getPassives(id: Long): List<P>? {
@@ -44,20 +47,28 @@ inline fun <reified P : Passive> User.getAll() = getPassives<P>(id)
 
 fun BotBuilder.passives() {
     onAnyEvent {
-        passives[0]?.retainAll{ it.active }
-        passives[0]
-            ?.filter { it.active }
-            ?.filter { it.predicate(this, globalWeebot) }
-            ?.forEach { it.consume(this, globalWeebot) }
+        GlobalScope.launch {
+            passives[0]?.retainAll { it.active }
+            passives[0]
+                ?.filter { it.active }
+                ?.filter { it.predicate(this@onAnyEvent, globalWeebot) }
+                ?.forEach { it.consume(this@onAnyEvent, globalWeebot) }
+        }
         if (this is GuildEvent) {
             passives.forEach { (id, list) ->
-                list.retainAll{ it.active }
-                list
-                    .filter { it.active }
-                    .filter { it.predicate(this, bot(id)) }
-                    .forEach {
-                        bot(id).modify { it.consume(this@onAnyEvent, this) }
-                    }
+                GlobalScope.launch {
+                    list.retainAll { it.active }
+                    list
+                        .filter { it.active }
+                        .filter {
+                            it.predicate(
+                                this@onAnyEvent, bot(this@onAnyEvent.guild.id)
+                            )
+                        }
+                        .forEach {
+                            bot(id).modify { it.consume(this@onAnyEvent, this) }
+                        }
+                }
             }
         }
     }

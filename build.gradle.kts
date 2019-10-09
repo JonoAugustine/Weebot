@@ -33,7 +33,7 @@ dependencies {
     implementation(kotlin("stdlib-jdk8"))
     testCompile("junit", "junit", "4.12")
 
-    implementation("com.serebit.strife:strife-client-jvm:master-fb34d68e")
+    implementation("com.serebit.strife:strife-client-jvm:master-f00b3932")
 
     //Utils
     implementation("org.slf4j:slf4j-simple:1.6.1")

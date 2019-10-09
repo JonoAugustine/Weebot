@@ -89,16 +89,18 @@ object Statistics : DeveloperCommand(
             title("Statistics")
             list.forEach { col ->
                 inlineField(col.command) {
-                    val ivks = col.stats
+                    val ivks: List<String> = col.stats
                         .map { it.invokation.toLowerCase() }
+                    val count_ivks: Map<String, Int> = ivks
                         .distinct()
-                    val count_ivks = ivks
                         .associateWith { s -> ivks.count { it == s } }
-                    val size_ivk = ivks.associateWith { s ->
-                        col.stats.filter { it.invokation.equals(s, true) }
-                            .map { it.guildSize }
-                            .average()
-                    }
+                    val size_ivk: Map<String, Int> = ivks
+                        .distinct()
+                        .associateWith { s ->
+                            col.stats.filter { it.invokation.equals(s, true) }
+                                .map { it.guildSize }
+                                .average().toInt()
+                        }
                     if (ivks.isNotEmpty()) buildString {
                         append("Invokation Data\n")
                         count_ivks.toList()
@@ -106,8 +108,9 @@ object Statistics : DeveloperCommand(
                             .forEach { (ivk, cnt) ->
                                 append(ivk.inlineCode)
                                 append(" used ").append(cnt)
-                                append(" time with avg guild size of ")
+                                append(" time(s) with avg guild size of ")
                                 append(size_ivk[ivk])
+                                append('\n')
                             }
                     } else "No invokation data."
                 }

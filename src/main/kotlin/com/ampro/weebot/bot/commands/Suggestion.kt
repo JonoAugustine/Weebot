@@ -175,7 +175,7 @@ object SuggestionCmd : Command(
         params = listOfParams("id"),
         details = "view and edit a command",
         action = {
-            TODO()
+            TODO("Sugg-Dev commands")
         }
     )
 
@@ -184,7 +184,7 @@ object SuggestionCmd : Command(
         message: Message,
         dev: Boolean = false
     ) {
-        TODO()
+        TODO("Send Suggestions waiting on MENU")
     }
 
     private val add = Regex("${Regecies.ic}ad{0,3}")

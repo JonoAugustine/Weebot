@@ -8,6 +8,9 @@ import com.serebit.strife.BotClient
 import com.serebit.strife.StrifeInfo
 import com.serebit.strife.data.Color
 import com.serebit.strife.entities.*
+import kotlinx.coroutines.delay
+import kotlin.time.ExperimentalTime
+import kotlin.time.seconds
 
 val Message.args get() = content.split(' ')
 
@@ -36,3 +39,10 @@ suspend fun Message.sendWEmbed(builder: EmbedBuilder.() -> Unit): Message? =
 
 suspend fun TextChannel.sendWEmbed(builder: EmbedBuilder.() -> Unit) =
     send(wEmbed(context, builder))
+
+
+@ExperimentalTime
+suspend fun Message.delete(seconds: Int) = run {
+    delay(seconds.seconds.toLongMilliseconds())
+    delete()
+}

@@ -107,9 +107,9 @@ object GateKeeperCmd : Command(
     guildOnly = true,
     rateLimit = 30,
     params = listOfParams(
-        TODO()
+        TODO("Gatekeeper waiting on MENU")
     ),
     action = {
-        TODO()
+        TODO("GateKeeper wating on MENU")
     }
 )
