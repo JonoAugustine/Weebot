@@ -17,6 +17,7 @@ import com.serebit.strife.entities.EmbedBuilder
 import com.serebit.strife.events.MessageCreateEvent
 import com.serebit.strife.onMessageCreate
 import org.joda.time.DateTime
+import kotlin.time.ExperimentalTime
 
 // TODO: Better command restrictions
 
@@ -213,6 +214,7 @@ private infix fun Pair<Prefix, String>.invokes(command: Command): Boolean {
     return m
 }
 
+@ExperimentalTime
 fun <C : Command> BotBuilder.cmd(command: C) {
     (command.aliases + command.name)
         .map { it.toLowerCase() }
@@ -223,12 +225,13 @@ fun <C : Command> BotBuilder.cmd(command: C) {
             _commands[it] = command
         }
     onMessageCreate {
-        if (command.enabled)
-            bot(message.guild?.id ?: 0).modify {
-                if (prefix and message.args[0] invokes command)
-                    command.run(this@onMessageCreate, this)
-            }
-
+        if (message.author?.isHumanUser == true) {
+            if (command.enabled)
+                bot(message.guild?.id ?: 0).modify {
+                    if (prefix and message.args[0] invokes command)
+                        command.run(this@onMessageCreate, this)
+                }
+        }
     }
     logger.trace("Registered command with name ${command.name}")
 }

@@ -118,3 +118,11 @@ object Statistics : DeveloperCommand(
         }
     }
 )
+
+object GetRunningLocation : DeveloperCommand(
+    "location",
+    details = "Get where bot is running",
+    action = a@{
+        TODO()
+    }
+)

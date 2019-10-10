@@ -39,7 +39,7 @@ import kotlin.time.minutes
 val DIR = File("wbot")
     get() = when {
         field.exists() && field.isDirectory -> field
-        else                                -> {
+        else -> {
             Files.createDirectory(field.toPath())
             field
         }
@@ -164,7 +164,8 @@ private object Dao {
 
         object Bots : DeletionQueue<Weebot>(bots, Weebot::guildID)
 
-        object Suggestions : DeletionQueue<Suggestion>(suggestions, Suggestion::_id)
+        object Suggestions :
+            DeletionQueue<Suggestion>(suggestions, Suggestion::_id)
 
         object Statistic : DeletionQueue<BotStatCollection>(
             stats, BotStatCollection::command

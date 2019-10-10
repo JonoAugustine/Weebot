@@ -36,7 +36,7 @@ suspend fun initWeebot(weebot: Boolean? = null) {
         cmd(Settings)
         cmd(Settings.Prefix)
 
-        //cmd(GateKeeperCmd)
+        cmd(GateKeeperCmd)
         cmd(VoiceChannelRole)
         cmd(OutHouseCmd)
         cmd(RegexTest)
