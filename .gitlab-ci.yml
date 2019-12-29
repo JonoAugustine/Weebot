@@ -16,8 +16,12 @@ deploy_staging:
     url: example.com
   script:
     - ssh root@50.116.39.133
-      "cd Weebot/ && git checkout master && git pull origin master
-      && tmux && tmux kill-session -a && ./gradlew shadowJar
-      && java -jar ./build/libs/weebot-4.0.0-all.jar"
+      "cd Weebot/
+      && git checkout master
+      && git pull origin master
+      && tmux && tmux kill-session -a
+      && ./gradlew clean
+      && ./gradlew shadowJar
+      && java -jar ./build/libs/*.jar"
   only:
     - master
