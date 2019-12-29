@@ -128,3 +128,13 @@ object About : Command(
         }
     )
 }
+
+object Ping : Command(
+    "ping",
+    listOf("pong", "latency"),
+    details = "Check my response times",
+    rateLimit = 30,
+    action = {
+        TODO()
+    }
+)
