@@ -1,0 +1,23 @@
+# Credit: https://medium.com/@hfally/a-gitlab-ci-config-to-deploy-to-your-server-via-ssh-43bf3cf93775
+before_script:
+  - apt-get update -qq
+  - apt-get install -qq git
+  # Setup SSH deploy keys
+  - 'which ssh-agent || ( apt-get install -qq openssh-client )'
+  - eval $(ssh-agent -s)
+  - ssh-add <(echo "$SSH_PRIVATE_KEY")
+  - mkdir -p ~/.ssh
+  - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+
+deploy_staging:
+  type: deploy
+  environment:
+    name: staging
+    url: example.com
+  script:
+    - ssh root@50.116.39.133
+      "cd Weebot/ && git checkout master && git pull origin master
+      && tmux && tmux kill-session -a && ./gradlew shadowJar
+      && java -jar ./build/libs/weebot-4.0.0-all.jar"
+  only:
+    - master

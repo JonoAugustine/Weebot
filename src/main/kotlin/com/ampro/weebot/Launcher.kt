@@ -6,6 +6,7 @@ package com.ampro.weebot
 
 import com.ampro.weebot.api.initJavalin
 import com.ampro.weebot.bot.initWeebot
+import com.ampro.weebot.util.matches
 import com.serebit.logkat.LogLevel
 import com.serebit.logkat.Logger
 import com.serebit.logkat.writers.ConsoleWriter
@@ -20,5 +21,8 @@ val logger = Logger().apply {
 @ExperimentalTime
 suspend fun main(args: Array<String>) {
     initJavalin()
-    initWeebot(args.getOrNull(0)?.equals("-w") ?: false)
+    initWeebot(
+        if (args[0].matches("^-{1,2}e(nv)?$")) System.getenv(args[1])
+        else args[0]
+    )
 }

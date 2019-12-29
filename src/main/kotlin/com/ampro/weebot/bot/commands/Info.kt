@@ -8,7 +8,10 @@ import com.ampro.weebot.bot.WeebotInfo
 import com.ampro.weebot.bot.strifeExtensions.args
 import com.ampro.weebot.bot.strifeExtensions.sendWEmbed
 import com.serebit.strife.StrifeInfo
-import com.serebit.strife.entities.*
+import com.serebit.strife.entities.inlineField
+import com.serebit.strife.entities.reply
+import com.serebit.strife.entities.thumbnail
+import com.serebit.strife.entities.title
 import com.soywiz.klock.DateFormat.Companion.FORMAT_DATE
 
 object Help : Command(
@@ -76,8 +79,7 @@ object About : Command(
             val presence = member?.presence
             message.sendWEmbed {
                 title(name)
-                thumbnail(user.avatar.uri)
-                image(thumbnail)
+                thumbnail(user.username)
                 description = buildString {
                     append("username: ").append(user.username).append('\n')
                     member?.nickname?.let {

@@ -4,7 +4,7 @@
 
 package com.ampro.weebot.bot
 
-import com.ampro.weebot.bot.Credentials.Tokens
+
 import com.ampro.weebot.bot.commands.*
 import com.ampro.weebot.botCount
 import com.ampro.weebot.logger
@@ -20,13 +20,11 @@ import kotlin.time.seconds
 
 /** Initialize the Weebot. */
 @ExperimentalTime
-suspend fun initWeebot(weebot: Boolean? = null) {
+suspend fun initWeebot(token: String) {
     logger.info("Weebot Init")
     logger.info("\t\tPre-Existing bots: ${botCount()}")
 
-    bot(if (weebot == true) Tokens.weebot else Tokens.tobeew) {
-        logToConsole = weebot?.not() ?: true
-
+    bot(token) {
         passives()
 
         cmd(Help)
